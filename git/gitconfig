@@ -1,0 +1,8 @@
+[user]
+	name = Firstname Lastname
+	email = email@goes.here
+	signingkey = XXXXXX
+[commit]
+	gpgSign = true
+[tag]
+	gpgSign = true
