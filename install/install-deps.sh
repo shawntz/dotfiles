@@ -48,6 +48,7 @@ brew install --cask microsoft-office
 brew install --cask middleclick
 brew install --cask min
 brew install --cask notion
+brew install --cask orion
 brew install --cask psychopy
 brew install --cask r
 brew install --cask rectangle
