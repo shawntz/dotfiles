@@ -1,5 +1,7 @@
 #!/usr/bin/env bash
 
+fileicon set "/Applications/iTerm.app" $HOME/.init/iTerm2-nord-chevron.icns
+
 # Install Oh My Zsh
 curl -fsSL --output omz_installer.sh
 https://raw.github.com/robbyrussell/oh-my-zsh/master/tools/install.sh
