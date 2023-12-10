@@ -47,10 +47,11 @@ brew install --cask keycastr
 brew install --cask kindle
 brew install --cask mactex
 brew install --cask microsoft-office
+brew install --cask microsoft-remote-desktop
 brew install --cask middleclick
 brew install --cask min
 brew install --cask notion
-brew install --cask orion
+brew install --cask obsidian
 brew install --cask psychopy
 brew install --cask r
 brew install --cask rectangle
