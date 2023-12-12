@@ -1,9 +1,5 @@
 #!/usr/bin/env bash
 
-xcode-select --install
-
-mkdir ~/Developer
-
 brew update
 
 brew install cmake
