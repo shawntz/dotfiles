@@ -11,12 +11,13 @@
 5. `git clone git@github.com:ShawnTylerSchwartz/dotfiles.git ~/Developer/repos`
 6. `cd ~/Developer/repos/dotfiles && chmod +x brew/install.sh && ./brew/install.sh`
 7. `chmod +x install/install-deps.sh && ./install/install-deps.sh`
-8. `chmod +x install/bootstrap.sh && ./install/bootstrap.sh`
-9. `chmod +x iterm/install.sh && ./iterm/install.sh`
-10. manually load in [iterm/iterm.json](iterm/iterm.json) config file into `iTerm.app`
-11. `chmod +x vscode/config.sh && ./vscode/config.sh`
-12. `chmod +x install/macos.sh && ./install/macos.sh`
-13. restart computer and enjoy 😎
+8. configure gpg signing key with git
+9. `chmod +x install/bootstrap.sh && ./install/bootstrap.sh`
+10. `chmod +x iterm/install.sh && ./iterm/install.sh`
+11. manually load in [iterm/iterm.json](iterm/iterm.json) config file into `iTerm.app`
+12. `chmod +x vscode/config.sh && ./vscode/config.sh`
+13. `chmod +x install/macos.sh && ./install/macos.sh`
+14. restart computer and enjoy 😎
 
 ## other apps to install (not from package managers)
 
