@@ -8,7 +8,7 @@
     > git config --global user.name "John Doe"
     
     > git config --global user.email johndoe@example.com
-5. `git clone git@github.com:ShawnTylerSchwartz/dotfiles.git ~/Developer/repos`
+5. `git clone git@github.com:ShawnTylerSchwartz/dotfiles.git ~/Developer/repos/.dotfiles`
 6. `cd ~/Developer/repos/dotfiles && chmod +x brew/install.sh && ./brew/install.sh`
 7. `chmod +x install/install-deps.sh && ./install/install-deps.sh`
 8. configure gpg signing key with git
