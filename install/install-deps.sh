@@ -12,6 +12,7 @@ brew install cowsay
 brew install exa
 brew install ffmpeg
 brew install gcc
+brew install gh
 brew install gnupg
 brew install imagemagick
 brew install istat-menus
