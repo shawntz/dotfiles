@@ -1,8 +1,22 @@
 # shawn's dotfiles
 
-## key steps
+## setup steps (for a fresh macos install)👨🏼‍💻
 
-1. edit [git/gitconfig](git/gitconfig) before running [install/bootstrap.sh](install/bootstrap.sh)
+1. `mkdir -p ~/Developer/repos`
+2. [setup git ssh key](https://docs.github.com/en/authentication/connecting-to-github-with-ssh/generating-a-new-ssh-key-and-adding-it-to-the-ssh-agent)
+3. setup git config name/email params
+    > git config --global user.name "John Doe"
+    
+    > git config --global user.email johndoe@example.com
+5. `git clone git@github.com:ShawnTylerSchwartz/dotfiles.git ~/Developer/repos`
+6. `cd ~/Developer/repos/dotfiles && chmod +x brew/install.sh && ./brew/install.sh`
+7. `chmod +x install/install-deps.sh && ./install/install-deps.sh`
+8. `chmod +x install/bootstrap.sh && ./install/bootstrap.sh`
+9. `chmod +x iterm/install.sh && ./iterm/install.sh`
+10. manually load in [iterm/iterm.json](iterm/iterm.json) config file into `iTerm.app`
+11. `chmod +x vscode/config.sh && ./vscode/config.sh`
+12. `chmod +x install/macos.sh && ./install/macos.sh`
+13. restart computer and enjoy 😎
 
 ## other apps to install (not from package managers)
 
