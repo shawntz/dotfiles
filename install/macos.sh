@@ -91,6 +91,10 @@ defaults write NSGlobalDomain NSAutomaticQuoteSubstitutionEnabled -bool false
 # Disable auto-correct
 defaults write NSGlobalDomain NSAutomaticSpellingCorrectionEnabled -bool false
 
+# Set custom wallpaper
+wallpaper () { automator -i "${1}" $HOME/.init/setDesktopWallpaper.workflow }
+wallpaper $HOME/.init/wallpaper.jpg
+
 ###############################################################################
 # Trackpad, mouse, keyboard, Bluetooth accessories, and input                 #
 ###############################################################################

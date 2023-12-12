@@ -36,3 +36,4 @@
 * [@narze](https://github.com/narze/dotfiles)
 * [@dhanishgajjar](https://github.com/dhanishgajjar/vscode-icons)
 * [@jasonlong](https://github.com/jasonlong/iterm2-icons)
+* [8K wallpaper](https://www.wallpaperflare.com/untitled-night-mountains-landscape-dark-minimal-4k-8k-wallpaper-saazn/download)
