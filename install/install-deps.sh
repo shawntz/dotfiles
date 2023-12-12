@@ -26,10 +26,6 @@ brew install wget
 brew install yarn
 brew install z
 
-# brew install powerlevel10k
-# echo "source $(brew --prefix)/share/powerlevel10k/powerlevel10k.zsh-theme" >>~/.zshrc
-# brew install zsh-syntax-highlighting
-
 brew install --cask adobe-creative-cloud
 brew install --cask alfred
 brew install --cask caffeine
