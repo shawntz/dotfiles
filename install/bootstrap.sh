@@ -120,7 +120,7 @@ install_dotfiles () {
 
   find -H "$DOTFILES" -maxdepth 2 -name 'links.prop' -not -path '*.git*' | while read linkfile
   do
-    cat "$linkfile" | while read line
+    cat "$linkfile" | grep -v "^$" | while read line
     do
         local src dst dir
         src=$(eval echo "$line" | cut -d '=' -f 1)
