@@ -17,7 +17,7 @@
 8. `chmod +x iterm/install.sh && ./iterm/install.sh`
 9. manually load in [iterm/iterm.json](iterm/iterm.json) config file into `iTerm.app`
 10. `chmod +x vscode/config.sh && ./vscode/config.sh`
-11. 'chmod +x gpg/setup.sh && ./gpg/setup.sh`
+11. `chmod +x gpg/setup.sh && ./gpg/setup.sh`
 12. `chmod +x install/macos.sh && ./install/macos.sh`
 13. restart computer and enjoy 😎
 
