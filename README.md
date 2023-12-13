@@ -5,19 +5,21 @@
 1. `mkdir -p ~/Developer/repos`
 2. [setup git ssh key](https://docs.github.com/en/authentication/connecting-to-github-with-ssh/generating-a-new-ssh-key-and-adding-it-to-the-ssh-agent)
 3. setup git config name/email params
-    > git config --global user.name "John Doe"
-    
-    > git config --global user.email johndoe@example.com
-5. `git clone git@github.com:ShawnTylerSchwartz/dotfiles.git ~/Developer/repos/dotfiles`
-6. `cd ~/Developer/repos/dotfiles && chmod +x brew/install.sh && ./brew/install.sh`
-7. `chmod +x install/install-deps.sh && ./install/install-deps.sh`
-8. configure gpg signing key with git
-9. `chmod +x install/bootstrap.sh && ./install/bootstrap.sh`
-10. `chmod +x iterm/install.sh && ./iterm/install.sh`
-11. manually load in [iterm/iterm.json](iterm/iterm.json) config file into `iTerm.app`
-12. `chmod +x vscode/config.sh && ./vscode/config.sh`
-13. `chmod +x install/macos.sh && ./install/macos.sh`
-14. restart computer and enjoy 😎
+
+   > git config --global user.name "John Doe"
+
+   > git config --global user.email johndoe@example.com
+
+4. `git clone git@github.com:ShawnTylerSchwartz/dotfiles.git ~/Developer/repos/dotfiles`
+5. `cd ~/Developer/repos/dotfiles && chmod +x brew/install.sh && ./brew/install.sh`
+6. `chmod +x install/install-deps.sh && ./install/install-deps.sh`
+7. `chmod +x install/bootstrap.sh && ./install/bootstrap.sh`
+8. `chmod +x iterm/install.sh && ./iterm/install.sh`
+9. manually load in [iterm/iterm.json](iterm/iterm.json) config file into `iTerm.app`
+10. `chmod +x vscode/config.sh && ./vscode/config.sh`
+11. 'chmod +x gpg/setup.sh && ./gpg/setup.sh`
+12. `chmod +x install/macos.sh && ./install/macos.sh`
+13. restart computer and enjoy 😎
 
 ## other apps to install (not from package managers)
 
@@ -31,9 +33,9 @@
 
 ## thanks to...
 
-* [@mathiasbynens](https://github.com/mathiasbynens/dotfiles)
-* [@andrew8088](https://github.com/andrew8088/dotfiles)
-* [@narze](https://github.com/narze/dotfiles)
-* [@dhanishgajjar](https://github.com/dhanishgajjar/vscode-icons)
-* [@jasonlong](https://github.com/jasonlong/iterm2-icons)
-* [8K wallpaper](https://www.wallpaperflare.com/untitled-night-mountains-landscape-dark-minimal-4k-8k-wallpaper-saazn/download)
+- [@mathiasbynens](https://github.com/mathiasbynens/dotfiles)
+- [@andrew8088](https://github.com/andrew8088/dotfiles)
+- [@narze](https://github.com/narze/dotfiles)
+- [@dhanishgajjar](https://github.com/dhanishgajjar/vscode-icons)
+- [@jasonlong](https://github.com/jasonlong/iterm2-icons)
+- [8K wallpaper](https://www.wallpaperflare.com/untitled-night-mountains-landscape-dark-minimal-4k-8k-wallpaper-saazn/download)
