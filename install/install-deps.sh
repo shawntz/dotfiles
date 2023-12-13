@@ -7,6 +7,7 @@ brew install cmatrix
 brew install cowsay
 brew install exa
 brew install ffmpeg
+brew install fileicon
 brew install gcc
 brew install gh
 brew install gnupg
@@ -16,6 +17,7 @@ brew install jsonpp
 brew install neovim
 brew install node
 brew install pandoc
+brew install pinentry-mac
 brew install rclone
 brew install tmux
 brew install trash
@@ -31,8 +33,6 @@ brew install --cask alfred
 brew install --cask caffeine
 brew install --cask dropbox
 brew install --cask firefox
-brew install --cask font-tex-gyre-pagella
-brew install --cask font-tex-gyre-termes
 brew install --cask google-chrome
 brew install --cask hazeover
 brew install --cask iterm2
@@ -55,6 +55,10 @@ brew install --cask visual-studio-code
 brew install --cask xquartz
 brew install --cask zoom
 brew install --cask zotero
+
+brew tap homebrew/cask-fonts
+brew install --cask font-tex-gyre-pagella
+brew install --cask font-tex-gyre-termes
 
 # Remove outdated versions from the cellar.
 brew cleanup
