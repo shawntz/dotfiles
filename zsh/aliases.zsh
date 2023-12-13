@@ -19,6 +19,7 @@ alias rm=trash
 alias trim="awk '{\$1=\$1;print}'"
 
 # GIT ALIASES -----------------------------------------------------------------
+alias gss='git status'
 alias gc='git commit -S -m'
 alias gco='git checkout'
 alias ga='git add'
