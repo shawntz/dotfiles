@@ -15,3 +15,8 @@ source_if_exists $DOTFILES/zsh/gpgclient.zsh
 precmd() {
     source $DOTFILES/zsh/aliases.zsh
 }
+export ZSH="$HOME/.oh-my-zsh"
+ZSH_THEME="powerlevel10k/powerlevel10k"
+POWERLEVEL9K_DISABLE_CONFIGURATION_WIZARD=true
+plugins=(git zsh-syntax-highlighting zsh-autosuggestions)
+source /Users/shawn/.oh-my-zsh/oh-my-zsh.sh
