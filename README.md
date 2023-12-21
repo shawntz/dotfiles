@@ -19,17 +19,17 @@
 10. `chmod +x vscode/config.sh && ./vscode/config.sh`
 11. `chmod +x gpg/setup.sh && ./gpg/setup.sh`
 12. `chmod +x install/macos.sh && ./install/macos.sh`
-13. restart computer and enjoy 😎
+13. load alfred prefs from `alfred/Alfred.alfredpreferences`
+14. restart computer and enjoy 😎
 
 ## other apps to install (not from package managers)
 
+- [x] [Things 3](https://culturedcode.com/things/mac/appstore/)
 - [x] [Mango MRI viewer](https://mangoviewer.com/downloads/mango_mac.zip)
 - [x] [MATLAB](https://www.mathworks.com/downloads/web_downloads/)
 - [x] [Cisco AnyConnect VPN client](https://uit.stanford.edu/sites/default/files/installers/anyconnect/mac/InstallAnyConnect4.10.pkg)
 - [x] [Apple Xcode (not through app store)](https://developer.apple.com/download/all/)
 - [x] [Apple SF Symbols](https://developer.apple.com/sf-symbols/)
-- [x] [Things 3](https://culturedcode.com/things/mac/appstore/)
-- [x] [Onigiri - Minimal Timer](https://apps.apple.com/us/app/onigiri-minimal-timer/id1639917298?mt=12)
 
 ## thanks to...
 
