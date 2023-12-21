@@ -30,6 +30,7 @@ brew install z
 
 brew install --cask adobe-creative-cloud
 brew install --cask alfred
+brew install --cask bartender
 brew install --cask caffeine
 brew install --cask dropbox
 brew install --cask firefox
@@ -48,6 +49,7 @@ brew install --cask obsidian
 brew install --cask psychopy
 brew install --cask r
 brew install --cask rectangle
+brew install --cask routine
 brew install --cask rstudio
 brew install --cask slack
 brew install --cask spotify
