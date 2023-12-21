@@ -1,0 +1,265 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+	<key>bundleid</key>
+	<string>com.alfredapp.vero.yakshaver</string>
+	<key>category</key>
+	<string>Productivity</string>
+	<key>connections</key>
+	<dict>
+		<key>195565E3-4236-4C75-A9F6-39F125604331</key>
+		<array>
+			<dict>
+				<key>destinationuid</key>
+				<string>5DC111DE-4E8E-4979-9F43-BE18DA078156</string>
+				<key>modifiers</key>
+				<integer>0</integer>
+				<key>modifiersubtext</key>
+				<string></string>
+				<key>vitoclose</key>
+				<false/>
+			</dict>
+		</array>
+		<key>5DC111DE-4E8E-4979-9F43-BE18DA078156</key>
+		<array>
+			<dict>
+				<key>destinationuid</key>
+				<string>8E5755C5-090A-41AF-9254-9701CAA59DAB</string>
+				<key>modifiers</key>
+				<integer>0</integer>
+				<key>modifiersubtext</key>
+				<string></string>
+				<key>vitoclose</key>
+				<false/>
+			</dict>
+		</array>
+		<key>62D4AAD1-4B63-4089-9185-4B32356911BB</key>
+		<array>
+			<dict>
+				<key>destinationuid</key>
+				<string>195565E3-4236-4C75-A9F6-39F125604331</string>
+				<key>modifiers</key>
+				<integer>0</integer>
+				<key>modifiersubtext</key>
+				<string></string>
+				<key>vitoclose</key>
+				<false/>
+			</dict>
+		</array>
+	</dict>
+	<key>createdby</key>
+	<string>Vero Pepperrell</string>
+	<key>description</key>
+	<string>Set a reminder to get focused for a set amount of time because... oooh shiny!</string>
+	<key>disabled</key>
+	<false/>
+	<key>name</key>
+	<string>Yak Saver</string>
+	<key>objects</key>
+	<array>
+		<dict>
+			<key>config</key>
+			<dict>
+				<key>lastpathcomponent</key>
+				<false/>
+				<key>onlyshowifquerypopulated</key>
+				<false/>
+				<key>removeextension</key>
+				<false/>
+				<key>text</key>
+				<string>Stretch, take a deep breath, then start again!</string>
+				<key>title</key>
+				<string>Are you still focused?</string>
+			</dict>
+			<key>type</key>
+			<string>alfred.workflow.output.notification</string>
+			<key>uid</key>
+			<string>8E5755C5-090A-41AF-9254-9701CAA59DAB</string>
+			<key>version</key>
+			<integer>1</integer>
+		</dict>
+		<dict>
+			<key>config</key>
+			<dict>
+				<key>argumenttype</key>
+				<integer>2</integer>
+				<key>keyword</key>
+				<string>{var:keyword}</string>
+				<key>subtext</key>
+				<string>Let's start working on that task!</string>
+				<key>text</key>
+				<string>Start my focus timer</string>
+				<key>withspace</key>
+				<false/>
+			</dict>
+			<key>type</key>
+			<string>alfred.workflow.input.keyword</string>
+			<key>uid</key>
+			<string>62D4AAD1-4B63-4089-9185-4B32356911BB</string>
+			<key>version</key>
+			<integer>1</integer>
+		</dict>
+		<dict>
+			<key>config</key>
+			<dict>
+				<key>expression</key>
+				<string>{var:minutes} * 60</string>
+			</dict>
+			<key>type</key>
+			<string>alfred.workflow.utility.expression</string>
+			<key>uid</key>
+			<string>195565E3-4236-4C75-A9F6-39F125604331</string>
+			<key>version</key>
+			<integer>1</integer>
+		</dict>
+		<dict>
+			<key>config</key>
+			<dict>
+				<key>seconds</key>
+				<string>{query}</string>
+			</dict>
+			<key>type</key>
+			<string>alfred.workflow.utility.delay</string>
+			<key>uid</key>
+			<string>5DC111DE-4E8E-4979-9F43-BE18DA078156</string>
+			<key>version</key>
+			<integer>1</integer>
+		</dict>
+	</array>
+	<key>readme</key>
+	<string># Yak Saver: Time to Focus
+
+Type `yak` and get to work; You'll see a Notification Center reminder pop up in 20 minutes, reminding you to stretch, breathe deeply and get back to work.
+
+![Yak workflow](yak-saver.png)
+
+Why the keyword `yak`? The expression "yak shaving" refers to being busy without necessarily being productive. The aim of this timer is to help you remember, every 20 minutes, to stay focused and on-task.
+
+Like a pomodoro timer, with less tomatoes and more yaks.
+
+### Time duration
+
+By default, the workflow is set to remind you every 20 minutes, but you can change this timing in the User Configuration. Note that the time is set in seconds.
+
+For quick reference:
+- 10 mins: 600 seconds
+- 20 mins: 1200 seconds
+- 30 mins: 1800 seconds
+
+### Keyword
+
+You can also customise the keyword if `yak` doesn't quite do it for you.
+
+Good luck and have a productive day!
+
+*[Photo Credit: Tommy Dickson]*</string>
+	<key>uidata</key>
+	<dict>
+		<key>195565E3-4236-4C75-A9F6-39F125604331</key>
+		<dict>
+			<key>note</key>
+			<string>Convert minutes to seconds</string>
+			<key>xpos</key>
+			<real>235</real>
+			<key>ypos</key>
+			<real>80</real>
+		</dict>
+		<key>5DC111DE-4E8E-4979-9F43-BE18DA078156</key>
+		<dict>
+			<key>note</key>
+			<string>Wait number of seconds</string>
+			<key>xpos</key>
+			<real>370</real>
+			<key>ypos</key>
+			<real>80</real>
+		</dict>
+		<key>62D4AAD1-4B63-4089-9185-4B32356911BB</key>
+		<dict>
+			<key>xpos</key>
+			<real>50</real>
+			<key>ypos</key>
+			<real>50</real>
+		</dict>
+		<key>8E5755C5-090A-41AF-9254-9701CAA59DAB</key>
+		<dict>
+			<key>xpos</key>
+			<real>475</real>
+			<key>ypos</key>
+			<real>50</real>
+		</dict>
+	</dict>
+	<key>userconfigurationconfig</key>
+	<array>
+		<dict>
+			<key>config</key>
+			<dict>
+				<key>default</key>
+				<string>yak</string>
+				<key>placeholder</key>
+				<string></string>
+				<key>required</key>
+				<false/>
+				<key>trim</key>
+				<true/>
+			</dict>
+			<key>description</key>
+			<string>Set your own keyword if "yak" isn't the keyword for you. :)</string>
+			<key>label</key>
+			<string>Workflow keyword</string>
+			<key>type</key>
+			<string>textfield</string>
+			<key>variable</key>
+			<string>keyword</string>
+		</dict>
+		<dict>
+			<key>config</key>
+			<dict>
+				<key>default</key>
+				<string>20</string>
+				<key>placeholder</key>
+				<string></string>
+				<key>required</key>
+				<false/>
+				<key>trim</key>
+				<true/>
+			</dict>
+			<key>description</key>
+			<string>The duration for each focus period you'd like to set</string>
+			<key>label</key>
+			<string>Time in Minutes</string>
+			<key>type</key>
+			<string>textfield</string>
+			<key>variable</key>
+			<string>minutes</string>
+		</dict>
+		<dict>
+			<key>config</key>
+			<dict>
+				<key>default</key>
+				<string>You're awesome, keep going!</string>
+				<key>required</key>
+				<false/>
+				<key>trim</key>
+				<true/>
+				<key>verticalsize</key>
+				<integer>3</integer>
+			</dict>
+			<key>description</key>
+			<string>Boost your morale with some motivating words! This field is required, because it's good to say nice things about yourself sometimes :)</string>
+			<key>label</key>
+			<string>Encouragement</string>
+			<key>type</key>
+			<string>textarea</string>
+			<key>variable</key>
+			<string>words</string>
+		</dict>
+	</array>
+	<key>variablesdontexport</key>
+	<array/>
+	<key>version</key>
+	<string>2023.2</string>
+	<key>webaddress</key>
+	<string>https://www.alfredapp.com</string>
+</dict>
+</plist>

@@ -1,0 +1,27 @@
+{
+  "name": "alfred-phil",
+  "version": "1.0.2",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "build": "./scripts/build.sh",
+    "release": "./scripts/release.sh",
+    "clean-release": "rm -rf dist",
+    "clean-build": "rm -rf alfred-workflow/bin/*",
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "version": "git add -A src",
+    "postversion": "git push && git push --tags"
+  },
+  "author": "",
+  "license": "MIT",
+  "devDependencies": {
+    "@types/node": "^18.15.3",
+    "path": "^0.12.7",
+    "ts-loader": "^9.4.2",
+    "ts-node": "^10.9.1"
+  },
+  "dependencies": {
+    "@magobaol/phil": "^1.0.6",
+    "commander": "^10.0.0"
+  }
+}
