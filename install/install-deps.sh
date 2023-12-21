@@ -8,6 +8,7 @@ brew install cowsay
 brew install exa
 brew install ffmpeg
 brew install fileicon
+brew install folderify
 brew install gcc
 brew install gh
 brew install gnupg
