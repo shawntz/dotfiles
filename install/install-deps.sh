@@ -30,6 +30,7 @@ brew install yarn
 brew install z
 
 brew install --cask adobe-creative-cloud
+brew install --cask aldente
 brew install --cask alfred
 brew install --cask bartender
 brew install --cask caffeine
