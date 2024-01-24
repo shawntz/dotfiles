@@ -172,7 +172,7 @@ end run</string>
 				<key>argumenttype</key>
 				<integer>1</integer>
 				<key>keyword</key>
-				<string>code</string>
+				<string>vs</string>
 				<key>subtext</key>
 				<string>Open Finder folder or selection in Visual Studio Code or optionally enter a path to open</string>
 				<key>text</key>
@@ -240,7 +240,7 @@ end run</string>
 				<key>includesystem</key>
 				<false/>
 				<key>keyword</key>
-				<string>codef</string>
+				<string>vsf</string>
 				<key>limit</key>
 				<integer>0</integer>
 				<key>runningsubtext</key>
