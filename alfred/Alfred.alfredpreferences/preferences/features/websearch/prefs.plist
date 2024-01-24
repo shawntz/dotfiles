@@ -13,7 +13,7 @@
 			<key>text</key>
 			<string>GitHub search my repos for ➡️ {query}</string>
 			<key>url</key>
-			<string>https://github.com/ShawnTylerSchwartz?tab=repositories&amp;q={query}</string>
+			<string>https://github.com/shawntschwartz?tab=repositories&amp;q={query}</string>
 		</dict>
 		<key>C734F873-FBCB-4B4E-9539-29434603E4E9</key>
 		<dict>
@@ -24,7 +24,7 @@
 			<key>text</key>
 			<string>GitHub go to repo ➡️ {query}</string>
 			<key>url</key>
-			<string>https://github.com/ShawnTylerSchwartz/{query}</string>
+			<string>https://github.com/shawntschwartz/{query}</string>
 		</dict>
 	</dict>
 	<key>onlyShowEnabledInPrefs</key>

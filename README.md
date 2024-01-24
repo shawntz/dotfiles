@@ -10,7 +10,7 @@
 
    > git config --global user.email johndoe@example.com
 
-4. `git clone git@github.com:ShawnTylerSchwartz/dotfiles.git ~/Developer/repos/dotfiles`
+4. `git clone git@github.com:shawntschwartz/dotfiles.git ~/Developer/repos/dotfiles`
 5. `cd ~/Developer/repos/dotfiles && chmod +x brew/install.sh && ./brew/install.sh`
 6. `chmod +x install/install-deps.sh && ./install/install-deps.sh`
 7. `chmod +x install/bootstrap.sh && ./install/bootstrap.sh`
