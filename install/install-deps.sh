@@ -47,11 +47,11 @@ brew install --cask microsoft-remote-desktop
 brew install --cask middleclick
 brew install --cask min
 brew install --cask notion
+brew install --cask notion-calendar
 brew install --cask obsidian
 brew install --cask psychopy
 brew install --cask r
 brew install --cask rectangle
-brew install --cask routine
 brew install --cask rstudio
 brew install --cask slack
 brew install --cask spotify
