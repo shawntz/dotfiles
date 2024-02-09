@@ -50,6 +50,7 @@ brew install --cask min
 brew install --cask notion
 brew install --cask notion-calendar
 brew install --cask obsidian
+brew install --cask postman
 brew install --cask psychopy
 brew install --cask r
 brew install --cask rectangle
