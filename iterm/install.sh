@@ -1,7 +1,5 @@
 #!/usr/bin/env bash
 
-fileicon set "/Applications/iTerm.app" $HOME/.init/iTerm2-nord-chevron.icns
-
 cp $HOME/.init/*.ttf /Library/Fonts/
 
 # Install Oh My Zsh

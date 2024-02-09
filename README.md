@@ -38,4 +38,7 @@
 - [@narze](https://github.com/narze/dotfiles)
 - [@dhanishgajjar](https://github.com/dhanishgajjar/vscode-icons)
 - [@jasonlong](https://github.com/jasonlong/iterm2-icons)
+- [@amirmasoudabdol](https://github.com/amirmasoudabdol/rstudio-icons)
+- [spotify icons](https://stijndv.com/goodies/big-sur-replacement-icons/)
+- [arc icons](https://lechichi.notion.site/Arc-Icon-Gallery-198384b780104dbf98b990a5fb9eec26)
 - [8K wallpaper](https://www.wallpaperflare.com/untitled-night-mountains-landscape-dark-minimal-4k-8k-wallpaper-saazn/download)
