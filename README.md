@@ -19,8 +19,9 @@
 10. `chmod +x vscode/config.sh && ./vscode/config.sh`
 11. `chmod +x gpg/setup.sh && ./gpg/setup.sh`
 12. `chmod +x install/macos.sh && ./install/macos.sh`
-13. load alfred prefs from `alfred/Alfred.alfredpreferences`
-14. restart computer and enjoy 😎
+13. `chmod +x icons/set.sh && ./icons/set.sh`
+14. load alfred prefs from `alfred/Alfred.alfredpreferences`
+15. restart computer and enjoy 😎
 
 ## other apps to install (not from package managers)
 
