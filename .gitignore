@@ -1,2 +1,9 @@
 .DS_Store
 .DS_Store?
+**/alfred/Alfred.alfredpreferences/snippets/custom/address*.json
+**/alfred/Alfred.alfredpreferences/snippets/custom/book*.json
+**/alfred/Alfred.alfredpreferences/snippets/custom/cell*.json
+**/alfred/Alfred.alfredpreferences/snippets/custom/sherlock*.json
+**/alfred/Alfred.alfredpreferences/snippets/custom/ssh*.json
+**/alfred/Alfred.alfredpreferences/snippets/custom/work*.json
+**/alfred/Alfred.alfredpreferences/snippets/custom/zoom*.json
