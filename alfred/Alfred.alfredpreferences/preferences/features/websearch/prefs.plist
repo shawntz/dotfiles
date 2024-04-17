@@ -7,7 +7,7 @@
 		<key>4487463F-F755-4CD7-A085-270BB536E97F</key>
 		<dict>
 			<key>enabled</key>
-			<true/>
+			<false/>
 			<key>keyword</key>
 			<string>ghsme</string>
 			<key>text</key>
@@ -18,7 +18,7 @@
 		<key>C734F873-FBCB-4B4E-9539-29434603E4E9</key>
 		<dict>
 			<key>enabled</key>
-			<true/>
+			<false/>
 			<key>keyword</key>
 			<string>gh</string>
 			<key>text</key>
