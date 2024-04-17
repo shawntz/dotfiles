@@ -47,7 +47,7 @@
 	<key>description</key>
 	<string>Search your starred repositories in Github</string>
 	<key>disabled</key>
-	<false/>
+	<true/>
 	<key>name</key>
 	<string>GitHub Star</string>
 	<key>objects</key>
