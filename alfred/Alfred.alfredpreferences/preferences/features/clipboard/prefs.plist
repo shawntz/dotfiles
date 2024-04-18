@@ -4,6 +4,8 @@
 <dict>
 	<key>autoExpandMidString</key>
 	<true/>
+	<key>autoExpandRestoreClipboardAfter</key>
+	<real>1</real>
 	<key>autoExpandSnippetPlaySound</key>
 	<false/>
 	<key>autoExpandSnippetTriggerPlaySound</key>
@@ -17,6 +19,8 @@
 		<key>string</key>
 		<string> </string>
 	</dict>
+	<key>snippetKeyword</key>
+	<string>s</string>
 	<key>snippetMatchFields</key>
 	<integer>1</integer>
 </dict>
