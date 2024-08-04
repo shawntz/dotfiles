@@ -673,7 +673,7 @@
 	<key>description</key>
 	<string>OpenAI integrations</string>
 	<key>disabled</key>
-	<false/>
+	<true/>
 	<key>name</key>
 	<string>ChatGPT / DALL-E</string>
 	<key>objects</key>
@@ -1830,8 +1830,6 @@ function run() {
 			<integer>1</integer>
 		</dict>
 		<dict>
-			<key>config</key>
-			<dict/>
 			<key>type</key>
 			<string>alfred.workflow.utility.junction</string>
 			<key>uid</key>
