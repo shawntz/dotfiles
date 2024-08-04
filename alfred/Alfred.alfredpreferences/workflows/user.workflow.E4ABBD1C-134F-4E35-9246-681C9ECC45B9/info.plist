@@ -53,7 +53,7 @@
 	<key>description</key>
 	<string>Set a reminder to get focused for a set amount of time because... oooh shiny!</string>
 	<key>disabled</key>
-	<false/>
+	<true/>
 	<key>name</key>
 	<string>Yak Saver</string>
 	<key>objects</key>

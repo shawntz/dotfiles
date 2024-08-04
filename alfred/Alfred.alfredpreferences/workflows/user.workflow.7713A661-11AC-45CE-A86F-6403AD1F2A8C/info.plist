@@ -78,7 +78,7 @@
 	<key>description</key>
 	<string>Generate disposable email inboxes</string>
 	<key>disabled</key>
-	<false/>
+	<true/>
 	<key>name</key>
 	<string>Temporary Email</string>
 	<key>objects</key>

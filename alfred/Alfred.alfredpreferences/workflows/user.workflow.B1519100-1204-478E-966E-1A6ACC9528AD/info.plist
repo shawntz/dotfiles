@@ -55,7 +55,7 @@
 	<key>description</key>
 	<string>Open files or folders in Visual Studio Code.</string>
 	<key>disabled</key>
-	<false/>
+	<true/>
 	<key>name</key>
 	<string>Visual Studio Code</string>
 	<key>objects</key>

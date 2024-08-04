@@ -54,7 +54,7 @@
 	<key>description</key>
 	<string>Connect/ Disconnect your AirPods</string>
 	<key>disabled</key>
-	<false/>
+	<true/>
 	<key>name</key>
 	<string>AirPods Connector</string>
 	<key>objects</key>

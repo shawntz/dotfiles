@@ -378,7 +378,7 @@
 	<key>description</key>
 	<string>Quickly play songs in iTunes</string>
 	<key>disabled</key>
-	<false/>
+	<true/>
 	<key>name</key>
 	<string>Play Song</string>
 	<key>objects</key>
