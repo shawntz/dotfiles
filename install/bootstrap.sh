@@ -148,3 +148,8 @@ create_env_file
 echo ''
 echo ''
 success 'All installed!'
+
+# powerlevel10k term config
+echo "source $(brew --prefix)/share/powerlevel10k/powerlevel10k.zsh-theme" >> $DOTFILES/zsh/rc.zsh
+echo "source $(brew --prefix)/share/zsh-autosuggestions/zsh-autosuggestions.zsh" >> $DOTFILES/zsh/rc.zsh
+echo "source $(brew --prefix)/share/zsh-syntax-highlighting/zsh-syntax-highlighting.zsh" >> $DOTFILES/zsh/rc.zsh
