@@ -1,3 +1,0 @@
-### Changelog
-- **fix**: parsing fail with certain invalid entries (#48)
-- **refactor**: bibtex parsing
