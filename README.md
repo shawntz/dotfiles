@@ -7,13 +7,13 @@ sudo pacman -S git --noconfirm
 ```
 
 ## step 0.5
-clone `dotfiles` to home directory
-```
-git clone git@github.com:shawntschwartz/dotfiles.git ~/
-```
+[setup git ssh key](https://docs.github.com/en/authentication/connecting-to-github-with-ssh/generating-a-new-ssh-key-and-adding-it-to-the-ssh-agent) if new system
 
 ## step 1
-[setup git ssh key](https://docs.github.com/en/authentication/connecting-to-github-with-ssh/generating-a-new-ssh-key-and-adding-it-to-the-ssh-agent) if new system
+clone `dotfiles` to home directory
+```
+git clone git@github.com:shawntschwartz/dotfiles.git ~/dotfiles
+```
 
 ## step 2
 ```
