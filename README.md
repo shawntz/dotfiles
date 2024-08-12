@@ -3,7 +3,7 @@
 ## step 0
 install `git`
 ```
-sudo pacman -S git -y
+sudo pacman -S git --noconfirm
 ```
 
 ## step 0.5
