@@ -1,0 +1,63 @@
+[gpg]
+    format = ssh
+
+[rerere]
+    enabled = true
+
+[commit]
+	gpgsign = true
+
+[branch]
+    sort = committerdate
+
+[column]
+    ui = auto
+
+[pull]
+    rebase = true
+
+[merge]
+    log = true
+
+[diff]
+    renames = copies
+
+[help]
+    autocorrect = 1
+
+[color]
+	ui = auto
+
+[core]
+	excludesfile = ~/.gitignore
+	# treat spaces before tabs and all kinds of trailing whitespace as an error
+	# [default] trailing-space: looks for spaces at the end of a line
+	# [default] space-before-tab: looks for spaces before tabs at the beginning of a line
+	whitespace = space-before-tab,-indent-with-non-tab,trailing-space
+
+[filter "lfs"]
+	clean = git-lfs clean -- %f
+	smudge = git-lfs smudge -- %f
+	process = git-lfs filter-process
+	required = true
+
+[url "git@github.com:github"]
+	insteadOf = "https://github.com/github"
+	insteadOf = "github:github"
+	insteadOf = "git://github.com/github"
+
+[url "git@github.com:"]
+	pushInsteadOf = "https://github.com/"
+	pushInsteadOf = "github:"
+	pushInsteadOf = "git://github.com/"
+
+[url "git://github.com/"]
+	insteadOf = "github:"
+
+[url "git@gist.github.com:"]
+	insteadOf = "gst:"
+	pushInsteadOf = "gist:"
+	pushInsteadOf = "git://gist.github.com/"
+
+[url "git://gist.github.com/"]
+	insteadOf = "gist:"
