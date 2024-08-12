@@ -17,14 +17,17 @@ git clone git@github.com:shawntschwartz/dotfiles.git ~/dotfiles
 
 ## step 2
 ```
-cp .extra.template ~/.extra
-nvim ~/.extra
+cd ~/dotfiles && mv .extra.template .extra.sh
+nvim ~/dotfiles/.extra.sh
 
-# set the following variables within ~/.extra
+# set the following variables within `~/dotfiles/.extra`
 GIT_AUTHOR_NAME="Your Name"
 GIT_AUTHOR_EMAIL="email@you.com"
 GH_USER="nickname"
 GPG_KEY="~/.ssh/key.pub"
+
+# then execute `~/dotfiles/.extra` to configure git props
+chmod +x ~/dotfiles/.extra.sh && ~/./dotfiles/.extra.sh
 ```
 
 ## step 3
