@@ -73,6 +73,7 @@ install_if_missing yazi         # fast terminal file manager
 install_if_missing zoxide       # better cd
 
 ##### apps #####
+install_if_missing 1password
 install_if_missing dropbox
 install_if_missing google-chrome
 install_if_missing notion-app-electron
