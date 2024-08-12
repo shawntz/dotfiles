@@ -19,7 +19,7 @@ install_if_missing() {
     fi
 
     if ! $package_manager -Qi "$package_name" > /dev/null; then
-        sudo $package_manager -S "$package_name"
+        sudo $package_manager -S "$package_name" -y
     else
         echo "'$package_name' is already installed... skipping!"
     fi
