@@ -19,13 +19,16 @@ GPG_KEY="~/.ssh/key.pub"
 execute `bootstrap/setdirs.sh`
 
 ## step 4
-`reboot`
-
-## step 4
-execute `bootstrap/pacman.sh`
+execute `bootstrap/display.sh`
 
 ## step 5
-`zsh`
+`reboot`
 
 ## step 6
+execute `bootstrap/pacman.sh`
+
+## step 7
+`zsh`
+
+## step 8
 `stow` dotfiles
