@@ -15,6 +15,10 @@ eval "$(zoxide init zsh)"
 eval "$(fzf --zsh)"
 eval "$(starship init zsh)"
 
+xset r rate 200 100
+
+neofetch
+
 # https://juliu.is/a-simple-tmux/
 # tat: tmux attach
 function tat {
