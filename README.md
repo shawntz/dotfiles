@@ -15,6 +15,12 @@ clone `dotfiles` to home directory
 git clone git@github.com:shawntschwartz/dotfiles.git ~/dotfiles
 ```
 
+## step 1.5
+ignore chmod file changes in git dotfiles repo
+```
+git config core.filemode false
+```
+
 ## step 2
 ```
 cd ~/dotfiles && cp .extra.template .extra.sh
