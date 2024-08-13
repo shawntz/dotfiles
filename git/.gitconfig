@@ -1,29 +1,29 @@
 [gpg]
-    format = ssh
+  format = ssh
 
 [rerere]
-    enabled = true
+  enabled = true
 
 [commit]
 	gpgsign = true
 
 [branch]
-    sort = committerdate
+  sort = committerdate
 
 [column]
-    ui = auto
+  ui = auto
 
 [pull]
-    rebase = true
+  rebase = true
 
 [merge]
-    log = true
+  log = true
 
 [diff]
-    renames = copies
+  renames = copies
 
 [help]
-    autocorrect = 1
+  autocorrect = 1
 
 [color]
 	ui = auto
