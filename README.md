@@ -17,7 +17,7 @@ git clone git@github.com:shawntschwartz/dotfiles.git ~/dotfiles
 
 ## step 2
 ```
-cd ~/dotfiles && mv .extra.template .extra.sh
+cd ~/dotfiles && cp .extra.template .extra.sh
 nvim ~/dotfiles/.extra.sh
 
 # set the following variables within `~/dotfiles/.extra`
