@@ -4,7 +4,7 @@ for_window [class="^.*"] border pixel 1
 
 set $mod Mod1
 
-exec_always --no-startup-id picom
+exec_always --no-startup-id picom -b -f
 exec_always --no-startup-id feh --bg-scale ~/pictures/backgrounds/nyc-aerial.jpg
 exec --no-startup-id xrdb -merge ~/.Xresources
 exec_always --no-startup-id "~/.config/i3/startup.sh"
