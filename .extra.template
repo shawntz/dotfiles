@@ -16,3 +16,6 @@ git config --global github.user "$GH_USER"
 
 echo "setting git global user.signingkey => $GPG_KEY"
 git config --global user.signingkey "$GPG_KEY"
+
+echo "setting git global password cache timeout value to 1 month"
+git config --global credential.helper 'cache --timeout=2628000'
