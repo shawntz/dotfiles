@@ -1,5 +1,11 @@
 #!/usr/bin/env bash
 
+for dir in $(ls $HOME)
+do
+    mv $HOME/$dir $(echo $HOME/$dir | tr '[:upper:]' '[:lower:]')
+    echo "[INFO] - renamed $HOME/$dir"
+done
+
 # first change to a placeholder name, then desired lowercase name
 # since it doesn't deliniate between upper and lower case defaults
 
