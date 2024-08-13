@@ -53,6 +53,7 @@ systemctl enable bluetooth.service
 
 install_if_missing dmenu pacman
 install_if_missing docker pacman
+install_if_missing feh yay
 install_if_missing firefox pacman
 install_if_missing i3 pacman
 install_if_missing kitty pacman
