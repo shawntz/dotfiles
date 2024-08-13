@@ -1,12 +1,13 @@
 #!/usr/bin/env bash
 
-sudo -v  # ask for sudo password upfront
-
 ##### fully upgrade system #####
-pacman -Syu
+sudo pacman -Syu
 
 ##### yay #####
-pacman -S --needed git base-devel && git clone https://aur.archlinux.org/yay.git && cd yay && makepkg -si
+if ! command -v yay > /dev/null; then
+    echo "yay is not installed... installing!"
+    sudo pacman -S --needed git base-devel && git clone https://aur.archlinux.org/yay.git && cd yay && makepkg -si
+fi
 
 ##### install helper #####
 install_if_missing() {
@@ -27,7 +28,11 @@ install_if_missing() {
 
     # install package
     if ! $package_manager -Qi "$package_name" > /dev/null; then
-        yes | $package_manager -S "$package_name"
+	if [ "$package_manager" = "pacman" ]; then
+            sudo $package_manager -S "$package_name" --noconfirm
+	else
+	    yes | $package_manager -S "$package_name"
+	fi
     else
         echo "'$package_name' is already installed... skipping!"
     fi
@@ -35,9 +40,10 @@ install_if_missing() {
 
 ##### gnome extensions #####
 install_if_missing gnome-tweaks pacman
+install_if_missing gnome-shell-extensions pacman
 install_if_missing gnome-shell-extension-caffeine pacman
+install_if_missing gnome-shell-extension-weather-oclock pacman
 install_if_missing gnome-shell-extension-blur-my-shell yay
-install_if_missing whitesur-gtk-theme yay
 
 ##### system #####
 install_if_missing bluez pacman
@@ -45,16 +51,19 @@ install_if_missing bluez-utils pacman
 systemctl start bluetooth.service
 systemctl enable bluetooth.service
 
+install_if_missing dmenu pacman
 install_if_missing docker pacman
 install_if_missing firefox pacman
-install_if_missing i3-wm pacman
+install_if_missing i3 pacman
 install_if_missing kitty pacman
+install_if_missing nano pacman
 install_if_missing neovim pacman
 install_if_missing picom pacman
 install_if_missing r pacman
 install_if_missing rofi pacman
 install_if_missing tmux pacman
 install_if_missing ttf-meslo-nerd pacman
+install_if_missing xorg pacman
 install_if_missing zsh pacman
 install_if_missing zsh-syntax-highlighting pacman
 install_if_missing zsh-autosuggestions pacman
@@ -91,3 +100,9 @@ install_if_missing slack-desktop yay
 install_if_missing todoist-appimage yay
 install_if_missing visual-studio-code-bin yay
 install_if_missing zoom yay
+
+##### set default shell #####
+zsh
+zsh-newuser-install -f
+chsh -l
+chsh -s /usr/bin/zsh
