@@ -4,8 +4,12 @@ alias vi='nvim -w ~/.vimlog "$@"'
 alias vim='nvim -w ~/.vimlog "$@"'
 alias vsc="code -g ."
 alias cd='z'
+alias b='cd ..'
+alias bb='cd ../..'
+alias bbb='cd ../../..'
+alias bbbb='cd ../../../..'
 alias hg='history | grep'
-alias ls='eza --color=always --sort=newest --long --no-filesize --no-user --icons=always --no-permissions'
+alias ls='eza --all --color=always --sort=name --long --no-user --icons=always --no-permissions'
 alias c='clear'
 alias s='source ~/.zshrc'
 alias jj='pbpaste | jsonpp | pbcopy'
@@ -13,6 +17,11 @@ alias trim="awk '{\$1=\$1;print}'"
 alias g='lazygit'
 
 # FUNCTIONS -------------------------------------------------------------------
+function cs () {
+  z $1
+  eza --all --color=always --sort=name --no-filesize --no-user --icons=always --no-permissions
+}
+
 function take {
     mkdir -p $1
     cd $1
