@@ -66,8 +66,6 @@ install_if_missing tmux pacman
 install_if_missing ttf-meslo-nerd pacman
 install_if_missing xorg pacman
 install_if_missing zsh pacman
-install_if_missing zsh-syntax-highlighting pacman
-install_if_missing zsh-autosuggestions pacman
 
 ##### shell tools #####
 install_if_missing neofetch pacman     # sysinfo panel
@@ -107,3 +105,13 @@ zsh
 zsh-newuser-install -f
 chsh -l
 chsh -s /usr/bin/zsh
+
+git clone https://github.com/zsh-users/zsh-autosuggestions ~/dotfiles/zsh/zsh/zsh-autosuggestions
+rm -rf ~/dotfiles/zsh/zsh/zsh-autosuggestions/.git
+rm -rf ~/dotfiles/zsh/zsh/zsh-autosuggestions/.github
+rm -rf ~/dotfiles/zsh/zsh/zsh-autosuggestions/.gitignore
+
+git clone https://github.com/zsh-users/zsh-syntax-highlighting ~/dotfiles/zsh/zsh/zsh-syntax-highlighting
+rm -rf ~/dotfiles/zsh/zsh/zsh-syntax-highlighting/.git
+rm -rf ~/dotfiles/zsh/zsh/zsh-syntax-highlighting/.github
+rm -rf ~/dotfiles/zsh/zsh/zsh-syntax-highlighting/.gitignore

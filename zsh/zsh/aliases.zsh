@@ -15,6 +15,7 @@ alias s='source ~/.zshrc'
 alias jj='pbpaste | jsonpp | pbcopy'
 alias trim="awk '{\$1=\$1;print}'"
 alias g='lazygit'
+alias f='yazi'
 
 # FUNCTIONS -------------------------------------------------------------------
 function cs () {

@@ -1,4 +1,4 @@
-source_if_exists () {
+:ource_if_exists () {
     if test -r "$1"; then
         source "$1"
     fi
@@ -6,6 +6,8 @@ source_if_exists () {
 
 source_if_exists /home/$USER/zsh/history.zsh
 source_if_exists /home/$USER/zsh/aliases.zsh
+source_if_exists /home/$USER/zsh/zsh-autosuggestions/zsh-autosuggestions.zsh
+source_if_exists /home/$USER/zsh/zsh-syntax-highlighting/zsh-syntax-highlighting.zsh
 
 precmd() {
     source /home/$USER/zsh/aliases.zsh
@@ -33,4 +35,4 @@ function tat {
   fi
 }
 
-# todo: source zsh plugins based on pacman install location
+bindkey '^I^I' autosuggest-accept
