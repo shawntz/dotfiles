@@ -44,7 +44,9 @@ install_if_missing gnome-shell-extensions pacman
 install_if_missing gnome-shell-extension-caffeine pacman
 install_if_missing gnome-shell-extension-weather-oclock pacman
 install_if_missing gnome-shell-extension-blur-my-shell yay
-
+install_if_missing gnome-shell-extension-forge-git yay
+install_if_missing gnome-shell-extension-space-bar-git yay
+install_if_missing gnome-shell-extension-another-window-session-manager-git yay
 ##### system #####
 install_if_missing apple-fonts yay
 
@@ -53,6 +55,7 @@ install_if_missing bluez-utils pacman
 systemctl start bluetooth.service
 systemctl enable bluetooth.service
 
+install_if_missing dconf-editor pacman
 install_if_missing dmenu pacman
 install_if_missing docker pacman
 install_if_missing feh yay
