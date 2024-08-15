@@ -47,6 +47,7 @@ install_if_missing gnome-shell-extension-blur-my-shell yay
 install_if_missing gnome-shell-extension-forge-git yay
 install_if_missing gnome-shell-extension-space-bar-git yay
 install_if_missing gnome-shell-extension-another-window-session-manager-git yay
+
 ##### system #####
 install_if_missing apple-fonts yay
 
