@@ -7,5 +7,8 @@ rm -rf ~/dotfiles/icons/whitesur/.git
 rm -rf ~/dotfiles/icons/whitesur/.github
 rm -rf ~/dotfiles/icons/whitesur/.gitignore
 
-~/./dotfiles/icons/whitesur/install.sh -r
-~/./dotfiles/icons/whitesur/install.sh -a -b
+#~/./dotfiles/icons/whitesur/install.sh -r
+#~/./dotfiles/icons/whitesur/install.sh -a -b
+mkdir -p ~/.icons
+mkdir -p ~/.icons/whitesur
+cp ~/dotfiles/icons/whitesur/ ~/.icons/whitesur/
