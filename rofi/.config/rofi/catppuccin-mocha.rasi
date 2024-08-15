@@ -7,7 +7,7 @@
     fg-col: #cdd6f4;
     fg-col2: #f38ba8;
     grey: #6c7086;
-    width: 600;
+    width: 1000;
     font: "JetBrainsMono Nerd Font 18";
 }
 
@@ -17,7 +17,7 @@ element-text, element-icon , mode-switcher {
 }
 
 window {
-    height: 360px;
+    height: 600px;
     border: 3px;
     border-color: @border-col;
     background-color: @bg-col;
@@ -86,7 +86,7 @@ button {
     padding: 10px;
     background-color: @bg-col-light;
     text-color: @grey;
-    vertical-align: 0.5; 
+    vertical-align: 0.5;
     horizontal-align: 0.5;
 }
 
