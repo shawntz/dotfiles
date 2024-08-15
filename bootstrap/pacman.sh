@@ -97,7 +97,9 @@ install_if_missing zoxide pacman       # better cd
 ##### apps #####
 install_if_missing 1password yay
 install_if_missing cider yay
+install_if_missing python-gpgme pacman  # required for dropbox
 install_if_missing dropbox yay
+install_if_missing dropbox-cli yay
 install_if_missing google-chrome yay
 install_if_missing jupyter-notebook pacman
 install_if_missing notion-app-electron yay
