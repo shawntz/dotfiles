@@ -5,37 +5,37 @@ sudo pacman -Syu
 
 ##### yay #####
 if ! command -v yay > /dev/null; then
-    echo "yay is not installed... installing!"
-    sudo pacman -S --needed git base-devel && git clone https://aur.archlinux.org/yay.git && cd yay && makepkg -si
+  echo "yay is not installed... installing!"
+  sudo pacman -S --needed git base-devel && git clone https://aur.archlinux.org/yay.git && cd yay && makepkg -si
 fi
 
 ##### install helper #####
 install_if_missing() {
-    package_name="$1"
-    package_manager="$2"
+  package_name="$1"
+  package_manager="$2"
 
-    # validate package manager input as either pacman or yay
-    if [[ "$package_manager" != "pacman" && "$package_manager" != "yay" ]]; then
-        echo "invalid package manager specified; please use 'pacman' or 'yay'"
-        return 1
-    fi
+  # validate package manager input as either pacman or yay
+  if [[ "$package_manager" != "pacman" && "$package_manager" != "yay" ]]; then
+    echo "invalid package manager specified; please use 'pacman' or 'yay'"
+    return 1
+  fi
 
-    # verify the package manager is installed
-    if ! command -v $package_manager > /dev/null; then
-        echo "'$package_manager' is not installed!"
-        return 1
-    fi
+  # verify the package manager is installed
+  if ! command -v $package_manager > /dev/null; then
+    echo "'$package_manager' is not installed!"
+    return 1
+  fi
 
-    # install package
-    if ! $package_manager -Qi "$package_name" > /dev/null; then
-	if [ "$package_manager" = "pacman" ]; then
-            sudo $package_manager -S "$package_name" --noconfirm
-	else
+  # install package
+  if ! $package_manager -Qi "$package_name" > /dev/null; then
+	  if [ "$package_manager" = "pacman" ]; then
+      sudo $package_manager -S "$package_name" --noconfirm
+	  else
 	    yes | $package_manager -S "$package_name"
-	fi
-    else
-        echo "'$package_name' is already installed... skipping!"
-    fi
+	  fi
+  else
+    echo "'$package_name' is already installed... skipping!"
+  fi
 }
 
 ##### gnome extensions #####
@@ -46,6 +46,8 @@ install_if_missing gnome-shell-extension-weather-oclock pacman
 install_if_missing gnome-shell-extension-blur-my-shell yay
 
 ##### system #####
+install_if_missing apple-fonts yay
+
 install_if_missing bluez pacman
 install_if_missing bluez-utils pacman
 systemctl start bluetooth.service
@@ -90,11 +92,12 @@ install_if_missing zoxide pacman       # better cd
 
 ##### apps #####
 install_if_missing 1password yay
+install_if_missing cider yay
 install_if_missing dropbox yay
 install_if_missing google-chrome yay
+install_if_missing jupyter-notebook pacman
 install_if_missing notion-app-electron yay
-install_if_missing positron-ide-devel-bin yay
-install_if_missing rstudio-desktop-bin yay
+install_if_missing rstudio-desktop yay
 install_if_missing slack-desktop yay
 install_if_missing todoist-appimage yay
 install_if_missing visual-studio-code-bin yay
