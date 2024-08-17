@@ -1,0 +1,15 @@
+#!/bin/zsh
+
+DOTFILES=~/dotfiles
+
+STOW=("aerospace" "kitty" "nvim" "starship" "tmux" "wallpapers" "zsh")
+
+cd "$DOTFILES" || exit
+
+for DIR in "${STOW[@]}"; do
+  echo "[INFO] - stowing $DIR..."
+  stow --verbose --target="$HOME" "$DIR"
+done
+
+echo "[INFO] - dotfiles stowed successfully!"
+
