@@ -4,6 +4,7 @@ source_if_exists () {
     fi
 }
 
+source_if_exists /home/$USER/zsh/util.zsh
 source_if_exists /home/$USER/zsh/history.zsh
 source_if_exists /home/$USER/zsh/aliases.zsh
 source_if_exists /home/$USER/zsh/zsh-autosuggestions/zsh-autosuggestions.zsh
@@ -13,26 +14,17 @@ precmd() {
     source /home/$USER/zsh/aliases.zsh
 }
 
-eval "$(zoxide init zsh)"
-eval "$(fzf --zsh)"
-eval "$(starship init zsh)"
+# brew
+PATH=$PATH:/opt/homebrew/bin
 
-xset r rate 200 100
+# zoxide
+eval "$(zoxide init zsh)"
+
+# fzf
+eval "$(fzf --zsh)"
+
+# starship
+eval "$(starship init zsh)"
 
 neofetch
 
-# https://juliu.is/a-simple-tmux/
-# tat: tmux attach
-function tat {
-  name=$(basename `pwd` | sed -e 's/\.//g')
-
-  if tmux ls 2>&1 | grep "$name"; then
-    tmux attach -t "$name"
-  elif [ -f .envrc ]; then
-    direnv exec / tmux new-session -s "$name"
-  else
-    tmux new-session -s "$name"
-  fi
-}
-
-bindkey '^I^I' autosuggest-accept

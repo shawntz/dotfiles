@@ -1,3 +1,5 @@
+#!/bin/zsh
+
 # https://github.com/robbyrussell/oh-my-zsh/blob/master/lib/history.zsh
 
 # history wrapper
