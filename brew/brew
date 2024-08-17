@@ -16,9 +16,7 @@ BREW_FORMULAE=(
   lazygit
   mas
   neovim
-  node
   pandoc
-  r
   rclone
   ripgrep
   starship
@@ -43,23 +41,19 @@ BREW_CASKS=(
   dropbox
   gimp
   google-chrome
-  google-drive
   istat-menus
   jupyterlab 
   karabiner-elements
   kindle
   kitty
-  macdown
-  mactex
   microsoft-auto-update
   microsoft-office
   microsoft-remote-desktop
   middleclick
   min
   neofetch
-  notion
+  obsidian
   positron
-  postman
   raycast
   rstudio
   slack
