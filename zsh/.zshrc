@@ -6,12 +6,20 @@ source_if_exists () {
     fi
 }
 
+<<<<<<< HEAD
 source_if_exists $HOME/.env
 source_if_exists $HOME/.zsh/util.zsh
 source_if_exists $HOME/.zsh/history.zsh
 source_if_exists $HOME/.zsh/aliases.zsh
 source_if_exists $HOME/.zsh/zsh-autosuggestions/zsh-autosuggestions.zsh
 source_if_exists $HOME/.zsh/zsh-syntax-highlighting/zsh-syntax-highlighting.zsh
+=======
+source_if_exists /home/$USER/zsh/util.zsh
+source_if_exists /home/$USER/zsh/history.zsh
+source_if_exists /home/$USER/zsh/aliases.zsh
+source_if_exists /home/$USER/zsh/zsh-autosuggestions/zsh-autosuggestions.zsh
+source_if_exists /home/$USER/zsh/zsh-syntax-highlighting/zsh-syntax-highlighting.zsh
+>>>>>>> 4c744880 (:sparkles: update zsh config)
 
 precmd() {
     source $HOME/.zsh/aliases.zsh
