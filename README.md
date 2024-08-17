@@ -1,70 +1,13 @@
-# shawn's dotfiles (for arch linux btw)
+# dotfiles
 
-## step 0
-install `git`
-```
-sudo pacman -S git --noconfirm
-```
+dotfiles for my m3 max macbook pro 15,10 running macos sonoma 14.6.1 👨🏼‍💻
 
-## step 0.5
-[setup git ssh key](https://docs.github.com/en/authentication/connecting-to-github-with-ssh/generating-a-new-ssh-key-and-adding-it-to-the-ssh-agent) if new system
+## installation
 
-## step 1
-clone `dotfiles` to home directory
-```
-git clone git@github.com:shawntschwartz/dotfiles.git ~/dotfiles
-```
+> [!IMPORTANT]  
+> **before you get started** make sure you give full disk access permission to your terminal (for writing macos defaults) 
+> `System Preferences -> Privacy -> Full Disk Access`
 
-## step 1.5
-ignore chmod file changes in git dotfiles repo
-```
-git config core.filemode false
-```
+to install:
+`curl -L https://raw.githubusercontent.com/shawntschwartz/dotfiles/macos/run.sh | sh`
 
-## step 2
-```
-cd ~/dotfiles && cp .extra.template .extra.sh
-nvim ~/dotfiles/.extra.sh
-
-# set the following variables within `~/dotfiles/.extra`
-GIT_AUTHOR_NAME="Your Name"
-GIT_AUTHOR_EMAIL="email@you.com"
-GH_USER="nickname"
-GPG_KEY="~/.ssh/key.pub"
-
-# then execute `~/dotfiles/.extra` to configure git props
-chmod +x ~/dotfiles/.extra.sh && ~/./dotfiles/.extra.sh
-```
-
-## step 3
-execute `bootstrap/setdirs.sh`
-```
-chmod +x ~/dotfiles/bootstrap/setdirs.sh && ~/./dotfiles/bootstrap/setdirs.sh
-```
-
-## step 4
-execute `bootstrap/display.sh`
-```
-chmod +x ~/dotfiles/bootstrap/display.sh && ~/./dotfiles/bootstrap/display.sh
-```
-
-## step 5
-`reboot` system
-```
-reboot
-```
-
-## step 6
-execute `bootstrap/pacman.sh`
-```
-chmod +x ~/dotfiles/bootstrap/pacman.sh && ~/./dotfiles/bootstrap/pacman.sh
-```
-
-## step 7
-set `zsh` as default shell
-```
-zsh
-```
-
-## step 8
-`stow` dotfiles
