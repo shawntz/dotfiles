@@ -34,6 +34,7 @@ BREW_FORMULAE=(
 
 BREW_CASKS=(
   1password 
+  appcleaner
   bartender
   blender
   caffeine
@@ -56,6 +57,8 @@ BREW_CASKS=(
   positron
   raycast
   rstudio
+  sf-symbols
+  skim
   slack
   todoist
   visual-studio-code
