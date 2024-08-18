@@ -57,6 +57,10 @@ generate_ssh_key() {
   echo "[INFO] - public key copied to clipboard! please add to github!"
 }
 
+get_obsidian_vault() {
+  git clone git@github.com:shawntschwartz/obsidian.git ~/documents/notes
+}
+
 config_crons() {
   crontab ~/dotfiles/crontab/crontab
 }
@@ -112,6 +116,9 @@ config_macos
 
 printf "😇  stowing dotfiles...\n"
 stow_dotfiles
+
+printf "💎  getting obsidian vault...\n"
+get_obsidian_vault
 
 printf "✨  order up, your mac is ready!!\n"
 confirm_reboot
