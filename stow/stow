@@ -6,10 +6,11 @@ STOW=("aerospace" "karabiner" "kitty" "neofetch" "nvim" "starship" "tmux" "wallp
 
 cd "$DOTFILES" || exit
 
+sudo -v
+
 for DIR in "${STOW[@]}"; do
   echo "[INFO] - stowing $DIR..."
-  stow --verbose --target="$HOME" "$DIR"
+  sudo /opt/homebrew/bin/stow --verbose --target="$HOME" "$DIR"
 done
 
 echo "[INFO] - dotfiles stowed successfully!"
-
