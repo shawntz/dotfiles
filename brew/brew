@@ -14,11 +14,14 @@ BREW_FORMULAE=(
   istat-menus
   jq
   lazygit
-  mas
+  lua
+  luarocks
   neovim
+  node
   pandoc
   rclone
   ripgrep
+  rust
   starship
   stow
   tmux
@@ -29,7 +32,7 @@ BREW_FORMULAE=(
   wget
   yarn
   yazi
-  zoxide 
+  zoxide
 )
 
 BREW_CASKS=(
@@ -37,7 +40,6 @@ BREW_CASKS=(
   appcleaner
   bartender
   blender
-  caffeine
   chatgpt
   dropbox
   gimp
@@ -45,16 +47,16 @@ BREW_CASKS=(
   istat-menus
   jupyterlab 
   karabiner-elements
-  kindle
   kitty
   microsoft-auto-update
   microsoft-office
   microsoft-remote-desktop
   middleclick
   min
-  neofetch
+  notchnook
   obsidian
   positron
+  postman
   raycast
   rstudio
   sf-symbols
@@ -106,4 +108,3 @@ echo "brew setup complete!"
 
 # Remove outdated versions from the cellar.
 brew cleanup
-
