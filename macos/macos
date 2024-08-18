@@ -420,7 +420,7 @@ defaults write com.apple.ActivityMonitor SortColumn -string "CPUUsage"
 defaults write com.apple.ActivityMonitor SortDirection -int 0
 
 ###############################################################################
-# TextEdit and Disk Utility  				                      #
+# TextEdit and Disk Utility  				                                  #
 ###############################################################################
 
 # Use plain text mode for new TextEdit documents
@@ -467,10 +467,8 @@ for app in "Activity Monitor" \
 	"Google Chrome" \
 	"Messages" \
 	"Photos" \
-	"SystemUIServer" \
-	"Terminal"; do
+	"SystemUIServer"; do
 	killall "${app}" &> /dev/null
 done
 
 echo 'Done. Note that some of these changes require a logout/restart to take effect.'
-
