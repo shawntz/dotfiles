@@ -62,7 +62,7 @@ generate_ssh_key() {
 }
 
 get_obsidian_vault() {
-  git clone git@github.com:shawntschwartz/obsidian.git ~/documents/notes
+  git clone git@github.com:shawntschwartz/obsidian.git ~/documents/obsidian
 }
 
 make_neofetch() {
