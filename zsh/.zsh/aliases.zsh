@@ -25,8 +25,8 @@ alias dl="cd ~/downloads"
 alias md="mkdir"
 alias t="touch"
 alias x="exit"
+alias kk='killall kitty'
 alias o="open ."
-alias x+="chmod +x"
 alias restart="sudo reboot"
 alias bye="sudo shutdown -r now"
 alias get="curl -O -L"
@@ -129,12 +129,12 @@ up() {
   cd "${cdir}"
 }
 
-emptytrash() {
-  echo "🗑  Emptying trashes..."
-  sudo rm -rfv /Volumes/*/.Trashes 1>/dev/null
-  rm -rfv ~/.Trash/* 1>/dev/null
-  sudo rm -v /private/var/vm/sleepimage 1>/dev/null
-}
+# emptytrash() {
+#   echo "🗑  Emptying trashes..."
+#   sudo rm -rfv /Volumes/*/.Trashes 1>/dev/null
+#   rm -rfv ~/.Trash/* 1>/dev/null
+#   sudo rm -v /private/var/vm/sleepimage 1>/dev/null
+# }
 
 rename-branch() {
   current_name=$1
