@@ -70,7 +70,7 @@ outer.right =      13
 
 # See: https://nikitabobko.github.io/AeroSpace/commands#exec-and-forget
 # You can uncomment the following lines to open up terminal with alt + enter shortcut (like in i3)
-cmd-enter = 'exec-and-forget open -n /Applications/kitty.app'
+cmd-shift-enter = 'exec-and-forget open -n /Applications/kitty.app'
 
 # See: https://nikitabobko.github.io/AeroSpace/commands#layout
 cmd-shift-slash = 'layout tiles horizontal vertical'
