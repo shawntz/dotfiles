@@ -129,10 +129,6 @@ up() {
   cd "${cdir}"
 }
 
-tree() {
-  tree -aC -I '.git|node_modules|build|dist' --dirsfirst "$@"
-}
-
 emptytrash() {
   echo "🗑  Emptying trashes..."
   sudo rm -rfv /Volumes/*/.Trashes 1>/dev/null
