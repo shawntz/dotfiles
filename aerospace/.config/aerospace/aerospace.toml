@@ -55,12 +55,12 @@ key-mapping.preset = 'qwerty'
 #                 Monitor pattern is the same as for 'workspace-to-monitor-force-assignment'.
 #                 See: https://nikitabobko.github.io/AeroSpace/guide#assign-workspaces-to-monitors
 [gaps]
-inner.horizontal = 13
-inner.vertical =   13
-outer.left =       13
-outer.bottom =     13
-outer.top =        13
-outer.right =      13
+inner.horizontal = 15
+inner.vertical =   15
+outer.left =       15
+outer.bottom =     15
+outer.top =        15
+outer.right =      15
 
 # 'main' binding mode declaration
 # See: https://nikitabobko.github.io/AeroSpace/guide#binding-modes
@@ -132,8 +132,8 @@ alt-tab = 'workspace-back-and-forth'
 alt-shift-tab = 'move-workspace-to-monitor --wrap-around next'
 
 alt-shift-r = ['flatten-workspace-tree', 'mode main'] # reset layout
-cmd-f = ['fullscreen'] # Toggle between fullscreen
-cmd-shift-f = ['layout floating tiling', 'mode main'] # Toggle between floating and tiling layout
+cmd-shift-f = ['fullscreen'] # Toggle between fullscreen
+#cmd-shift-f = ['layout floating tiling', 'mode main'] # Toggle between floating and tiling layout
 
 # See: https://nikitabobko.github.io/AeroSpace/commands#mode
 cmd-shift-semicolon = 'mode service'
