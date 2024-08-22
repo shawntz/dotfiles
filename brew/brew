@@ -19,6 +19,7 @@ BREW_FORMULAE=(
   neovim
   node
   pandoc
+  r
   rclone
   ripgrep
   rust
@@ -36,7 +37,7 @@ BREW_FORMULAE=(
 )
 
 BREW_CASKS=(
-  1password 
+  1password
   appcleaner
   bartender
   blender
@@ -45,7 +46,7 @@ BREW_CASKS=(
   gimp
   google-chrome
   istat-menus@6
-  jupyterlab 
+  jupyterlab
   karabiner-elements
   kitty
   microsoft-auto-update
