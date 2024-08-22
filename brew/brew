@@ -42,7 +42,6 @@ BREW_CASKS=(
   bartender
   blender
   chatgpt
-  dropbox
   gimp
   google-chrome
   istat-menus@6
