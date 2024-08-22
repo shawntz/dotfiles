@@ -111,8 +111,8 @@ cmd-9 = 'workspace 9'
 cmd-0 = 'workspace 10'
 cmd-p = ['focus-monitor prev', 'move-mouse window-force-center']
 cmd-n = ['focus-monitor next', 'move-mouse window-force-center']
-cmd-shift-p = 'move-workspace-to-monitor prev'
-cmd-shift-n = 'move-workspace-to-monitor next'
+cmd-alt-p = 'move-workspace-to-monitor prev'
+cmd-alt-n = 'move-workspace-to-monitor next'
 
 # See: https://nikitabobko.github.io/AeroSpace/commands#move-node-to-workspace
 alt-1 = 'move-node-to-workspace 1'
