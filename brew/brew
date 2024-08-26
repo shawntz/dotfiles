@@ -62,6 +62,7 @@ BREW_CASKS=(
   skim
   slack
   todoist
+  via
   visual-studio-code
   xquartz
   zoom
