@@ -77,10 +77,10 @@ cmd-shift-slash = 'layout tiles horizontal vertical'
 cmd-shift-comma = 'layout accordion horizontal vertical'
 
 # See: https://nikitabobko.github.io/AeroSpace/commands#focus
-cmd-h = ['focus --boundaries-action stop left', 'move-mouse window-force-center']
-cmd-j = ['focus --boundaries-action stop down', 'move-mouse window-force-center']
-cmd-k = ['focus --boundaries-action stop up', 'move-mouse window-force-center']
-cmd-l = ['focus --boundaries-action stop right', 'move-mouse window-force-center']
+alt-h = ['focus --boundaries-action stop left', 'move-mouse window-force-center']
+alt-j = ['focus --boundaries-action stop down', 'move-mouse window-force-center']
+alt-k = ['focus --boundaries-action stop up', 'move-mouse window-force-center']
+alt-l = ['focus --boundaries-action stop right', 'move-mouse window-force-center']
 
 # See: https://nikitabobko.github.io/AeroSpace/commands#move
 cmd-shift-h = 'move left'
@@ -95,10 +95,10 @@ cmd-shift-minus = 'resize smart -128'
 cmd-shift-equal = 'resize smart +128'
 
 # See: https://nikitabobko.github.io/AeroSpace/commands#workspace
-cmd-u = 'workspace prev'
-cmd-i = 'workspace next'
-cmd-shift-u = 'move-node-to-workspace prev'
-cmd-shift-i = 'move-node-to-workspace next'
+cmd-shift-u = 'workspace prev'
+cmd-shift-i = 'workspace next'
+#cmd-shift-u = 'move-node-to-workspace prev'
+#cmd-shift-i = 'move-node-to-workspace next'
 cmd-1 = 'workspace 1'
 cmd-2 = 'workspace 2'
 cmd-3 = 'workspace 3'
@@ -109,10 +109,10 @@ cmd-7 = 'workspace 7'
 cmd-8 = 'workspace 8'
 cmd-9 = 'workspace 9'
 cmd-0 = 'workspace 10'
-cmd-p = ['focus-monitor prev', 'move-mouse window-force-center']
-cmd-n = ['focus-monitor next', 'move-mouse window-force-center']
-cmd-alt-p = 'move-workspace-to-monitor prev'
-cmd-alt-n = 'move-workspace-to-monitor next'
+cmd-alt-p = ['focus-monitor prev', 'move-mouse window-force-center']
+cmd-alt-n = ['focus-monitor next', 'move-mouse window-force-center']
+#cmd-alt-p = 'move-workspace-to-monitor prev'
+#cmd-alt-n = 'move-workspace-to-monitor next'
 
 # See: https://nikitabobko.github.io/AeroSpace/commands#move-node-to-workspace
 alt-1 = 'move-node-to-workspace 1'
@@ -145,3 +145,4 @@ esc = ['reload-config', 'mode main']
 r = ['flatten-workspace-tree', 'mode main'] # reset layout
 f = ['layout floating tiling', 'mode main'] # Toggle between floating and tiling layout
 backspace = ['close-all-windows-but-current', 'mode main']
+
