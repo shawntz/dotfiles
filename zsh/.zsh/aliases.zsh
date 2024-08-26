@@ -9,6 +9,7 @@ alias vim='nvim -w ~/.vimlog "$@"'
 ## navigation *****************************************************************
 alias cl='clear'
 alias cd='z'
+alias cdi='zi'
 alias b='cd ..'
 alias bb='cd ../..'
 alias bbb='cd ../../..'
@@ -139,7 +140,7 @@ up() {
 rename-branch() {
   current_name=$1
   new_name=$2
-  
+
   # rename the branch
   git branch -m $current_name $new_name
 
