@@ -1,6 +1,8 @@
 #!/bin/zsh
 
 BREW_FORMULAE=(
+  bash
+  bat
   docker
   eza
   fd
@@ -42,6 +44,7 @@ BREW_CASKS=(
   bartender
   blender
   chatgpt
+  cmake
   gimp
   google-chrome
   istat-menus@6
