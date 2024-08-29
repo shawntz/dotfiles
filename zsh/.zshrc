@@ -6,7 +6,7 @@ source_if_exists () {
     fi
 }
 
-source_if_exists $HOME/dotfiles/zsh/.zsh/.env
+source_if_exists $HOME/.env
 source_if_exists $HOME/.zsh/util.zsh
 source_if_exists $HOME/.zsh/history.zsh
 source_if_exists $HOME/.zsh/aliases.zsh
