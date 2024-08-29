@@ -2,7 +2,7 @@
 
 # ALIASES ---------------------------------------------------------------------
 ## neovim *********************************************************************
-alias v='nvim -w ~/.vimlog "$@"'
+alias v='fd --type f --hidden --exclude .git | fzf-tmux -m --preview="bat --color=always {}" -p | xargs nvim'
 alias vi='nvim -w ~/.vimlog "$@"'
 alias vim='nvim -w ~/.vimlog "$@"'
 
@@ -23,6 +23,12 @@ alias work="cd ~/dev/work"
 alias desk="cd ~/desktop"
 alias docs="cd ~/documents"
 alias dl="cd ~/downloads"
+alias m="music -open"
+alias ma="music -artist"
+alias mc="music -current"
+alias mn="music -next && music -current"
+alias mp="music -play && echo 'resuming...' && music -current"
+alias ms="music -stop && echo 'music paused!'"
 alias md="mkdir"
 alias t="touch"
 alias x="exit"
@@ -31,6 +37,7 @@ alias o="open ."
 alias restart="sudo reboot"
 alias bye="sudo shutdown -r now"
 alias get="curl -O -L"
+alias ssh="kitty +kitten ssh"
 
 ## tools **********************************************************************
 alias c="code -g ."
