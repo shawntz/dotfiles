@@ -1300,8 +1300,10 @@ end
 -- [neural] -----------------------------------------------------------------
 if is_available "neural" or is_available "copilot" then
   maps.n["<leader>a"] = {
-    function() require("neural").prompt() end,
-    desc = "Ask chatgpt",
+    function() vim.cmd(":Copilot") end,
+    desc = "github copilot",
+    -- function() require("neural").prompt() end,
+    -- desc = "Ask chatgpt",
   }
 end
 
