@@ -116,13 +116,13 @@ maps.n["<leader>q"] = {
   end,
   desc = "Quit",
 }
-maps.n["<Tab>"] = {
-  "<Tab>",
-  noremap = true,
-  silent = true,
-  expr = false,
-  desc = "FIX: Prevent TAB from behaving like <C-i>, as they share the same internal code",
-}
+-- maps.n["<Tab>"] = {
+--   "<Tab>",
+--   noremap = true,
+--   silent = true,
+--   expr = false,
+--   desc = "FIX: Prevent TAB from behaving like <C-i>, as they share the same internal code",
+-- }
 
 -- clipboard ---------------------------------------------------------------
 
