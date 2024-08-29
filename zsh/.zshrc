@@ -6,6 +6,7 @@ source_if_exists () {
     fi
 }
 
+source_if_exists $HOME/dotfiles/zsh/.zsh/.env
 source_if_exists $HOME/.zsh/util.zsh
 source_if_exists $HOME/.zsh/history.zsh
 source_if_exists $HOME/.zsh/aliases.zsh
@@ -14,6 +15,7 @@ source_if_exists $HOME/.zsh/zsh-syntax-highlighting/zsh-syntax-highlighting.zsh
 
 precmd() {
     source $HOME/.zsh/aliases.zsh
+    source $HOME/dotfiles/zsh/zshmusic/zshmusic.zsh
 }
 
 # brew
@@ -29,3 +31,4 @@ eval "$(fzf --zsh)"
 eval "$(starship init zsh)"
 
 neofetch
+
