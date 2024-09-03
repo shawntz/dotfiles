@@ -61,6 +61,7 @@ install_if_missing dmenu pacman
 install_if_missing docker pacman
 install_if_missing feh yay
 install_if_missing firefox pacman
+install_if_missing gcc-fortran pacman
 install_if_missing i3 pacman
 install_if_missing kitty pacman
 install_if_missing nano pacman
