@@ -26,6 +26,17 @@ stow_dotfiles() {
   ~/dotfiles/stow/stow
 }
 
+start_zsh() {
+##### set default shell #####
+  zsh
+  zsh-newuser-install -f
+  chsh -l
+  chsh -s /usr/bin/zsh
+  
+##### install oh my zsh #####
+sh -c "$(wget https://raw.githubusercontent.com/ohmyzsh/ohmyzsh/master/tools/install.sh -O -)"
+}
+
 confirm_reboot() {
   echo "[IMPORTANT] - it's now time to reboot... press <return> to continue or ctrl+c to cancel."
   read -r
@@ -33,22 +44,21 @@ confirm_reboot() {
 }
 
 printf "🐙  configuring git...\n"
-config_git
+#config_git
 
 printf "🗄  creating directories and configuring files...\n"
-create_dirs
+#create_dirs
 
 printf "🍺  brewing packages...\n"
-install_packages
-
-#printf "👨🏼‍💻  building neofetch from source...\n"
-#make_neofetch
+#install_packages
 
 printf "😇  stowing dotfiles...\n"
 stow_dotfiles
 
 printf "💎  getting obsidian vault...\n"
 get_obsidian_vault
+
+#start_zsh
 
 printf "✨  order up, ubuntu is ready!!\n"
 confirm_reboot
