@@ -10,7 +10,7 @@ sudo -v
 
 for DIR in "${STOW[@]}"; do
   echo "[INFO] - stowing $DIR..."
-  sudo /opt/homebrew/bin/stow --verbose --target="$HOME" "$DIR"
+  sudo stow --verbose --target="$HOME" "$DIR"
 done
 
 echo "[INFO] - dotfiles stowed successfully!"
