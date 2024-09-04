@@ -45,3 +45,4 @@ setopt share_history          # share command history data
 
 bindkey "^[[A" history-search-backward
 bindkey "^[[B" history-search-forward
+
