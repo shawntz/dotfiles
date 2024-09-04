@@ -7,7 +7,6 @@ rm -rf ~/dotfiles/whitesur/.git
 rm -rf ~/dotfiles/whitesur/.github
 rm -rf ~/dotfiles/whitesur/.gitignore
 
-~/./dotfiles/gtk/whitesur/install.sh -r
 ~/./dotfiles/gtk/whitesur/install.sh -t all -m -N glassy -s 220 -i arch -HD --normal --round -P bigger
 
 ~/./dotfiles/gtk/whitesur/tweaks.sh -e
