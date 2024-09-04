@@ -4,10 +4,10 @@ if type git > /dev/null; then
     cd ~/dotfiles
     ./install
 else
-    curl -LO https://github.com/shawntschwartz/dotfiles/archive/macos.zip
-    unzip dotfiles-macos.zip
-    rm -rf dotfiles-macos.zip
-    mv dotfiles-macos ~/dotfiles
+    curl -LO https://github.com/shawntschwartz/dotfiles/archive/ubuntu.zip
+    unzip dotfiles-ubuntu.zip
+    rm -rf dotfiles-ubuntu.zip
+    mv dotfiles-ubuntu ~/dotfiles
     chmod +x ~/dotfiles
     cd ~/dotfiles
     ./install
