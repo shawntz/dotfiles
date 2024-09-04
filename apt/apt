@@ -39,7 +39,9 @@ sudo apt-get install docker-ce docker-ce-cli containerd.io docker-buildx-plugin 
 install_if_missing bat
 install_if_missing feh
 install_if_missing gdebi
+install_if_missing gnome-weather
 install_if_missing kitty
+install_if_missing libfuse2
 install_if_missing lua
 install_if_missing luarocks
 install_if_missing neovim
@@ -54,8 +56,10 @@ install_if_missing zsh
 install_if_missing neofetch     # sysinfo panel
 install_if_missing eza          # better ls
 install_if_missing fd           # better find
-#install_if_missing flatpak	# application manager
-install_if_missing fzf          # fuzzy finder
+install_if_missing flatpak	# application manager
+#install_if_missing fzf          # fuzzy finder
+git clone --depth 1 https://github.com/junegunn/fzf.git ~/.fzf
+~/.fzf/install
 install_if_missing imagemagick  # image manipulation
 install_if_missing pandoc       # converting between file formats
 install_if_missing polybar      # status bar
@@ -86,26 +90,27 @@ cargo build --release --locked
 ./target/release/yazi
 
 # add flathub repo
-#flatpak remote-add --if-not-exists flathub https://dl.flathub.org/repo/flathub.flatpakrepo
+flatpak remote-add --if-not-exists flathub https://dl.flathub.org/repo/flathub.flatpakrepo
 
 # reboot system
 #reboot
 
-#flatpak install flathub sh.cider.Cider
+flatpak install flathub sh.cider.Cider
+flatpak install flathub md.obsidian.Obsidian
+flatpak install flathub com.todoist.Todoist
 
 ##### apps #####
-
 sudo snap install code --classic
-sudo snap install jupyterlab-desktop --classic
-sudo snap install node --classic
-sudo snap install postman
-sudo snap install slack
-sudo snap install todoist
+# sudo snap install jupyterlab-desktop --classic  # instead, install via pipx
+# sudo snap install node --classic
+# sudo snap install postman
+# sudo snap install slack  # instead, install directly with .deb from slack.com/downloads/linux
+# sudo snap install todoist
 
 # 1password
 curl -sS https://downloads.1password.com/linux/keys/1password.asc | sudo gpg --dearmor --output /usr/share/keyrings/1password-archive-keyring.gpg
 
- echo 'deb [arch=amd64 signed-by=/usr/share/keyrings/1password-archive-keyring.gpg] https://downloads.1password.com/linux/debian/amd64 stable main' | sudo tee /etc/apt/sources.list.d/1password.list
+echo 'deb [arch=amd64 signed-by=/usr/share/keyrings/1password-archive-keyring.gpg] https://downloads.1password.com/linux/debian/amd64 stable main' | sudo tee /etc/apt/sources.list.d/1password.list
  
 sudo mkdir -p /etc/debsig/policies/AC2D62742012EA22/
 
@@ -117,19 +122,13 @@ curl -sS https://downloads.1password.com/linux/keys/1password.asc | sudo gpg --d
  
 sudo apt update && sudo apt install 1password
 
-##### set default shell #####
-zsh
-zsh-newuser-install -f
-chsh -l
-chsh -s /usr/bin/zsh
+#git clone https://github.com/zsh-users/zsh-autosuggestions ~/dotfiles/zsh/zsh/zsh-autosuggestions
+#rm -rf ~/dotfiles/zsh/zsh/zsh-autosuggestions/.git
+#rm -rf ~/dotfiles/zsh/zsh/zsh-autosuggestions/.github
+#rm -rf ~/dotfiles/zsh/zsh/zsh-autosuggestions/.gitignore
 
-git clone https://github.com/zsh-users/zsh-autosuggestions ~/dotfiles/zsh/zsh/zsh-autosuggestions
-rm -rf ~/dotfiles/zsh/zsh/zsh-autosuggestions/.git
-rm -rf ~/dotfiles/zsh/zsh/zsh-autosuggestions/.github
-rm -rf ~/dotfiles/zsh/zsh/zsh-autosuggestions/.gitignore
-
-git clone https://github.com/zsh-users/zsh-syntax-highlighting ~/dotfiles/zsh/zsh/zsh-syntax-highlighting
-rm -rf ~/dotfiles/zsh/zsh/zsh-syntax-highlighting/.git
-rm -rf ~/dotfiles/zsh/zsh/zsh-syntax-highlighting/.github
-rm -rf ~/dotfiles/zsh/zsh/zsh-syntax-highlighting/.gitignore
+#git clone https://github.com/zsh-users/zsh-syntax-highlighting ~/dotfiles/zsh/zsh/zsh-syntax-highlighting
+#rm -rf ~/dotfiles/zsh/zsh/zsh-syntax-git/.highlighting
+#rm -rf ~/dotfiles/zsh/zsh/zsh-syntax-highlighting/.github
+#rm -rf ~/dotfiles/zsh/zsh/zsh-syntax-highlighting/.gitignore
 
