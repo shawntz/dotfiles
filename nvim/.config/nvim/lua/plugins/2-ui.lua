@@ -27,6 +27,11 @@ local is_android = vim.fn.isdirectory('/data') == 1 -- true if on android
 
 return {
 
+  -- catppuccin [theme]
+  -- https://github.com/catppuccin/nvim
+  { 
+    "catppuccin/nvim",
+  },
   -- tokyonight [theme]
   -- https://github.com/folke/tokyonight.nvim
   {
@@ -130,44 +135,37 @@ return {
         }
       else
         dashboard.section.header.val = {
-          [[888b      88                                                           88]],
-          [[8888b     88                                                           88]],
-          [[88 `8b    88                                                           88]],
-          [[88  `8b   88   ,adPPYba,   8b,dPPYba,  88,dPYba,,adPYba,   ,adPPYYba,  88]],
-          [[88   `8b  88  a8"     "8a  88P'   "Y8  88P'   "88"    "8a  ""     `Y8  88]],
-          [[88    `8b 88  8b       d8  88          88      88      88  ,adPPPPP88  88]],
-          [[88     `8888  "8a,   ,a8"  88          88      88      88  88,    ,88  88]],
-          [[88      `888   `"YbbdP"'   88          88      88      88  `"8bbdP"Y8  88]],
-          [[                                    __                ]],
-          [[                      ___   __  __ /\_\    ___ ___    ]],
-          [[                    /' _ `\/\ \/\ \\/\ \ /' __` __`\  ]],
-          [[                    /\ \/\ \ \ \_/ |\ \ \/\ \/\ \/\ \ ]],
-          [[                    \ \_\ \_\ \___/  \ \_\ \_\ \_\ \_\]],
-          [[                     \/_/\/_/\/__/    \/_/\/_/\/_/\/_/]],
+          '                                        ▟▙            ',
+          '                                        ▝▘            ',
+          '██▃▅▇█▆▖  ▗▟████▙▖   ▄████▄   ██▄  ▄██  ██  ▗▟█▆▄▄▆█▙▖',
+          '██▛▔ ▝██  ██▄▄▄▄██  ██▛▔▔▜██  ▝██  ██▘  ██  ██▛▜██▛▜██',
+          '██    ██  ██▀▀▀▀▀▘  ██▖  ▗██   ▜█▙▟█▛   ██  ██  ██  ██',
+          '██    ██  ▜█▙▄▄▄▟▊  ▀██▙▟██▀   ▝████▘   ██  ██  ██  ██',
+          '▀▀    ▀▀   ▝▀▀▀▀▀     ▀▀▀▀       ▀▀     ▀▀  ▀▀  ▀▀  ▀▀',
         }
       end
 
       dashboard.section.header.opts.hl = "DashboardHeader"
-      vim.cmd "highlight DashboardHeader guifg=#F7778F"
+      vim.cmd "highlight DashboardHeader guifg=#A6E3A1"
 
       -- If yazi is not installed, don't show the button.
       local is_yazi_installed = vim.fn.executable("ya") == 1
-      local yazi_button = dashboard.button("r", "🦆 Yazi  ", "<cmd>Yazi<CR>")
+      local yazi_button = dashboard.button("f", "🔭 files  ", "<cmd>Yazi<CR>")
       if not is_yazi_installed then yazi_button = nil end
 
       -- Buttons
       dashboard.section.buttons.val = {
-        dashboard.button("n", "📄 New     ", "<cmd>ene<CR>"),
-        dashboard.button("e", "🌺 Recent  ", "<cmd>Telescope oldfiles<CR>"),
+        dashboard.button("n", "📄 new     ", "<cmd>ene<CR>"),
+        dashboard.button("r", "👻 recent  ", "<cmd>Telescope oldfiles<CR>"),
         yazi_button,
         dashboard.button(
           "s",
-          "🔎 Sessions",
+          "🔎 sessions",
           "<cmd>SessionManager! load_session<CR>"
         ),
-        dashboard.button("p", "💼 Projects", "<cmd>Telescope projects<CR>"),
+        dashboard.button("p", "💼 projects", "<cmd>Telescope projects<CR>"),
         dashboard.button("", ""),
-        dashboard.button("q", "   Quit", "<cmd>exit<CR>"),
+        dashboard.button("q", "✌️ quit", "<cmd>exit<CR>"),
         --  --button("LDR f '", "  Bookmarks  "),
       }
 
@@ -196,7 +194,7 @@ return {
             " ",
             " ",
             " ",
-            "Loaded " .. stats.loaded .. " plugins  in " .. ms .. "ms",
+            "loaded " .. stats.loaded .. " plugins  in " .. ms .. "ms",
             ".............................",
           }
           opts.section.footer.opts.hl = "DashboardFooter"

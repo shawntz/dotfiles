@@ -1,6 +1,7 @@
 .extra.sh
 .DS_Store
 *.swp
-yay/
-icons/whitesur/links/apps/*
-icons/whitesur/links/mimes/*
+*.env
+*.env.example
+*.env.local
+*.env.staging

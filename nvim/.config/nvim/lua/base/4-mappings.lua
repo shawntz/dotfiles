@@ -116,13 +116,13 @@ maps.n["<leader>q"] = {
   end,
   desc = "Quit",
 }
-maps.n["<Tab>"] = {
-  "<Tab>",
-  noremap = true,
-  silent = true,
-  expr = false,
-  desc = "FIX: Prevent TAB from behaving like <C-i>, as they share the same internal code",
-}
+-- maps.n["<Tab>"] = {
+--   "<Tab>",
+--   noremap = true,
+--   silent = true,
+--   expr = false,
+--   desc = "FIX: Prevent TAB from behaving like <C-i>, as they share the same internal code",
+-- }
 
 -- clipboard ---------------------------------------------------------------
 
@@ -1300,8 +1300,10 @@ end
 -- [neural] -----------------------------------------------------------------
 if is_available "neural" or is_available "copilot" then
   maps.n["<leader>a"] = {
-    function() require("neural").prompt() end,
-    desc = "Ask chatgpt",
+    function() vim.cmd(":Copilot") end,
+    desc = "github copilot",
+    -- function() require("neural").prompt() end,
+    -- desc = "Ask chatgpt",
   }
 end
 

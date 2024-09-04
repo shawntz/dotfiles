@@ -1,0 +1,16 @@
+#!/bin/zsh
+
+sudo -v
+
+for dir in $(ls $HOME)
+do
+  sudo mv $HOME/$dir $(echo $HOME/$dir | tr '[:upper:]' '[:lower:]')
+  echo "[INFO] - renamed $HOME/$dir"
+done
+
+echo "[INFO] - making dirs..."
+mkdir ~/screenshots
+mkdir -p ~/dev/work
+
+echo "[INFO] - finished configuring home directory!"
+
