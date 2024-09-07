@@ -1,1 +1,0 @@
-zsh/.zsh/history.zsh
