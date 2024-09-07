@@ -17,9 +17,6 @@ precmd() {
     source $HOME/.zsh/aliases.zsh
 }
 
-# zoxide
-eval "$(zoxide init zsh)"
-
 # fzf
 [ -f ~/.fzf.zsh ] && source ~/.fzf.zsh
 
@@ -31,3 +28,10 @@ neofetch
 
 # Created by `pipx` on 2024-09-04 16:11:33
 export PATH="$PATH:/home/shawn/.local/bin"
+
+source $HOME/.cargo/env
+export PATH="$HOME/.local/share/bob/nvim-bin:$PATH"
+
+# zoxide
+eval "$(zoxide init zsh)"
+
