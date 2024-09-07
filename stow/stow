@@ -8,9 +8,11 @@ cd "$DOTFILES" || exit
 
 sudo -v
 
+rm $HOME/.zshrc
+
 for DIR in "${STOW[@]}"; do
   echo "[INFO] - stowing $DIR..."
-  sudo stow --verbose --target="$HOME" "$DIR"
+  stow --verbose --target="$HOME" "$DIR"
 done
 
 echo "[INFO] - dotfiles stowed successfully!"
