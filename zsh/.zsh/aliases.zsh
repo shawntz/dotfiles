@@ -2,8 +2,8 @@
 
 # ALIASES ---------------------------------------------------------------------
 ## neovim *********************************************************************
-alias v='fd --type f --hidden --exclude .git | fzf-tmux -m --preview="bat --color=always {}" -p | xargs nvim'
-alias vi='nvim -w ~/.vimlog "$@"'
+alias vi='fd --type f --hidden --exclude .git | fzf-tmux -m --preview="bat --color=always {}" -p | xargs nvim'
+alias v='nvim -w ~/.vimlog "$@"'
 alias vim='nvim -w ~/.vimlog "$@"'
 
 ## navigation *****************************************************************
@@ -18,8 +18,9 @@ alias ls='eza --all --color=always --sort=name --long --no-user --icons=always -
 alias home="cd ~"
 alias dots="cd ~/dotfiles"
 alias dotfiles="cd ~/dotfiles"
-alias dev="cd ~/dev"
-alias work="cd ~/dev/work"
+alias dev="cd ~/code"
+alias oss="cd ~/code/oss"
+alias anl="cd ~/code/anl"
 alias desk="cd ~/desktop"
 alias docs="cd ~/documents"
 alias dl="cd ~/downloads"
