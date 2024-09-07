@@ -19,6 +19,8 @@ install_if_missing() {
 ##### gnome extensions #####
 install_if_missing gnome-tweaks
 install_if_missing gnome-shell-extensions
+install_if_missing gnome-shell-extension-manager
+
 
 ##### system #####
 # Add Docker's official GPG key:
@@ -36,7 +38,6 @@ echo \
 sudo apt-get update
 sudo apt-get install docker-ce docker-ce-cli containerd.io docker-buildx-plugin docker-compose-plugin
 
-install_if_missing bat
 install_if_missing feh
 install_if_missing gdebi
 install_if_missing gnome-weather
@@ -45,17 +46,28 @@ install_if_missing libfuse2
 install_if_missing lua
 install_if_missing luarocks
 install_if_missing neovim
+install_if_missing python3
+install_if_missing python3-pip
+install_if_missing pipx
 install_if_missing r-base
 install_if_missing r-base-dev
 install_if_missing rofi
-install_if_missing rustc
 install_if_missing tmux
 install_if_missing zsh
 
 ##### shell tools #####
 install_if_missing neofetch     # sysinfo panel
-install_if_missing eza          # better ls
-install_if_missing fd           # better find
+#install_if_missing eza          # better ls
+sudo apt update
+sudo apt install -y gpg
+sudo mkdir -p /etc/apt/keyrings
+wget -qO- https://raw.githubusercontent.com/eza-community/eza/main/deb.asc | sudo gpg --dearmor -o /etc/apt/keyrings/gierens.gpg
+echo "deb [signed-by=/etc/apt/keyrings/gierens.gpg] http://deb.gierens.de stable main" | sudo tee /etc/apt/sources.list.d/gierens.list
+sudo chmod 644 /etc/apt/keyrings/gierens.gpg /etc/apt/sources.list.d/gierens.list
+sudo apt update
+sudo apt install -y eza
+install_if_missing fd-find          # better find
+ln -s $(which fdfind) ~/.local/bin/fd
 install_if_missing flatpak	# application manager
 #install_if_missing fzf          # fuzzy finder
 git clone --depth 1 https://github.com/junegunn/fzf.git ~/.fzf
@@ -70,7 +82,8 @@ install_if_missing trash-cli    # trashcan interface
 install_if_missing tree         # nested dir listings
 install_if_missing wget         # retrieve files from the web
 install_if_missing yazi         # fast terminal file manager
-install_if_missing zoxide       # better cd
+#install_if_missing zoxide       # better cd
+sudo curl -sS https://raw.githubusercontent.com/ajeetdsouza/zoxide/main/install.sh | bash
 
 # build lazygit from source
 LAZYGIT_VERSION=$(curl -s "https://api.github.com/repos/jesseduffield/lazygit/releases/latest" | grep -Po '"tag_name": "v\K[^"]*')
@@ -95,23 +108,27 @@ flatpak remote-add --if-not-exists flathub https://dl.flathub.org/repo/flathub.f
 # reboot system
 #reboot
 
-flatpak install flathub sh.cider.Cider
 flatpak install flathub md.obsidian.Obsidian
 flatpak install flathub com.todoist.Todoist
 
 ##### apps #####
+install_if_missing snapd
 sudo snap install code --classic
-# sudo snap install jupyterlab-desktop --classic  # instead, install via pipx
+pipx install jupyterlab
 # sudo snap install node --classic
 # sudo snap install postman
-# sudo snap install slack  # instead, install directly with .deb from slack.com/downloads/linux
-# sudo snap install todoist
+# also install slack, zoom, via keyboard, chrome, cider, rstudio, and positron .deb files from each site
+
+cargo install bob-nvim
+bob use stable
+
+cargo install --locked bat
 
 # 1password
 curl -sS https://downloads.1password.com/linux/keys/1password.asc | sudo gpg --dearmor --output /usr/share/keyrings/1password-archive-keyring.gpg
 
 echo 'deb [arch=amd64 signed-by=/usr/share/keyrings/1password-archive-keyring.gpg] https://downloads.1password.com/linux/debian/amd64 stable main' | sudo tee /etc/apt/sources.list.d/1password.list
- 
+
 sudo mkdir -p /etc/debsig/policies/AC2D62742012EA22/
 
 curl -sS https://downloads.1password.com/linux/debian/debsig/1password.pol | sudo tee /etc/debsig/policies/AC2D62742012EA22/1password.pol
@@ -119,7 +136,7 @@ curl -sS https://downloads.1password.com/linux/debian/debsig/1password.pol | sud
 sudo mkdir -p /usr/share/debsig/keyrings/AC2D62742012EA22
 
 curl -sS https://downloads.1password.com/linux/keys/1password.asc | sudo gpg --dearmor --output /usr/share/debsig/keyrings/AC2D62742012EA22/debsig.gpg
- 
+
 sudo apt update && sudo apt install 1password
 
 #git clone https://github.com/zsh-users/zsh-autosuggestions ~/dotfiles/zsh/zsh/zsh-autosuggestions
