@@ -14,10 +14,6 @@ get_obsidian_vault() {
   git clone git@github.com:shawntschwartz/obsidian.git ~/documents/obsidian
 }
 
-make_neofetch() {
-  sudo make -C ~/dotfiles/src/neofetch PREFIX=/usr/local install
-}
-
 create_dirs() {
   ~/dotfiles/files/setup
 }
@@ -44,13 +40,13 @@ confirm_reboot() {
 }
 
 printf "🐙  configuring git...\n"
-#config_git
+config_git
 
 printf "🗄  creating directories and configuring files...\n"
-#create_dirs
+create_dirs
 
 printf "🍺  brewing packages...\n"
-#install_packages
+install_packages
 
 printf "😇  stowing dotfiles...\n"
 stow_dotfiles
@@ -58,7 +54,7 @@ stow_dotfiles
 printf "💎  getting obsidian vault...\n"
 get_obsidian_vault
 
-#start_zsh
+start_zsh
 
 printf "✨  order up, ubuntu is ready!!\n"
 confirm_reboot
