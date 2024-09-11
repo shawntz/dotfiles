@@ -1,11 +1,11 @@
-if type git > /dev/null; then
-    sudo xcodebuild -license
+sudo xcodebuild -license
+
+if type git > /dev/null; then    
     git clone https://github.com/shawntschwartz/dotfiles ~/dotfiles
     chmod +x ~/dotfiles
     cd ~/dotfiles
     ./install
 else
-    sudo xcodebuild -license
     curl -LO https://github.com/shawntschwartz/dotfiles/archive/macos.zip
     unzip dotfiles-macos.zip
     rm -rf dotfiles-macos.zip
