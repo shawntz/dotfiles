@@ -89,6 +89,12 @@ stow_dotfiles() {
   ~/dotfiles/stow/stow
 }
 
+confirm_step() {
+  echo "[STEP DONE] - press the <spacebar> to continue!"
+  read -r
+  echo "\n\n"
+}
+
 confirm_reboot() {
   echo "[IMPORTANT] - it's now time to reboot... press <return> to continue or ctrl+c to cancel."
   read -r
@@ -97,36 +103,48 @@ confirm_reboot() {
 
 printf "🛠  installing xcode command line tools...\n"
 build_xcode
+confirm_step
 
 printf "🔑  generating ssh key...\n"
 generate_ssh_key
+confirm_step
 
 printf "🐙  configuring git...\n"
 config_git
+confirm_step
 
 printf "🗄  creating directories and configuring finder...\n"
 create_dirs
+confirm_step
 
 printf "🍺  brewing packages...\n"
 install_brew
+confirm_step
 
 printf "👨🏼‍💻  building neofetch from source...\n"
 make_neofetch
+confirm_step
 
 printf "⏰  configuring cron jobs...\n"
 config_crons
+confirm_step
 
 printf "😇  stowing dotfiles...\n"
 stow_dotfiles
+confirm_step
 
 printf "💎  getting obsidian vault...\n"
 get_obsidian_vault
+confirm_step
 
 printf "🛍️  shopping the mac app store...\n"
 install_mac_app_store_apps
+confirm_step
 
 printf "💻  setting up macos...\n"
 config_macos
+confirm_step
 
 printf "✨  order up, your mac is ready!!\n"
+confirm_step
 confirm_reboot
