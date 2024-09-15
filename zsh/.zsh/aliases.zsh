@@ -2,8 +2,8 @@
 
 # ALIASES ---------------------------------------------------------------------
 ## neovim *********************************************************************
-alias v='fd --type f --hidden --exclude .git | fzf-tmux -m --preview="bat --color=always {}" -p | xargs nvim'
-alias vi='nvim -w ~/.vimlog "$@"'
+alias v='nvim -w ~/.vimlog "$@"'
+alias vi='fd --type f --hidden --exclude .git | fzf-tmux -m --preview="bat --color=always {}" -p | xargs nvim'
 alias vim='nvim -w ~/.vimlog "$@"'
 
 ## navigation *****************************************************************
