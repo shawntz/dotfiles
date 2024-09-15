@@ -31,6 +31,7 @@ BREW_FORMULAE=(
   trash
   tree
   tree-sitter
+  weasyprint
   webp
   wget
   yarn
@@ -47,6 +48,7 @@ BREW_CASKS=(
   firefox
   gimp
   google-chrome
+  hammerspoon
   istat-menus@6
   jupyterlab
   karabiner-elements
@@ -89,10 +91,6 @@ brew tap r-lib/rig
 brew install --cask rig
 
 brew install --cask nikitabobko/tap/aerospace
-
-brew install koekeishiya/formulae/skhd
-skhd --start-service
-
 brew install --cask --no-quarantine middleclick
 
 brew tap theseal/ssh-askpass
