@@ -2,10 +2,6 @@
     "profiles": [
         {
             "complex_modifications": {
-                "parameters": {
-                    "basic.to_delayed_action_delay_milliseconds": 100,
-                    "basic.to_if_held_down_threshold_milliseconds": 100
-                },
                 "rules": [
                     {
                         "description": "Remap right command to command+space (i.e., a 'super' key)",
