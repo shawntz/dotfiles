@@ -1,6 +1,7 @@
 #!/bin/zsh
 
 BREW_FORMULAE=(
+  1password-cli
   bash
   bat
   docker
