@@ -10,6 +10,7 @@ BREW_FORMULAE=(
   ffmpeg
   fzf
   gcc
+  gh
   git
   htop
   imagemagick
@@ -47,6 +48,7 @@ BREW_CASKS=(
   cmake
   firefox
   gimp
+  github
   google-chrome
   hammerspoon
   istat-menus@6
