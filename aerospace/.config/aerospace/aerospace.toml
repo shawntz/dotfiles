@@ -71,17 +71,17 @@ cmd-alt-h = [] # disable "hide other applications" shortcut
 
 # See: https://nikitabobko.github.io/AeroSpace/commands#exec-and-forget
 # You can uncomment the following lines to open up terminal with alt + enter shortcut (like in i3)
-cmd-shift-enter = 'exec-and-forget open -n /Applications/kitty.app'
+#cmd-shift-enter = 'exec-and-forget open -n /Applications/kitty.app'
 
 # See: https://nikitabobko.github.io/AeroSpace/commands#layout
 cmd-shift-slash = 'layout tiles horizontal vertical'
 cmd-shift-comma = 'layout accordion horizontal vertical'
 
 # See: https://nikitabobko.github.io/AeroSpace/commands#focus
-alt-h = ['focus --boundaries-action stop left', 'move-mouse window-force-center']
-alt-j = ['focus --boundaries-action stop down', 'move-mouse window-force-center']
-alt-k = ['focus --boundaries-action stop up', 'move-mouse window-force-center']
-alt-l = ['focus --boundaries-action stop right', 'move-mouse window-force-center']
+alt-shift-h = ['focus --boundaries-action stop left', 'move-mouse window-force-center']
+alt-shift-j = ['focus --boundaries-action stop down', 'move-mouse window-force-center']
+alt-shift-k = ['focus --boundaries-action stop up', 'move-mouse window-force-center']
+alt-shift-l = ['focus --boundaries-action stop right', 'move-mouse window-force-center']
 
 # See: https://nikitabobko.github.io/AeroSpace/commands#move
 cmd-shift-h = 'move left'
