@@ -60,6 +60,7 @@ BREW_CASKS=(
   positron
   postman
   raycast
+  redquits
   rstudio
   sf-symbols
   skim
