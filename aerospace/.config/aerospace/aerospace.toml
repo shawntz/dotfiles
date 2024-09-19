@@ -78,16 +78,16 @@ cmd-shift-slash = 'layout tiles horizontal vertical'
 cmd-shift-comma = 'layout accordion horizontal vertical'
 
 # See: https://nikitabobko.github.io/AeroSpace/commands#focus
-alt-shift-h = ['focus --boundaries-action stop left', 'move-mouse window-force-center']
-alt-shift-j = ['focus --boundaries-action stop down', 'move-mouse window-force-center']
-alt-shift-k = ['focus --boundaries-action stop up', 'move-mouse window-force-center']
-alt-shift-l = ['focus --boundaries-action stop right', 'move-mouse window-force-center']
+cmd-shift-h = ['focus --boundaries-action stop left', 'move-mouse window-force-center']
+cmd-shift-j = ['focus --boundaries-action stop down', 'move-mouse window-force-center']
+cmd-shift-k = ['focus --boundaries-action stop up', 'move-mouse window-force-center']
+cmd-shift-l = ['focus --boundaries-action stop right', 'move-mouse window-force-center']
 
 # See: https://nikitabobko.github.io/AeroSpace/commands#move
-cmd-shift-h = 'move left'
-cmd-shift-j = 'move down'
-cmd-shift-k = 'move up'
-cmd-shift-l = 'move right'
+alt-shift-h = 'move left'
+alt-shift-j = 'move down'
+alt-shift-k = 'move up'
+alt-shift-l = 'move right'
 
 # See: https://nikitabobko.github.io/AeroSpace/commands#resize
 cmd-minus = 'resize smart -64'
