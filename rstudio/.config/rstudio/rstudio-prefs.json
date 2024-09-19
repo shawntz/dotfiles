@@ -14,10 +14,7 @@
     "scroll_past_end_of_document": true,
     "highlight_r_function_calls": true,
     "rainbow_parentheses": true,
-    "auto_append_newline": true,
-    "strip_trailing_whitespace": true,
     "restore_source_document_cursor_position": false,
-    "auto_save_on_blur": true,
     "show_help_tooltip_on_idle": true,
     "tab_multiline_completion": true,
     "check_arguments_to_r_function_calls": true,
@@ -27,27 +24,27 @@
     "style_diagnostics": true,
     "default_encoding": "UTF-8",
     "editor_keybindings": "vim",
-    "auto_save_on_idle": "commit",
     "syntax_color_console": true,
     "console_double_click_select": true,
     "help_font_size_points": 12,
     "font_size_points": 12,
     "posix_terminal_shell": "bash",
-    "editor_theme": "Material Palenight",
+    "editor_theme": "Material Ocean",
     "packages_pane_enabled": false,
     "save_files_before_build": true,
     "panes": {
         "quadrants": [
-            "TabSet1",
-            "TabSet2",
             "Source",
-            "Console"
+            "Console",
+            "TabSet1",
+            "TabSet2"
         ],
         "tabSet1": [
             "Environment",
             "History",
             "Plots",
             "Build",
+            "VCS",
             "Presentation"
         ],
         "tabSet2": [
@@ -59,14 +56,16 @@
         "hiddenTabSet": [
             "Connections",
             "Packages",
-            "VCS",
             "Tutorial",
             "Presentations"
         ],
         "console_left_on_top": false,
-        "console_right_on_top": false,
+        "console_right_on_top": true,
         "additional_source_columns": 0
     },
     "copilot_enabled": true,
-    "text_rendering": "geometricPrecision"
+    "text_rendering": "geometricPrecision",
+    "copilot_completions_trigger": "manual",
+    "auto_append_newline": true,
+    "strip_trailing_whitespace": true
 }
