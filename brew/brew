@@ -104,6 +104,7 @@ sudo ln -s /usr/local/bin/ssh-askpass /usr/X11R6/bin/ssh-askpass
 brew tap FelixKratz/formulae
 brew install borders
 brew services start borders
+borders blacklist="System Settings,kitty,iPhone Mirroring"
 
 # install formulae
 echo "installing brew packages..."
