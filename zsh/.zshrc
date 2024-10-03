@@ -32,6 +32,8 @@ export PATH="$PATH:/home/shawn/.local/bin"
 source $HOME/.cargo/env
 export PATH="$HOME/.local/share/bob/nvim-bin:$PATH"
 
+export RIG_PLATFORM="ubuntu-22.04"
+
 # zoxide
 eval "$(zoxide init zsh)"
 
