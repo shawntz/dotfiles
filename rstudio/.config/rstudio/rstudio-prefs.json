@@ -26,18 +26,17 @@
     "editor_keybindings": "vim",
     "syntax_color_console": true,
     "console_double_click_select": true,
-    "help_font_size_points": 12,
     "font_size_points": 12,
-    "posix_terminal_shell": "bash",
+    "posix_terminal_shell": "zsh",
     "editor_theme": "Material Ocean",
     "packages_pane_enabled": false,
     "save_files_before_build": true,
     "panes": {
         "quadrants": [
-            "Source",
-            "Console",
             "TabSet1",
-            "TabSet2"
+            "TabSet2",
+            "Source",
+            "Console"
         ],
         "tabSet1": [
             "Environment",
@@ -59,13 +58,21 @@
             "Tutorial",
             "Presentations"
         ],
-        "console_left_on_top": false,
-        "console_right_on_top": true,
+        "console_left_on_top": true,
+        "console_right_on_top": false,
         "additional_source_columns": 0
     },
     "copilot_enabled": true,
     "text_rendering": "geometricPrecision",
     "copilot_completions_trigger": "manual",
     "auto_append_newline": true,
-    "strip_trailing_whitespace": true
+    "strip_trailing_whitespace": true,
+    "code_completion_characters": 2,
+    "code_completion_delay": 150,
+    "terminal_track_environment": false,
+    "busy_detection": "never",
+    "jobs_tab_visibility": "shown",
+    "default_project_location": "~/dev/teaching/ck",
+    "new_proj_use_renv": true,
+    "document_author": "psych 10"
 }
