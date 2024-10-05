@@ -1,4 +1,9 @@
-#!/bin/bash
+#!/usr/bin/env bash
+
+blazing_fast_keyboard() {
+  gsettings set org.gnome.desktop.peripherals.keyboard repeat-interval 10
+  gsettings set org.gnome.desktop.peripherals.keyboard delay 150
+}
 
 config_git() {
   cp ~/dotfiles/git/.extra.template .extra.sh
@@ -7,7 +12,7 @@ config_git() {
 }
 
 install_packages() {
-  ~/dotfiles/apt/apt
+  ~/dotfiles/packages
 }
 
 get_obsidian_vault() {
@@ -15,22 +20,26 @@ get_obsidian_vault() {
 }
 
 create_dirs() {
-  ~/dotfiles/files/setup
+  ~/dotfiles/dirs
 }
 
 stow_dotfiles() {
-  ~/dotfiles/stow/stow
+  ~/dotfiles/stow
 }
 
 start_zsh() {
 ##### set default shell #####
-  zsh
-  zsh-newuser-install -f
-  chsh -l
-  chsh -s /usr/bin/zsh
-  
+  rm ~/.bash_history ~/.bash_logout ~/.bashrc
+
 ##### install oh my zsh #####
-sh -c "$(wget https://raw.githubusercontent.com/ohmyzsh/ohmyzsh/master/tools/install.sh -O -)"
+  sh -c "$(wget https://raw.githubusercontent.com/ohmyzsh/ohmyzsh/master/tools/install.sh -O -)"
+  
+  rm .zshrc
+  mv .zshrc.pre-oh-my-zsh .zshrc
+  source ~/.zshrc
+
+  zsh
+  chsh -s /usr/bin/zsh
 }
 
 confirm_reboot() {
@@ -38,6 +47,8 @@ confirm_reboot() {
   read -r
   sudo reboot
 }
+
+blazing_fast_keyboard
 
 printf "🐙  configuring git...\n"
 config_git

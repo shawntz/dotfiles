@@ -1,7 +1,0 @@
-{
-	"name": "keyd",
-	"description": "Used by keyd to obtain active window information.",
-	"uuid": "keyd",
-	"shell-version": [ "42", "43", "44" ]
-}
-
