@@ -24,12 +24,15 @@ panel-id='world'
 size=(870, 690)
 
 [org/gnome/control-center]
-last-panel='universal-access'
-window-state=(1440, 786, false)
+last-panel='keyboard'
+window-state=(1440, 786, true)
 
 [org/gnome/deja-dup]
 backend='google'
 prompt-check='2024-10-04T15:26:01.035536Z'
+
+[org/gnome/desktop/a11y/magnifier]
+mag-factor=5.0
 
 [org/gnome/desktop/app-folders]
 folder-children=['Utilities', 'YaST', 'Pardus']
@@ -66,13 +69,13 @@ xkb-options=['caps:super']
 color-scheme='default'
 document-font-name='SF Pro Display 11'
 font-name='SF Pro Display 11'
-gtk-theme='Yaru'
-icon-theme='Flatery-Orange'
+gtk-theme='Yaru-blue'
+icon-theme='Yaru-blue'
 monospace-font-name='FiraCode Nerd Font Mono 13'
 show-battery-percentage=true
 
 [org/gnome/desktop/notifications]
-application-children=['firefox-firefox', 'gnome-power-panel', 'org-gnome-nautilus', 'zoom', 'thunderbird-thunderbird']
+application-children=['firefox-firefox', 'gnome-power-panel', 'org-gnome-nautilus', 'zoom', 'thunderbird-thunderbird', 'notion-snap-reborn-notion-snap-reborn', 'org-gnome-settings']
 
 [org/gnome/desktop/notifications/application/firefox-firefox]
 application-id='firefox_firefox.desktop'
@@ -80,8 +83,14 @@ application-id='firefox_firefox.desktop'
 [org/gnome/desktop/notifications/application/gnome-power-panel]
 application-id='gnome-power-panel.desktop'
 
+[org/gnome/desktop/notifications/application/notion-snap-reborn-notion-snap-reborn]
+application-id='notion-snap-reborn_notion-snap-reborn.desktop'
+
 [org/gnome/desktop/notifications/application/org-gnome-nautilus]
 application-id='org.gnome.Nautilus.desktop'
+
+[org/gnome/desktop/notifications/application/org-gnome-settings]
+application-id='org.gnome.Settings.desktop'
 
 [org/gnome/desktop/notifications/application/thunderbird-thunderbird]
 application-id='thunderbird_thunderbird.desktop'
@@ -116,14 +125,50 @@ sort-order=['org.gnome.Contacts.desktop', 'org.gnome.Documents.desktop', 'org.gn
 idle-delay=uint32 600
 
 [org/gnome/desktop/wm/keybindings]
-move-to-workspace-left=['<Super>d']
-move-to-workspace-right=['<Super>f']
-switch-to-workspace-left=['<Super>a']
-switch-to-workspace-right=['<Super>s']
+activate-window-menu=@as []
+begin-move=@as []
+begin-resize=@as []
+close=['<Super>q']
+cycle-group=@as []
+cycle-group-backward=@as []
+cycle-panels=@as []
+cycle-panels-backward=@as []
+cycle-windows=@as []
+cycle-windows-backward=@as []
+move-to-monitor-down=@as []
+move-to-monitor-up=@as []
+move-to-workspace-1=@as []
+move-to-workspace-10=['<Super><Shift>0']
+move-to-workspace-2=@as []
+move-to-workspace-3=@as []
+move-to-workspace-4=@as []
+move-to-workspace-5=['<Super><Shift>5']
+move-to-workspace-6=['<Super><Shift>6']
+move-to-workspace-7=['<Super><Shift>7']
+move-to-workspace-8=['<Super><Shift>8']
+move-to-workspace-9=['<Super><Shift>9']
+move-to-workspace-last=['<Shift><Super>g']
+move-to-workspace-left=@as []
+move-to-workspace-right=@as []
+panel-run-dialog=@as []
+show-desktop=@as []
+switch-panels=@as []
+switch-panels-backward=@as []
+switch-to-workspace-1=@as []
+switch-to-workspace-2=@as []
+switch-to-workspace-3=@as []
+switch-to-workspace-4=@as []
+switch-to-workspace-last=@as []
+switch-to-workspace-left=['<Super>s']
+switch-to-workspace-right=['<Super>d']
 switch-windows=['<Super>e']
+toggle-fullscreen=['<Shift><Super>m']
+toggle-maximized=@as []
 
 [org/gnome/desktop/wm/preferences]
 button-layout=':minimize,maximize,close'
+num-workspaces=9
+workspace-names=@as []
 
 [org/gnome/evolution-data-server]
 migrated=true
@@ -174,19 +219,23 @@ show-whose-processes='user'
 
 [org/gnome/gnome-system-monitor/disktreenew]
 col-6-visible=true
-col-6-width=0
+col-6-width=290
 columns-order=[5]
 sort-col=1
 sort-order=0
 
 [org/gnome/mutter]
 center-new-windows=true
+dynamic-workspaces=false
 edge-tiling=false
-experimental-features=['scale-monitor-framebuffer']
+experimental-features=@as []
 
 [org/gnome/mutter/keybindings]
 toggle-tiled-left=@as []
 toggle-tiled-right=@as []
+
+[org/gnome/mutter/wayland/keybindings]
+restore-shortcuts=@as []
 
 [org/gnome/nautilus/list-view]
 default-column-order=['name', 'size', 'type', 'owner', 'group', 'permissions', 'date_modified', 'date_accessed', 'date_created', 'recency', 'detailed_type']
@@ -207,6 +256,30 @@ last-folder-path='/home/shawn/downloads'
 [org/gnome/portal/filechooser/via-nativia]
 last-folder-path='/home/shawn/dotfiles/via'
 
+[org/gnome/settings-daemon/plugins/media-keys]
+calculator=['<Shift><Super>c']
+control-center=@as []
+custom-keybindings=['/org/gnome/settings-daemon/plugins/media-keys/custom-keybindings/custom0/', '/org/gnome/settings-daemon/plugins/media-keys/custom-keybindings/custom1/']
+email=['<Shift><Super>e']
+help=@as []
+home=['<Shift><Super>h']
+magnifier=@as []
+magnifier-zoom-in=@as []
+magnifier-zoom-out=@as []
+screenreader=@as []
+terminal=@as []
+www=['<Shift><Super>b']
+
+[org/gnome/settings-daemon/plugins/media-keys/custom-keybindings/custom0]
+binding='<Super>Return'
+command='kitty'
+name='kitty'
+
+[org/gnome/settings-daemon/plugins/media-keys/custom-keybindings/custom1]
+binding='<Shift><Super>s'
+command='slack'
+name='slack'
+
 [org/gnome/settings-daemon/plugins/power]
 ambient-enabled=false
 power-saver-profile-on-low-battery=false
@@ -215,9 +288,9 @@ sleep-inactive-ac-type='nothing'
 sleep-inactive-battery-type='nothing'
 
 [org/gnome/shell]
-disabled-extensions=['drive-menu@gnome-shell-extensions.gcampax.github.com', 'window-list@gnome-shell-extensions.gcampax.github.com', 'windowsNavigator@gnome-shell-extensions.gcampax.github.com', 'extension-list@tu.berry', 'top-panel-drag@princeola.com', 'strings@lobau.io', 'apps-menu@gnome-shell-extensions.gcampax.github.com', 'simplebreakreminder@castillodel.com', 'system-monitor@gnome-shell-extensions.gcampax.github.com', 'places-menu@gnome-shell-extensions.gcampax.github.com']
-enabled-extensions=['ding@rastersoft.com', 'ubuntu-dock@ubuntu.com', 'tiling-assistant@ubuntu.com', 'auto-move-windows@gnome-shell-extensions.gcampax.github.com', 'screenshot-window-sizer@gnome-shell-extensions.gcampax.github.com', 'CustomizeClockOnLockScreen@pratap.fastmail.fm', 'ControlBlurEffectOnLockScreen@pratap.fastmail.fm', 'caffeine@patapon.info', 'tactile@lundal.io', 'display-adjustment@w8jcik.gitlab.com', 'zilence@apankowski.github.com', 'notification-banner-reloaded@marcinjakubowski.github.com', 'lomotion@lorens.com', 'date-menu-formatter@marcinjakubowski.github.com', 'weatheroclock@CleoMenezesJr.github.io', 'native-window-placement@gnome-shell-extensions.gcampax.github.com', 'weatherornot@somepaulo.github.io', 'workspace-indicator@gnome-shell-extensions.gcampax.github.com', 'dash-to-panel@jderose9.github.com', 'blur-my-shell@aunetx', 'dash-to-dock@micxgx.gmail.com', 'light-style@gnome-shell-extensions.gcampax.github.com', 'color-picker@tuberry', 'unblank@sun.wxg@gmail.com']
-favorite-apps=['kitty.desktop', 'firefox_firefox.desktop', 'thunderbird_thunderbird.desktop', 'rstudio.desktop', 'slack.desktop', 'positron.desktop', 'code_code.desktop', 'cider.desktop', 'org.gnome.Nautilus.desktop']
+disabled-extensions=['drive-menu@gnome-shell-extensions.gcampax.github.com', 'window-list@gnome-shell-extensions.gcampax.github.com', 'windowsNavigator@gnome-shell-extensions.gcampax.github.com', 'extension-list@tu.berry', 'top-panel-drag@princeola.com', 'strings@lobau.io', 'apps-menu@gnome-shell-extensions.gcampax.github.com', 'simplebreakreminder@castillodel.com', 'system-monitor@gnome-shell-extensions.gcampax.github.com', 'places-menu@gnome-shell-extensions.gcampax.github.com', 'dash-to-dock@micxgx.gmail.com', 'ubuntu-dock@ubuntu.com']
+enabled-extensions=['ding@rastersoft.com', 'tiling-assistant@ubuntu.com', 'auto-move-windows@gnome-shell-extensions.gcampax.github.com', 'screenshot-window-sizer@gnome-shell-extensions.gcampax.github.com', 'CustomizeClockOnLockScreen@pratap.fastmail.fm', 'ControlBlurEffectOnLockScreen@pratap.fastmail.fm', 'caffeine@patapon.info', 'tactile@lundal.io', 'display-adjustment@w8jcik.gitlab.com', 'zilence@apankowski.github.com', 'notification-banner-reloaded@marcinjakubowski.github.com', 'date-menu-formatter@marcinjakubowski.github.com', 'weatheroclock@CleoMenezesJr.github.io', 'native-window-placement@gnome-shell-extensions.gcampax.github.com', 'weatherornot@somepaulo.github.io', 'workspace-indicator@gnome-shell-extensions.gcampax.github.com', 'dash-to-panel@jderose9.github.com', 'blur-my-shell@aunetx', 'light-style@gnome-shell-extensions.gcampax.github.com', 'color-picker@tuberry', 'unblank@sun.wxg@gmail.com', 'lomotion@lorens.com', 'space-bar@luchrioh', 'disable-workspace-animation@ethnarque']
+favorite-apps=['firefox_firefox.desktop']
 last-selected-power-profile='performance'
 welcome-dialog-last-shown-version='46.0'
 
@@ -284,6 +357,12 @@ enable-systray=false
 notify-sound=uint32 1
 preview-style=uint32 0
 
+[org/gnome/shell/extensions/customize-clock-on-lockscreen]
+date-color='#ffffff'
+font-style='Ubuntu Sans'
+hint-color='#ffffff'
+time-color='#ffffff'
+
 [org/gnome/shell/extensions/dash-to-dock]
 always-center-icons=true
 animate-show-apps=true
@@ -297,7 +376,7 @@ custom-theme-shrink=false
 customize-alphas=true
 dash-max-icon-size=48
 disable-overview-on-startup=true
-dock-fixed=false
+dock-fixed=true
 dock-position='LEFT'
 extend-height=false
 height-fraction=0.90000000000000002
@@ -329,35 +408,45 @@ workspace-agnostic-urgent-windows=false
 [org/gnome/shell/extensions/dash-to-panel]
 animate-app-switch=false
 animate-appicon-hover=false
+animate-appicon-hover-animation-convexity={'RIPPLE': 2.0, 'PLANK': 1.0, 'SIMPLE': 0.0}
 animate-appicon-hover-animation-extent={'RIPPLE': 4, 'PLANK': 4, 'SIMPLE': 1}
+animate-appicon-hover-animation-type='SIMPLE'
 animate-window-launch=false
 appicon-margin=8
-appicon-padding=4
+appicon-padding=8
 appicon-style='NORMAL'
 available-monitors=[0]
+dot-color-dominant=true
+dot-color-override=false
+dot-color-unfocused-different=false
 dot-position='BOTTOM'
 dot-style-focused='DASHES'
 dot-style-unfocused='DASHES'
+focus-highlight-dominant=false
+focus-highlight-opacity=25
+group-apps=true
 hotkeys-overlay-combo='TEMPORARILY'
 intellihide=false
 leftbox-padding=-1
 leftbox-size=0
 panel-anchors='{"0":"MIDDLE"}'
-panel-element-positions='{"0":[{"element":"dateMenu","visible":true,"position":"stackedTL"},{"element":"leftBox","visible":true,"position":"stackedTL"},{"element":"centerBox","visible":true,"position":"centered"},{"element":"showAppsButton","visible":false,"position":"centerMonitor"},{"element":"activitiesButton","visible":false,"position":"centerMonitor"},{"element":"rightBox","visible":true,"position":"centerMonitor"},{"element":"systemMenu","visible":true,"position":"stackedBR"},{"element":"taskbar","visible":false,"position":"stackedTL"},{"element":"desktopButton","visible":true,"position":"stackedBR"}]}'
+panel-element-positions='{"0":[{"element":"taskbar","visible":true,"position":"stackedTL"},{"element":"centerBox","visible":true,"position":"centerMonitor"},{"element":"showAppsButton","visible":false,"position":"centerMonitor"},{"element":"activitiesButton","visible":false,"position":"centerMonitor"},{"element":"rightBox","visible":false,"position":"centerMonitor"},{"element":"leftBox","visible":true,"position":"stackedBR"},{"element":"systemMenu","visible":true,"position":"stackedBR"},{"element":"dateMenu","visible":true,"position":"stackedBR"},{"element":"desktopButton","visible":false,"position":"stackedBR"}]}'
 panel-lengths='{"0":100}'
-panel-positions='{"0":"TOP"}'
-panel-sizes='{"0":32}'
+panel-positions='{"0":"BOTTOM"}'
+panel-sizes='{"0":48}'
 primary-monitor=0
+progress-show-count=false
 secondarymenu-contains-appmenu=true
 show-apps-icon-file=''
 show-favorites=false
 show-favorites-all-monitors=false
-show-running-apps=false
+show-running-apps=true
 show-tooltip=false
-show-window-previews=false
+show-window-previews=true
 status-icon-padding=-1
-stockgs-keep-dash=true
+stockgs-keep-dash=false
 stockgs-keep-top-panel=false
+stockgs-panelbtn-click-only=false
 trans-bg-color='#ffffff'
 trans-panel-opacity=0.0
 trans-use-custom-bg=false
@@ -389,6 +478,30 @@ right-elements=['AppMenu', 'Activities', 'SystemMenu', 'DateMenu']
 
 [org/gnome/shell/extensions/simplebreakreminder]
 time-between-breaks=uint32 50
+
+[org/gnome/shell/extensions/space-bar/appearance]
+workspace-margin=0
+workspaces-bar-padding=12
+
+[org/gnome/shell/extensions/space-bar/behavior]
+always-show-numbers=true
+enable-custom-label=false
+indicator-style='workspaces-bar'
+position='center'
+show-empty-workspaces=false
+smart-workspace-names=false
+toggle-overview=false
+
+[org/gnome/shell/extensions/space-bar/shortcuts]
+activate-empty-key=['<Super>f']
+activate-previous-key=['<Super>a']
+enable-move-to-workspace-shortcuts=true
+move-workspace-left=['<Shift><Super>d']
+move-workspace-right=['<Shift><Super>f']
+
+[org/gnome/shell/extensions/space-bar/state]
+version=28
+workspace-names-map='{"org.gnome.Settings":["web"],"firefox":["web"],"gjs":["web","term"]}'
 
 [org/gnome/shell/extensions/system-monitor]
 show-download=false
@@ -436,6 +549,9 @@ tiling-popup-all-workspace=true
 toggle-always-on-top=@as []
 toggle-tiling-popup=@as []
 
+[org/gnome/shell/extensions/unblank]
+time=0
+
 [org/gnome/shell/extensions/weatherornot]
 position='left'
 
@@ -445,6 +561,13 @@ grouping-mode='never'
 show-on-all-monitors=true
 
 [org/gnome/shell/keybindings]
+screenshot=['<Super>Print']
+screenshot-window=['<Shift><Super>Print']
+show-screen-recording-ui=['<Shift><Super>r']
+switch-to-application-1=@as []
+switch-to-application-2=@as []
+switch-to-application-3=@as []
+switch-to-application-4=@as []
 toggle-application-view=@as []
 toggle-quick-settings=@as []
 
@@ -455,7 +578,20 @@ locations=[<(uint32 2, <('Palo Alto', 'KPAO', true, [(0.65391669889830628, -2.13
 [org/gnome/shell/world-clocks]
 locations=[<(uint32 2, <('Palo Alto', 'KPAO', true, [(0.65391669889830628, -2.1313379107115065)], [(0.65348413649649195, -2.1317978398759916)])>)>]
 
+[org/gnome/terminal/legacy]
+new-terminal-mode='tab'
+theme-variant='dark'
+
+[org/gnome/terminal/legacy/profiles:/:b1dcc9dd-5262-4d8d-a863-c897e6d979b9]
+background-color='rgb(23,20,33)'
+background-transparency-percent=0
+foreground-color='rgb(208,207,204)'
+use-theme-colors=true
+use-theme-transparency=true
+use-transparent-background=false
+
 [org/gtk/gtk4/settings/color-chooser]
+custom-colors=[(0.27058824896812439, 0.40392157435417175, 0.5372549295425415, 1.0)]
 selected-color=(true, 1.0, 1.0, 1.0, 1.0)
 
 [org/gtk/gtk4/settings/file-chooser]
