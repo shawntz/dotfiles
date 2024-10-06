@@ -64,8 +64,11 @@ xkb-options=['caps:super']
 
 [org/gnome/desktop/interface]
 color-scheme='default'
+document-font-name='SF Pro Display 11'
+font-name='SF Pro Display 11'
 gtk-theme='Yaru'
-icon-theme='Yaru'
+icon-theme='Flatery-Orange'
+monospace-font-name='FiraCode Nerd Font Mono 13'
 show-battery-percentage=true
 
 [org/gnome/desktop/notifications]
@@ -213,7 +216,7 @@ sleep-inactive-battery-type='nothing'
 
 [org/gnome/shell]
 disabled-extensions=['drive-menu@gnome-shell-extensions.gcampax.github.com', 'window-list@gnome-shell-extensions.gcampax.github.com', 'windowsNavigator@gnome-shell-extensions.gcampax.github.com', 'extension-list@tu.berry', 'top-panel-drag@princeola.com', 'strings@lobau.io', 'apps-menu@gnome-shell-extensions.gcampax.github.com', 'simplebreakreminder@castillodel.com', 'system-monitor@gnome-shell-extensions.gcampax.github.com', 'places-menu@gnome-shell-extensions.gcampax.github.com']
-enabled-extensions=['ding@rastersoft.com', 'ubuntu-dock@ubuntu.com', 'tiling-assistant@ubuntu.com', 'auto-move-windows@gnome-shell-extensions.gcampax.github.com', 'screenshot-window-sizer@gnome-shell-extensions.gcampax.github.com', 'CustomizeClockOnLockScreen@pratap.fastmail.fm', 'ControlBlurEffectOnLockScreen@pratap.fastmail.fm', 'caffeine@patapon.info', 'tactile@lundal.io', 'display-adjustment@w8jcik.gitlab.com', 'zilence@apankowski.github.com', 'notification-banner-reloaded@marcinjakubowski.github.com', 'lomotion@lorens.com', 'date-menu-formatter@marcinjakubowski.github.com', 'weatheroclock@CleoMenezesJr.github.io', 'native-window-placement@gnome-shell-extensions.gcampax.github.com', 'weatherornot@somepaulo.github.io', 'workspace-indicator@gnome-shell-extensions.gcampax.github.com', 'dash-to-panel@jderose9.github.com', 'blur-my-shell@aunetx', 'dash-to-dock@micxgx.gmail.com', 'light-style@gnome-shell-extensions.gcampax.github.com']
+enabled-extensions=['ding@rastersoft.com', 'ubuntu-dock@ubuntu.com', 'tiling-assistant@ubuntu.com', 'auto-move-windows@gnome-shell-extensions.gcampax.github.com', 'screenshot-window-sizer@gnome-shell-extensions.gcampax.github.com', 'CustomizeClockOnLockScreen@pratap.fastmail.fm', 'ControlBlurEffectOnLockScreen@pratap.fastmail.fm', 'caffeine@patapon.info', 'tactile@lundal.io', 'display-adjustment@w8jcik.gitlab.com', 'zilence@apankowski.github.com', 'notification-banner-reloaded@marcinjakubowski.github.com', 'lomotion@lorens.com', 'date-menu-formatter@marcinjakubowski.github.com', 'weatheroclock@CleoMenezesJr.github.io', 'native-window-placement@gnome-shell-extensions.gcampax.github.com', 'weatherornot@somepaulo.github.io', 'workspace-indicator@gnome-shell-extensions.gcampax.github.com', 'dash-to-panel@jderose9.github.com', 'blur-my-shell@aunetx', 'dash-to-dock@micxgx.gmail.com', 'light-style@gnome-shell-extensions.gcampax.github.com', 'color-picker@tuberry', 'unblank@sun.wxg@gmail.com']
 favorite-apps=['kitty.desktop', 'firefox_firefox.desktop', 'thunderbird_thunderbird.desktop', 'rstudio.desktop', 'slack.desktop', 'positron.desktop', 'code_code.desktop', 'cider.desktop', 'org.gnome.Nautilus.desktop']
 last-selected-power-profile='performance'
 welcome-dialog-last-shown-version='46.0'
@@ -271,6 +274,15 @@ sigma=30
 
 [org/gnome/shell/extensions/caffeine]
 indicator-position-max=1
+
+[org/gnome/shell/extensions/color-picker]
+color-history=[uint32 952783, 16185078, 2106680]
+color-picker-shortcut=['<Super>c']
+enable-shortcut=true
+enable-sound=false
+enable-systray=false
+notify-sound=uint32 1
+preview-style=uint32 0
 
 [org/gnome/shell/extensions/dash-to-dock]
 always-center-icons=true
@@ -449,7 +461,7 @@ selected-color=(true, 1.0, 1.0, 1.0, 1.0)
 [org/gtk/gtk4/settings/file-chooser]
 date-format='regular'
 location-mode='path-bar'
-show-hidden=true
+show-hidden=false
 sidebar-width=140
 sort-column='name'
 sort-directories-first=true
