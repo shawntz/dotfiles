@@ -73,6 +73,17 @@ install_if_missing flatpak	# application manager
 git clone --depth 1 https://github.com/junegunn/fzf.git ~/.fzf
 ~/.fzf/install
 
+# dependencies for tidyverse dependencies (R)
+install_if_missing libcurl4-openssl-dev # required for curl
+install_if_missing libfontconfig1-dev   # required for systemfonts
+install_if_missing libharfbuzz-dev      # required for textshaping
+install_if_missing libfribidi-dev       # required for textshaping
+install_if_missing libfreetype6-dev     # required for ragg
+install_if_missing libpng-dev           # required for ragg
+install_if_missing libtiff5-dev         # required for ragg
+install_if_missing libjpeg-dev          # required for ragg
+install_if_missing libxml2-dev          # required for xml2
+
 install_if_missing imagemagick  # image manipulation
 install_if_missing pandoc       # converting between file formats
 install_if_missing rclone       # sync files to cloud
