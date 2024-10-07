@@ -2,7 +2,7 @@
 
 DOTFILES=~/dotfiles
 
-STOW=("kitty" "neofetch" "nvim" "ssh" "starship" "tmux" "wallpapers" "yazi" "zsh")
+STOW=("kitty" "neofetch" "nvim" "rstudio" "ssh" "starship" "tmux" "wallpapers" "yazi" "zsh")
 
 cd "$DOTFILES" || exit
 
