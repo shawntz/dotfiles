@@ -6,3 +6,4 @@
 *.env.local
 *.env.staging
 keyd/app/*
+rstudio/.config/rstudio/Cookies
