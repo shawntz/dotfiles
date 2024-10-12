@@ -1,0 +1,82 @@
+#!/bin/bash
+
+############ EDIT ME ############
+GIT_AUTHOR_NAME="name"
+GIT_AUTHOR_EMAIL="email@you.com"
+GH_USER="nickname"
+GPG_KEY="~/.ssh/id_ed25519.pub"
+############ EDIT ME ############
+
+###########################################################################################
+
+echo "[INFO] - setting git global user.name => $GIT_AUTHOR_NAME"
+git config --global user.name "$GIT_AUTHOR_NAME"
+
+echo "[INFO] - setting git global user.email => $GIT_AUTHOR_EMAIL"
+git config --global user.email "$GIT_AUTHOR_EMAIL"
+
+echo "[INFO] - setting git global github.user => $GH_USER"
+git config --global github.user "$GH_USER"
+
+echo "[INFO] - setting git global user.signingkey => $GPG_KEY"
+git config --global user.signingkey "$GPG_KEY"
+
+echo "[INFO] - setting git global password cache timeout value to 1 month"
+git config --global credential.helper 'cache --timeout=2628000'
+
+echo "[INFO] - setting the gpg format to ssh"
+git config --global gpg.format ssh
+
+echo "[INFO] - enabling rerere (reuse recorded resolution)"
+git config --global rerere.enabled true
+
+echo "[INFO] - enabling signing of all commits by default"
+git config --global commit.gpgsign true
+
+echo "[INFO] - enabling sorting of branches by committer date"
+git config --global branch.sort committerdate
+
+echo "[INFO] - automatically enable column display in the UI"
+git config --global column.ui auto
+
+echo "[INFO] - enabling rebase by default when pulling"
+git config --global pull.rebase true
+
+echo "[INFO] - enabling including a log of one-line descriptions of commits being merged"
+git config --global merge.log true
+
+echo "[INFO] - enabling showing rename and copy detection in diffs
+git config --global diff.renames copies
+
+echo "[INFO] - enabling help.autocorrect with a 1-second delay"
+git config --global help.autocorrect 1
+
+echo "[INFO] - automatically enable color UI"
+git config --global color.ui auto
+
+echo "[INFO] - setting whitespace rules"
+git config --global core.whitespace space-before-tab,-indent-with-non-tab,trailing-space
+
+echo "[INFO] - configuring Git LFS (Large File Storage)"
+git config --global filter.lfs.clean "git-lfs clean -- %f"
+git config --global filter.lfs.smudge "git-lfs smudge -- %f"
+git config --global filter.lfs.process "git-lfs filter-process"
+git config --global filter.lfs.required true
+
+echo "[INFO] - setting up URL rewrites for GitHub (SSH instead of HTTPS)"
+git config --global url."git@github.com:github".insteadOf "https://github.com/github"
+git config --global url."git@github.com:github".insteadOf "github:github"
+git config --global url."git@github.com:github".insteadOf "git://github.com/github"
+git config --global url."git@github.com:".pushInsteadOf "https://github.com/"
+git config --global url."git@github.com:".pushInsteadOf "github:"
+git config --global url."git@github.com:".pushInsteadOf "git://github.com/"
+git config --global url."git://github.com/".insteadOf "github:"
+
+echo "[INFO] - setting up URL rewrites for Gist (SSH instead of HTTPS)"
+git config --global url."git@gist.github.com:".insteadOf "gst:"
+git config --global url."git@gist.github.com:".pushInsteadOf "gist:"
+git config --global url."git@gist.github.com:".pushInsteadOf "git://gist.github.com/"
+git config --global url."git://gist.github.com/".insteadOf "gist:"
+
+###########################################################################################
+
