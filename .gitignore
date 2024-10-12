@@ -1,7 +1,0 @@
-.extra.sh
-.DS_Store
-*.swp
-*.env
-*.env.example
-*.env.local
-*.env.staging
