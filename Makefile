@@ -30,6 +30,7 @@ stow-dot-configs:
 stow-others:
 	@echo "stowing other files..."
 	sudo stow -v -d $(STOW_DIR) -t $(KEYD_TARGET_DIR) keyd
+	sudo keyd reload
 	stow -v -d $(STOW_DIR) -t $(WALLPAPERS_TARGET_DIR) wallpapers
 	stow -v -d $(STOW_DIR) -t $(ZSH_TARGET_DIR) zsh
 
