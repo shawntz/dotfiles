@@ -45,7 +45,7 @@ git config --global pull.rebase true
 echo "[INFO] - enabling including a log of one-line descriptions of commits being merged"
 git config --global merge.log true
 
-echo "[INFO] - enabling showing rename and copy detection in diffs
+echo "[INFO] - enabling showing rename and copy detection in diffs"
 git config --global diff.renames copies
 
 echo "[INFO] - enabling help.autocorrect with a 1-second delay"

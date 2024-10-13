@@ -1,4 +1,4 @@
-.extra.sh
+.gitconf.sh
 .DS_Store
 *.swp
 *.env
@@ -6,4 +6,3 @@
 *.env.local
 *.env.staging
 keyd/app/*
-rstudio/.config/rstudio/Cookies
