@@ -93,6 +93,14 @@ enable-zsh:
 	@echo "enabling zsh and ohmyzsh..."
 	_scripts/zsh
 
+install-transfuse:
+	@echo "installing transfuse kde plasma backup script..."
+	_scripts/transfuse
+
+backup-kde-appearance:
+	@echo "backing up kde plasma appearance..."
+	crontab/kdebkup.sh
+
 # if needed, clean up symlinks or dirs
 clean:
 	@echo "cleaning up symlinks..."
