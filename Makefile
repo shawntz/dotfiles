@@ -56,6 +56,7 @@ install-ubuntu-packages:
 install-fedora-packages:
 	@echo "installing packages for fedora..."
 	sudo dnf install -y $(FEDORA_PACKAGES)
+	$(MAKE) fix-zoxide-binary
 	@echo "after this next step finishes, run `make install-from-source`"
 	$(MAKE) install-rustup
 
@@ -78,6 +79,10 @@ install-from-source:
 	bash _scripts/via
 	bash _scripts/docker
 	@echo "done installing packages from source!"
+
+fix-zoxide-binary:
+	@echo "fixing zoxide binary location..."
+	sudo mv /usr/bin/zoxide /usr/local/bin/
 
 setup-keyd:
 	@echo "setting up keyd manager in systemctl..."
