@@ -9,9 +9,9 @@ KEYD_TARGET_DIR = /etc/keyd
 WALLPAPERS_TARGET_DIR = $(HOME)/pictures
 ZSH_TARGET_DIR = $(HOME)
 
-step-one: configure-git rename-dirs install-packages
-step-two: install-from-source setup-keyd stow-dot-configs stow-others
-step-fin: enable-zsh
+step-a: configure-git rename-dirs install-packages
+step-b: install-from-source setup-keyd stow-dot-configs stow-others
+step-c: enable-zsh
 
 configure-git:
 	@echo "configuring git..."
@@ -90,14 +90,7 @@ setup-keyd:
 
 enable-zsh:
 	@echo "enabling zsh and ohmyzsh..."
-	rm ~/.bash_history ~/.bash_logout ~/.bashrc
-	sh -c "$(wget https://raw.githubusercontent.com/ohmyzsh/ohmyzsh/master/tools/install.sh -O -)"
-	rm .zshrc
-	mv .zshrc.pre-oh-my-zsh .zshrc
-	source ~/.zshrc
-	zsh
-	chsh -s /usr/bin/zsh
-	rm ~/.bash_history ~/.bash_logout ~/.bashrc
+	_scripts/zsh
 
 # if needed, clean up symlinks or dirs
 clean:

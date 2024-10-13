@@ -1,0 +1,9 @@
+#!/usr/bin/env bash
+
+bash -c "$(wget https://raw.githubusercontent.com/ohmyzsh/ohmyzsh/master/tools/install.sh -O -)"
+
+rm ~/.zshrc
+
+mv ~/.zshrc.pre-oh-my-zsh ~/.zshrc
+
+source ~/.zshrc
