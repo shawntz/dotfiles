@@ -1,0 +1,7 @@
+#!/usr/bin/env bash
+
+echo "[rust bob]..."
+
+cargo install bob-nvim
+
+bob use stable

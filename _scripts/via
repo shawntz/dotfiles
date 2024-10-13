@@ -1,0 +1,5 @@
+#!/usr/bin/env bash
+
+echo "[via keyboard editor]..."
+
+chmod a+x ./_scripts/via-3.0.0-linux.AppImage
