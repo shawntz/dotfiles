@@ -12,3 +12,5 @@ cd yazi
 
 cargo build --release --locked
 ./target/release/yazi
+
+rm -rf yazi
