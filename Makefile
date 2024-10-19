@@ -3,15 +3,18 @@ OS = $(shell uname)
 FEDORA_PACKAGES = git kitty alacritty bat zsh neovim curl R feh fzf lua python3 python3-pip pipx tmux neofetch eza fd-find ImageMagick pandoc rclone ripgrep stow trash-cli tree make wget zoxide jupyterlab gimp
 
 # stow dirs
-STOW_DIR = $(HOME)/dotfiles/_configs
+DOTS_DIR = $(HOME)/dotfiles
+STOW_DIR = $(HOME)/dotfiles/config
 CONFIG_TARGET_DIR = $(HOME)/.config
+HAMMERSPOON_TARGET_DIR = $(HOME)/.hammerspoon
 KEYD_TARGET_DIR = /etc/keyd
-WALLPAPERS_TARGET_DIR = $(HOME)/pictures
+WALLPAPERS_TARGET_DIR = $(HOME)/pictures/wallpapers
 ZSH_TARGET_DIR = $(HOME)
 
-step-a: configure-git rename-dirs install-packages
-step-b: install-from-source setup-keyd stow-dot-configs stow-others
-step-c: enable-zsh
+config: configure-git rename-dirs install-packages
+install: install-packages
+stow: stow-dot-configs stow-others
+zsh: enable-zsh
 
 configure-git:
 	@echo "configuring git..."
@@ -19,24 +22,13 @@ configure-git:
 	nano .gitconf.sh
 	bash .gitconf.sh
 
-stow-dot-configs:
-	@echo "stowing .config files..."
-	@for dir in $(STOW_DIR)/*; do \
-		if [ "$$(basename $$dir)" != "keyd" ] && [ "$$(basename $$dir)" != "zsh" ] && [ "$$(basename $$dir)" != "wallpapers" ]; then \
-			stow -v -d $(STOW_DIR) -t $(CONFIG_TARGET_DIR) $$(basename $$dir); \
-		fi; \
-	done
-
-stow-others:
-	@echo "stowing other files..."
-	sudo stow -v -d $(STOW_DIR) -t $(KEYD_TARGET_DIR) keyd
-	sudo keyd reload
-	stow -v -d $(STOW_DIR) -t $(WALLPAPERS_TARGET_DIR) wallpapers
-	stow -v -d $(STOW_DIR) -t $(ZSH_TARGET_DIR) zsh
-
 rename-dirs:
 	@echo "renaming user dirs..."
-	bash _scripts/dirs
+	@if [ "$(OS)" = "Darwin" ]; then \
+		bash scripts/finder; \
+	else \
+		bash scripts/dirs; \
+	fi; \
 
 install-packages:
 	@echo "installing packages..."
@@ -48,7 +40,7 @@ install-packages:
 		fi; \
 	elif [ "$(OS)" = "Darwin" ]; then \
 		$(MAKE) install-macos-packages; \
-	fi
+	fi; \
 
 install-ubuntu-packages:
 	@echo "installing packages for ubuntu..."
@@ -63,23 +55,56 @@ install-fedora-packages:
 
 install-macos-packages:
 	@echo "installing packages for macos..."
-	brew install $(MACOS_PACKAGES)
+	/opt/homebrew/bin/brew install $(MACOS_PACKAGES)
 
 install-rustup:
 	@echo "setting up rustup (for cargo)..."
-	bash _scripts/rust
+	bash scripts/rust
 	source $(HOME)/.bashrc
 
 install-from-source:
 	@echo "installing cli tools and apps from source..."
-	bash _scripts/bob
-	bash _scripts/starship
-	bash _scripts/lazygit
-	bash _scripts/yazi
-	bash _scripts/1password
-	bash _scripts/via
-	bash _scripts/docker
+	bash scripts/bob
+	bash scripts/starship
+	bash scripts/lazygit
+	bash scripts/yazi
+	bash scripts/1password
+	bash scripts/via
+	bash scripts/docker
 	@echo "done installing packages from source!"
+
+stow-dot-configs:
+	@echo "stowing .config files..."
+	@if [ "$(OS)" = "Darwin" ]; then \
+		STOW_CMD="/opt/homebrew/bin/stow"; \
+	else \
+		STOW_CMD="stow"; \
+	fi; \
+	for dir in $(STOW_DIR)/*; do \
+		if [ "$$(basename $$dir)" != "keyd" ] && [ "$$(basename $$dir)" != "zsh" ] && [ "$$(basename $$dir)" != "karabiner" ] && [ "$$(basename $$dir)" != "hammerspoon" ] && [ "$$(basename $$dir)" != "aerospace" ] && [ "$$(basename $$dir)" != "wallpapers" ]; then \
+			$$STOW_CMD -v -d $(STOW_DIR) -t $(CONFIG_TARGET_DIR) $$(basename $$dir); \
+		fi; \
+	done
+
+stow-others:
+	@echo "stowing other files..."
+	@if [ "$(OS)" != "Darwin" ]; then \
+		sudo stow -v -d $(STOW_DIR) -t $(KEYD_TARGET_DIR) keyd; \
+		sudo keyd reload; \
+	fi; \
+	mkdir -p ~/pictures/wallpapers
+	stow -v -d $(DOTS_DIR) -t $(WALLPAPERS_TARGET_DIR) wallpapers
+	stow -v -d $(STOW_DIR) -t $(ZSH_TARGET_DIR) zsh
+
+stow-mac-dot-configs:
+	@echo "stowing macos specific configs..."
+	mkdir -p ~/.config/aerospace
+	/opt/homebrew/bin/stow -v -d $(STOW_DIR) -t $(CONFIG_TARGET_DIR)/aerospace aerospace
+	mkdir -p ~/.hammerspoon
+	/opt/homebrew/bin/stow -v -d $(STOW_DIR) -t $(HAMMERSPOON_TARGET_DIR) hammerspoon
+	mkdir -p ~/.config/karabiner
+	/opt/homebrew/bin/stow -v -d $(STOW_DIR) -t $(CONFIG_TARGET_DIR)/karabiner karabiner
+	/opt/homebrew/bin/stow -v -d $(STOW_DIR) -t $(ZSH_TARGET_DIR) zsh
 
 fix-zoxide-binary:
 	@echo "fixing zoxide binary location..."
@@ -87,21 +112,21 @@ fix-zoxide-binary:
 
 setup-keyd:
 	@echo "setting up keyd manager in systemctl..."
-	bash _scripts/keyd
+	bash scripts/keyd
 
 enable-zsh:
 	@echo "enabling zsh and ohmyzsh..."
-	_scripts/zsh
+	scripts/zsh
 
 install-transfuse:
 	@echo "installing transfuse kde plasma backup script..."
-	_scripts/transfuse
+	scripts/transfuse
 
-backup-kde-appearance:
-	@echo "backing up kde plasma appearance..."
-	crontab/kdebkup.sh
+# backup-kde-appearance:
+# 	@echo "backing up kde plasma appearance..."
+# 	crontab/kdebkup.sh
 
 # if needed, clean up symlinks or dirs
 clean:
 	@echo "cleaning up symlinks..."
-	stow -D _configs
+	stow -D config
