@@ -8,7 +8,7 @@ cd $DOTFILES_DIR
 echo "[ INFO ] - cron job started on $(date)" >> $LOG_FILE
 echo "[ INFO ] - backing up dotfiles to github..." >> $LOG_FILE
 /usr/bin/git add -A
-/usr/bin/git commit -m "cron($(date)): daily dotfiles backup"
+/usr/bin/git commit -S -m "cron($(date)): daily dotfiles backup"
 /usr/bin/git push origin main
 
 if [ $? -eq 0 ]; then
