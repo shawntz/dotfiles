@@ -122,6 +122,10 @@ install-transfuse:
 	@echo "installing transfuse kde plasma backup script..."
 	scripts/transfuse
 
+install-cronjobs:
+	@echo "installing cron jobs with crontab..."
+	sudo crontab -u shawn $(DOTS_DIR)/cronfile
+
 # backup-kde-appearance:
 # 	@echo "backing up kde plasma appearance..."
 # 	crontab/kdebkup.sh
