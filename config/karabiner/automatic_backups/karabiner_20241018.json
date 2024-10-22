@@ -10,7 +10,6 @@
                 "rules": [
                     {
                         "description": "Remap right command to command+space (i.e., a 'super' key)",
-                        "enabled": false,
                         "manipulators": [
                             {
                                 "from": {
@@ -30,22 +29,15 @@
                     {
                         "manipulators": [
                             {
-                                "description": "Change shift + / to Hyper (i.e., command+control+option+shift)",
+                                "description": "Change right option to Hyper (i.e., command+control+option+shift)",
                                 "from": {
-                                    "simultaneous": [
-                                        { "key_code": "right_shift" },
-                                        { "key_code": "slash" }
-                                    ],
-                                    "simultaneous_options": {
-                                        "detect_key_down_uninterruptedly": true,
-                                        "key_down_order": "strict",
-                                        "key_up_order": "insensitive"
-                                    }
+                                    "key_code": "right_option",
+                                    "modifiers": { "optional": ["any"] }
                                 },
                                 "to": [
                                     {
                                         "key_code": "left_shift",
-                                        "modifiers": ["left_command", "left_control", "left_option"]
+                                        "modifiers": ["left_control", "left_option", "left_command"]
                                     }
                                 ],
                                 "type": "basic"
@@ -53,7 +45,7 @@
                         ]
                     },
                     {
-                        "description": "S+D -> SuperDuper Mode",
+                        "description": "S+D -> (S)uper(D)uper Mode",
                         "manipulators": [
                             {
                                 "from": {
@@ -63,7 +55,7 @@
                                     ],
                                     "simultaneous_options": {
                                         "detect_key_down_uninterruptedly": true,
-                                        "key_down_order": "strict",
+                                        "key_down_order": "insensitive",
                                         "key_up_order": "insensitive",
                                         "key_up_when": "any",
                                         "to_after_key_up": [
@@ -170,7 +162,6 @@
                     },
                     {
                         "description": "(S)uper(D)uper + A -> Option",
-                        "enabled": false,
                         "manipulators": [
                             {
                                 "conditions": [
@@ -211,7 +202,6 @@
                     },
                     {
                         "description": "(S)uper(D)uper + Space -> Shift",
-                        "enabled": false,
                         "manipulators": [
                             {
                                 "conditions": [
@@ -232,7 +222,6 @@
                     },
                     {
                         "description": "(S)uper(D)uper + U -> First Tab",
-                        "enabled": false,
                         "manipulators": [
                             {
                                 "conditions": [
@@ -258,7 +247,6 @@
                     },
                     {
                         "description": "(S)uper(D)uper + I -> Prev Tab",
-                        "enabled": false,
                         "manipulators": [
                             {
                                 "conditions": [
@@ -284,7 +272,6 @@
                     },
                     {
                         "description": "(S)uper(D)uper + O -> Next Tab",
-                        "enabled": false,
                         "manipulators": [
                             {
                                 "conditions": [
@@ -310,7 +297,6 @@
                     },
                     {
                         "description": "(S)uper(D)uper + P -> Last Tab",
-                        "enabled": false,
                         "manipulators": [
                             {
                                 "conditions": [
@@ -435,8 +421,7 @@
             ],
             "virtual_hid_keyboard": {
                 "caps_lock_delay_milliseconds": 0,
-                "keyboard_type": "ansi",
-                "keyboard_type_v2": "ansi"
+                "keyboard_type": "ansi"
             }
         }
     ]
