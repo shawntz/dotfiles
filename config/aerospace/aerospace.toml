@@ -41,7 +41,7 @@ outer.right      = 0
 ############################
 ### i3-like app triggers ###
 ############################
-cmd-enter = ['workspace kitty', 'exec-and-forget open -n /Applications/kitty.app']
+cmd-alt-enter = ['workspace kitty', 'exec-and-forget open -n /Applications/kitty.app']
 cmd-shift-enter = ['workspace neovim', 'exec-and-forget open -n /Applications/kitty.app --args nvim']
 cmd-alt-p = ['workspace gimp', 'exec-and-forget open -n /Applications/GIMP.app']
 
