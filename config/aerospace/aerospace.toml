@@ -1,37 +1,221 @@
+####################################
+####################################
+##### shawn's aerospace config #####
+####################################
+####################################
+
+
+########################
+### startup commands ###
+########################
+after-login-command = ['layout v_accordion']
+after-startup-command = []
+start-at-login = true
+enable-normalization-flatten-containers = true
+enable-normalization-opposite-orientation-for-nested-containers = true
+accordion-padding = 30
+default-root-container-layout = 'tiles'  # possible values: tiles|accordion
+default-root-container-orientation = 'horizontal'  # possible values: horizontal|vertical|auto
+key-mapping.preset = 'qwerty'
+on-focused-monitor-changed = ['move-mouse monitor-lazy-center']  # mouse follows focus when focused monitor changes, drop from config to remove
+
+###################
+### window gaps ###
+###################
+[gaps]
+inner.horizontal = 0
+inner.vertical   = 0
+outer.left       = 0
+outer.bottom     = 0
+outer.top        = 0
+outer.right      = 0
+
+
+###########################
+###########################
+#### main binding mode ####
+###########################
+###########################
+[mode.main.binding]  # 'main' binding mode declaration
+
+############################
+### i3-like app triggers ###
+############################
+cmd-enter = ['workspace kitty', 'exec-and-forget open -n /Applications/kitty.app']
+cmd-shift-enter = ['workspace neovim', 'exec-and-forget open -n /Applications/kitty.app --args nvim']
+cmd-alt-p = ['workspace gimp', 'exec-and-forget open -n /Applications/GIMP.app']
+
+###############################
+### reorient container tree ###
+###############################
+ctrl-slash = 'layout tiles horizontal vertical'
+ctrl-comma = 'layout accordion vertical horizontal'
+
+#########################################
+### change window focus within a node ###
+#########################################
+cmd-shift-h = ['focus --boundaries-action stop left' , 'move-mouse window-force-center']
+cmd-shift-j = ['focus --boundaries-action stop down' , 'move-mouse window-force-center']
+cmd-shift-k = ['focus --boundaries-action stop up'   , 'move-mouse window-force-center']
+cmd-shift-l = ['focus --boundaries-action stop right', 'move-mouse window-force-center']
+
+##################################
+### move windows within a node ###
+##################################
+alt-shift-h = 'move left'
+alt-shift-j = 'move down'
+alt-shift-k = 'move up'
+alt-shift-l = 'move right'
+
+############################
+### workspace navigation ###
+############################
+alt-a = ['workspace asana']
+alt-b = ['workspace browser']
+alt-c = ['workspace cal']
+alt-d = ['workspace drive']
+alt-e = ['workspace email']
+alt-f = ['workspace finder']
+alt-g = ['workspace github']
+alt-i = ['workspace imessage']
+alt-m = ['workspace music']
+alt-n = ['workspace neovim']
+alt-o = ['workspace obsidian']
+alt-p = ['workspace gimp']
+alt-r = ['workspace rstudio']
+alt-s = ['workspace slack']
+alt-t = ['workspace chatgpt']
+alt-v = ['workspace vscode']
+alt-x = ['workspace kitty']
+alt-z = ['workspace zoom']
+
+alt-1 = ['workspace 1']
+alt-2 = ['workspace 2']
+alt-3 = ['workspace 3']
+alt-4 = ['workspace 4']
+
+cmd-alt-1 = ['move-node-to-workspace 1']
+cmd-alt-2 = ['move-node-to-workspace 2']
+cmd-alt-3 = ['move-node-to-workspace 3']
+cmd-alt-4 = ['move-node-to-workspace 4']
+
+cmd-alt-j = 'workspace next'
+cmd-alt-k = 'workspace prev'
+ctrl-tab = 'workspace-back-and-forth'
+
+cmd-semicolon = 'move-workspace-to-monitor --wrap-around next'
+cmd-alt-n = ['focus-monitor next --wrap-around', 'move-mouse window-force-center']
+cmd-alt-m = ['move-workspace-to-monitor next --wrap-around', 'move-mouse window-force-center']
+
+##################################
+### resize windows within node ###
+##################################
+cmd-9 = 'resize smart -64'
+cmd-0 = 'resize smart +64'
+cmd-shift-f  = ['fullscreen']  # toggle fullscreen
+
+
+##############################
+##############################
+#### service binding mode ####
+##############################
+##############################
+cmd-shift-semicolon = 'mode service'
+[mode.service.binding]  # 'service' binding mode declaration
+esc = ['reload-config', 'mode main']
+r = ['flatten-workspace-tree', 'mode main']  # reset layout
+f = ['layout floating tiling', 'mode main']  # toggle between floating and tiling layout
+backspace = ['close-all-windows-but-current', 'mode main']
+
+
+###################
+###################
+#### callbacks ####
+###################
+###################
+[[on-window-detected]]  # asana
+if.app-id = 'com.electron.asana'
+run = 'move-node-to-workspace asana'
+
+[[on-window-detected]]  # (brave) browser
+if.app-id = 'com.brave.Browser'
+run = 'move-node-to-workspace browser'
+
+[[on-window-detected]]  # (google) drive
+if.app-id = 'com.brave.Browser.app.aghbiahbpaijignceidepookljebhfak'
+run = 'move-node-to-workspace drive'
+
+[[on-window-detected]]  # (e)/gmail
+if.app-id = 'com.apple.Safari.WebApp.8909B45D-6807-44EE-BCB7-E8A4FEF716A4'
+run = 'move-node-to-workspace email'
+
+[[on-window-detected]]  # finder
+if.app-id = 'com.apple.finder'
+run = 'move-node-to-workspace finder'
+
+[[on-window-detected]]  # fantasti(cal)
+if.app-id = 'com.flexibits.fantastical2.mac'
+run = 'move-node-to-workspace cal'
+
+[[on-window-detected]]  # github
+if.app-id = 'com.apple.Safari.WebApp.74728F17-C93E-4227-BBBA-4E2E22BAF9F2'
+run = 'move-node-to-workspace github'
+
+[[on-window-detected]]  # imessage
+if.app-id = 'com.apple.MobileSMS'
+run = 'move-node-to-workspace imessage'
+
+[[on-window-detected]]  # music
+if.app-id = 'com.apple.Music'
+run = 'move-node-to-workspace music'
+
+[[on-window-detected]]  # obsidian
+if.app-id = 'md.obsidian'
+run = 'move-node-to-workspace obsidian'
+
+[[on-window-detected]]  # rstudio
+if.app-id = 'com.rstudio.desktop'
+run = 'move-node-to-workspace rstudio'
+
+[[on-window-detected]]  # slack
+if.app-id = 'com.tinyspeck.slackmacgap'
+run = 'move-node-to-workspace slack'
+
+[[on-window-detected]]  # chatgpt
+if.app-id = 'com.openai.chat'
+run = 'move-node-to-workspace chatgpt'
+
+[[on-window-detected]]  # vscode
+if.app-id = 'com.microsoft.VSCode'
+run = 'move-node-to-workspace vscode'
+
+[[on-window-detected]]  # zoom
+if.app-id = 'us.zoom.xos'
+run = 'move-node-to-workspace zoom'
+
+
+##############################
+### helpful aerospace docs ###
+##############################
 # available commands: https://nikitabobko.github.io/AeroSpace/commands
 # normalizations: https://nikitabobko.github.io/AeroSpace/guide#normalization
 # layouts: https://nikitabobko.github.io/AeroSpace/guide#layouts
 # keyboard layouts: https://nikitabobko.github.io/AeroSpace/guide#key-mapping
 # binding modes: https://nikitabobko.github.io/AeroSpace/guide#binding-modes
-
-after-login-command = ['layout v_accordion']
-
-after-startup-command = []
-
-start-at-login = true
-
-enable-normalization-flatten-containers = true
-enable-normalization-opposite-orientation-for-nested-containers = true
-
-accordion-padding = 30
-
-default-root-container-layout = 'accordion'  # possible values: tiles|accordion
-
-# possible values: horizontal|vertical|auto
+# resize: https://nikitabobko.github.io/AeroSpace/commands#resize
+# focus changed callbacks: https://nikitabobko.github.io/AeroSpace/guide#on-focus-changed-callbacks
+# exec-and-forget: https://nikitabobko.github.io/AeroSpace/commands#exec-and-forget
+# move mouse: https://nikitabobko.github.io/AeroSpace/commands#move-mouse
+# See: https://nikitabobko.github.io/AeroSpace/commands#layout
+# See: https://nikitabobko.github.io/AeroSpace/commands#focus
+# See: https://nikitabobko.github.io/AeroSpace/commands#move
+# See: https://nikitabobko.github.io/AeroSpace/commands#workspace
+# See: https://nikitabobko.github.io/AeroSpace/commands#move-node-to-workspace
+# See: https://nikitabobko.github.io/AeroSpace/commands#workspace-back-and-forth
+# See: https://nikitabobko.github.io/AeroSpace/commands#move-workspace-to-monitor
+#
 # 'auto' means: wide monitor (anything wider than high) gets horizontal orientation,
 #               tall monitor (anything higher than wide) gets vertical orientation
-default-root-container-orientation = 'auto'
-
-
-key-mapping.preset = 'qwerty'
-
-# Mouse follows focus when focused monitor changes
-# Drop it from your config, if you don't like this behavior
-# See https://nikitabobko.github.io/AeroSpace/guide#on-focus-changed-callbacks
-# See https://nikitabobko.github.io/AeroSpace/commands#move-mouse
-# Fallback value (if you omit the key): on-focused-monitor-changed = []
-on-focused-monitor-changed = ['move-mouse monitor-lazy-center']
-
 # Gaps between windows (inner-*) and between monitor edges (outer-*).
 # Possible values:
 # - Constant:     gaps.outer.top = 8
@@ -39,122 +223,3 @@ on-focused-monitor-changed = ['move-mouse monitor-lazy-center']
 #                 In this example, 24 is a default value when there is no match.
 #                 Monitor pattern is the same as for 'workspace-to-monitor-force-assignment'.
 #                 See: https://nikitabobko.github.io/AeroSpace/guide#assign-workspaces-to-monitors
-[gaps]
-inner.horizontal = 10
-inner.vertical   = 10
-outer.left       = 10
-outer.bottom     = 10
-outer.top        = 10
-outer.right      = 10
-
-# 'main' binding mode declaration
-
-# 'main' binding mode must be always presented
-# Fallback value (if you omit the key): mode.main.binding = {}
-[mode.main.binding]
-
-# See: https://nikitabobko.github.io/AeroSpace/commands#exec-and-forget
-# You can uncomment the following lines to open up terminal with alt + enter shortcut (like in i3)
-cmd-shift-enter = 'exec-and-forget open -n /Applications/kitty.app'
-
-# See: https://nikitabobko.github.io/AeroSpace/commands#layout
-cmd-shift-slash = 'layout tiles horizontal vertical'
-cmd-shift-comma = 'layout accordion vertical horizontal'
-
-# See: https://nikitabobko.github.io/AeroSpace/commands#focus
-cmd-shift-h = ['focus --boundaries-action stop left' , 'move-mouse window-force-center']
-cmd-shift-j = ['focus --boundaries-action stop down' , 'move-mouse window-force-center']
-cmd-shift-k = ['focus --boundaries-action stop up'   , 'move-mouse window-force-center']
-cmd-shift-l = ['focus --boundaries-action stop right', 'move-mouse window-force-center']
-
-# See: https://nikitabobko.github.io/AeroSpace/commands#move
-cmd-ctrl-h = 'move left'
-cmd-ctrl-j = 'move down'
-cmd-ctrl-k = 'move up'
-cmd-ctrl-l = 'move right'
-
-# callbacks
-[[on-window-detected]]
-if.app-id = 'com.electron.asana'
-run = 'move-node-to-workspace asana'
-
-[[on-window-detected]]
-if.app-id = 'com.brave.Browser'
-run = 'move-node-to-workspace browser'
-
-[[on-window-detected]]
-if.app-id = 'com.flexibits.fantastical2.mac'
-run = 'move-node-to-workspace cal'
-
-[[on-window-detected]]
-if.app-id = 'com.flexibits.fantastical2.mac'
-run = 'move-node-to-workspace cal'
-
-# google drive
-com.brave.Browser.app.aghbiahbpaijignceidepookljebhfak
-
-com.apple.finder                     | Finder
-
-86947 | com.microsoft.VSCode                 | Code
-2204  | com.apple.systempreferences          | System Settings
-4164  | com.openai.chat                      | ChatGPT
-5276  | org.pqrs.Karabiner-Elements.Settings | Karabiner-Elements
-8630  | net.kovidgoyal.kitty                 | kitty
-36203 | com.apple.MobileSMS                  | Messages
-
-# See: https://nikitabobko.github.io/AeroSpace/commands#resize
-cmd-shift-minus = 'resize smart -64'
-cmd-shift-equal = 'resize smart +64'
-
-# See: https://nikitabobko.github.io/AeroSpace/commands#workspace
-# See: https://nikitabobko.github.io/AeroSpace/commands#move-node-to-workspace
-cmd-alt-j = 'workspace next'
-cmd-alt-k = 'workspace prev'
-
-# todo:
-# convert the first action to an application specific trigger callbacks
-# get application ids by running `$ aerospace list-apps`
-alt-a = ['workspace asana']
-alt-b = [ 'move-node-to-workspace browser'    , 'workspace browser'   ]
-alt-c = [ 'move-node-to-workspace cal'        , 'workspace cal'       ]
-alt-d = [ 'move-node-to-workspace drive'      , 'workspace drive'     ]
-alt-e = [ 'move-node-to-workspace email'      , 'workspace email'     ]
-alt-f = [ 'move-node-to-workspace finder'     , 'workspace finder'    ]
-alt-g = [ 'move-node-to-workspace github'     , 'workspace github'    ]
-alt-i = [ 'move-node-to-workspace imessage'   , 'workspace imessage'  ]
-alt-k = [ 'move-node-to-workspace kitty'      , 'workspace kitty'     ]
-alt-m = [ 'move-node-to-workspace music'      , 'workspace music'     ]
-alt-n = [ 'move-node-to-workspace neovim'     , 'workspace neovim'    ]
-alt-o = [ 'move-node-to-workspace obsidian'   , 'workspace obsidian'  ]
-alt-p = [ 'move-node-to-workspace gimp'       , 'workspace gimp'      ]
-alt-r = [ 'move-node-to-workspace rstudio'    , 'workspace rstudio'   ]
-alt-s = [ 'move-node-to-workspace slack'      , 'workspace slack'     ]
-alt-t = [ 'move-node-to-workspace chatgpt'    , 'workspace chatgpt'   ]
-alt-v = [ 'move-node-to-workspace vscode'     , 'workspace vscode'    ]
-alt-z = [ 'move-node-to-workspace zoom'       , 'workspace zoom'      ]
-alt-1 = [ 'move-node-to-workspace sandbox-1'  , 'workspace sandbox-1' ]
-alt-2 = [ 'move-node-to-workspace sandbox-2'  , 'workspace sandbox-2' ]
-alt-3 = [ 'move-node-to-workspace sandbox-3'  , 'workspace sandbox-3' ]
-
-cmd-shift-f = ['fullscreen']  # toggle between fullscreen
-
-# See: https://nikitabobko.github.io/AeroSpace/commands#workspace-back-and-forth
-ctrl-tab = 'workspace-back-and-forth'
-
-# See: https://nikitabobko.github.io/AeroSpace/commands#move-workspace-to-monitor
-cmd-semicolon = 'move-workspace-to-monitor --wrap-around next'
-cmd-alt-n = ['focus-monitor next --wrap-around', 'move-mouse window-force-center']
-cmd-alt-m = ['move-workspace-to-monitor next --wrap-around', 'move-mouse window-force-center']
-
-# See: https://nikitabobko.github.io/AeroSpace/commands#mode
-cmd-shift-semicolon = 'mode service'
-
-# 'service' binding mode declaration.
-# See: https://nikitabobko.github.io/AeroSpace/guide#binding-modes
-[mode.service.binding]
-esc = ['reload-config', 'mode main']
-r = ['flatten-workspace-tree', 'mode main']  # reset layout
-f = ['layout floating tiling', 'mode main']  # toggle between floating and tiling layout
-backspace = ['close-all-windows-but-current', 'mode main']
-
-## todo: add application specific callbacks (triggers + ignores)
