@@ -5,4 +5,4 @@
 *.env.example
 *.env.local
 *.env.staging
-keyd/app/*
+node_modules
