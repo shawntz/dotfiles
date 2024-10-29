@@ -29,31 +29,50 @@ return {
 
   -- catppuccin [theme]
   -- https://github.com/catppuccin/nvim
-  { 
-    "catppuccin/nvim",
-  },
-  -- tokyonight [theme]
-  -- https://github.com/folke/tokyonight.nvim
-  {
-    "folke/tokyonight.nvim",
-    event = "User LoadColorSchemes",
-    opts = {
-      dim_inactive = false,
-      styles = {
-        comments = { italic = true },
-        keywords = { italic = true },
+ "catppuccin/nvim",
+  name = "catppuccin",
+  priority = 1000,
+  opts = {
+    term_colors = true,
+    transparent_background = true,
+    dim_inactive = {
+      enabled = false, -- dims the background color of inactive window
+      shade = "dark",
+      percentage = 0.15, -- percentage of the shade to apply to the inactive window
+    },
+    integrations = {
+      cmp = true,
+      gitsigns = true,
+      treesitter = true,
+      harpoon = true,
+      telescope = true,
+      mason = true,
+      noice = true,
+      notify = true,
+      which_key = true,
+      fidget = true,
+      native_lsp = {
+        enabled = true,
+        virtual_text = {
+          errors = { "italic" },
+          hints = { "italic" },
+          warnings = { "italic" },
+          information = { "italic" },
+        },
+        underlines = {
+          errors = { "underline" },
+          hints = { "underline" },
+          warnings = { "underline" },
+          information = { "underline" },
+        },
+        inlay_hints = {
+          background = true,
+        },
       },
-    }
-  },
-
-  --  astrotheme [theme]
-  --  https://github.com/AstroNvim/astrotheme
-  {
-    "AstroNvim/astrotheme",
-    event = "User LoadColorSchemes",
-    opts = {
-      palette = "astrodark",
-      plugins = { ["dashboard-nvim"] = true },
+      mini = {
+        enabled = true,
+        indentscope_color = "",
+      },
     },
   },
 
