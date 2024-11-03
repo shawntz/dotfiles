@@ -55,7 +55,7 @@ install-fedora-packages:
 
 install-macos-packages:
 	@echo "installing packages for macos..."
-	/opt/homebrew/bin/brew install $(MACOS_PACKAGES)
+	/opt/homebrew/bin/brew bundle
 
 install-rustup:
 	@echo "setting up rustup (for cargo)..."
