@@ -97,7 +97,7 @@ stow-dot-configs:
 	mkdir -p $(WALLPAPERS_TARGET_DIR)
 	$$STOW_CMD -v -d $(DOTS_DIR) -t $(WALLPAPERS_TARGET_DIR) wallpapers
 	$$STOW_CMD -v -d $(STOW_DIR) -t $(ZSH_TARGET_DIR) zsh
-	@if [ "$(OS)" == "Darwin" ]; then \
+	@if [ "$(OS)" = "Darwin" ]; then \
 		mkdir -p ~/.config/karabiner
 		$$STOW_CMD -v -d $(STOW_DIR) -t $(CONFIG_TARGET_DIR)/karabiner karabiner; \
 		$$STOW_CMD -v -d $(STOW_DIR) -t $(ZSH_TARGET_DIR) zsh; \
