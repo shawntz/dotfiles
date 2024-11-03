@@ -3,10 +3,10 @@ OS = $(shell uname)
 FEDORA_PACKAGES = git kitty alacritty bat zsh neovim curl R feh fzf lua python3 python3-pip pipx tmux neofetch eza fd-find ImageMagick pandoc rclone ripgrep stow trash-cli tree make wget zoxide jupyterlab gimp
 
 # stow dirs
-DOTS_DIR = $(HOME)/dotfiles
-STOW_DIR = $(HOME)/dotfiles/config
+DOTS_DIR = $(HOME)/.dotfiles
+STOW_DIR = $(DOTS_DIR)/config
 CONFIG_TARGET_DIR = $(HOME)/.config
-HAMMERSPOON_TARGET_DIR = $(HOME)/.hammerspoon
+# HAMMERSPOON_TARGET_DIR = $(HOME)/.hammerspoon
 KEYD_TARGET_DIR = /etc/keyd
 WALLPAPERS_TARGET_DIR = $(HOME)/Pictures/wallpapers
 ZSH_TARGET_DIR = $(HOME)
