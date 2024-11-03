@@ -16,6 +16,10 @@ install: install-packages
 stow: stow-dot-configs stow-others
 zsh: enable-zsh
 
+config-mac:
+	@echo "configuring macos preferences..."
+	bash macos/defaults
+
 configure-git:
 	@echo "configuring git..."
 	cp .gitconfig.template .gitconf.sh
