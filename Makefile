@@ -13,7 +13,7 @@ ZSH_TARGET_DIR = $(HOME)
 
 config: configure-git rename-dirs install-packages
 install: install-packages
-stow: stow-dot-configs stow-others
+stow: stow-dot-configs
 zsh: enable-zsh
 
 config-mac:
@@ -90,16 +90,18 @@ stow-dot-configs:
 			$$STOW_CMD -v -d $(STOW_DIR) -t $(CONFIG_TARGET_DIR) $$(basename $$dir); \
 		fi; \
 	done
-
-stow-others:
-	@echo "stowing other files..."
 	@if [ "$(OS)" != "Darwin" ]; then \
-		sudo stow -v -d $(STOW_DIR) -t $(KEYD_TARGET_DIR) keyd; \
+		sudo $$STOW_CMD -v -d $(STOW_DIR) -t $(KEYD_TARGET_DIR) keyd; \
 		sudo keyd reload; \
 	fi; \
 	mkdir -p $(WALLPAPERS_TARGET_DIR)
-	stow -v -d $(DOTS_DIR) -t $(WALLPAPERS_TARGET_DIR) wallpapers
-	stow -v -d $(STOW_DIR) -t $(ZSH_TARGET_DIR) zsh
+	$$STOW_CMD -v -d $(DOTS_DIR) -t $(WALLPAPERS_TARGET_DIR) wallpapers
+	$$STOW_CMD -v -d $(STOW_DIR) -t $(ZSH_TARGET_DIR) zsh
+	@if [ "$(OS)" == "Darwin" ]; then \
+		mkdir -p ~/.config/karabiner
+		$$STOW_CMD -v -d $(STOW_DIR) -t $(CONFIG_TARGET_DIR)/karabiner karabiner; \
+		$$STOW_CMD -v -d $(STOW_DIR) -t $(ZSH_TARGET_DIR) zsh; \
+	fi; \
 
 stow-mac-dot-configs:
 	@echo "stowing macos specific configs..."
