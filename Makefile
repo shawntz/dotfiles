@@ -8,7 +8,7 @@ STOW_DIR = $(HOME)/dotfiles/config
 CONFIG_TARGET_DIR = $(HOME)/.config
 HAMMERSPOON_TARGET_DIR = $(HOME)/.hammerspoon
 KEYD_TARGET_DIR = /etc/keyd
-WALLPAPERS_TARGET_DIR = $(HOME)/pictures/wallpapers
+WALLPAPERS_TARGET_DIR = $(HOME)/Pictures/wallpapers
 ZSH_TARGET_DIR = $(HOME)
 
 config: configure-git rename-dirs install-packages
@@ -92,16 +92,16 @@ stow-others:
 		sudo stow -v -d $(STOW_DIR) -t $(KEYD_TARGET_DIR) keyd; \
 		sudo keyd reload; \
 	fi; \
-	mkdir -p ~/pictures/wallpapers
+	mkdir -p $(WALLPAPERS_TARGET_DIR)
 	stow -v -d $(DOTS_DIR) -t $(WALLPAPERS_TARGET_DIR) wallpapers
 	stow -v -d $(STOW_DIR) -t $(ZSH_TARGET_DIR) zsh
 
 stow-mac-dot-configs:
 	@echo "stowing macos specific configs..."
-	mkdir -p ~/.config/aerospace
-	/opt/homebrew/bin/stow -v -d $(STOW_DIR) -t $(CONFIG_TARGET_DIR)/aerospace aerospace
-	mkdir -p ~/.hammerspoon
-	/opt/homebrew/bin/stow -v -d $(STOW_DIR) -t $(HAMMERSPOON_TARGET_DIR) hammerspoon
+	# mkdir -p ~/.config/aerospace
+	# /opt/homebrew/bin/stow -v -d $(STOW_DIR) -t $(CONFIG_TARGET_DIR)/aerospace aerospace
+	# mkdir -p ~/.hammerspoon
+	# /opt/homebrew/bin/stow -v -d $(STOW_DIR) -t $(HAMMERSPOON_TARGET_DIR) hammerspoon
 	mkdir -p ~/.config/karabiner
 	/opt/homebrew/bin/stow -v -d $(STOW_DIR) -t $(CONFIG_TARGET_DIR)/karabiner karabiner
 	/opt/homebrew/bin/stow -v -d $(STOW_DIR) -t $(ZSH_TARGET_DIR) zsh
