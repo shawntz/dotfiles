@@ -94,7 +94,7 @@ stow-dot-configs:
 		sudo $$STOW_CMD -v -d $(STOW_DIR) -t $(KEYD_TARGET_DIR) keyd; \
 		sudo keyd reload; \
 	fi; \
-	mkdir -p $(WALLPAPERS_TARGET_DIR)
+	# mkdir -p $(WALLPAPERS_TARGET_DIR)
 	$$STOW_CMD -v -d $(DOTS_DIR) -t $(WALLPAPERS_TARGET_DIR) wallpapers
 	$$STOW_CMD -v -d $(STOW_DIR) -t $(ZSH_TARGET_DIR) zsh
 	@if [ "$(OS)" = "Darwin" ]; then \
