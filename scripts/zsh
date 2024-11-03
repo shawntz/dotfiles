@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 
-bash -c "$(wget https://raw.githubusercontent.com/ohmyzsh/ohmyzsh/master/tools/install.sh -O -)"
+bash -c "$(/opt/homebrew/bin/wget https://raw.githubusercontent.com/ohmyzsh/ohmyzsh/master/tools/install.sh -O -)"
 
 rm ~/.zshrc
 
