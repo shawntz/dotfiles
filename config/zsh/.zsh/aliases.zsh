@@ -2,29 +2,28 @@
 
 # ALIASES ---------------------------------------------------------------------
 ## neovim *********************************************************************
-alias vi='fd --type f --hidden --exclude .git | fzf-tmux -m --preview="bat --color=always {}" -p | xargs nvim'
 alias v='nvim -w ~/.vimlog "$@"'
+alias vi='fd --type f --hidden --exclude .git | fzf-tmux -m --preview="bat --color=always {}" -p | xargs nvim'
 alias vim='nvim -w ~/.vimlog "$@"'
 
 ## navigation *****************************************************************
-alias cl='clear'
+alias d='clear'
+alias c='z'
 alias cd='z'
-alias cdi='zi'
+alias ci='zi'
 alias b='cd ..'
 alias bb='cd ../..'
 alias bbb='cd ../../..'
 alias bbbb='cd ../../../..'
-alias ls='eza --all --color=always --sort=name --long --no-user --icons=always --no-permissions'
+alias l='eza --all --color=always --sort=name --long --no-user --icons=always --no-permissions'
 alias home="cd ~"
-alias dots="cd ~/dotfiles"
-alias dotfiles="cd ~/dotfiles"
-alias dev="cd ~/code"
-alias oss="cd ~/code/oss"
-alias anl="cd ~/code/anl"
-alias desk="cd ~/desktop"
-alias docs="cd ~/documents"
-alias dl="cd ~/downloads"
-alias md="mkdir"
+alias dots="cd ~/.dotfiles"
+alias dotfiles="cd ~/.dotfiles"
+alias dev="cd ~/Developer"
+alias desk="cd ~/Desktop"
+alias docs="cd ~/Documents"
+alias dl="cd ~/Downloads"
+alias md="mkdir -p"
 alias t="touch"
 alias x="exit"
 alias kk='killall kitty'
@@ -35,7 +34,7 @@ alias get="curl -O -L"
 alias ssh="kitty +kitten ssh"
 
 ## tools **********************************************************************
-alias c="code -g ."
+alias v="code -g ."
 alias s='source ~/.zshrc'
 alias trim="awk '{\$1=\$1;print}'"
 alias g='lazygit'
@@ -43,7 +42,7 @@ alias f='yazi'
 alias stfu="osascript -e 'set volume output muted true'"
 alias afk="/System/Library/CoreServices/Menu\ Extras/User.menu/Contents/Resources/CGSession -suspend"
 alias chromekill="ps ux | grep '[C]hrome Helper --type=renderer' | grep -v extension-process | tr -s ' ' | cut -d ' ' -f2 | xargs kill"
-alias rm_ds="find . -name '*.DS_Store' -type f -ls -delete"
+alias rmds="find . -name '*.DS_Store' -type f -ls -delete"
 
 # FUNCTIONS -------------------------------------------------------------------
 function cs () {
