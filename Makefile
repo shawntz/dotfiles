@@ -79,6 +79,7 @@ install-from-source:
 
 stow-dot-configs:
 	@echo "stowing .config files..."
+	mkdir -p ~/.config
 	@if [ "$(OS)" = "Darwin" ]; then \
 		STOW_CMD="/opt/homebrew/bin/stow"; \
 	else \
