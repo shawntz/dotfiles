@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 echo "[INFO] - stowing dotfiles..."
-stow .
+stow . -v
 echo "[INFO] - finished stowing dotfiles!"
 
 echo "[INFO] - making dirs..."
