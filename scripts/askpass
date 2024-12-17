@@ -1,5 +1,0 @@
-#!/usr/bin/env bash
-
-echo "[ssh-askpass]..."
-
-sudo ln -s /usr/local/bin/ssh-askpass /usr/X11R6/bin/ssh-askpass
