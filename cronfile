@@ -1,2 +1,0 @@
-20 09 * * * $HOME/dotfiles/crontab/upgrade.sh
-30 09 * * * $HOME/dotfiles/crontab/backup.sh
