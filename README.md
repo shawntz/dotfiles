@@ -13,3 +13,10 @@ this `main` branch of my `dotfiles` repo contains my latest attempt at bootstrap
 - `chsh -s /run/current-system/sw/bin/fish`
 - `eval (ssh-agent -c)`
 - `darwin-rebuild switch --flake ~/Nix`
+
+## other notes
+- download `R` lang directly from CRAN (instead of from Nix/Nix Brew) so that library is exposed for `R.nvim`
+- download `R` lang server through CRAN to facilitate autocompletions in nvim:
+```r
+install.packages("languageserver")
+```
