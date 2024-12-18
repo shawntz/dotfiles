@@ -193,6 +193,71 @@ const rules: KarabinerRules[] = [
         "raycast://extensions/raycast/clipboard-history/clipboard-history"
       ),
     },
+
+    // w = "Window" via rectangle.app
+    w: {
+      semicolon: {
+        description: "Window: Hide",
+        to: [
+          {
+            key_code: "h",
+            modifiers: ["right_command"],
+          },
+        ],
+      },
+      y: rectangle("previous-display"),
+      o: rectangle("next-display"),
+      k: rectangle("top-half"),
+      j: rectangle("bottom-half"),
+      h: rectangle("left-half"),
+      l: rectangle("right-half"),
+      f: rectangle("maximize"),
+      u: {
+        description: "Window: Previous Tab",
+        to: [
+          {
+            key_code: "tab",
+            modifiers: ["right_control", "right_shift"],
+          },
+        ],
+      },
+      i: {
+        description: "Window: Next Tab",
+        to: [
+          {
+            key_code: "tab",
+            modifiers: ["right_control"],
+          },
+        ],
+      },
+      n: {
+        description: "Window: Next Window",
+        to: [
+          {
+            key_code: "grave_accent_and_tilde",
+            modifiers: ["right_command"],
+          },
+        ],
+      },
+      b: {
+        description: "Window: Back",
+        to: [
+          {
+            key_code: "open_bracket",
+            modifiers: ["right_command"],
+          },
+        ],
+      },
+      m: {
+        description: "Window: Forward",
+        to: [
+          {
+            key_code: "close_bracket",
+            modifiers: ["right_command"],
+          },
+        ],
+      },
+    },
   }),
 ];
 
