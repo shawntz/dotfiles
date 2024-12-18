@@ -10,6 +10,7 @@
   environment.systemPackages = with pkgs; [
     ascii-image-converter
     bat
+    deno
     docker
     eza
     fd
@@ -39,7 +40,6 @@
     pandoc
     positron-bin
     postman
-    R
     raycast
     rclone
     rectangle
