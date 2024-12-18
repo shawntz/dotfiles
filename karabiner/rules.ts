@@ -56,9 +56,7 @@ const rules: KarabinerRules[] = [
     ],
   },
   ...createHyperSubLayers({
-    spacebar: open(
-      "raycast://extensions/stellate/mxstbr-commands/create-notion-todo"
-    ),
+    spacebar: app("HEY"),
     // b = "B"rowse
     b: {
       g: open("https://google.com"),
@@ -69,17 +67,14 @@ const rules: KarabinerRules[] = [
     // o = "Open" applications
     o: {
       1: app("1Password"),
-      a: app("Asana"),
-      b: app("Brave Browser"),
-      r: app("Fantastical"),
+      a: app("Music"),
+      b: app("Google Chrome"),
       s: app("Slack"),
-      e: app("Gmail"),
       k: app("kitty"),
       z: app("zoom.us"),
       f: app("Finder"),
-      // "i"Message
-      i: app("Messages"),
-      m: app("Music"),
+      m: app("Messages"),
+      t: app("Todoist"),
     },
 
     // s = "System"
