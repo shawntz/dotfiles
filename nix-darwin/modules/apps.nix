@@ -77,6 +77,7 @@
     casks = [
       "1password"
       "chatgpt"
+      "docker"
       "hey"
       "iina"
       "kindle"
