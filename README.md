@@ -13,6 +13,9 @@ this `main` branch of my `dotfiles` repo contains my latest attempt at bootstrap
 - `chsh -s /run/current-system/sw/bin/fish`
 - `eval (ssh-agent -c)`
 - `darwin-rebuild switch --flake ~/Nix`
+- for lsps (tailwindcss):
+  - `sudo chown -R 501:20 "~/.npm"`
+  - `npm install -g @tailwindcss/language-server`
 
 ## other notes
 - download `R` lang directly from CRAN (instead of from Nix/Nix Brew) so that library is exposed for `R.nvim`
