@@ -1,4 +1,46 @@
 return {
+  {
+    "neovim/nvim-lspconfig",
+    dependencies = {
+      -- Automatically install LSPs and related tools to stdpath for Neovim
+      { 'williamboman/mason.nvim', config = true }, -- NOTE: Must be loaded before dependants
+      'williamboman/mason-lspconfig.nvim',
+      'WhoIsSethDaniel/mason-tool-installer.nvim',
+
+      -- Useful status updates for LSP.
+      -- NOTE: `opts = {}` is the same as calling `require('fidget').setup({})`
+      { 'j-hui/fidget.nvim', opts = {} },
+
+      -- Allows extra capabilities provided by nvim-cmp
+      'hrsh7th/cmp-nvim-lsp',
+    },
+    config = function()
+        -- Example LSP configuration
+        local lspconfig = require('lspconfig')
+
+        -- Setup for a specific LSP server
+        lspconfig.ts_ls.setup {
+            on_attach = function(client, bufnr)
+                print("Attached to buffer", bufnr)
+            end,
+            capabilities = vim.lsp.protocol.make_client_capabilities(),
+        }
+    end,
+    opts = {
+      servers = {
+        tailwindcss = {},
+        pyright = {},
+      },
+    },
+  },
+  {
+    "NvChad/nvim-colorizer.lua",
+    opts = {
+      user_default_options = {
+        tailwind = true,
+      },
+    },
+  },
   "hrsh7th/nvim-cmp",
   event = "InsertEnter",
   dependencies = {
@@ -8,6 +50,7 @@ return {
     "L3MON4D3/LuaSnip", -- snippet engine
     "saadparwaiz1/cmp_luasnip", -- for autocompletion
     "rafamadriz/friendly-snippets", -- useful snippets
+    { "roobert/tailwindcss-colorizer-cmp.nvim", config = true },
   },
   config = function()
     local cmp = require("cmp")
