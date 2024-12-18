@@ -1,4 +1,6 @@
 #!/usr/bin/env bash
+trash ~/.config/{karabiner,neofetch,nvim,rstudio,tmux,yazi}
+
 echo "[INFO] - stowing dotfiles..."
 stow . -v
 echo "[INFO] - finished stowing dotfiles!"

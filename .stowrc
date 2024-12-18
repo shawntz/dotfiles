@@ -1,7 +1,8 @@
---target=~/.config --no-folding .
+--target=~/.config
 --ignore=.stowrc
 --ignore=DS_Store
 --ignore=README.md
 --ignore=setup.sh
 --ignore=.gitignore
 --ignore=.git
+--ignore=nix-darwin
