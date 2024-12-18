@@ -42,8 +42,14 @@
         # Persistent applications in the dock.
         # Type: null or (list of (path or string))
         persistent-apps = [
-          "/Applications/Safari.app"
+          "/Applications/HEY.app"
+          "${pkgs.google-chrome}/Applications/Google Chrome.app"
+          "${pkgs.slack}/Applications/Slack.app"
           "${pkgs.kitty}/Applications/kitty.app"
+          "/Applications/Xcode.app"
+          "/Applications/Todoist.app"
+          "/System/Applications/Music.app"
+          "/System/Applications/System Settings.app"
         ];
 
         # Persistent folders in the dock.
@@ -58,7 +64,7 @@
         showhidden = true;  # Default is false.
         slow-motion-allowed = false;  # Default is false.
         static-only = false;  # Default is false.
-        tilesize = 64;  # Default is (64).
+        tilesize = 48;  # Default is (64).
 
         # Hot corner actions. Valid values include:
         #
@@ -146,7 +152,7 @@
         "com.apple.mouse.tapBehavior" = 1;  # Mode 1 enables tap to click.
         "com.apple.sound.beep.feedback" = 1;  # Defaults to 1 (feedback sound when changing system volume).
         "com.apple.springing.delay" = 0.0;  # Default is (1.0).
-        "com.apple.springing.enabled" = false; 
+        "com.apple.springing.enabled" = false;
         "com.apple.swipescrolldirection" = true;  # Default is true.
         "com.apple.trackpad.enableSecondaryClick" = true;  # Default is true.
         "com.apple.trackpad.forceClick" = true;
