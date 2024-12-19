@@ -5,11 +5,15 @@
     programs.starship = {
       enable = true;
 	    settings = {
-	      format = ''
-          [](surface0)$os$username[](bg:peach fg:surface0)$directory[](fg:peach bg:green)$git_branch$git_status[](fg:green bg:teal)$c$rust$golang$nodejs$php$java$kotlin$haskell$python[](fg:teal bg:blue)$docker_context$conda[](fg:blue bg:purple)$time[ ](fg:purple)$line_break$character
+	      #format = ''
+        #  [](surface0)$os$username[](bg:peach fg:surface0)$directory[](fg:peach bg:green)$git_branch$git_status[](fg:green bg:teal)$c$rust$golang$nodejs$php$java$kotlin$haskell$python[](fg:teal bg:blue)$docker_context$conda[](fg:blue bg:purple)$time[ ](fg:purple)$line_break$character
+        #'';
+
+        format = ''
+        [](color_orange)$username$os$hostname[](bg:color_yellow fg:color_orange)$directory[](fg:color_yellow bg:color_aqua)$git_branch$git_status[](fg:color_aqua bg:color_blue)$c$rust$golang$nodejs$php$java$python[](fg:color_blue bg:color_bg3)$docker_context$conda[](fg:color_bg3 bg:color_bg1)$time[ ](fg:color_bg1)$line_break$character
         '';
 
-        palette = "catppuccin_mocha";
+        palette = "gruvbox_dark";
 
 	      add_newline = true;
 
@@ -28,7 +32,7 @@
 
 	      os = {
 	        disabled = false;
-	        style = "bg:surface0 fg:text";
+	        style = "bg:color_orange fg:color_fg0";
 	      };
 
 	      os.symbols = {
@@ -52,39 +56,47 @@
           Debian = "󰣚";
           Redhat = "󱄛";
           RedHatEnterprise = "󱄛";
+          Pop = "";
 	      };
 
         username = {
           show_always = true;
-          style_user = "bg:surface0 fg:text";
-          style_root = "bg:surface0 fg:text";
+          style_user = "bg:color_orange fg:color_fg0";
+          style_root = "bg:color_orange fg:color_fg0";
           format = "[ $user ]($style)";
         };
 
+        hostname = {
+          disabled = false;
+          ssh_only = false;
+          style = "bg:color_orange fg:color_fg0";
+          format = "[ $hostname ]($style)";
+        };
+
         directory = {
-          style = "fg:mantle bg:peach";
+          style = "fg:color_fg0 bg:color_yellow";
           format = "[ $path ]($style)";
           truncation_length = 3;
           truncation_symbol = "…/";
 
           substitutions = {
-            "documents" = "󰈙 ";
-            "downloads" = " ";
-            "music" = "󰝚 ";
-            "pictures" = " ";
-            "code" = "󰲋 ";
+            "Documents" = "󰈙 ";
+            "Downloads" = " ";
+            "Music" = "󰝚 ";
+            "Pictures" = " ";
+            "Code" = "󰲋 ";
           };
         };
 
         git_branch = {
           symbol = "";
           style = "bg:color_aqua";
-          format = "[[ $symbol $branch ](fg:base bg:green)]($style)";
+          format = "[[ $symbol $branch ](fg:color_fg0 bg:color_aqua)]($style)";
         };
 
         git_status = {
           style = "bg:color_aqua";
-          format = "[[($all_status$ahead_behind )](fg:base bg:green)]($style)";
+          format = "[[($all_status$ahead_behind )](fg:color_fg0 bg:color_aqua)]($style)";
         };
 
         nodejs = {
@@ -143,8 +155,8 @@
         time = {
           disabled = false;
           time_format = "%R";
-          style = "bg:peach";
-          format = "[[  $time ](fg:mantle bg:purple)]($style)";
+          style = "bg:color_bg1";
+          format = "[[  $time ](fg:color_fg0 bg:color_bg1)]($style)";
         };
 
         line_break = {
@@ -153,11 +165,11 @@
 
         character = {
           disabled = false;
-          success_symbol = "[](bold fg:green)";
-          error_symbol = "[](bold fg:red)";
-          vimcmd_symbol = "[](bold fg:green)";
-          vimcmd_replace_one_symbol = "[](bold fg:purple)";
-          vimcmd_replace_symbol = "[](bold fg:purple)";
+          success_symbol = "[](bold fg:color_green)";
+          error_symbol = "[](bold fg:color_red)";
+          vimcmd_symbol = "[](bold fg:color_green)";
+          vimcmd_replace_one_symbol = "[](bold fg:color_purple)";
+          vimcmd_replace_symbol = "[](bold fg:color_purple)";
           vimcmd_visual_symbol = "[](bold fg:lavender)";
         };
 
