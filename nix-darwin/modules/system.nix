@@ -27,7 +27,9 @@
       };
 
       dock = {
-        autohide = false;  # Default is false
+        autohide = true;  # Default is false
+        autohide-delay = 0.0;  # Default is (0.24).
+        autohide-time-modifier = 0.0;  # Default is (1.0).
         enable-spring-load-actions-on-all-items = true;  # Default is false.
         appswitcher-all-displays = true;  # Default is false.
         dashboard-in-overlay = true;  # Default is false.
@@ -64,7 +66,7 @@
         showhidden = true;  # Default is false.
         slow-motion-allowed = false;  # Default is false.
         static-only = false;  # Default is false.
-        tilesize = 48;  # Default is (64).
+        tilesize = 128;  # Default is (64).
 
         # Hot corner actions. Valid values include:
         #
