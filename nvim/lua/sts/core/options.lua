@@ -20,6 +20,7 @@ vim.opt.background = "dark" -- Colorschemes that can be light or dark will be ma
 vim.opt.laststatus = 3 -- Global statusline.
 vim.opt.linebreak = true -- Wrap lines at 'breakat'.
 vim.opt.number = true -- Show numberline.
+vim.opt.numberwidth = 5 -- Set number column width to 2 {default 4}.
 vim.opt.preserveindent = true -- Preserve indent structure as much as possible.
 vim.opt.pumheight = 10 -- Height of the pop up menu.
 vim.opt.relativenumber = true -- Show relative numberline.
@@ -28,10 +29,40 @@ vim.opt.showmode = false -- Disable showing modes in command line.
 vim.opt.showtabline = 2 -- always display tabline.
 vim.opt.signcolumn = "yes" -- Always show the sign column.
 vim.opt.smartcase = true -- Case sensitivie searching.
-vim.opt.smartindent = false -- Smarter autoindentation.
+vim.opt.smartindent = true -- Smarter autoindentation.
 vim.opt.splitbelow = true -- Splitting a new window below the current one.
 vim.opt.splitright = true -- Splitting a new window at the right of the current one.
 vim.opt.tabstop = 2 -- Number of space in a tab.
+
+-- Define an augroup for toggling relative numbers
+local numbertoggle_group = vim.api.nvim_create_augroup("numbertoggle", { clear = true })
+
+-- Toggle relative numbers when entering/leaving insert mode or focusing/defocusing windows
+vim.api.nvim_create_autocmd(
+  { "BufEnter", "FocusGained", "InsertLeave", "WinEnter" },
+  {
+    group = numbertoggle_group,
+    pattern = "*",
+    callback = function()
+      if vim.opt.number:get() and vim.fn.mode() ~= "i" then
+        vim.opt.relativenumber = true
+      end
+    end
+  }
+)
+
+vim.api.nvim_create_autocmd(
+  { "BufLeave", "FocusLost", "InsertEnter", "WinLeave" },
+  {
+    group = numbertoggle_group,
+    pattern = "*",
+    callback = function()
+      if vim.opt.number:get() then
+        vim.opt.relativenumber = false
+      end
+    end
+  }
+)
 
 vim.opt.termguicolors = true -- Enable 24-bit RGB color in the TUI.
 vim.opt.undofile = true -- Enable persistent undo between session and reboots.
@@ -53,5 +84,6 @@ vim.opt.selection = "old" -- Don't select the newline symbol when using <End> on
 vim.opt.viewoptions:remove "curdir" -- Disable saving current directory with views.
 vim.opt.shortmess:append { s = true, I = true } -- Disable startup message.
 vim.opt.backspace:append { "nostop" } -- Don't stop backspace at insert.
-vim.opt.diffopt:append { "algorithm:histogram", "linematch:60" } -- Enable linematch diff algorithmvim.opt.breakindent = true -- Wrap indent to match  line start.
+vim.opt.diffopt:append { "algorithm:histogram", "linematch:60" } -- Enable linematch diff algorithm
+vim.opt.breakindent = true -- Wrap indent to match  line start.
 
