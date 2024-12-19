@@ -18,7 +18,7 @@
       '';
       functions = {
         # neovim
-        v = "kitty @set-colors background=#282828 && nvim -w ~/.vimlog $argv && kitty @set-colors background=#1a1b26";
+        v = "nvim -w ~/.vimlog $argv";
         vim = "kitty @set-colors background=#282828 && nvim -w ~/.vimlog $argv && kitty @set-colors background=#1a1b26";
         vi = "fd --type f --hidden --exclude .git | fzf-tmux -m --preview='bat --color=always {}' -p | xargs nvim";
 
