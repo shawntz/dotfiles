@@ -46,7 +46,7 @@
         restart = "sudo reboot";
         bye = "sudo shutdown -r now";
         get = "curl -O -L $argv[1]";
-        ssh = "kitty +kitten ssh";
+        ssh = "kitty +kitten ssh $argv[1]";
 
         # tools
         vs = "code -g .";
