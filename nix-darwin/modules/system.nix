@@ -172,7 +172,7 @@
       spaces = {
         # false = each physical display has a separate space (Mac default)
         # true = one space spans across all physical displays
-        spans-displays = true;
+        spans-displays = false;
       };
 
       trackpad = {
