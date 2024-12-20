@@ -10,7 +10,7 @@
         #'';
 
         format = ''
-        [](color_orange)$username$os$hostname[](bg:color_yellow fg:color_orange)$directory[](fg:color_yellow bg:color_aqua)$git_branch$git_status[](fg:color_aqua bg:color_blue)$c$rust$golang$nodejs$php$java$python[](fg:color_blue bg:color_bg3)$docker_context$conda[](fg:color_bg3 bg:color_bg1)$time[ ](fg:color_bg1)$line_break$character
+        [](color_orange)$username[](bg:color_yellow fg:color_orange)$directory[](fg:color_yellow bg:color_aqua)$git_branch$git_status[](fg:color_aqua bg:color_blue)$c$rust$golang$nodejs$php$java$python[](fg:color_blue bg:color_bg3)$docker_context$conda[](fg:color_bg3 bg:color_bg1)$time[ ](fg:color_bg1)$line_break$character
         '';
 
         palette = "gruvbox_dark";
@@ -63,7 +63,7 @@
           show_always = true;
           style_user = "bg:color_orange fg:color_fg0";
           style_root = "bg:color_orange fg:color_fg0";
-          format = "[ $user ]($style)";
+          format = "[👻$user ]($style)";
         };
 
         hostname = {
