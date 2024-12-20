@@ -49,6 +49,7 @@
           "${pkgs.slack}/Applications/Slack.app"
           "${pkgs.kitty}/Applications/kitty.app"
           "/Applications/Xcode.app"
+          "/Applications/Bear.app"
           "/Applications/Todoist.app"
           "/System/Applications/Music.app"
           "/System/Applications/System Settings.app"
