@@ -42,9 +42,9 @@
     postman
     raycast
     rclone
-    rectangle
     ripgrep
     rustup
+    skhd
     skimpdf
     slack
     starship
@@ -54,6 +54,7 @@
     tree-sitter
     wget
     vscode
+    yabai
     yarn
     yazi
     zoom-us
@@ -91,6 +92,7 @@
 
     masApps = {
       "1pwsafari" = 1569813296;
+      "bear" = 1091189122;
       "codye" = 1516894961;
       "color" = 1545870783;
       "excel" = 462058435;
