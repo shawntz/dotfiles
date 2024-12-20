@@ -4,7 +4,8 @@
   home-manager.users."${username}" = { ... }: {
     programs.kitty = {
       enable = true;
-      theme = "Tokyo Night";
+      # theme = "Tokyo Night";
+      theme = "Gruvbox Dark";
       font.name = "JetBrainsMono Nerd Font";
       settings = {
         allow_remote_control = "yes";
@@ -19,8 +20,8 @@
         macos_colorspace = "displayp3";
         # window_padding_height = 30;
         # window_padding_width = 5;
-        background_opacity = 0.4;
-        background_blur = 128;
+        # background_opacity = 0.4;
+        # background_blur = 128;
         confirm_os_window_close = -0;
         copy_on_select = true;
         clipboard_control = "write-clipboard read-clipboard write-primary read-primary";
