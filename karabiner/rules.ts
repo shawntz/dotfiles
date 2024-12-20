@@ -3,14 +3,41 @@ import { KarabinerRules } from "./types";
 import { createHyperSubLayers, app, webapp, open, rectangle, shell } from "./utils";
 
 const rules: KarabinerRules[] = [
+  // Define the ctrl key
+  {
+    description: "New Control Key",
+    manipulators: [
+      {
+        description: "Caps Lock -> Control Key",
+        from: {
+          key_code: "caps_lock",
+          modifiers: {
+            optional: ["any"],
+          },
+        },
+        to: [
+          {
+            key_code: "left_control",
+            hold_down_milliseconds: 500,
+          },
+        ],
+        to_if_alone: [
+          {
+            key_code: "escape",
+          },
+        ],
+        type: "basic",
+      },
+    ],
+  },
   // Define the Hyper key itself
   {
     description: "Hyper Key (⌃⌥⇧⌘)",
     manipulators: [
       {
-        description: "Caps Lock -> Hyper Key",
+        description: "Tab -> Hyper Key",
         from: {
-          key_code: "caps_lock",
+          key_code: "tab",
           modifiers: {
             optional: ["any"],
           },
@@ -33,26 +60,11 @@ const rules: KarabinerRules[] = [
         ],
         to_if_alone: [
           {
-            key_code: "escape",
+            key_code: "tab",
           },
         ],
         type: "basic",
       },
-      // {
-      //   type: "basic",
-      //   description: "Disable CMD + Tab to force Hyper Key usage",
-      //   from: {
-      //     key_code: "tab",
-      //     modifiers: {
-      //       mandatory: ["left_command"],
-      //     },
-      //   },
-      //   to: [
-      //     {
-      //       key_code: "tab",
-      //     },
-      //   ],
-      // },
     ],
   },
   ...createHyperSubLayers({
@@ -60,7 +72,6 @@ const rules: KarabinerRules[] = [
     // b = "B"rowse
     b: {
       g: open("https://google.com"),
-      t: open("https://twitter.com"),
       f: open("https://facebook.com"),
       r: open("https://reddit.com"),
     },
@@ -69,12 +80,13 @@ const rules: KarabinerRules[] = [
       1: app("1Password"),
       a: app("Music"),
       b: app("Google Chrome"),
-      s: app("Slack"),
-      k: app("kitty"),
-      z: app("zoom.us"),
       f: app("Finder"),
+      k: app("kitty"),
       m: app("Messages"),
+      n: app("Bear"),
+      s: app("Slack"),
       t: app("Todoist"),
+      z: app("zoom.us"),
     },
 
     // s = "System"
@@ -138,9 +150,7 @@ const rules: KarabinerRules[] = [
       c: open("raycast://extensions/raycast/system/open-camera"),
     },
 
-    // v = "moVe" which isn't "m" because we want it to be on the left hand
-    // so that hjkl work like they do in vim
-    v: {
+    q: {
       h: {
         to: [{ key_code: "left_arrow" }],
       },
@@ -184,79 +194,14 @@ const rules: KarabinerRules[] = [
 
     // r = "Raycast"
     r: {
-      c: open("raycast://extensions/thomas/color-picker/pick-color"),
+      p: open("raycast://extensions/thomas/color-picker/pick-color"),
       e: open(
         "raycast://extensions/raycast/emoji-symbols/search-emoji-symbols"
       ),
-      p: open("raycast://extensions/raycast/raycast/confetti"),
+      c: open("raycast://extensions/raycast/raycast/confetti"),
       h: open(
         "raycast://extensions/raycast/clipboard-history/clipboard-history"
       ),
-    },
-
-    // w = "Window" via rectangle.app
-    w: {
-      semicolon: {
-        description: "Window: Hide",
-        to: [
-          {
-            key_code: "h",
-            modifiers: ["right_command"],
-          },
-        ],
-      },
-      y: rectangle("previous-display"),
-      o: rectangle("next-display"),
-      k: rectangle("top-half"),
-      j: rectangle("bottom-half"),
-      h: rectangle("left-half"),
-      l: rectangle("right-half"),
-      f: rectangle("maximize"),
-      u: {
-        description: "Window: Previous Tab",
-        to: [
-          {
-            key_code: "tab",
-            modifiers: ["right_control", "right_shift"],
-          },
-        ],
-      },
-      i: {
-        description: "Window: Next Tab",
-        to: [
-          {
-            key_code: "tab",
-            modifiers: ["right_control"],
-          },
-        ],
-      },
-      n: {
-        description: "Window: Next Window",
-        to: [
-          {
-            key_code: "grave_accent_and_tilde",
-            modifiers: ["right_command"],
-          },
-        ],
-      },
-      b: {
-        description: "Window: Back",
-        to: [
-          {
-            key_code: "open_bracket",
-            modifiers: ["right_command"],
-          },
-        ],
-      },
-      m: {
-        description: "Window: Forward",
-        to: [
-          {
-            key_code: "close_bracket",
-            modifiers: ["right_command"],
-          },
-        ],
-      },
     },
   }),
 ];
