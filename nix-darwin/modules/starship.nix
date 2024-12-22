@@ -63,7 +63,8 @@
           show_always = true;
           style_user = "bg:color_orange fg:color_fg0";
           style_root = "bg:color_orange fg:color_fg0";
-          format = "[👻$user ]($style)";
+          # format = "[👻$user ]($style)";
+          format = "[👻]($style)";
         };
 
         hostname = {
