@@ -166,6 +166,24 @@ export function open(...what: string[]): LayerCommand {
   };
 }
 
+export function trigger(space: number, ...what: string[]): LayerCommand {
+  return {
+    to: what.map((w) => ({
+      shell_command: `/run/current-system/sw/bin/yabai -m space --focus ${space} || true && open -a '${w}.app'`,
+    })),
+    description: `Open ${what.join(" & ")}`,
+  };
+}
+
+export function hyperYabai(...what: string[]): LayerCommand {
+  return {
+    to: what.map((w) => ({
+      shell_command: `/run/current-system/sw/bin/yabai ${w}`,
+    })),
+    description: `Skhd replacement`,
+  };
+}
+
 /**
  * Utility function to create a LayerCommand from a tagged template literal
  * where each line is a shell command to be executed.
@@ -208,8 +226,12 @@ export function rectangle(name: string): LayerCommand {
 /**
  * Shortcut for "Open an app" command (of which there are a bunch)
  */
-export function app(name: string): LayerCommand {
-  return open(`-a '${name}.app'`);
+export function app(name: string, space?: number): LayerCommand {
+  if (space === undefined) {
+    return open(`-a '${name}.app'`);
+  } else {
+    return trigger(space, `${name}`);
+  }
 }
 
 /**

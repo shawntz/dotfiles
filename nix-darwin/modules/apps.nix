@@ -44,7 +44,6 @@
     rclone
     ripgrep
     rustup
-    skhd
     skimpdf
     slack
     starship
