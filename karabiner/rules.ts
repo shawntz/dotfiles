@@ -79,9 +79,9 @@ const rules: KarabinerRules[] = [
     y: hyperYabai("-m space --space --mirror y-axis"),
     x: hyperYabai("-m space --space --mirror x-axis"),
     t: hyperYabai("-m window --toggle float --grid 4:4:1:1:2:2"),
-    f: hyperYabai("-m window --toggle zoom-fullscreen"),
+    m: hyperYabai("-m window --toggle zoom-fullscreen"),
     b: hyperYabai("-m window space --balance"),
-    v: {
+    z: {
       j: hyperYabai("-m window --swap south"),
       k: hyperYabai("-m window --swap north"),
       h: hyperYabai("-m window --swap west"),
@@ -195,7 +195,7 @@ const rules: KarabinerRules[] = [
     },
 
     // utils
-    spacebar: {
+    v: {
       // vim key bindings
       h: {
         to: [{ key_code: "left_arrow" }],
@@ -228,7 +228,7 @@ const rules: KarabinerRules[] = [
     },
 
     // m = Apple *M*usic which isn't "m" because we want it to be on the left hand
-    m: {
+    p: {
       p: {
         to: [{ key_code: "play_or_pause" }],
       },
