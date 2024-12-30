@@ -65,7 +65,7 @@
         ./modules/kitty.nix
         ./modules/fish.nix
         ./modules/starship.nix
-
+        
 	    home-manager.darwinModules.home-manager
 	    nix-homebrew.darwinModules.nix-homebrew {
           nix-homebrew = {
