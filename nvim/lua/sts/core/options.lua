@@ -87,3 +87,39 @@ vim.opt.backspace:append { "nostop" } -- Don't stop backspace at insert.
 vim.opt.diffopt:append { "algorithm:histogram", "linematch:60" } -- Enable linematch diff algorithm
 vim.opt.breakindent = true -- Wrap indent to match  line start.
 
+--:hi normal guibg=NONE
+vim.api.nvim_set_hl(0, "Normal", { bg = "NONE" })
+-- vim.api.nvim_set_hl(0, "CursorLine", { bg = "NONE" })
+--vim.api.nvim_set_hl(0, "CursorLine", {default=true, blend=50})
+--vim.api.nvim_set_hl(0, "CursorLine", { bg = "NONE", fg = "#F5261D" })
+vim.api.nvim_set_hl(0, "CursorLine", { bg = "NONE", underline = true, bold = true, sp = "#EEDAAD", italic = true, blend = 15 })
+vim.api.nvim_set_hl(0, "CursorLineNr", { fg = "#FFD700", bold = true }) -- Gold color for the line number
+vim.api.nvim_set_hl(0, "NvimTreeNormal", { bg = "NONE" })
+vim.api.nvim_set_hl(0, "EndOfBuffer", { bg = "NONE" })
+--vim.api.nvim_set_hl(0, "SignColumn", { bg = "NONE" })
+
+-- Sidebar
+--vim.api.nvim_set_hl(0, "LineNr", { bg = "NONE", fg = "#AAAAAA" })
+--vim.api.nvim_set_hl(0, "CursorLineNr", { bg = "NONE", fg = "#FFFFFF" })
+vim.api.nvim_set_hl(0, "LineNr", { bg = "NONE" })
+-- vim.api.nvim_set_hl(0, "CursorLineNr", { bg = "NONE" })
+vim.api.nvim_set_hl(0, "SignColumn", { bg = "NONE" })
+
+-- Diagnostics
+vim.api.nvim_set_hl(0, "DiagnosticSignWarn", { bg = "NONE", fg = "#FFA500" })
+vim.api.nvim_set_hl(0, "DiagnosticSignError", { bg = "NONE", fg = "#FF0000" })
+vim.api.nvim_set_hl(0, "DiagnosticSignInfo", { bg = "NONE", fg = "#00FFFF" })
+vim.api.nvim_set_hl(0, "DiagnosticSignHint", { bg = "NONE", fg = "#00FF00" })
+
+-- Top bar
+vim.api.nvim_set_hl(0, "StatusLine", { bg = "NONE", fg = "#FFFFFF" })
+vim.api.nvim_set_hl(0, "StatusLineNC", { bg = "NONE", fg = "#AAAAAA" })
+
+-- Tabline
+vim.api.nvim_set_hl(0, "TabLine", { bg = "NONE", fg = "#AAAAAA" })
+vim.api.nvim_set_hl(0, "TabLineSel", { bg = "NONE", fg = "#FFFFFF" })
+vim.api.nvim_set_hl(0, "TabLineFill", { bg = "NONE" })
+
+-- WinBar
+vim.api.nvim_set_hl(0, "WinBar", { bg = "NONE", fg = "#FFFFFF" })
+vim.api.nvim_set_hl(0, "WinBarNC", { bg = "NONE", fg = "#AAAAAA" })
