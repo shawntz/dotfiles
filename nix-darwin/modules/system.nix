@@ -27,7 +27,7 @@
       };
 
       dock = {
-        autohide = true;  # Default is false
+        autohide = false;  # Default is false
         autohide-delay = 0.0;  # Default is (0.24).
         autohide-time-modifier = 0.0;  # Default is (1.0).
         enable-spring-load-actions-on-all-items = true;  # Default is false.
@@ -47,7 +47,7 @@
           "/Applications/HEY.app"
           "${pkgs.google-chrome}/Applications/Google Chrome.app"
           "${pkgs.slack}/Applications/Slack.app"
-          "${pkgs.kitty}/Applications/kitty.app"
+          # "${pkgs.kitty}/Applications/kitty.app"
           "/Applications/Xcode.app"
           "/Applications/Bear.app"
           "/Applications/Todoist.app"
@@ -67,7 +67,7 @@
         showhidden = true;  # Default is false.
         slow-motion-allowed = false;  # Default is false.
         static-only = false;  # Default is false.
-        tilesize = 128;  # Default is (64).
+        tilesize = 64;  # Default is (64).
 
         # Hot corner actions. Valid values include:
         #
