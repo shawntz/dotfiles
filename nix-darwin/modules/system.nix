@@ -48,6 +48,7 @@
           "${pkgs.google-chrome}/Applications/Google Chrome.app"
           "${pkgs.slack}/Applications/Slack.app"
           # "${pkgs.kitty}/Applications/kitty.app"
+          "/Applications/Ghostty.app"
           "/Applications/Xcode.app"
           "/Applications/Bear.app"
           "/Applications/Todoist.app"

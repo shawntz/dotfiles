@@ -2812,12 +2812,12 @@
                                         "value": 0
                                     }
                                 ],
-                                "description": "Open kitty",
+                                "description": "Open Ghostty",
                                 "from": {
                                     "key_code": "return_or_enter",
                                     "modifiers": { "optional": ["any"] }
                                 },
-                                "to": [{ "shell_command": "/run/current-system/sw/bin/yabai -m space --focus 1 || true && open -a 'kitty.app'" }],
+                                "to": [{ "shell_command": "/run/current-system/sw/bin/yabai -m space --focus 1 || true && open -a 'Ghostty.app'" }],
                                 "type": "basic"
                             }
                         ]

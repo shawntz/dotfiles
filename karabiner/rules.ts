@@ -117,7 +117,7 @@ const rules: KarabinerRules[] = [
     },
  
     // most frequent apps don't require "a" sublayer
-    return_or_enter: app("kitty", 1),
+    return_or_enter: app("Ghostty", 1),
     g: app("Google Chrome", 2),
     
     // a = Open "a"pplications
