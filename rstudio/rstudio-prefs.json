@@ -73,6 +73,5 @@
     "busy_detection": "never",
     "jobs_tab_visibility": "shown",
     "default_project_location": "~/dev/teaching/ck",
-    "new_proj_use_renv": true,
     "document_author": "psych 10"
 }
