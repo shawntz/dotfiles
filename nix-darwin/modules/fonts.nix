@@ -9,5 +9,6 @@
     fira-code
     jetbrains-mono
     noto
+    hack
   ];
 }
