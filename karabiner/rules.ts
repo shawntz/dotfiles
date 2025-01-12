@@ -77,7 +77,7 @@ const rules: KarabinerRules[] = [
     o: hyperYabai("-m space --rotate 270"),
     y: hyperYabai("-m space --space --mirror y-axis"),
     x: hyperYabai("-m space --space --mirror x-axis"),
-    f: hyperYabai("-m window --toggle float --grid 4:4:1:1:2:2"),
+    t: hyperYabai("-m window --toggle float --grid 4:4:1:1:2:2"),
     m: hyperYabai("-m window --toggle zoom-fullscreen"),
     b: hyperYabai("-m window space --balance"),
 
@@ -131,7 +131,7 @@ const rules: KarabinerRules[] = [
     },
 
     // utils
-    a: {
+    f: {
       // vim key bindings
       h: { to: [{ key_code: "left_arrow" }] },
       j: { to: [{ key_code: "down_arrow" }] },
