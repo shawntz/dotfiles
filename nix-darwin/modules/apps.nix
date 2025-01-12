@@ -48,6 +48,7 @@
     slack
     starship
     stow
+    tlrc
     tmux
     tree
     tree-sitter
@@ -72,26 +73,31 @@
     brews = [
       "JupyterLab"
       "macos-trash"
+      "sketchybar"
     ];
 
     casks = [
       "1password"
       "chatgpt"
       "docker"
+      "font-sketchybar-app-font"
       "hey"
       "iina"
       "kindle"
+      "media-center"
+      "messenger"
       "middleclick"
       "rstudio"
       "sf-symbols"
       "the-unarchiver"
       "todoist"
       "via"
+      "whatsapp"
     ];
 
     masApps = {
       "1pwsafari" = 1569813296;
-      "bear" = 1091189122;
+      # "bear" = 1091189122;
       "codye" = 1516894961;
       "color" = 1545870783;
       "excel" = 462058435;
