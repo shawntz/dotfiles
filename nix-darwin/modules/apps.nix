@@ -27,7 +27,6 @@
     inkscape
     jq
     karabiner-elements
-    kitty
     lazygit
     lazydocker
     lua51Packages.lua
