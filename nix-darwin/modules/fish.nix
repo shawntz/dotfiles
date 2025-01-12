@@ -20,7 +20,7 @@
         zoxide init fish | source
 
         # anaconda
-        /opt/anaconda3/bin/conda init fish
+        /opt/anaconda3/bin/conda init fish &> /dev/null
       '';
       functions = {
         # neovim
