@@ -7,12 +7,15 @@
       interactiveShellInit = ''
         # Manually export the PATH
         set -x PATH /nix/var/nix/profiles/default/bin /run/current-system/sw/bin $PATH
+
         # silence shell messages
         printf '\33c\e[3J'  # hide 'last login' message
         set -g fish_greeting ""
 	      echo $0
+
         # neofetch
         neofetch
+
         # zoxide
         zoxide init fish | source
       '';
@@ -20,7 +23,6 @@
         # neovim
         v = "nvim -w ~/.vimlog $argv";
         vim = "nvim -w ~/.vimlog $argv";
-        # vim = "kitty @set-colors background=#282828 && nvim -w ~/.vimlog $argv && kitty @set-colors background=#1a1b26";
         vi = "fd --type f --hidden --exclude .git | fzf-tmux -m --preview='bat --color=always {}' -p | xargs nvim";
 
         # navigation
@@ -47,7 +49,7 @@
         restart = "sudo reboot";
         bye = "sudo shutdown -r now";
         get = "curl -O -L $argv[1]";
-        ssh = "kitty +kitten ssh $argv[1]";
+        # ssh = "kitty +kitten ssh $argv[1]";
 
         # tools
         vs = "code -g .";
