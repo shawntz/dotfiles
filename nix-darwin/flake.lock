@@ -119,6 +119,22 @@
         "type": "github"
       }
     },
+    "homebrew-sketchybar": {
+      "flake": false,
+      "locked": {
+        "lastModified": 1731946498,
+        "narHash": "sha256-uPhKE6hdhuSgyt41TiIxIIu6FNd08naNujpYx91J03U=",
+        "owner": "FelixKratz",
+        "repo": "homebrew-formulae",
+        "rev": "8cd8fae90b2e154e3fa3092cc5f8e3a6e963acd0",
+        "type": "github"
+      },
+      "original": {
+        "owner": "FelixKratz",
+        "repo": "homebrew-formulae",
+        "type": "github"
+      }
+    },
     "nix-darwin": {
       "inputs": {
         "nixpkgs": [
@@ -262,6 +278,7 @@
         "homebrew-bundle": "homebrew-bundle",
         "homebrew-cask": "homebrew-cask",
         "homebrew-core": "homebrew-core",
+        "homebrew-sketchybar": "homebrew-sketchybar",
         "nix-darwin": "nix-darwin",
         "nix-homebrew": "nix-homebrew",
         "nixpkgs": "nixpkgs_4",

@@ -18,6 +18,10 @@
       url = "github:homebrew/homebrew-bundle";
       flake = false;
     };
+    homebrew-sketchybar = {
+      url = "github:FelixKratz/homebrew-formulae";
+      flake = false;
+    };
     nix-darwin = {
       url = "github:LnL7/nix-darwin";
       inputs.nixpkgs.follows = "nixpkgs";
@@ -38,6 +42,7 @@
     homebrew-core,
     homebrew-cask,
     homebrew-bundle,
+    homebrew-sketchybar,
     ...
   }: let
     username = "sts";
@@ -62,7 +67,6 @@
         ./modules/apps.nix
         ./modules/fonts.nix
         ./modules/git.nix
-        ./modules/kitty.nix
         ./modules/fish.nix
         ./modules/starship.nix
         
@@ -78,6 +82,7 @@
               "homebrew/homebrew-core" = homebrew-core;
               "homebrew/homebrew-cask" = homebrew-cask;
               "homebrew/homebrew-bundle" = homebrew-bundle;
+              "FelixKratz/homebrew-formulae" = homebrew-sketchybar;
             };
 
             # enable fully-declarative tap management
