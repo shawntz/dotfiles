@@ -27,7 +27,7 @@
       };
 
       dock = {
-        autohide = false;  # Default is false
+        autohide = true;  # Default is false
         autohide-delay = 0.0;  # Default is (0.24).
         autohide-time-modifier = 0.0;  # Default is (1.0).
         enable-spring-load-actions-on-all-items = true;  # Default is false.
@@ -47,10 +47,8 @@
           "/Applications/HEY.app"
           "${pkgs.google-chrome}/Applications/Google Chrome.app"
           "${pkgs.slack}/Applications/Slack.app"
-          # "${pkgs.kitty}/Applications/kitty.app"
           "/Applications/Ghostty.app"
           "/Applications/Xcode.app"
-          "/Applications/Bear.app"
           "/Applications/Todoist.app"
           "/System/Applications/Music.app"
           "/System/Applications/System Settings.app"
