@@ -21,6 +21,7 @@
     gcc
     gimp
     git
+    git-lfs
     google-chrome
     htop
     imagemagick
@@ -70,7 +71,6 @@
     };
 
     brews = [
-      "git-lfs"
       "JupyterLab"
       "macos-trash"
       "sketchybar"
