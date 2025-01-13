@@ -2,7 +2,7 @@ theme = GruvboxDarkHard
 
 # macos-titlebar-style = transparent
 macos-titlebar-proxy-icon = hidden
-macos-option-as-alt = true 
+macos-option-as-alt = false
 window-save-state = always
 window-vsync = true
 window-colorspace = display-p3
@@ -14,6 +14,7 @@ window-theme = dark
 clipboard-read = allow
 clipboard-paste-protection = false
 window-decoration = false
+copy-on-select = true
 
 command = /run/current-system/sw/bin/fish
 click-repeat-interval = 500
@@ -30,3 +31,4 @@ title = "👻"
 window-padding-x = 20
 window-padding-y = 20
 
+keybind =ctrl+k=text:\x03
