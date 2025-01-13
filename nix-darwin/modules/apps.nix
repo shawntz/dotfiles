@@ -70,6 +70,7 @@
     };
 
     brews = [
+      "git-lfs"
       "JupyterLab"
       "macos-trash"
       "sketchybar"
