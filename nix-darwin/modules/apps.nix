@@ -78,6 +78,7 @@
 
     casks = [
       "1password"
+      "beeper"
       "chatgpt"
       "docker"
       "font-sketchybar-app-font"
