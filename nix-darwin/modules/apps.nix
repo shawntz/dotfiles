@@ -81,6 +81,7 @@
       "beeper"
       "chatgpt"
       "docker"
+      "firefox"
       "font-sketchybar-app-font"
       "hey"
       "iina"
