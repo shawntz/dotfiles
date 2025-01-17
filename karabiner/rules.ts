@@ -114,6 +114,7 @@ const rules: KarabinerRules[] = [
       h: app("HEY", 4),
       p: app("Beeper", 5),
       c: app("Basecamp 3", 6),
+      k: app("Google Calendar", 6),
     },
 
     // s = control the "s"ystem
