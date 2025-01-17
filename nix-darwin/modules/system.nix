@@ -44,12 +44,14 @@
         # Persistent applications in the dock.
         # Type: null or (list of (path or string))
         persistent-apps = [
+          "/Applications/Beeper.app"
           "/Applications/HEY.app"
+          "/Applications/Basecamp 3.app"
           "${pkgs.google-chrome}/Applications/Google Chrome.app"
           "${pkgs.slack}/Applications/Slack.app"
           "/Applications/Ghostty.app"
           "/Applications/Xcode.app"
-          "/Applications/Todoist.app"
+          "/Applications/ChatGPT.app"
           "/System/Applications/Music.app"
           "/System/Applications/System Settings.app"
         ];
