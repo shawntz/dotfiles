@@ -74,50 +74,50 @@ const rules: KarabinerRules[] = [
     k: hyperYabai("-m window --focus north"),
     l: hyperYabai("-m window --focus east"),
 
-    o: hyperYabai("-m space --rotate 270"),
+    r: hyperYabai("-m space --rotate 270"),
     y: hyperYabai("-m space --space --mirror y-axis"),
     x: hyperYabai("-m space --space --mirror x-axis"),
     t: hyperYabai("-m window --toggle float --grid 4:4:1:1:2:2"),
     m: hyperYabai("-m window --toggle zoom-fullscreen"),
     b: hyperYabai("-m window space --balance"),
 
-    s: {
+    f: {
       h: hyperYabai("-m space --focus 1"),
       j: hyperYabai("-m space --focus 2"),
       k: hyperYabai("-m space --focus 3"),
       l: hyperYabai("-m space --focus 4"),
       semicolon: hyperYabai("-m space --focus 5"),
+      quote: hyperYabai("-m space --focus 6"),
       n: hyperYabai("-m window --swap west"),
       m: hyperYabai("-m window --swap south"),
       comma: hyperYabai("-m window --swap north"),
       period: hyperYabai("-m window --swap east"),
     },
 
-    d: {
-      j: hyperYabai("-m window --space 1; /run/current-system/sw/bin/yabai -m space --focus 1;"),
-      k: hyperYabai("-m window --space 2; /run/current-system/sw/bin/yabai -m space --focus 2;"),
-      l: hyperYabai("-m window --space 3; /run/current-system/sw/bin/yabai -m space --focus 3;"),
-      semicolon: hyperYabai("-m window --space 4; /run/current-system/sw/bin/yabai -m space --focus 4;"),
-      quote: hyperYabai("-m window --space 5; /run/current-system/sw/bin/yabai -m space --focus 5;"),
+    g: {
+      h: hyperYabai("-m window --space 1; /run/current-system/sw/bin/yabai -m space --focus 1;"),
+      j: hyperYabai("-m window --space 1; /run/current-system/sw/bin/yabai -m space --focus 2;"),
+      k: hyperYabai("-m window --space 2; /run/current-system/sw/bin/yabai -m space --focus 3;"),
+      l: hyperYabai("-m window --space 3; /run/current-system/sw/bin/yabai -m space --focus 4;"),
+      semicolon: hyperYabai("-m window --space 4; /run/current-system/sw/bin/yabai -m space --focus 5;"),
+      quote: hyperYabai("-m window --space 5; /run/current-system/sw/bin/yabai -m space --focus 6;"),
       comma: hyperYabai("-p window --space prev"),
       period: hyperYabai("-m window --space next"),
     },
 
-    // most frequent apps don't require "a" sublayer
-    return_or_enter: app("Ghostty", 1),
-    
-    // g = "g" open x app
-    g: {
-      return_or_enter: app("Google Chrome", 2),
-      h: app("HEY", 3),
-      s: app("Slack", 4),
-      l: app("Finder", 5),
-      m: app("Messages"),
-      p: app("1Password"),
+    // most frequent apps don't require "o" sublayer
+    // o = "o"pen x app
+    o: {
+      f: app("Firefox", 1),
+      g: app("Ghostty", 2),
+      r: app("RStudio", 3),
+      h: app("HEY", 4),
+      p: app("Beeper", 5),
+      c: app("Basecamp 3", 6),
     },
 
-    // c = "c"ontrol the system
-    c: {
+    // s = control the "s"ystem
+    s: {
       u: { to: [{ key_code: "volume_increment" }] },
       j: { to: [{ key_code: "volume_decrement" }] },
       i: { to: [{ key_code: "display_brightness_increment" }] },
@@ -131,7 +131,7 @@ const rules: KarabinerRules[] = [
     },
 
     // utils
-    f: {
+    d: {
       // vim key bindings
       h: { to: [{ key_code: "left_arrow" }] },
       j: { to: [{ key_code: "down_arrow" }] },
@@ -147,8 +147,8 @@ const rules: KarabinerRules[] = [
       i: { to: [{ key_code: "page_up" }] },
     },
 
-    // r = "Raycast"
-    r: {
+    // c = Ray"c"ast
+    c: {
       p: open("raycast://extensions/thomas/color-picker/pick-color"),
       e: open("raycast://extensions/raycast/emoji-symbols/search-emoji-symbols"),
       h: open("raycast://extensions/raycast/clipboard-history/clipboard-history"),
