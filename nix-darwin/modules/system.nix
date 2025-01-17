@@ -39,15 +39,17 @@
         mineffect = "suck";  # Type: null or one of “genie” (default), “suck”, “scale”
         minimize-to-application = true;  # Default is false.
         mru-spaces = false;  # Auto rearrange spaces based on (m)ost (r)ecent (u)se. Default is true.
-        orientation = "bottom";  # Type: null or one of “bottom” (default), “left”, “right”
+        orientation = "right";  # Type: null or one of “bottom” (default), “left”, “right”
 
         # Persistent applications in the dock.
         # Type: null or (list of (path or string))
         persistent-apps = [
+          "/Applications/Google Calendar.app"
           "/Applications/Beeper.app"
           "/Applications/HEY.app"
           "/Applications/Basecamp 3.app"
-          "${pkgs.google-chrome}/Applications/Google Chrome.app"
+          "/Applications/Firefox.app"
+          # "${pkgs.google-chrome}/Applications/Google Chrome.app"
           "${pkgs.slack}/Applications/Slack.app"
           "/Applications/Ghostty.app"
           "/Applications/Xcode.app"
@@ -68,7 +70,7 @@
         showhidden = true;  # Default is false.
         slow-motion-allowed = false;  # Default is false.
         static-only = false;  # Default is false.
-        tilesize = 64;  # Default is (64).
+        tilesize = 48;  # Default is (64).
 
         # Hot corner actions. Valid values include:
         #
