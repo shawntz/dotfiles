@@ -93,6 +93,7 @@
       "sf-symbols"
       "the-unarchiver"
       "todoist"
+      "ubar"
       "via"
       "whatsapp"
     ];
