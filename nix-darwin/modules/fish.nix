@@ -17,7 +17,7 @@
 
         /opt/anaconda3/bin/conda init fish &> /dev/null
 
-        fastfetch
+        #fastfetch
       '';
       functions = {
         # neovim
