@@ -39,7 +39,7 @@
         mineffect = "suck";  # Type: null or one of “genie” (default), “suck”, “scale”
         minimize-to-application = true;  # Default is false.
         mru-spaces = false;  # Auto rearrange spaces based on (m)ost (r)ecent (u)se. Default is true.
-        orientation = "right";  # Type: null or one of “bottom” (default), “left”, “right”
+        orientation = "left";  # Type: null or one of “bottom” (default), “left”, “right”
 
         # Persistent applications in the dock.
         # Type: null or (list of (path or string))
@@ -47,13 +47,11 @@
           "/Applications/Google Calendar.app"
           "/Applications/Beeper.app"
           "/Applications/HEY.app"
-          "/Applications/Basecamp 3.app"
-          "/Applications/Firefox.app"
-          # "${pkgs.google-chrome}/Applications/Google Chrome.app"
+          "/Applications/Basecamp.app"
+          "${pkgs.google-chrome}/Applications/Google Chrome.app"
           "${pkgs.slack}/Applications/Slack.app"
-          "/Applications/Ghostty.app"
+          #"/Applications/Ghostty.app"
           "/Applications/Xcode.app"
-          "/Applications/ChatGPT.app"
           "/System/Applications/Music.app"
           "/System/Applications/System Settings.app"
         ];
