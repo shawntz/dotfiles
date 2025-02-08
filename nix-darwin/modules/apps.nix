@@ -44,6 +44,7 @@
     rclone
     ripgrep
     rustup
+    shfmt
     skimpdf
     slack
     starship
@@ -74,6 +75,7 @@
       "JupyterLab"
       "macos-trash"
       "sketchybar"
+      "freetype"
     ];
 
     casks = [
