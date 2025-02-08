@@ -42,7 +42,6 @@
     pandoc
     positron-bin
     postman
-    raycast
     rclone
     ripgrep
     rustup
@@ -92,6 +91,7 @@
       "kindle"
       "media-center"
       "microsoft-edge"
+      "raycast"
       "rstudio"
       "sf-symbols"
       "the-unarchiver"
