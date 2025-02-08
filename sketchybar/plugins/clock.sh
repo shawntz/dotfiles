@@ -1,8 +1,3 @@
-#!/bin/sh
+#!/usr/bin/env zsh
 
-# The $NAME variable is passed from sketchybar and holds the name of
-# the item invoking this script:
-# https://felixkratz.github.io/SketchyBar/config/events#events-and-scripting
-
-/opt/homebrew/bin/sketchybar --set "$NAME" label="$(date '+%d/%m %H:%M')"
-
+/opt/homebrew/bin/sketchybar --set $NAME label="$(date '+%a %b %-d %-H:%M')"
