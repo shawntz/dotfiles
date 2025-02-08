@@ -91,6 +91,7 @@
       "iina"
       "kindle"
       "media-center"
+      "microsoft-edge"
       "rstudio"
       "sf-symbols"
       "the-unarchiver"

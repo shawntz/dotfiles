@@ -27,7 +27,7 @@
       };
 
       dock = {
-        autohide = true;  # Default is false
+        autohide = false;  # Default is false
         autohide-delay = 0.0;  # Default is (0.24).
         autohide-time-modifier = 0.0;  # Default is (1.0).
         enable-spring-load-actions-on-all-items = true;  # Default is false.
@@ -37,23 +37,26 @@
         expose-group-apps = true;  # Default is false.
         launchanim = false;  # Default is true.
         mineffect = "suck";  # Type: null or one of “genie” (default), “suck”, “scale”
-        minimize-to-application = true;  # Default is false.
+        minimize-to-application = false;  # Default is false.
         mru-spaces = false;  # Auto rearrange spaces based on (m)ost (r)ecent (u)se. Default is true.
-        orientation = "left";  # Type: null or one of “bottom” (default), “left”, “right”
+        orientation = "bottom";  # Type: null or one of “bottom” (default), “left”, “right”
 
         # Persistent applications in the dock.
         # Type: null or (list of (path or string))
         persistent-apps = [
-          "/Applications/Google Calendar.app"
-          "/Applications/Beeper.app"
+          "/System/Applications/Calendar.app"
           "/Applications/HEY.app"
           "/Applications/Basecamp.app"
-          "${pkgs.google-chrome}/Applications/Google Chrome.app"
-          "${pkgs.slack}/Applications/Slack.app"
-          #"/Applications/Ghostty.app"
-          "/Applications/Xcode.app"
+          "/Applications/Microsoft Edge.app"
+          "/Applications/Ghostty.app"
+          "${pkgs.vscode}/Applications/Visual Studio Code.app"
+          "${pkgs.positron-bin}/Applications/Positron.app"
+          "/Applications/RStudio.app"
           "/System/Applications/Music.app"
-          "/System/Applications/System Settings.app"
+          "${pkgs.slack}/Applications/Slack.app"
+          "/Applications/Beeper.app"
+          "/System/Applications/Messages.app"
+          "/Applications/1Password.app"
         ];
 
         # Persistent folders in the dock.
@@ -68,7 +71,7 @@
         showhidden = true;  # Default is false.
         slow-motion-allowed = false;  # Default is false.
         static-only = false;  # Default is false.
-        tilesize = 48;  # Default is (64).
+        tilesize = 36;  # Default is (64).
 
         # Hot corner actions. Valid values include:
         #
