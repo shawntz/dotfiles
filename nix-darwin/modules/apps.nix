@@ -8,15 +8,19 @@
   # List packages installed in system profile. To search by name, run:
   # $ nix-env -qaP | grep wget
   environment.systemPackages = with pkgs; [
+    alacritty
     ascii-image-converter
     bat
+    chatgpt-cli
     deno
     docker
     eza
+    fastfetch
     fd
     feh
     ffmpeg
     fish
+    freetype
     fzf
     gcc
     gimp
@@ -32,11 +36,9 @@
     lazydocker
     lua51Packages.lua
     luarocks
-    neofetch
     neovim
     nodejs_22
     nushell
-    obsidian
     pandoc
     positron-bin
     postman
@@ -50,14 +52,14 @@
     starship
     stow
     tlrc
-    tmux
     tree
     tree-sitter
     wget
+    xld
     vscode
-    yabai
     yarn
     yazi
+    zellij
     zoom-us
     zoxide
   ];
@@ -75,13 +77,13 @@
       "JupyterLab"
       "macos-trash"
       "sketchybar"
-      "freetype"
     ];
 
     casks = [
       "1password"
+      "basecamp"
       "beeper"
-      "chatgpt"
+      "claude"
       "docker"
       "firefox"
       "font-sketchybar-app-font"
@@ -89,20 +91,13 @@
       "iina"
       "kindle"
       "media-center"
-      "messenger"
-      "middleclick"
       "rstudio"
       "sf-symbols"
       "the-unarchiver"
-      "todoist"
-      "ubar"
       "via"
-      "whatsapp"
     ];
 
     masApps = {
-      "1pwsafari" = 1569813296;
-      # "bear" = 1091189122;
       "codye" = 1516894961;
       "color" = 1545870783;
       "excel" = 462058435;
@@ -111,9 +106,7 @@
       "powerpoint" = 462062816;
       "msremote" = 1295203466;
       "word" = 462054704;
-      "things" = 904280696;
       "xcode" = 497799835;
-      "yoink" = 457622435;
     };
   };
 }
