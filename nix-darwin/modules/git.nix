@@ -6,7 +6,7 @@
       enable = true;
 	    extraConfig = {
           user.name = "Shawn Schwartz";
-          user.email = "mail@shawntz.com";
+          user.email = "sts@hey.com";
           github.user = "shawntz";
           user.signingkey = "~/.ssh/id_ed25519.pub";
           credential.helper = "cache --timeout=2628000";
