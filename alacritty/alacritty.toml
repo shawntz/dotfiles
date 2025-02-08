@@ -1,0 +1,92 @@
+[env]
+TERM = "xterm-256color"
+
+[terminal.shell]
+program = "/run/current-system/sw/bin/zellij"
+
+[window]
+padding.x = 16
+padding.y = 16
+#padding.y = 22
+#decorations = "Transparent"
+decorations = "None"
+opacity = 1
+blur = true
+startup_mode = "Maximized"
+decorations_theme_variant = "Dark"
+
+[font]
+size = 16.5
+normal = { family = "JetBrainsMono Nerd Font", style = "Light" }
+bold = { family = "JetBrainsMono Nerd Font", style = "Light" }
+italic = { family = "JetBrainsMono Nerd Font", style = "Italic" }
+
+[scrolling]
+history = 10000
+multiplier = 5
+
+[selection]
+save_to_clipboard = true
+
+[cursor]
+[cursor.style]
+shape = "Beam"
+
+[mouse]
+hide_when_typing = true
+
+[colors]
+[colors.primary]
+background = '#1d2021'
+foreground = '#ebdbb2'
+
+# Normal colors
+[colors.normal]
+black   = '#1c2021'
+red     = '#cd241d'
+green   = '#989719'
+yellow  = '#d79920'
+blue    = '#448588'
+magenta = '#b26286'
+cyan    = '#689d6a'
+white   = '#ebdbb2'
+
+# Bright colors
+[colors.bright]
+black   = '#928374'
+red     = '#fb4934'
+green   = '#b8bb26'
+yellow  = '#fabd2f'
+blue    = '#83a598'
+magenta = '#d3869b'
+cyan    = '#8ec07c'
+white   = '#ebdbb2'
+
+#background = '#1a1b26'
+#foreground = '#a9b1d6'
+
+# Normal colors
+#[colors.normal]
+#black = '#32344a'
+#red = '#f7768e'
+#green = '#9ece6a'
+#yellow = '#e0af68'
+#blue = '#7aa2f7'
+#magenta = '#ad8ee6'
+#cyan = '#449dab'
+#white = '#787c99'
+
+# Bright colors
+#[colors.bright]
+#black = '#444b6a'
+#red = '#ff7a93'
+#green = '#b9f27c'
+#yellow = '#ff9e64'
+#blue = '#7da6ff'
+#magenta = '#bb9af7'
+#cyan = '#0db9d7'
+#white = '#acb0d0'
+
+[colors.selection]
+#background = '#7aa2f7'
+
