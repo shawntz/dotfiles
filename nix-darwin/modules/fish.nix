@@ -13,33 +13,36 @@
         set -g fish_greeting ""
 	      echo $0
 
-        # neofetch
-        neofetch
-
-        # zoxide
         zoxide init fish | source
 
-        # anaconda
         /opt/anaconda3/bin/conda init fish &> /dev/null
+
+        fastfetch
       '';
       functions = {
         # neovim
-        v = "nvim -w ~/.vimlog $argv";
+        n = "nvim -w ~/.vimlog $argv";
         vim = "nvim -w ~/.vimlog $argv";
-        vi = "fd --type f --hidden --exclude .git | fzf-tmux -m --preview='bat --color=always {}' -p | xargs nvim";
+        #v = "fd --type f --hidden --exclude .git | fzf-tmux -m --preview='bat --color=always {}' -p | xargs nvim";
 
         # navigation
-        c = "zi $argv[1]";
+        cdi = "zi $argv[1]";
         cd = "z $argv[1]";
         b = "cd ..";
         bb = "cd ../..";
         bbb = "cd ../../..";
         bbbb = "cd ../../../..";
         l = "eza $argv[1] --all --color=always --sort=name --long --no-user --icons=always --no-permissions";
+        ls = "eza $argv[1] -lh --group-directories-first --icons";
+        lsa = "ls $argv[1] -a";
+        lt = "eza $argv[1] --tree --level=2 --long --icons --git";
+        lta = "lt $argv[1] -a";
+        ff = "fzf --preview 'batcat --style=numbers --color=always {}'";
+        fy = "fzf --preview 'batcat --style=numbers --color=always {}' | yazi $argv[1]";
+        fn = "fzf --preview 'batcat --style=numbers --color=always {}' | nvim $argv[1]";
         home = "cd ~";
-        d = "clear";
+        c = "clear";
         dots = "cd ~/Developer/dotfiles";
-        dotfiles = "cd ~/Developer/dotfiles";
         dev = "cd ~/Developer";
         desk = "cd ~/Desktop";
         docs = "cd ~/Documents";
@@ -47,12 +50,10 @@
         md = "mkdir -p $argv[1]";
         t = "touch $argv[1]";
         x = "exit";
-        k = "killall kitty";
         o = "open .";
         restart = "sudo reboot";
         bye = "sudo shutdown -r now";
         get = "curl -O -L $argv[1]";
-        # ssh = "kitty +kitten ssh $argv[1]";
 
         # tools
         vs = "code -g .";
