@@ -8,7 +8,6 @@
   # List packages installed in system profile. To search by name, run:
   # $ nix-env -qaP | grep wget
   environment.systemPackages = with pkgs; [
-    alacritty
     ascii-image-converter
     bat
     chatgpt-cli
@@ -26,7 +25,6 @@
     gimp
     git
     git-lfs
-    google-chrome
     htop
     imagemagick
     inkscape
@@ -43,6 +41,7 @@
     positron-bin
     postman
     rclone
+    rectangle
     ripgrep
     rustup
     shfmt
@@ -83,19 +82,22 @@
       "basecamp"
       "beeper"
       "claude"
+      "chromium"
+      "commander-one"
       "docker"
-      "firefox"
       "font-sketchybar-app-font"
       "hey"
       "iina"
       "kindle"
       "media-center"
-      "microsoft-edge"
+      "proton-mail"
       "raycast"
       "rstudio"
       "sf-symbols"
+      "sunsama"
       "the-unarchiver"
       "via"
+      "zen-browser"
     ];
 
     masApps = {
