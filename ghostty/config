@@ -8,7 +8,7 @@ window-vsync = true
 window-colorspace = display-p3
 quick-terminal-screen = macos-menu-bar
 
-font-size = 18
+font-size = 17
 scrollback-limit = 10_000
 window-theme = dark
 clipboard-read = allow
@@ -29,6 +29,6 @@ mouse-hide-while-typing = true
 title = "👻"
 
 window-padding-x = 20
-window-padding-y = 20
+window-padding-y = 5
 
 keybind =ctrl+k=text:\x03
