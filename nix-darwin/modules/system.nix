@@ -47,7 +47,7 @@
           "/System/Applications/Calendar.app"
           "/Applications/HEY.app"
           "/Applications/Basecamp.app"
-          "/Applications/Microsoft Edge.app"
+          "/Applications/Zen Browser.app"
           "/Applications/Ghostty.app"
           "${pkgs.vscode}/Applications/Visual Studio Code.app"
           "${pkgs.positron-bin}/Applications/Positron.app"
