@@ -7,7 +7,7 @@
       interactiveShellInit = ''
         # Manually export the PATH
         set -x PATH /nix/var/nix/profiles/default/bin /run/current-system/sw/bin $PATH
-
+        #set fish_greeting
         # silence shell messages
         printf '\33c\e[3J'  # hide 'last login' message
         set -g fish_greeting ""
@@ -15,9 +15,22 @@
 
         zoxide init fish | source
 
-        /opt/anaconda3/bin/conda init fish &> /dev/null
+        #/opt/anaconda3/bin/conda init fish &> /dev/null
 
         #fastfetch
+
+        # Check if we're in an interactive shell
+        if status is-interactive
+
+            # At this point, specify the Zellij config dir, so we can launch it manually if we want to
+            export ZELLIJ_CONFIG_DIR=$HOME/.config/zellij
+
+            # Check if our Terminal emulator is Ghostty
+            if [ "$TERM" = "xterm-ghostty" ]
+                # Launch zellij
+                eval (zellij setup --generate-auto-start fish | string collect)
+            end
+        end
       '';
       functions = {
         # neovim
