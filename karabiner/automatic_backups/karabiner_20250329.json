@@ -25,7 +25,7 @@
                 },
                 "to": [
                   {
-                    "key_code": "left_option",
+                    "key_code": "left_command",
                     "hold_down_milliseconds": 500
                   }
                 ],

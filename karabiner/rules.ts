@@ -17,7 +17,7 @@ const rules: KarabinerRules[] = [
         },
         to: [
           {
-            key_code: "left_command",
+            key_code: "left_option",
             hold_down_milliseconds: 500,
           },
         ],
