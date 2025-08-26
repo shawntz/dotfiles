@@ -74,30 +74,27 @@
     brews = [
       "JupyterLab"
       "macos-trash"
-      "sketchybar"
+      "dockutil"
     ];
 
     casks = [
       "1password"
-      "basecamp"
       "beeper"
       "claude"
       "chromium"
-      "commander-one"
       "docker"
       "font-sketchybar-app-font"
-      "hey"
+      "google-chrome"
       "iina"
       "kindle"
       "media-center"
-      "proton-mail"
+      "notion"
+      "notion-calendar"
       "raycast"
       "rstudio"
       "sf-symbols"
-      "sunsama"
       "the-unarchiver"
       "via"
-      "zen-browser"
     ];
 
     masApps = {

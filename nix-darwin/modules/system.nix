@@ -9,10 +9,22 @@
     stateVersion = 5;
 
     # activationScripts are executed every time you boot the system or run `nixos-rebuild` / `darwin-rebuild`.
-    activationScripts.postUserActivation.text = ''
+    #activationScripts.postUserActivation.text = ''
       # activateSettings -u will reload the settings from the database and apply them to the current session,
       # so we do not need to logout and login again to make the changes take effect.
+     # /System/Library/PrivateFrameworks/SystemAdministration.framework/Resources/activateSettings -u
+    #'';
+
+    activationScripts.postUserActivation.text = ''
       /System/Library/PrivateFrameworks/SystemAdministration.framework/Resources/activateSettings -u
+
+      # Remove any existing Downloads entry
+      /opt/homebrew/bin/dockutil --remove "Downloads" --no-restart || true
+
+      # Add Downloads folder with fan view and sort by date added
+      /opt/homebrew/bin/dockutil --add ~/Downloads --view fan --sort dateadded --display folder --no-restart
+
+      killall Dock
     '';
 
     defaults = {
@@ -23,7 +35,7 @@
       };
 
       controlcenter = {
-	    NowPlaying = true;  # Default is null
+	      NowPlaying = null;  # Default is null
       };
 
       dock = {
@@ -45,18 +57,17 @@
         # Type: null or (list of (path or string))
         persistent-apps = [
           "/System/Applications/Calendar.app"
-          "/Applications/HEY.app"
-          "/Applications/Basecamp.app"
-          "/Applications/Zen Browser.app"
+          "/Applications/Google Chrome.app"
           "/Applications/Ghostty.app"
+          "/Applications/Xcode.app"
           "${pkgs.vscode}/Applications/Visual Studio Code.app"
-          "${pkgs.positron-bin}/Applications/Positron.app"
+          # "${pkgs.positron-bin}/Applications/Positron.app"
           "/Applications/RStudio.app"
           "/System/Applications/Music.app"
           "${pkgs.slack}/Applications/Slack.app"
-          "/Applications/Beeper.app"
+          # "/Applications/Beeper.app"
           "/System/Applications/Messages.app"
-          "/Applications/1Password.app"
+          # "/Applications/1Password.app"
         ];
 
         # Persistent folders in the dock.
@@ -71,7 +82,7 @@
         showhidden = true;  # Default is false.
         slow-motion-allowed = false;  # Default is false.
         static-only = false;  # Default is false.
-        tilesize = 36;  # Default is (64).
+        tilesize = 64;  # Default is (64).
 
         # Hot corner actions. Valid values include:
         #

@@ -17,7 +17,7 @@
 
         #/opt/anaconda3/bin/conda init fish &> /dev/null
 
-        #fastfetch
+        fastfetch
 
         # Check if we're in an interactive shell
         if status is-interactive

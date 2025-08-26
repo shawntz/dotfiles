@@ -28,7 +28,7 @@
     "console_double_click_select": true,
     "font_size_points": 12,
     "posix_terminal_shell": "bash",
-    "editor_theme": "Xcode",
+    "editor_theme": "xcode_rstudio_theme3",
     "packages_pane_enabled": false,
     "save_files_before_build": true,
     "panes": {
