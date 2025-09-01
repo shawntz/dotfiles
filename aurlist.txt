@@ -1,0 +1,5 @@
+google-drive-linux 1.0-1
+otf-avenir-next-pro 1-1
+positron-ide-devel-bin 2025.08.0.130-1
+rstudio-desktop-bin 2025.05.1.513-1
+ttf-apple-emoji 18.4-2
