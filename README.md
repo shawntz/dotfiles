@@ -20,7 +20,7 @@ A small bootstrap lives in `.bootstrap/` with an `install.sh` script and a `Make
 On a new machine, just run:
 
 ```bash
-bash -c "$(wget -qO- https://raw.githubusercontent.com/shawntz/dotfiles/main/.bootstrap/install.sh)"
+bash -c "$(wget -qO- https://raw.githubusercontent.com/shawntz/dotfiles/master/.bootstrap/install.sh)"
 ```
 
 This will:
@@ -51,7 +51,7 @@ By default, `install.sh` has the remote URL baked in (`git@github.com:shawntz/do
 If you want to clone from a fork, use HTTPS instead of SSH, or test a branch, override it inline:
 
 ```bash
-REMOTE_URL=https://github.com/{you}/dotfiles.git bash -c "$(wget -qO- https://raw.githubusercontent.com/{you}/dotfiles/main/.bootstrap/install.sh)"
+REMOTE_URL=https://github.com/{you}/dotfiles.git bash -c "$(wget -qO- https://raw.githubusercontent.com/{you}/dotfiles/master/.bootstrap/install.sh)"
 ```
 
 ---
