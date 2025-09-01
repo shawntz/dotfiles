@@ -99,8 +99,6 @@ make -f ~/.bootstrap/Makefile bootstrap
 
 > [!IMPORTANT]
 >
-> ## 📓 Notes
->
 > - Any pre-existing files that conflict on first checkout are automatically backed up to a folder like `~/.dotfiles-backup-<timestamp>`.
 >
 > - Sensitive material (`~/.ssh`, API keys, tokens) should not be committed. **Be sure to store those securely elsewhere.**
