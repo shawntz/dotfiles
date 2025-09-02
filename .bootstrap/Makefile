@@ -1,5 +1,12 @@
 # ~/.bootstrap/Makefile
 
+PLATFORM_BASE := $(HOME)/.dotfiles-platform
+CONFIG_DIRS := \
+  .dotfiles-platform/common \
+  .dotfiles-platform/arch \
+  .dotfiles-platform/macos \
+  .bootstrap
+
 SHELL := /bin/bash
 HOME_DIR := $(HOME)
 DOTFILES_DIR := $(HOME)/.dotfiles
@@ -121,17 +128,15 @@ restore-packages:
 
 .PHONY: backup-configs
 backup-configs:
-	@echo "🗂  Adding config dirs/files…"
-	@set -e; for p in $(CONFIG_DIRS) $(CONFIG_FILES); do \
-		if [ -e "$(HOME_DIR)/$$p" ]; then \
-			echo "  + $$p"; \
-			$(CONFIG) add "$$p"; \
-		else \
-			echo "  - $$p (missing)"; \
+	@echo "🗂  Adding platform-organized configs..."
+	@for dir in $(CONFIG_DIRS); do \
+		if [ -d "$(HOME)/$$dir" ]; then \
+			echo "  + $$dir"; \
+			$(CONFIG) add "$$dir"; \
 		fi; \
 	done
 	@echo "📝 Commit & push"
-	$(CONFIG) commit -m "Backup configs [auto]" || echo "No config changes"
+	$(CONFIG) commit -m "Backup organized configs [auto]" || echo "No config changes"
 	$(CONFIG) push
 	@echo "✅ Configs backed up."
 
