@@ -1,0 +1,9 @@
+[Desktop Entry]
+Version=1.0
+Name=Gmail
+Comment=Gmail
+Exec=omarchy-launch-webapp https://gmail.com
+Terminal=false
+Type=Application
+Icon=/home/sts/.local/share/applications/icons/Gmail.png
+StartupNotify=true

@@ -7,6 +7,8 @@ source ~/.local/share/omarchy/default/bash/rc
 # Make an alias for invoking commands you use constantly
 # alias p='python'
 #
+alias backup='make -f ~/.bootstrap/Makefile backup-packages backup-configs'
+
 # Use VSCode instead of neovim as your default editor
 # export EDITOR="code"
 #

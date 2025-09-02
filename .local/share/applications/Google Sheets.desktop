@@ -1,0 +1,9 @@
+[Desktop Entry]
+Version=1.0
+Name=Google Sheets
+Comment=Google Sheets
+Exec=omarchy-launch-webapp https://sheets.new
+Terminal=false
+Type=Application
+Icon=/home/sts/.local/share/applications/icons/Google Sheets.png
+StartupNotify=true

@@ -1,0 +1,9 @@
+[Desktop Entry]
+Version=1.0
+Name=Google Drive
+Comment=Google Drive
+Exec=omarchy-launch-webapp https://drive.google.com
+Terminal=false
+Type=Application
+Icon=/home/sts/.local/share/applications/icons/Google Drive.png
+StartupNotify=true
