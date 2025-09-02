@@ -1,1 +1,0 @@
-/home/sts/.dotfiles-platform/common/Scripts/open-url.sh

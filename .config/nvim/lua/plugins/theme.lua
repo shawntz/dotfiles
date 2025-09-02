@@ -1,1 +1,1 @@
-/home/sts/.config/omarchy/current/theme/neovim.lua
+/home/sts/.platform/common/.config/nvim/lua/plugins/theme.lua
