@@ -1,1 +1,0 @@
-/home/sts/Developer/dotfiles/platforms/archlinux/.config/Pinta/palette.txt
