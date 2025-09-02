@@ -1,0 +1,34 @@
+#!/usr/bin/env bash
+# Switch audio to Studio Display when docked, or to laptop when undocked
+
+# Check if Studio Display audio devices are available
+STUDIO_SINK=$(pactl list short sinks | grep "Studio_Display" | head -1 | cut -f2)
+
+if [[ -n "$STUDIO_SINK" ]]; then
+  echo "Studio Display detected, switching audio output..."
+  pactl set-default-sink "$STUDIO_SINK"
+
+  # Also switch the microphone to Studio Display
+  STUDIO_SOURCE=$(pactl list short sources | grep "Studio_Display" | grep -v "monitor" | head -1 | cut -f2)
+  if [[ -n "$STUDIO_SOURCE" ]]; then
+    pactl set-default-source "$STUDIO_SOURCE"
+    echo "Switched to Studio Display microphone"
+  fi
+
+  echo "Audio switched to Studio Display"
+else
+  echo "Studio Display not detected, switching to laptop audio..."
+  # Switch to laptop speakers
+  LAPTOP_SINK=$(pactl list short sinks | grep "pci-0000_c1_00.6" | cut -f2)
+  if [[ -n "$LAPTOP_SINK" ]]; then
+    pactl set-default-sink "$LAPTOP_SINK"
+  fi
+
+  # Switch to laptop microphone
+  LAPTOP_SOURCE=$(pactl list short sources | grep "pci-0000_c1_00.6" | grep -v "monitor" | cut -f2)
+  if [[ -n "$LAPTOP_SOURCE" ]]; then
+    pactl set-default-source "$LAPTOP_SOURCE"
+  fi
+
+  echo "Audio switched to laptop"
+fi

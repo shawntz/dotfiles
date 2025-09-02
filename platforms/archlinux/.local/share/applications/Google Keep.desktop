@@ -1,0 +1,9 @@
+[Desktop Entry]
+Version=1.0
+Name=Google Keep
+Comment=Google Keep
+Exec=omarchy-launch-webapp https://keep.google.com
+Terminal=false
+Type=Application
+Icon=/home/sts/.local/share/applications/icons/Google Keep.png
+StartupNotify=true

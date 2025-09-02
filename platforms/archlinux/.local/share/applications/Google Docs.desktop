@@ -1,0 +1,9 @@
+[Desktop Entry]
+Version=1.0
+Name=Google Docs
+Comment=Google Docs
+Exec=omarchy-launch-webapp https://docs.new
+Terminal=false
+Type=Application
+Icon=/home/sts/.local/share/applications/icons/Google Docs.png
+StartupNotify=true

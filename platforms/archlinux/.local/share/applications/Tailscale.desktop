@@ -1,0 +1,9 @@
+[Desktop Entry]
+Version=1.0
+Name=Tailscale
+Comment=Tailscale
+Exec=alacritty --class TUI.float -e sudo tsui
+Terminal=false
+Type=Application
+Icon=/home/sts/.local/share/applications/icons/Tailscale.png
+StartupNotify=true

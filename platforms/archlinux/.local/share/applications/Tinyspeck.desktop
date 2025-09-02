@@ -1,0 +1,9 @@
+[Desktop Entry]
+Version=1.0
+Name=Tinyspeck
+Comment=Tinyspeck
+Exec=omarchy-launch-webapp https://app.slack.com/client/E7SAV7LAD/
+Terminal=false
+Type=Application
+Icon=/home/sts/.local/share/applications/icons/Tinyspeck.png
+StartupNotify=true
