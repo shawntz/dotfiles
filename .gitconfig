@@ -1,12 +1,1 @@
-[alias]
-	co = checkout
-	br = branch
-	ci = commit
-	st = status
-[pull]
-	rebase = true
-[init]
-	defaultBranch = master
-[user]
-	name = Shawn Schwartz
-	email = shawn@shawnschwartz.com
+/home/sts/.dotfiles-platform/common/.gitconfig
