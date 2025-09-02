@@ -13,17 +13,33 @@ CONFIG := git --git-dir=$(DOTFILES_DIR) --work-tree=$(HOME)
 CONFIG_DIRS := \
   .config/hypr \
   .config/waybar \
-  .config/kitty \
-  .config/rofi \
-  .config/wofi \
-  .config/dunst \
-  .config/swaync \
-  .config/wlogout \
-  .config/mako \
   .config/gtk-3.0 \
   .config/gtk-4.0 \
-  .config/starship \
-  .config/nvim
+  .config/starship.toml \
+  .config/nvim \
+	.config/alacritty \
+	.config/btop \
+	.config/environment.d \
+	.config/fastfetch \
+	.config/fontconfig \
+	.config/lazydocker \
+	.config/lazygit \
+	.config/libreoffice \
+	.config/mise \
+	.config/nautilus \
+	.config/nvim \
+	.config/omarchy \
+	.config/Pinta \
+	.config/rstudio/rstudio-prefs.json \
+	.config/rstudio/config.json \
+	.config/rstudio/themes \
+	.config/swayosd \
+	.config/systemd \
+	.config/walker \
+	.config/sublime-text \
+	Scripts \
+	.local/bin \
+	.local/share/applications
 
 CONFIG_FILES := \
   .zshrc \
