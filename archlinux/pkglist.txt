@@ -125,7 +125,6 @@ rstudio-desktop-bin
 rust
 samba
 satty
-slack-term
 slurp
 snapper
 sof-firmware
