@@ -6,7 +6,7 @@ set -euo pipefail
 # Supports multiple platforms with platform-specific configurations
 
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
-PLATFORMS_DIR="$SCRIPT_DIR/platforms"
+PLATFORMS_DIR="$SCRIPT_DIR"
 
 # Detect platform
 detect_platform() {
@@ -77,7 +77,7 @@ main() {
     echo ""
     
     # Install common files first
-    if [[ -d "$PLATFORMS_DIR/common" ]]; then
+    if [[ -d "$SCRIPT_DIR/common" ]]; then
         install_platform "common"
     fi
     
