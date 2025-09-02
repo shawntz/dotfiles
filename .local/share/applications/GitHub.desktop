@@ -1,9 +1,1 @@
-[Desktop Entry]
-Version=1.0
-Name=GitHub
-Comment=GitHub
-Exec=omarchy-launch-webapp https://github.com/
-Terminal=false
-Type=Application
-Icon=/home/sts/.local/share/applications/icons/GitHub.png
-StartupNotify=true
+/home/sts/Developer/dotfiles/platforms/archlinux/.local/share/applications/GitHub.desktop

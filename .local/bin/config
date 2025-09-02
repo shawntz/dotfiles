@@ -1,3 +1,1 @@
-#!/usr/bin/env bash
-DOTFILES_DIR="${DOTFILES_DIR:-$HOME/.dotfiles}"
-exec /usr/bin/git --git-dir="$DOTFILES_DIR" --work-tree="$HOME" "$@"
+/home/sts/Developer/dotfiles/platforms/archlinux/.local/bin/config

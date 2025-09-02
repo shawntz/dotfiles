@@ -1,9 +1,1 @@
-[Desktop Entry]
-Version=1.0
-Name=HEY
-Comment=HEY
-Exec=omarchy-launch-webapp https://app.hey.com
-Terminal=false
-Type=Application
-Icon=/home/sts/.local/share/applications/icons/HEY.png
-StartupNotify=true
+/home/sts/Developer/dotfiles/platforms/archlinux/.local/share/applications/HEY.desktop

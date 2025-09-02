@@ -1,9 +1,1 @@
-[Desktop Entry]
-Version=1.0
-Name=Zoom
-Comment=Zoom
-Exec=omarchy-launch-webapp https://app.zoom.us/wc/home
-Terminal=false
-Type=Application
-Icon=/home/sts/.local/share/applications/icons/Zoom.png
-StartupNotify=true
+/home/sts/Developer/dotfiles/platforms/archlinux/.local/share/applications/Zoom.desktop

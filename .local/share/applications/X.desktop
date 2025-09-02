@@ -1,9 +1,1 @@
-[Desktop Entry]
-Version=1.0
-Name=X
-Comment=X
-Exec=omarchy-launch-webapp https://x.com/
-Terminal=false
-Type=Application
-Icon=/home/sts/.local/share/applications/icons/X.png
-StartupNotify=true
+/home/sts/Developer/dotfiles/platforms/archlinux/.local/share/applications/X.desktop

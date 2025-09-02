@@ -1,9 +1,1 @@
-[Desktop Entry]
-Version=1.0
-Name=YouTube Music
-Comment=YouTube Music
-Exec=omarchy-launch-webapp https://music.youtube.com
-Terminal=false
-Type=Application
-Icon=/home/sts/.local/share/applications/icons/YouTube Music.png
-StartupNotify=true
+/home/sts/Developer/dotfiles/platforms/archlinux/.local/share/applications/YouTube Music.desktop

@@ -1,2 +1,1 @@
-ORIGIN=$BUNDLED_EXTENSIONS_USER/registry/com.sun.star.comp.deployment.component.PackageRegistryBackend
-UNO_SERVICES=?$BUNDLED_EXTENSIONS/wiki-publisher/components.rdb ?$BUNDLED_EXTENSIONS/nlpsolver/components.rdb
+/home/sts/Developer/dotfiles/platforms/archlinux/.config/libreoffice/4/user/extensions/bundled/registry/com.sun.star.comp.deployment.component.PackageRegistryBackend/unorc

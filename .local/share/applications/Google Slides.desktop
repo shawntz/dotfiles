@@ -1,9 +1,1 @@
-[Desktop Entry]
-Version=1.0
-Name=Google Slides
-Comment=Google Slides
-Exec=omarchy-launch-webapp https://slides.new
-Terminal=false
-Type=Application
-Icon=/home/sts/.local/share/applications/icons/Google Slides.png
-StartupNotify=true
+/home/sts/Developer/dotfiles/platforms/archlinux/.local/share/applications/Google Slides.desktop

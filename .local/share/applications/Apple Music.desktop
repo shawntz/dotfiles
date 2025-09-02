@@ -1,9 +1,1 @@
-[Desktop Entry]
-Version=1.0
-Name=Apple Music
-Comment=Apple Music
-Exec=omarchy-launch-webapp https://beta.music.apple.com/us/new
-Terminal=false
-Type=Application
-Icon=/home/sts/.local/share/applications/icons/Apple Music.png
-StartupNotify=true
+/home/sts/Developer/dotfiles/platforms/archlinux/.local/share/applications/Apple Music.desktop
