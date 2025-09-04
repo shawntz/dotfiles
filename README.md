@@ -9,101 +9,75 @@
 [![License: MIT](https://img.shields.io/badge/License-MIT-green.svg)](LICENSE)
 
 These are my personal dotfiles for **Arch Linux with Omarchy + Hyprland**.  
-They’re managed with a **bare Git repo** at `~/.dotfiles`, which keeps `$HOME` clean while tracking only the files I choose.  
-
-A small bootstrap lives in `.bootstrap/` with an `install.sh` script and a `Makefile` for backup/restore.
+They include an `install.sh` script and a `Makefile` for comprehensive dotfiles management including symlink creation, package backup/restore, and system configuration.
 
 ---
 
 ## 🚀 First-Time Install
 
-On a new machine, just run:
+On a new machine, run:
 
 ```bash
-bash -c "$(wget -qO- https://raw.githubusercontent.com/shawntz/dotfiles/master/.bootstrap/install.sh)"
+git clone https://github.com/shawntz/dotfiles.git ~/.dotfiles
+cd ~/.dotfiles
+make bootstrap
 ```
 
 This will:
 
-1. Install a `config` shim at `~/.local/bin/config`.
+1. Install packages from backup lists (if on Arch Linux)
+2. Create symlinks for all configuration files and directories  
+3. Handle conflicts by backing up existing files
 
-2. Clone the bare repo into `~/.dotfiles`.
-
-3. Configure it to hide untracked files.
-
-4. Back up any conflicting files and then check out your tracked dotfiles into `$HOME`.
-
-After this, run all dotfile commands with:
-
-```bash
-config status
-config add .bashrc
-config commit -m "Update bashrc"
-config push
-```
+After installation, manage dotfiles with standard git commands in the dotfiles directory.
 
 ---
 
-## 🔧 Overriding the Repo URL
+## 🔍 Available Commands
 
-By default, `install.sh` has the remote URL baked in (`git@github.com:shawntz/dotfiles.git`).
+Run `make help` to see all available targets:
 
-If you want to clone from a fork, use HTTPS instead of SSH, or test a branch, override it inline:
-
-```bash
-REMOTE_URL=https://github.com/{you}/dotfiles.git bash -c "$(wget -qO- https://raw.githubusercontent.com/{you}/dotfiles/master/.bootstrap/install.sh)"
 ```
+Enhanced Dotfiles Management
 
----
+Detected platform: archlinux
+Dotfiles directory: /home/sts/Developer/dotfiles
 
-## 🔍 List available targets
-
-```bash
-make -f ~/.bootstrap/Makefile help
-```
-
----
-
-## 📦 Backup
-
-```bash
-# export pacman + yay package lists → commit & push
-make -f ~/.bootstrap/Makefile backup-packages
-
-# add config dirs/files → commit & push
-make -f ~/.bootstrap/Makefile backup-configs
-```
-
----
-
-## 🔄 Restore
-
-```bash
-# reinstall pacman + yay packages
-make -f ~/.bootstrap/Makefile restore-packages
-
-# checkout tracked dotfiles into $HOME
-make -f ~/.bootstrap/Makefile restore-dotfiles
-```
-
----
-
-## 🚀 One-Shot
-
-```bash
-# restore packages, then dotfiles
-make -f ~/.bootstrap/Makefile bootstrap
+Core targets:
+  help                 Show this help message
+  install              Install dotfiles for detected platform using install.sh
+  fresh-install        Simulate fresh install with safety checks - skips existing good symlinks
+  uninstall            Remove all dotfiles symlinks using uninstall.sh
+  status               Show current symlink status with detailed checking
+  archlinux            Force install Arch Linux dotfiles
+  darwin               Force install macOS dotfiles  
+  common               Install only common dotfiles
+  backup-packages      Export and backup package lists to platform directory
+  restore-packages     Install packages from backup lists in platform directory
+  backup-configs       Backup configuration files and directories to platform directory
+  fix-local-share      Fix .local/share directory symlinking for current platform
+  list-platforms       List available platforms
+  bootstrap            Complete setup: restore packages, then fresh-install dotfiles
+  validate             Validate all symlinks and report issues
+  doctor               Run comprehensive health check
+  clean                Alias for uninstall
+  setup-keyd           Setup keyd keyboard remapping service (Arch Linux only)
+  setup-apple-emoji    Setup Apple emoji font support (Arch Linux only)
+  link-wallpapers      Create symlink for wallpapers directory
+  link-scripts         Create symlink for scripts directory
+  link-langs           Automatically detect and link language directories to Developer/langs
+  scan-langs           Scan for language directories without moving them
 ```
 
 ---
 
 > [!IMPORTANT]
 >
-> - Any pre-existing files that conflict on first checkout are automatically backed up to a folder like `~/.dotfiles-backup-<timestamp>`.
+> - Any pre-existing files that conflict during installation are automatically backed up with `.bak` extension.
 >
 > - Sensitive material (`~/.ssh`, API keys, tokens) should not be committed. **Be sure to store those securely elsewhere.**
 >
-> - Edit `.bootstrap/Makefile` `CONFIG_DIRS` / `CONFIG_FILES` to match _your_ setup (Hyprland, Waybar, Kitty, Neovim, etc.).
+> - Edit `CONFIG_DIRS` / `CONFIG_FILES` in the Makefile to match _your_ setup (Hyprland, Waybar, Alacritty, Neovim, etc.).
 >
 > Out-of-the-box, the package backup includes:
 >
@@ -115,20 +89,30 @@ make -f ~/.bootstrap/Makefile bootstrap
 ## ✅ Quick Reference
 
 ```bash
-# check repo status
-config status
+# Check symlink status
+make status
 
-# add + commit + push dotfiles
-config add .zshrc .config/hypr/hyprland.conf
-config commit -m "Update Hyprland config"
-config push
+# Install/update dotfiles with safety checks  
+make fresh-install
 
-# backup packages & configs
-make -f ~/.bootstrap/Makefile backup-packages
-make -f ~/.bootstrap/Makefile backup-configs
+# Backup packages & configs
+make backup-packages
+make backup-configs
 
-# restore everything on a new machine
-make -f ~/.bootstrap/Makefile bootstrap
+# Complete setup on a new machine
+make bootstrap
+
+# Validate installation
+make validate
+
+# Run health check
+make doctor
+
+# Special directory management
+make link-wallpapers     # Link ~/Pictures/wallpapers to dotfiles/wallpapers
+make link-scripts        # Link ~/Scripts to dotfiles/common/scripts
+make scan-langs          # Preview language directories that can be moved
+make link-langs          # Move & hide language dirs in ~/Developer/langs/
 ```
 
 ---
@@ -137,22 +121,29 @@ make -f ~/.bootstrap/Makefile bootstrap
 
 ```text
 .
-├── .bootstrap/
-│   ├── Makefile
-│   └── install.sh
-├── .config/
-│   ├── hypr/
-│   │   └── hyprland.conf
-│   ├── waybar/
-│   │   └── config
-│   ├── kitty/
-│   │   └── kitty.conf
-│   ├── nvim/
-│   │   └── init.vim
-│   └── dunst/
-│       └── dunstrc
-├── .gitconfig
-├── .bashrc
-├── pkglist.txt
-└── aurlist.txt
+├── Makefile
+├── install.sh
+├── common/
+│   ├── .config/
+│   │   └── nvim/
+│   │       └── init.lua
+│   ├── .gitconfig
+│   ├── .zshrc
+│   └── .profile
+├── archlinux/
+│   ├── .config/
+│   │   ├── hypr/
+│   │   │   └── hyprland.conf
+│   │   ├── waybar/
+│   │   │   └── config
+│   │   └── alacritty/
+│   │       └── alacritty.yml
+│   ├── .bashrc
+│   ├── pkglist.txt
+│   └── aurlist.txt
+└── darwin/
+    ├── .config/
+    │   └── sketchybar/
+    │       └── sketchybarrc
+    └── .zshrc
 

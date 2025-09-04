@@ -28,7 +28,7 @@ CONFIG_DIRS := \
 	.config/waybar \
 	.config/gtk-3.0 \
 	.config/gtk-4.0 \
-	.config/starship \
+	.config/starship.toml \
 	.config/nvim \
 	.config/alacritty \
 	.config/btop \
@@ -40,16 +40,19 @@ CONFIG_DIRS := \
 	.config/libreoffice \
 	.config/mise \
 	.config/nautilus \
-	.config/omarchy \
+	.config/omarchy/branding \
 	.config/Pinta \
 	.config/rstudio \
 	.config/swayosd \
 	.config/systemd \
 	.config/walker \
 	.config/sublime-text \
-	Scripts \
 	.local/bin \
-	.local/share/applications
+	.local/share/applications \
+	.local/share/omarchy/logo.svg \
+	.local/share/omarchy/logo.txt \
+	.local/share/omarchy/bin \
+	.local/share/omarchy/default/plymouth
 
 CONFIG_FILES := \
 	.zshrc \
@@ -61,7 +64,7 @@ CONFIG_FILES := \
 	.profile \
 	.bashrc
 
-.PHONY: help install fresh-install uninstall status backup-packages restore-packages setup-keyd
+.PHONY: help install fresh-install uninstall status backup-packages restore-packages backup-configs setup-keyd link-wallpapers link-scripts link-langs scan-langs
 
 # Default target
 help: ## Show this help message
@@ -257,6 +260,53 @@ restore-packages: ## Install packages from backup lists in platform directory
 	fi
 	@echo "✅ Packages restored."
 
+backup-configs: ## Backup configuration files and directories to platform directory
+	@if [ "$(PLATFORM)" = "unknown" ]; then \
+		echo "❌ Config backup requires a supported platform"; \
+		exit 1; \
+	fi
+	@echo "📁 Backing up configuration files to $(PLATFORM) directory..."
+	@mkdir -p $(SCRIPT_DIR)/$(PLATFORM)
+	@echo "🔄 Copying CONFIG_DIRS..."
+	@for item in $(CONFIG_DIRS); do \
+		if [ -d "$(HOME_DIR)/$$item" ] && [ ! -L "$(HOME_DIR)/$$item" ]; then \
+			echo "  📂 Copying $$item..."; \
+			mkdir -p "$(SCRIPT_DIR)/$(PLATFORM)/$$(dirname $$item)"; \
+			cp -r "$(HOME_DIR)/$$item" "$(SCRIPT_DIR)/$(PLATFORM)/$$item"; \
+		elif [ -f "$(HOME_DIR)/$$item" ] && [ ! -L "$(HOME_DIR)/$$item" ]; then \
+			echo "  📄 Copying $$item..."; \
+			mkdir -p "$(SCRIPT_DIR)/$(PLATFORM)/$$(dirname $$item)"; \
+			cp "$(HOME_DIR)/$$item" "$(SCRIPT_DIR)/$(PLATFORM)/$$item"; \
+		elif [ -L "$(HOME_DIR)/$$item" ]; then \
+			echo "  🔗 Skipping $$item (already symlinked to dotfiles)"; \
+		else \
+			echo "  ⚠️  Skipping $$item (not found)"; \
+		fi \
+	done
+	@echo "📄 Copying CONFIG_FILES..."
+	@for file in $(CONFIG_FILES); do \
+		if [ -f "$(HOME_DIR)/$$file" ] && [ ! -L "$(HOME_DIR)/$$file" ]; then \
+			echo "  📄 Copying $$file..."; \
+			mkdir -p "$(SCRIPT_DIR)/$(PLATFORM)/$$(dirname $$file)"; \
+			cp "$(HOME_DIR)/$$file" "$(SCRIPT_DIR)/$(PLATFORM)/$$file"; \
+		elif [ -L "$(HOME_DIR)/$$file" ]; then \
+			echo "  🔗 Skipping $$file (already symlinked to dotfiles)"; \
+		else \
+			echo "  ⚠️  Skipping $$file (not found)"; \
+		fi \
+	done
+	@echo "✅ Configuration backup complete"
+	@echo "🔄 Committing and pushing changes..."
+	@cd $(SCRIPT_DIR) && \
+	git add $(PLATFORM)/ && \
+	if git diff --staged --quiet; then \
+		echo "ℹ️  No changes to commit"; \
+	else \
+		git commit -m "[CI] Update configuration files for $(PLATFORM)" && \
+		git push; \
+		echo "✅ Changes committed and pushed"; \
+	fi
+
 # === DEVELOPMENT/MAINTENANCE TARGETS ===
 
 fix-local-share: ## Fix .local/share directory symlinking for current platform
@@ -336,6 +386,82 @@ doctor: ## Run comprehensive health check
 		echo "  ❌ archlinux/aurlist.txt (missing)"; \
 	fi
 	@echo ""
+	@echo "Special directory symlinks:"
+	@if [ -L "$(HOME_DIR)/Pictures/wallpapers" ]; then \
+		existing_target=$$(readlink "$(HOME_DIR)/Pictures/wallpapers"); \
+		if [ "$$existing_target" = "$(SCRIPT_DIR)/wallpapers" ]; then \
+			echo "  ✅ wallpapers -> $(SCRIPT_DIR)/wallpapers"; \
+		else \
+			echo "  ⚠️  wallpapers -> $$existing_target (should be $(SCRIPT_DIR)/wallpapers)"; \
+		fi \
+	elif [ -e "$(HOME_DIR)/Pictures/wallpapers" ]; then \
+		echo "  ⚠️  wallpapers (exists but not symlinked)"; \
+	else \
+		echo "  ❌ wallpapers (missing)"; \
+	fi
+	@if [ -L "$(HOME_DIR)/Scripts" ]; then \
+		existing_target=$$(readlink "$(HOME_DIR)/Scripts"); \
+		if [ "$$existing_target" = "$(SCRIPT_DIR)/common/scripts" ]; then \
+			echo "  ✅ scripts -> $(SCRIPT_DIR)/common/scripts"; \
+		else \
+			echo "  ⚠️  scripts -> $$existing_target (should be $(SCRIPT_DIR)/common/scripts)"; \
+		fi \
+	elif [ -e "$(HOME_DIR)/Scripts" ]; then \
+		echo "  ⚠️  scripts (exists but not symlinked)"; \
+	else \
+		echo "  ❌ scripts (missing)"; \
+	fi
+	@echo ""
+	@echo "Language environment directories:"
+	@if [ -d "$(HOME_DIR)/Developer/langs" ]; then \
+		lang_count=$$(find "$(HOME_DIR)/Developer/langs" -maxdepth 1 -type d | wc -l); \
+		lang_count=$$((lang_count - 1)); \
+		echo "  📁 Developer/langs/ ($$lang_count directories)"; \
+		for pattern in go R .cargo .rustup .npm .yarn .julia .pyenv .rbenv .nvm; do \
+			if [ -e "$(HOME_DIR)/Developer/langs/$$pattern" ]; then \
+				case "$$pattern" in \
+					"go"|"R") \
+						if [ -L "$(HOME_DIR)/.$$pattern" ]; then \
+							echo "  ✅ $$pattern -> ~/.$$pattern (hidden)"; \
+						else \
+							echo "  ⚠️  $$pattern (relocated but not symlinked as hidden)"; \
+						fi \
+						;; \
+					*) \
+						if [ -L "$(HOME_DIR)/$$pattern" ]; then \
+							echo "  ✅ $$pattern -> ~/$$pattern"; \
+						else \
+							echo "  ⚠️  $$pattern (relocated but not symlinked)"; \
+						fi \
+						;; \
+				esac \
+			fi \
+		done; \
+	else \
+		echo "  ❌ Developer/langs/ (missing - run 'make link-langs')"; \
+	fi
+	@echo ""
+	@echo "Environment variables (shell config):"
+	@for shell_config in ".zshrc" ".bashrc"; do \
+		if [ -f "$(SCRIPT_DIR)/common/$$shell_config" ]; then \
+			if grep -q "Developer/langs" "$(SCRIPT_DIR)/common/$$shell_config"; then \
+				echo "  ✅ $$shell_config (language env vars configured)"; \
+			else \
+				echo "  ⚠️  $$shell_config (missing language env vars)"; \
+			fi \
+		else \
+			echo "  ❌ $$shell_config (missing)"; \
+		fi \
+	done
+	@echo ""
+	@echo "Home directory cleanliness check:"
+	@if ls "$(HOME_DIR)" | grep -E "(Makefile|LICENSE|install\.sh|uninstall\.sh|pkglist\.txt|aurlist\.txt|^archlinux$$|^common$$|^go$$|^R$$|node_modules|vendor)" >/dev/null 2>&1; then \
+		echo "  ⚠️  Found dotfiles repo files in home directory:"; \
+		ls "$(HOME_DIR)" | grep -E "(Makefile|LICENSE|install\.sh|uninstall\.sh|pkglist\.txt|aurlist\.txt|^archlinux$$|^common$$|^go$$|^R$$|node_modules|vendor)" | sed 's/^/    /'; \
+	else \
+		echo "  ✅ Home directory is clean (no repo files)"; \
+	fi
+	@echo ""
 	@$(MAKE) --no-print-directory validate
 
 clean: uninstall ## Alias for uninstall
@@ -380,3 +506,151 @@ setup-apple-emoji: ## Setup Apple emoji font support (Arch Linux only)
 	@echo "Testing: 😀 🎉 ❤️ 👍"
 	@fc-match emoji
 	@echo "✅ Apple emoji setup complete! Restart applications to see changes."
+
+link-wallpapers: ## Create symlink for wallpapers directory
+	@echo "🖼️  Linking wallpapers directory..."
+	@mkdir -p "$(HOME_DIR)/Pictures"
+	@if [ -L "$(HOME_DIR)/Pictures/wallpapers" ]; then \
+		existing_target=$$(readlink "$(HOME_DIR)/Pictures/wallpapers"); \
+		if [ "$$existing_target" = "$(SCRIPT_DIR)/wallpapers" ]; then \
+			echo "✅ $(HOME_DIR)/Pictures/wallpapers -> $(SCRIPT_DIR)/wallpapers (already linked correctly)"; \
+		else \
+			echo "🔄 $(HOME_DIR)/Pictures/wallpapers -> $(SCRIPT_DIR)/wallpapers (updating from $$existing_target)"; \
+			rm -f "$(HOME_DIR)/Pictures/wallpapers"; \
+			ln -sf "$(SCRIPT_DIR)/wallpapers" "$(HOME_DIR)/Pictures/wallpapers"; \
+		fi \
+	elif [ -e "$(HOME_DIR)/Pictures/wallpapers" ]; then \
+		echo "⚠️  $(HOME_DIR)/Pictures/wallpapers (exists but not symlinked - backing up to .bak)"; \
+		mv "$(HOME_DIR)/Pictures/wallpapers" "$(HOME_DIR)/Pictures/wallpapers.bak"; \
+		ln -sf "$(SCRIPT_DIR)/wallpapers" "$(HOME_DIR)/Pictures/wallpapers"; \
+		echo "✅ $(HOME_DIR)/Pictures/wallpapers -> $(SCRIPT_DIR)/wallpapers (created, original backed up)"; \
+	else \
+		ln -sf "$(SCRIPT_DIR)/wallpapers" "$(HOME_DIR)/Pictures/wallpapers"; \
+		echo "✅ $(HOME_DIR)/Pictures/wallpapers -> $(SCRIPT_DIR)/wallpapers (created)"; \
+	fi
+
+link-scripts: ## Create symlink for scripts directory
+	@echo "📜 Linking scripts directory..."
+	@if [ -L "$(HOME_DIR)/Scripts" ]; then \
+		existing_target=$$(readlink "$(HOME_DIR)/Scripts"); \
+		if [ "$$existing_target" = "$(SCRIPT_DIR)/common/scripts" ]; then \
+			echo "✅ $(HOME_DIR)/Scripts -> $(SCRIPT_DIR)/common/scripts (already linked correctly)"; \
+		else \
+			echo "🔄 $(HOME_DIR)/Scripts -> $(SCRIPT_DIR)/common/scripts (updating from $$existing_target)"; \
+			rm -f "$(HOME_DIR)/Scripts"; \
+			ln -sf "$(SCRIPT_DIR)/common/scripts" "$(HOME_DIR)/Scripts"; \
+		fi \
+	elif [ -e "$(HOME_DIR)/Scripts" ]; then \
+		echo "⚠️  $(HOME_DIR)/Scripts (exists but not symlinked - backing up to .bak)"; \
+		mv "$(HOME_DIR)/Scripts" "$(HOME_DIR)/Scripts.bak"; \
+		ln -sf "$(SCRIPT_DIR)/common/scripts" "$(HOME_DIR)/Scripts"; \
+		echo "✅ $(HOME_DIR)/Scripts -> $(SCRIPT_DIR)/common/scripts (created, original backed up)"; \
+	else \
+		ln -sf "$(SCRIPT_DIR)/common/scripts" "$(HOME_DIR)/Scripts"; \
+		echo "✅ $(HOME_DIR)/Scripts -> $(SCRIPT_DIR)/common/scripts (created)"; \
+	fi
+
+# Language environment directories to detect and relocate
+# Note: Some directories (like 'go' and 'R') will be hidden with dots when symlinked
+LANG_PATTERNS := go R .cargo .rustup .npm .yarn .gradle .m2 .julia .pyenv .rbenv .nvm .conda .miniconda3 .anaconda3 .poetry .pipenv .deno .bun node_modules .local/share/pnpm .cache/pip .gem .rvm .ghc .stack .cabal .opam .mix .hex _build .nuget .dotnet .composer vendor
+
+# Function to convert directory names to hidden versions for symlinking
+define make_hidden
+$(if $(filter go R node_modules vendor,$(1)),.$(1),$(1))
+endef
+
+link-langs: ## Automatically detect and link language directories to Developer/langs
+	@echo "🔍 Detecting language environment directories..."
+	@mkdir -p "$(HOME_DIR)/Developer/langs"
+	@found_dirs=0; \
+	for pattern in $(LANG_PATTERNS); do \
+		if [ -e "$(HOME_DIR)/$$pattern" ] && [ ! -L "$(HOME_DIR)/$$pattern" ]; then \
+			found_dirs=$$((found_dirs + 1)); \
+			echo "📁 Found: $$pattern"; \
+			target_dir="$(HOME_DIR)/Developer/langs/$$pattern"; \
+			mkdir -p "$$(dirname "$$target_dir")"; \
+			echo "🚀 Moving $(HOME_DIR)/$$pattern -> $$target_dir"; \
+			mv "$(HOME_DIR)/$$pattern" "$$target_dir"; \
+			case "$$pattern" in \
+				"go"|"R"|"node_modules"|"vendor") \
+					hidden_name=".$$pattern"; \
+					echo "🔗 Linking $$target_dir -> $(HOME_DIR)/$$hidden_name (hidden)"; \
+					ln -sf "$$target_dir" "$(HOME_DIR)/$$hidden_name"; \
+					echo "✅ $$pattern relocated and linked as $$hidden_name"; \
+					;; \
+				*) \
+					echo "🔗 Linking $$target_dir -> $(HOME_DIR)/$$pattern"; \
+					ln -sf "$$target_dir" "$(HOME_DIR)/$$pattern"; \
+					echo "✅ $$pattern relocated and linked"; \
+					;; \
+			esac \
+		elif [ -L "$(HOME_DIR)/$$pattern" ]; then \
+			existing_target=$$(readlink "$(HOME_DIR)/$$pattern"); \
+			expected_target="$(HOME_DIR)/Developer/langs/$$pattern"; \
+			if [ "$$existing_target" = "$$expected_target" ]; then \
+				echo "✅ $$pattern (already linked correctly)"; \
+			else \
+				echo "⚠️  $$pattern (linked to $$existing_target, expected $$expected_target)"; \
+			fi \
+		elif [ -L "$(HOME_DIR)/.$$pattern" ] && echo "go R node_modules vendor" | grep -q "$$pattern"; then \
+			existing_target=$$(readlink "$(HOME_DIR)/.$$pattern"); \
+			expected_target="$(HOME_DIR)/Developer/langs/$$pattern"; \
+			if [ "$$existing_target" = "$$expected_target" ]; then \
+				echo "✅ .$$pattern (already linked correctly, hidden)"; \
+			else \
+				echo "⚠️  .$$pattern (linked to $$existing_target, expected $$expected_target)"; \
+			fi \
+		fi \
+	done; \
+	if [ $$found_dirs -eq 0 ]; then \
+		echo "ℹ️  No language directories found to relocate"; \
+	else \
+		echo "🎉 Relocated $$found_dirs language directories to Developer/langs/"; \
+	fi; \
+	echo "⚙️  Updating shell environment variables..."; \
+	for shell_config in ".zshrc" ".bashrc"; do \
+		if [ -f "$(SCRIPT_DIR)/common/$$shell_config" ]; then \
+			if ! grep -q "Developer/langs" "$(SCRIPT_DIR)/common/$$shell_config"; then \
+				echo "" >> "$(SCRIPT_DIR)/common/$$shell_config"; \
+				echo "# Language environment directories relocated to Developer/langs" >> "$(SCRIPT_DIR)/common/$$shell_config"; \
+				echo 'export GOPATH="$$HOME/.go"' >> "$(SCRIPT_DIR)/common/$$shell_config"; \
+				echo 'export CARGO_HOME="$$HOME/Developer/langs/.cargo"' >> "$(SCRIPT_DIR)/common/$$shell_config"; \
+				echo 'export RUSTUP_HOME="$$HOME/Developer/langs/.rustup"' >> "$(SCRIPT_DIR)/common/$$shell_config"; \
+				echo 'export NPM_CONFIG_CACHE="$$HOME/Developer/langs/.npm"' >> "$(SCRIPT_DIR)/common/$$shell_config"; \
+				echo 'export R_LIBS_USER="$$HOME/.R"' >> "$(SCRIPT_DIR)/common/$$shell_config"; \
+				echo 'export JULIA_DEPOT_PATH="$$HOME/Developer/langs/.julia"' >> "$(SCRIPT_DIR)/common/$$shell_config"; \
+				echo 'export PYENV_ROOT="$$HOME/Developer/langs/.pyenv"' >> "$(SCRIPT_DIR)/common/$$shell_config"; \
+				echo 'export RBENV_ROOT="$$HOME/Developer/langs/.rbenv"' >> "$(SCRIPT_DIR)/common/$$shell_config"; \
+				echo 'export NVM_DIR="$$HOME/Developer/langs/.nvm"' >> "$(SCRIPT_DIR)/common/$$shell_config"; \
+				echo 'export POETRY_HOME="$$HOME/Developer/langs/.poetry"' >> "$(SCRIPT_DIR)/common/$$shell_config"; \
+				echo 'export DENO_INSTALL="$$HOME/Developer/langs/.deno"' >> "$(SCRIPT_DIR)/common/$$shell_config"; \
+				echo 'export BUN_INSTALL="$$HOME/Developer/langs/.bun"' >> "$(SCRIPT_DIR)/common/$$shell_config"; \
+				echo 'export GEM_HOME="$$HOME/Developer/langs/.gem"' >> "$(SCRIPT_DIR)/common/$$shell_config"; \
+				echo 'export STACK_ROOT="$$HOME/Developer/langs/.stack"' >> "$(SCRIPT_DIR)/common/$$shell_config"; \
+				echo "✅ Added environment variables to $$shell_config"; \
+			else \
+				echo "✅ Environment variables already present in $$shell_config"; \
+			fi \
+		fi \
+	done
+
+scan-langs: ## Scan for language directories without moving them
+	@echo "🔍 Scanning for language environment directories..."
+	@found_dirs=0; \
+	for pattern in $(LANG_PATTERNS); do \
+		if [ -e "$(HOME_DIR)/$$pattern" ]; then \
+			found_dirs=$$((found_dirs + 1)); \
+			if [ -L "$(HOME_DIR)/$$pattern" ]; then \
+				existing_target=$$(readlink "$(HOME_DIR)/$$pattern"); \
+				echo "🔗 $$pattern -> $$existing_target (symlinked)"; \
+			else \
+				size=$$(du -sh "$(HOME_DIR)/$$pattern" 2>/dev/null | cut -f1 || echo "?"); \
+				echo "📁 $$pattern ($$size, not symlinked)"; \
+			fi \
+		fi \
+	done; \
+	if [ $$found_dirs -eq 0 ]; then \
+		echo "ℹ️  No language directories found"; \
+	else \
+		echo "📊 Found $$found_dirs language directories total"; \
+	fi
