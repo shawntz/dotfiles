@@ -40,7 +40,7 @@
     "text_rendering": "geometricPrecision",
     "font_size_points": 11,
     "help_font_size_points": 11,
-    "editor_theme": "Rosé Pine Moon {rsthemes}",
+    "editor_theme": "Serendipity Light {rsthemes}",
     "panes": {
         "quadrants": [
             "TabSet2",
