@@ -1,11 +1,13 @@
 
-# 🗂️ Dotfiles (Bare Repo + Omarchy/Arch)
+# 🗂️ dotfiles (omarchy/arch + macos)
 
-[![Arch Linux](https://img.shields.io/badge/OS-Arch_Linux-1793D1?logo=arch-linux&logoColor=white)](https://archlinux.org)
-[![macOS Compatible](https://img.shields.io/badge/OS-macOS-000000?logo=apple&logoColor=white)](https://apple.com/macos)
-[![Package Manager](https://img.shields.io/badge/Pacman-Enabled-00457C?logo=arch-linux&logoColor=white)](https://wiki.archlinux.org/title/Pacman)
+[![Arch Linux](https://img.shields.io/badge/Arch-Linux-1793D1?logo=arch-linux&logoColor=white)](https://archlinux.org)
+[![Omarchy](https://img.shields.io/badge/Omarchy-FF4088?logo=linux&logoColor=white)](https://learn.omacom.io/2/the-omarchy-manual)
+[![Hyprland](https://img.shields.io/badge/Hyprland-01A7D6?logo=hyprland&logoColor=white)](https://hypr.land/)
+[![Package Manager](https://img.shields.io/badge/pacman-00457C?logo=arch-linux&logoColor=white)](https://wiki.archlinux.org/title/Pacman)
 [![AUR](https://img.shields.io/badge/AUR-yay-1793D1?logo=arch-linux&logoColor=white)](https://aur.archlinux.org)
-[![Omarchy](https://img.shields.io/badge/Setup-Omarchy-FF4088?logo=linux&logoColor=white)](https://world.hey.com/dhh/omarchy-is-out-4666dd31)
+[![macOS](https://img.shields.io/badge/macOS-000000?logo=apple&logoColor=white)](https://apple.com/macos)
+[![homebrew](https://img.shields.io/badge/homebrew-513D23?logo=homebrew&logoColor=white)](https://brew.sh)
 [![License: MIT](https://img.shields.io/badge/License-MIT-green.svg)](LICENSE)
 
 These are my personal dotfiles for **Arch Linux with Omarchy + Hyprland**.  
