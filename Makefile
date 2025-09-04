@@ -271,12 +271,15 @@ backup-configs: ## Backup configuration files and directories to platform direct
 	@for item in $(CONFIG_DIRS); do \
 		if [ -d "$(HOME_DIR)/$$item" ] && [ ! -L "$(HOME_DIR)/$$item" ]; then \
 			echo "  📂 Copying $$item..."; \
-			mkdir -p "$(SCRIPT_DIR)/$(PLATFORM)/$$(dirname $$item)"; \
-			cp -r "$(HOME_DIR)/$$item" "$(SCRIPT_DIR)/$(PLATFORM)/$$item"; \
+			target_dir="$(SCRIPT_DIR)/$(PLATFORM)/$$item"; \
+			mkdir -p "$$(dirname $$target_dir)"; \
+			rm -rf "$$target_dir"; \
+			cp -r "$(HOME_DIR)/$$item" "$$target_dir"; \
 		elif [ -f "$(HOME_DIR)/$$item" ] && [ ! -L "$(HOME_DIR)/$$item" ]; then \
 			echo "  📄 Copying $$item..."; \
-			mkdir -p "$(SCRIPT_DIR)/$(PLATFORM)/$$(dirname $$item)"; \
-			cp "$(HOME_DIR)/$$item" "$(SCRIPT_DIR)/$(PLATFORM)/$$item"; \
+			target_file="$(SCRIPT_DIR)/$(PLATFORM)/$$item"; \
+			mkdir -p "$$(dirname $$target_file)"; \
+			cp "$(HOME_DIR)/$$item" "$$target_file"; \
 		elif [ -L "$(HOME_DIR)/$$item" ]; then \
 			echo "  🔗 Skipping $$item (already symlinked to dotfiles)"; \
 		else \
