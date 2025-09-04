@@ -1,1 +1,0 @@
-/home/sts/Developer/dotfiles/archlinux/.config/nvim/lua/plugins/snacks-animated-scrolling-off.lua
