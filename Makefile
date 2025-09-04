@@ -61,7 +61,7 @@ CONFIG_FILES := \
 	.profile \
 	.bashrc
 
-.PHONY: help install fresh-install uninstall status backup-packages restore-packages
+.PHONY: help install fresh-install uninstall status backup-packages restore-packages setup-keyd
 
 # Default target
 help: ## Show this help message
@@ -329,3 +329,25 @@ doctor: ## Run comprehensive health check
 	@$(MAKE) --no-print-directory validate
 
 clean: uninstall ## Alias for uninstall
+
+# === SYSTEM CONFIGURATION TARGETS ===
+
+setup-keyd: ## Setup keyd keyboard remapping service (Arch Linux only)
+	@if [ "$(PLATFORM)" != "archlinux" ]; then \
+		echo "❌ keyd setup only supported on Arch Linux"; \
+		exit 1; \
+	fi
+	@echo "🔧 Setting up keyd keyboard remapping..."
+	@if [ ! -f "$(SCRIPT_DIR)/archlinux/.config/keyd/default.conf" ]; then \
+		echo "❌ keyd configuration file not found: $(SCRIPT_DIR)/archlinux/.config/keyd/default.conf"; \
+		exit 1; \
+	fi
+	@echo "📁 Creating /etc/keyd directory..."
+	@sudo mkdir -p /etc/keyd
+	@echo "🔗 Creating symlink /etc/keyd/default.conf -> $(SCRIPT_DIR)/archlinux/.config/keyd/default.conf"
+	@sudo ln -sf "$(SCRIPT_DIR)/archlinux/.config/keyd/default.conf" /etc/keyd/default.conf
+	@echo "🔄 Enabling keyd service..."
+	@sudo systemctl enable keyd
+	@echo "▶️  Starting keyd service..."
+	@sudo systemctl start keyd
+	@echo "✅ keyd setup complete! Check status with: systemctl status keyd"
