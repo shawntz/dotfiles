@@ -1,0 +1,579 @@
+#!/usr/bin/env python3
+"""
+FZF-style clipboard search interface
+Implements proper fuzzy matching algorithm based on fzf
+"""
+
+import os
+import sys
+import sqlite3
+import getpass
+import subprocess
+import time
+import termios
+import tty
+import select
+import re
+import json
+from pathlib import Path
+from typing import List, Tuple, Dict
+
+# Check if cryptography is available
+try:
+    from cryptography.fernet import Fernet
+    from cryptography.hazmat.primitives import hashes
+    from cryptography.hazmat.primitives.kdf.pbkdf2 import PBKDF2HMAC
+    import base64
+    import toml
+except ImportError:
+    print("❌ Dependencies not found. Please run 'clipd' first to set up dependencies.")
+    sys.exit(1)
+
+class FuzzyMatcher:
+    """Implements fzf-style fuzzy matching algorithm"""
+    
+    # Scoring constants (based on fzf algorithm)
+    SCORE_MATCH = 16
+    SCORE_GAP_START = -3
+    SCORE_GAP_EXTENSION = -1
+    
+    # Bonus scores for special positions
+    BONUS_BOUNDARY = SCORE_MATCH // 2
+    BONUS_NON_WORD = SCORE_MATCH // 6
+    BONUS_CAMEL123 = BONUS_BOUNDARY + SCORE_GAP_EXTENSION
+    BONUS_CONSECUTIVE = -(SCORE_GAP_START + SCORE_GAP_EXTENSION)
+    BONUS_FIRST_CHAR_MULTIPLIER = 2
+    
+    @classmethod
+    def char_class(cls, char):
+        """Classify character type for boundary detection"""
+        if char.isspace():
+            return 'white'
+        elif char.isalnum():
+            if char.islower():
+                return 'lower'
+            elif char.isupper():
+                return 'upper'
+            elif char.isdigit():
+                return 'number'
+        return 'non_word'
+    
+    @classmethod
+    def bonus_for_position(cls, prev_class, curr_class):
+        """Calculate bonus score for character position"""
+        if prev_class == 'white' or prev_class == 'non_word':
+            # Word boundary after space/separator
+            return cls.BONUS_BOUNDARY
+        elif prev_class == 'lower' and curr_class == 'upper':
+            # camelCase transition
+            return cls.BONUS_CAMEL123
+        elif prev_class != 'number' and curr_class == 'number':
+            # Number after non-number
+            return cls.BONUS_CAMEL123
+        return 0
+    
+    @classmethod
+    def fuzzy_match_v2(cls, pattern: str, text: str, case_sensitive: bool = False) -> Tuple[int, List[int]]:
+        """
+        Advanced fuzzy matching algorithm based on fzf's FuzzyMatchV2
+        Returns (score, match_positions)
+        """
+        if not pattern:
+            return 0, []
+            
+        if not case_sensitive:
+            pattern = pattern.lower()
+            text = text.lower()
+        
+        text_len = len(text)
+        pattern_len = len(pattern)
+        
+        if pattern_len > text_len:
+            return -1, []
+        
+        # Simple substring check for exact matches
+        if pattern in text:
+            start_idx = text.find(pattern)
+            return cls.SCORE_MATCH * pattern_len, list(range(start_idx, start_idx + pattern_len))
+        
+        # Initialize DP table
+        # H[i][j] = score for matching pattern[:i] with text[:j]
+        H = [[-1000 for _ in range(text_len + 1)] for _ in range(pattern_len + 1)]
+        
+        # Base case: empty pattern matches empty text with score 0
+        for j in range(text_len + 1):
+            H[0][j] = 0
+        
+        # Calculate character classes for bonus scoring
+        text_classes = ['white'] + [cls.char_class(c) for c in text]
+        
+        # Fill DP table
+        for i in range(1, pattern_len + 1):
+            pattern_char = pattern[i-1]
+            for j in range(i, text_len + 1):
+                text_char = text[j-1]
+                
+                if pattern_char == text_char:
+                    # Character matches
+                    score = cls.SCORE_MATCH
+                    
+                    # Add positional bonus
+                    bonus = cls.bonus_for_position(text_classes[j-1], text_classes[j])
+                    score += bonus
+                    
+                    # Add bonus for first character
+                    if i == 1:
+                        score *= cls.BONUS_FIRST_CHAR_MULTIPLIER
+                    
+                    # Add consecutive match bonus
+                    if i > 1 and j > 1 and H[i-1][j-1] > H[i-1][j-2]:
+                        score += cls.BONUS_CONSECUTIVE
+                    
+                    H[i][j] = max(H[i-1][j-1] + score, H[i][j-1] + cls.SCORE_GAP_EXTENSION)
+                else:
+                    # Character doesn't match
+                    if j > i:
+                        H[i][j] = max(H[i][j-1] + cls.SCORE_GAP_EXTENSION, -1000)
+        
+        final_score = H[pattern_len][text_len]
+        if final_score <= -1000:
+            return -1, []
+        
+        # Backtrack to find match positions
+        match_positions = []
+        i, j = pattern_len, text_len
+        
+        while i > 0 and j > 0:
+            if pattern[i-1] == text[j-1]:
+                match_positions.append(j-1)
+                i -= 1
+                j -= 1
+            else:
+                j -= 1
+        
+        match_positions.reverse()
+        return final_score, match_positions
+
+class ClipboardSearch:
+    def __init__(self):
+        self.config_dir = Path.home() / '.config' / 'clipd'
+        self.db_path = self.config_dir / 'clips.db'
+        self.salt_file = self.config_dir / '.salt'
+        self.config_file = self.config_dir / 'clipd.toml'
+        self.password_cache_file = self.config_dir / '.password_cache'
+        
+        self.search_query = ""
+        self.selected_index = 0
+        self.entries = []
+        self.filtered_entries = []
+        
+        # Terminal settings
+        self.term_height = 24
+        self.term_width = 80
+        self.preview_lines = 3
+        
+        # Load config
+        self.config = self.load_config()
+        self.require_password = self.config.get('require_password_for_access', False)
+        
+        self.update_terminal_size()
+        
+    def load_config(self):
+        """Load configuration from TOML file"""
+        if not self.config_file.exists():
+            return {}
+        try:
+            with open(self.config_file, 'r') as f:
+                return toml.load(f)
+        except:
+            return {}
+    
+    def check_password_cache(self):
+        """Check if we can access without password"""
+        if not self.require_password:
+            return True
+            
+        password_cache_days = self.config.get('password_cache_days', 14)
+        if password_cache_days == 0:
+            return False
+            
+        if not self.password_cache_file.exists():
+            return False
+            
+        try:
+            with open(self.password_cache_file, 'r') as f:
+                cache_data = json.load(f)
+                
+            cache_age = time.time() - cache_data['timestamp']
+            return cache_age < (password_cache_days * 24 * 60 * 60)
+        except:
+            return False
+        
+    def setup_encryption(self, password):
+        """Setup password-based decryption"""
+        if not self.salt_file.exists():
+            print("No clipboard database found. Start clipd daemon first.")
+            sys.exit(1)
+            
+        with open(self.salt_file, 'rb') as f:
+            salt = f.read()
+            
+        kdf = PBKDF2HMAC(
+            algorithm=hashes.SHA256(),
+            length=32,
+            salt=salt,
+            iterations=100000,
+        )
+        key = base64.urlsafe_b64encode(kdf.derive(password.encode()))
+        self.fernet = Fernet(key)
+        
+    def update_terminal_size(self):
+        """Get current terminal dimensions"""
+        try:
+            # Try shutil first (more reliable)
+            import shutil
+            cols, rows = shutil.get_terminal_size()
+            self.term_width = cols
+            self.term_height = rows
+        except:
+            # Fallback to stty
+            try:
+                result = subprocess.run(['stty', 'size'], capture_output=True, text=True)
+                if result.returncode == 0:
+                    rows, cols = map(int, result.stdout.strip().split())
+                    self.term_height = rows
+                    self.term_width = cols
+            except:
+                # Final fallback
+                self.term_width = 80
+                self.term_height = 24
+        
+        # Ensure minimum dimensions
+        self.term_width = max(50, self.term_width)
+        self.term_height = max(10, self.term_height)
+            
+    def load_entries(self):
+        """Load and decrypt clipboard entries"""
+        if not self.db_path.exists():
+            self.entries = []
+            return
+            
+        try:
+            conn = sqlite3.connect(self.db_path)
+            cursor = conn.execute('''
+                SELECT encrypted_content, timestamp, size 
+                FROM clips 
+                ORDER BY timestamp DESC 
+                LIMIT 1000
+            ''')
+            
+            self.entries = []
+            for encrypted_content, timestamp, size in cursor.fetchall():
+                try:
+                    content = self.fernet.decrypt(encrypted_content).decode('utf-8')
+                    time_str = time.strftime('%m-%d %H:%M', time.localtime(timestamp))
+                    self.entries.append({
+                        'content': content,
+                        'timestamp': timestamp,
+                        'time_str': time_str,
+                        'size': size,
+                        'score': 0,
+                        'match_positions': []
+                    })
+                except:
+                    continue
+                    
+            conn.close()
+            
+        except Exception as e:
+            print(f"Error loading clipboard data: {e}")
+            sys.exit(1)
+            
+    def filter_entries(self):
+        """Filter and rank entries using fzf algorithm"""
+        if not self.search_query.strip():
+            self.filtered_entries = self.entries[:]
+            for entry in self.filtered_entries:
+                entry['score'] = 0
+                entry['match_positions'] = []
+        else:
+            self.filtered_entries = []
+            query = self.search_query.strip()
+            
+            for entry in self.entries:
+                content = entry['content']
+                # Search in content, prioritizing first lines
+                lines = content.split('\n')
+                best_score = -1
+                best_positions = []
+                
+                # Check each line, with higher weight for earlier lines
+                for line_idx, line in enumerate(lines[:10]):  # Only check first 10 lines
+                    score, positions = FuzzyMatcher.fuzzy_match_v2(query, line)
+                    
+                    # Weight earlier lines higher
+                    if score > 0:
+                        weighted_score = score - (line_idx * 2)  # Penalize later lines
+                        if weighted_score > best_score:
+                            best_score = weighted_score
+                            best_positions = positions
+                
+                if best_score > 0:
+                    entry['score'] = best_score
+                    entry['match_positions'] = best_positions
+                    self.filtered_entries.append(entry)
+            
+            # Sort by score (descending)
+            self.filtered_entries.sort(key=lambda x: x['score'], reverse=True)
+                    
+        # Reset selection if out of bounds
+        if self.selected_index >= len(self.filtered_entries):
+            self.selected_index = max(0, len(self.filtered_entries) - 1)
+            
+    def highlight_matches(self, text: str, positions: List[int]) -> str:
+        """Highlight matched characters exactly like fzf"""
+        if not positions:
+            return text
+            
+        result = ""
+        for i, char in enumerate(text):
+            if i in positions:
+                # fzf uses bright white/yellow highlighting for matches
+                result += f"\033[1;33m{char}\033[0m"  # Bright yellow
+            else:
+                result += char
+        return result
+        
+    def format_entry_preview(self, entry, is_selected=False):
+        """Format entry for display like fzf - clean and readable"""
+        content = entry['content']
+        
+        # Clean content for display - show first line only
+        first_line = content.split('\n')[0].strip()
+        display_content = first_line.replace('\t', ' ')
+        
+        # Remove common prefixes that make URLs look messy
+        if display_content.startswith('https://'):
+            display_content = display_content[8:]  # Remove 'https://'
+        elif display_content.startswith('http://'):
+            display_content = display_content[7:]   # Remove 'http://'
+        
+        # Highlight matches if they exist - fzf style highlighting
+        if entry.get('match_positions') and self.search_query:
+            display_content = self.highlight_matches(display_content, entry['match_positions'])
+        
+        # Truncate to fit terminal - use actual character width, not string length
+        max_width = self.term_width - 4  # Account for "▌ " or "  " prefix
+        
+        # Simple width calculation (assume most characters are 1 width)
+        # This prevents wrapping issues
+        if len(display_content) > max_width:
+            # Truncate at word boundaries when possible
+            truncated = display_content[:max_width-3]
+            # Try to find a good break point
+            last_space = truncated.rfind(' ')
+            if last_space > max_width * 0.7:  # If we can break at a space
+                truncated = truncated[:last_space]
+            display_content = truncated + '...'
+        
+        return display_content
+        
+    def draw_interface(self):
+        """Draw the search interface exactly like fzf"""
+        # Clear screen and move to top
+        print("\033[2J\033[H", end="")
+        
+        # Use existing terminal dimensions (don't update them here)
+        # self.term_width and self.term_height should already be set
+        
+        # Calculate layout - fzf style
+        list_height = self.term_height - 1  # Leave space for search bar/count line
+        
+        # Center the list vertically like fzf does
+        if len(self.filtered_entries) <= list_height:
+            # If we have fewer items than available height, center them
+            start_y = (list_height - len(self.filtered_entries)) // 2
+            display_start = 0
+            display_end = len(self.filtered_entries)
+        else:
+            # If we have more items, show them around the selected item
+            start_y = 0
+            display_start = max(0, self.selected_index - list_height // 2)
+            display_end = min(len(self.filtered_entries), display_start + list_height)
+            
+            # Adjust if we're near the end
+            if display_end - display_start < list_height and len(self.filtered_entries) >= list_height:
+                display_start = max(0, len(self.filtered_entries) - list_height)
+                display_end = len(self.filtered_entries)
+        
+        # Print empty lines to center the list
+        for _ in range(start_y):
+            print("")
+        
+        # Draw main list - fzf style with proper spacing
+        for i in range(display_start, display_end):
+            entry = self.filtered_entries[i] if i < len(self.filtered_entries) else None
+            if entry:
+                is_selected = (i == self.selected_index)
+                if is_selected:
+                    # fzf style: selected item has solid background and block cursor
+                    content = self.format_entry_preview(entry, False)
+                    # Create a line that spans the full width with background
+                    full_line = f"▌ {content}"
+                    # Pad to full width and apply background color (fzf uses pink/magenta)
+                    padded_line = full_line.ljust(self.term_width)
+                    print(f"\033[48;5;213m{padded_line}\033[0m")  # Pink background
+                else:
+                    # fzf style: unselected items have 2 spaces prefix
+                    line = f"  {self.format_entry_preview(entry, False)}"
+                    # Ensure the line doesn't exceed terminal width and prevent wrapping
+                    if len(line) > self.term_width:
+                        line = line[:self.term_width-3] + "..."
+                    # Pad the line to prevent wrapping issues
+                    padded_line = line.ljust(self.term_width)
+                    print(padded_line)
+            else:
+                print("")  # Empty line
+        
+        # Fill remaining space if needed
+        remaining_lines = list_height - (display_end - display_start) - start_y
+        for _ in range(remaining_lines):
+            print("")
+        
+        # Bottom line with search prompt and count (exactly like fzf)
+        # fzf puts both on the same line: ">search_query  count"
+        search_display = f">{self.search_query}"
+        count_display = f"  {len(self.filtered_entries)}/{len(self.entries)}"
+        
+        # Combine them on one line and ensure it fits within terminal width
+        bottom_line = search_display + count_display
+        if len(bottom_line) > self.term_width:
+            # Truncate if too long to prevent wrapping
+            bottom_line = bottom_line[:self.term_width-3] + "..."
+        else:
+            # Pad to prevent wrapping issues
+            bottom_line = bottom_line.ljust(self.term_width)
+        
+        print(bottom_line)
+        
+        # Position cursor after the search query for input
+        cursor_pos = len(search_display)
+        # Ensure cursor position is within terminal bounds
+        cursor_pos = min(cursor_pos, self.term_width - 1)
+        print(f"\033[{self.term_height};{cursor_pos + 1}H", end="")
+        # Flush output to ensure cursor positioning works
+        import sys
+        sys.stdout.flush()
+        
+    def copy_to_clipboard(self, content):
+        """Copy selected content to clipboard"""
+        try:
+            proc = subprocess.Popen(['wl-copy'], stdin=subprocess.PIPE, 
+                                  stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
+            proc.communicate(content.encode(), timeout=5)
+            return proc.returncode == 0
+        except:
+            return False
+            
+    def run(self):
+        """Main interactive loop"""
+        # Check if we're in an interactive terminal
+        if not sys.stdin.isatty():
+            print("Error: clip-search requires an interactive terminal")
+            sys.exit(1)
+            
+        # Setup terminal for raw input
+        try:
+            old_settings = termios.tcgetattr(sys.stdin)
+            tty.setraw(sys.stdin.fileno())
+        except (termios.error, OSError) as e:
+            print(f"Error: Cannot set terminal to raw mode: {e}")
+            sys.exit(1)
+        
+        try:
+            self.filter_entries()
+            self.draw_interface()
+            
+            while True:
+                # Check for input
+                if select.select([sys.stdin], [], [], 0.1) == ([sys.stdin], [], []):
+                    char = sys.stdin.read(1)
+                    
+                    if ord(char) == 27:  # ESC sequence
+                        next_chars = sys.stdin.read(2)
+                        if len(next_chars) == 2 and next_chars[0] == '[':
+                            if next_chars[1] == 'A':  # Up arrow
+                                self.selected_index = max(0, self.selected_index - 1)
+                            elif next_chars[1] == 'B':  # Down arrow
+                                self.selected_index = min(len(self.filtered_entries) - 1, 
+                                                        self.selected_index + 1)
+                        else:
+                            break  # Plain ESC
+                            
+                    elif ord(char) == 3:  # Ctrl+C
+                        break
+                        
+                    elif ord(char) == 13:  # Enter
+                        if self.filtered_entries and self.selected_index < len(self.filtered_entries):
+                            selected = self.filtered_entries[self.selected_index]
+                            self.copy_to_clipboard(selected['content'])
+                        break
+                        
+                    elif ord(char) == 127:  # Backspace
+                        if self.search_query:
+                            self.search_query = self.search_query[:-1]
+                            self.filter_entries()
+                            
+                    elif 32 <= ord(char) <= 126:  # Printable characters
+                        self.search_query += char
+                        self.filter_entries()
+                        
+                    self.draw_interface()
+                    
+        finally:
+            # Restore terminal
+            termios.tcsetattr(sys.stdin, termios.TCSADRAIN, old_settings)
+            print("\033[?25h\033[0m")  # Show cursor, reset colors
+
+def main():
+    # Check if we're in a proper terminal environment
+    if not sys.stdin.isatty() or not sys.stdout.isatty():
+        print("Error: clip-search must be run in an interactive terminal")
+        sys.exit(1)
+        
+    try:
+        search = ClipboardSearch()
+        
+        # Check if password is needed
+        if search.require_password and not search.check_password_cache():
+            password = getpass.getpass("Clipboard password: ")
+            if not password:
+                print("Password required")
+                sys.exit(1)
+            search.setup_encryption(password)
+        else:
+            # Use cached access or no password required
+            if search.password_cache_file.exists():
+                # We still need to setup encryption with any password for decryption
+                # This is a design issue - we need the actual password, not just verification
+                password = getpass.getpass("Clipboard password: ")
+                search.setup_encryption(password)
+            else:
+                print("No clipboard database found. Start clipd daemon first.")
+                sys.exit(1)
+        
+        search.load_entries()
+        
+        if not search.entries:
+            print("No clipboard history found.")
+            sys.exit(0)
+            
+        search.run()
+        
+    except KeyboardInterrupt:
+        print("\n\033[0mGoodbye!")
+    except Exception as e:
+        print(f"\nError: {e}")
+
+if __name__ == '__main__':
+    main()
