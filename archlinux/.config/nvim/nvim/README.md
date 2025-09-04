@@ -1,1 +1,0 @@
-/home/sts/Developer/dotfiles/archlinux/.config/nvim/README.md
