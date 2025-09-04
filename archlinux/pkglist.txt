@@ -64,6 +64,7 @@ inetutils
 iwd
 jq
 kdenlive
+keyd
 kvantum-qt5
 lazydocker
 lazygit
@@ -89,6 +90,7 @@ mise
 mpv
 nautilus
 neovim
+nmap
 noto-fonts
 noto-fonts-cjk
 noto-fonts-emoji
@@ -121,7 +123,6 @@ qt5-wayland
 r
 rclone
 ripgrep
-rstudio-desktop-bin
 rust
 samba
 satty
@@ -174,6 +175,7 @@ xmlstarlet
 xournalpp
 yaru-icon-theme
 yay
+ydotool
 yubikey-manager
 zoxide
 zram-generator
