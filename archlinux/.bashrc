@@ -31,6 +31,8 @@ alias gc='git commit -m'            # Git commit with message (use: gc "message"
 alias gu='git push'                 # Git push
 alias gd='git pull'                 # Git pull
 alias gdf='git diff'                # Git diff
+alias gre='git restore'             # Git restore
+alias grm='git rm'                  # Git remove
 
 # fzf shortcuts for file operations
 alias fe='nvim $(fzf)'              # Edit selected file with neovim
