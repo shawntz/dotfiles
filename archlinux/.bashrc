@@ -9,6 +9,29 @@ source ~/.local/share/omarchy/default/bash/rc
 #
 alias backup='make -f ~/.bootstrap/Makefile backup-packages backup-configs'
 
+# Navigation shortcuts
+alias b='cd ..'                     # Go back one directory
+alias bb='cd ../..'                 # Go back two directories  
+alias bbb='cd ../../..'             # Go back three directories
+alias bbbb='cd ../../../..'         # Go back four directories
+alias bbbbb='cd ../../../../..'     # Go back five directories
+
+# Shell shortcuts
+alias s='source ~/.bashrc'          # Reload bashrc
+
+# Directory creation and navigation
+take() {
+    mkdir -p "$1" && cd "$1"
+}
+
+# Git shortcuts
+alias gs='git status'               # Git status
+alias ga='git add'                  # Git add
+alias gc='git commit -m'            # Git commit with message (use: gc "message")
+alias gu='git push'                 # Git push
+alias gd='git pull'                 # Git pull
+alias gdf='git diff'                # Git diff
+
 # fzf shortcuts for file operations
 alias fe='nvim $(fzf)'              # Edit selected file with neovim
 alias fv='bat $(fzf)'               # View selected file with bat
