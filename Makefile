@@ -227,6 +227,16 @@ backup-packages: ## Export and backup package lists to platform directory
 		echo "⚠️  yay not found; skipping aurlist.txt"; \
 	fi
 	@echo "📝 Package lists saved to platform directory"
+	@echo "🔄 Committing and pushing changes..."
+	@cd $(SCRIPT_DIR) && \
+	git add archlinux/pkglist.txt archlinux/aurlist.txt && \
+	if git diff --staged --quiet; then \
+		echo "ℹ️  No changes to commit"; \
+	else \
+		git commit -m "[CI] Update package lists" && \
+		git push; \
+		echo "✅ Changes committed and pushed"; \
+	fi
 
 restore-packages: ## Install packages from backup lists in platform directory
 	@if [ "$(PLATFORM)" != "archlinux" ]; then \
@@ -351,3 +361,22 @@ setup-keyd: ## Setup keyd keyboard remapping service (Arch Linux only)
 	@echo "▶️  Starting keyd service..."
 	@sudo systemctl start keyd
 	@echo "✅ keyd setup complete! Check status with: systemctl status keyd"
+
+setup-apple-emoji: ## Setup Apple emoji font support (Arch Linux only)
+	@if [ "$(PLATFORM)" != "archlinux" ]; then \
+		echo "❌ Apple emoji setup only supported on Arch Linux"; \
+		exit 1; \
+	fi
+	@echo "😀 Setting up Apple emoji font support..."
+	@if ! pacman -Qi ttf-apple-emoji >/dev/null 2>&1; then \
+		echo "❌ ttf-apple-emoji package not installed. Install with: yay -S ttf-apple-emoji"; \
+		exit 1; \
+	fi
+	@echo "🔗 Enabling Apple emoji fontconfig system-wide..."
+	@sudo ln -sf /usr/share/fontconfig/conf.avail/75-apple-color-emoji.conf /etc/fonts/conf.d/75-apple-color-emoji.conf
+	@echo "🔄 Rebuilding font cache..."
+	@fc-cache -f
+	@echo "🧪 Testing emoji support..."
+	@echo "Testing: 😀 🎉 ❤️ 👍"
+	@fc-match emoji
+	@echo "✅ Apple emoji setup complete! Restart applications to see changes."
