@@ -100,6 +100,7 @@ obs-studio
 obsidian
 ollama
 omarchy-chromium
+openssl-1.1
 otf-avenir-next-pro
 pam-u2f
 pamixer
@@ -123,6 +124,7 @@ qt5-wayland
 r
 rclone
 ripgrep
+rstudio-desktop-bin
 rust
 samba
 satty
@@ -131,6 +133,7 @@ snapper
 sof-firmware
 starship
 steam
+stow
 sublime-text-4
 sushi
 swaybg
