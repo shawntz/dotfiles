@@ -22,7 +22,7 @@ PLATFORM := $(shell \
 	fi \
 )
 
-.PHONY: help install uninstall restow adopt status clean doctor backup-packages restore-packages preview list-packages bootstrap base archlinux darwin rstudio-build
+.PHONY: help install uninstall restow adopt status clean doctor backup-packages restore-packages preview list-packages bootstrap base archlinux darwin rstudio
 
 # Default target
 help: ## Show this help message
@@ -209,16 +209,18 @@ bootstrap: ## Complete setup: restore packages, then install dotfiles
 	@$(MAKE) --no-print-directory install
 	@echo "🎉 Bootstrap complete!"
 
-rstudio-build: ## Build RStudio from source via AUR
-	@echo "🔨 Building RStudio from source via AUR..."
-	@echo "📦 Installing build dependencies..."
-	@yay -S --needed --noconfirm openssl-1.1 pandoc boost postgresql-libs cmake make gcc
-	@echo "📥 Cloning AUR rstudio-desktop repository..."
-	@if [ -d "../rstudio-desktop" ]; then \
-		echo "⚠️  Removing existing rstudio-desktop directory..."; \
-		rm -rf ../rstudio-desktop; \
+rstudio: ## Install RStudio Desktop from AUR (binary package)
+	@echo "📦 Installing RStudio Desktop from AUR..."
+	@echo "📥 Cloning rstudio-desktop-bin from AUR..."
+	@if [ -d "../rstudio-desktop-bin" ]; then \
+		echo "⚠️  Removing existing rstudio-desktop-bin directory..."; \
+		rm -rf ../rstudio-desktop-bin; \
 	fi
-	@cd .. && git clone https://aur.archlinux.org/rstudio-desktop.git
-	@echo "🏗️  Building and installing RStudio via makepkg..."
-	@cd ../rstudio-desktop && makepkg -si --needed --noconfirm
-	@echo "✅ RStudio build and installation complete!"
+	@cd .. && git clone https://aur.archlinux.org/rstudio-desktop-bin.git
+	@echo "🏗️  Building package with makepkg..."
+	@cd ../rstudio-desktop-bin && makepkg -s
+	@echo "📦 Installing built package..."
+	@cd ../rstudio-desktop-bin && sudo pacman -U rstudio-desktop-bin-*.pkg.tar.zst
+	@echo "🔧 Installing required dependency..."
+	@sudo pacman -S --needed --noconfirm openssl-1.1
+	@echo "✅ RStudio installation complete!"
