@@ -1,4 +1,3 @@
-
 # 🗂️ dotfiles (omarchy/arch + macos)
 
 [![Arch Linux](https://img.shields.io/badge/Arch-Linux-1793D1?logo=arch-linux&logoColor=white)](https://archlinux.org)
@@ -8,144 +7,236 @@
 [![AUR](https://img.shields.io/badge/AUR-yay-1793D1?logo=arch-linux&logoColor=white)](https://aur.archlinux.org)
 [![macOS](https://img.shields.io/badge/macOS-000000?logo=apple&logoColor=white)](https://apple.com/macos)
 [![homebrew](https://img.shields.io/badge/homebrew-513D23?logo=homebrew&logoColor=white)](https://brew.sh)
+[![GNU Stow](https://img.shields.io/badge/Symlinks-GNU_Stow-blue?logo=gnu&logoColor=white)](https://www.gnu.org/software/stow/)
+[![Omarchy](https://img.shields.io/badge/Setup-Omarchy-FF4088?logo=linux&logoColor=white)](https://world.hey.com/dhh/omarchy-is-out-4666dd31)
 [![License: MIT](https://img.shields.io/badge/License-MIT-green.svg)](LICENSE)
 
 These are my personal dotfiles for **Arch Linux with Omarchy + Hyprland**.  
-They include an `install.sh` script and a `Makefile` for comprehensive dotfiles management including symlink creation, package backup/restore, and system configuration.
+Now using **GNU Stow** for robust symlink management that eliminates circular symlink issues and provides a cleaner, more maintainable setup.
 
 ---
 
-## 🚀 First-Time Install
+## 🚀 First-Time Setup
 
-On a new machine, run:
+### Prerequisites
+
+Install stow and clone the repository:
 
 ```bash
-git clone https://github.com/shawntz/dotfiles.git ~/.dotfiles
-cd ~/.dotfiles
+# On Arch Linux
+sudo pacman -S stow
+
+# On macOS  
+brew install stow
+
+# Clone dotfiles
+git clone https://github.com/shawntz/dotfiles.git ~/Developer/dotfiles
+cd ~/Developer/dotfiles
+```
+
+### Installation
+
+```bash
+# Install dotfiles for your platform (auto-detected)
+make install
+
+# Or install for specific platform
+make archlinux  # For Arch Linux
+make darwin     # For macOS
+make base       # Base files only
+```
+
+### Full Bootstrap (New Machine)
+
+```bash
+# Complete setup: packages + dotfiles
 make bootstrap
 ```
 
 This will:
 
 1. Install packages from backup lists (if on Arch Linux)
-2. Create symlinks for all configuration files and directories  
-3. Handle conflicts by backing up existing files
-
-After installation, manage dotfiles with standard git commands in the dotfiles directory.
+2. Create symlinks for all configuration files using stow
+3. Handle conflicts automatically
 
 ---
 
-## 🔍 Available Commands
+## 🔧 Available Commands
 
 Run `make help` to see all available targets:
 
+### Core Commands
+
+```bash
+make install          # Install dotfiles for detected platform
+make uninstall        # Remove all symlinks  
+make restow           # Re-create symlinks (useful after adding files)
+make status           # Show current installation status
+make doctor           # Run comprehensive health check
+make preview          # Preview what stow would do (dry run)
 ```
-Enhanced Dotfiles Management
 
-Detected platform: archlinux
-Dotfiles directory: /home/sts/Developer/dotfiles
+### Package Management
 
-Core targets:
-  help                 Show this help message
-  install              Install dotfiles for detected platform using install.sh
-  fresh-install        Simulate fresh install with safety checks - skips existing good symlinks
-  uninstall            Remove all dotfiles symlinks using uninstall.sh
-  status               Show current symlink status with detailed checking
-  archlinux            Force install Arch Linux dotfiles
-  darwin               Force install macOS dotfiles  
-  common               Install only common dotfiles
-  backup-packages      Export and backup package lists to platform directory
-  restore-packages     Install packages from backup lists in platform directory
-  backup-configs       Backup configuration files and directories to platform directory
-  fix-local-share      Fix .local/share directory symlinking for current platform
-  list-platforms       List available platforms
-  bootstrap            Complete setup: restore packages, then fresh-install dotfiles
-  validate             Validate all symlinks and report issues
-  doctor               Run comprehensive health check
-  clean                Alias for uninstall
-  setup-keyd           Setup keyd keyboard remapping service (Arch Linux only)
-  setup-apple-emoji    Setup Apple emoji font support (Arch Linux only)
-  link-wallpapers      Create symlink for wallpapers directory
-  link-scripts         Create symlink for scripts directory
-  link-langs           Automatically detect and link language directories to Developer/langs
-  scan-langs           Scan for language directories without moving them
+```bash
+make backup-packages   # Export package lists (Arch Linux only)
+make restore-packages  # Install packages from lists (Arch Linux only)
+```
+
+### Conflict Resolution
+
+```bash
+make adopt            # Adopt existing files into dotfiles (use with caution)
+```
+
+### Platform-Specific
+
+```bash
+make archlinux        # Force install Arch Linux dotfiles
+make darwin           # Force install macOS dotfiles
+make base             # Install base dotfiles only
+```
+
+### Utilities
+
+```bash
+make list-packages    # List available stow packages
+make clean            # Alias for uninstall
 ```
 
 ---
 
-> [!IMPORTANT]
->
-> - Any pre-existing files that conflict during installation are automatically backed up with `.bak` extension.
->
-> - Sensitive material (`~/.ssh`, API keys, tokens) should not be committed. **Be sure to store those securely elsewhere.**
->
-> - Edit `CONFIG_DIRS` / `CONFIG_FILES` in the Makefile to match _your_ setup (Hyprland, Waybar, Alacritty, Neovim, etc.).
->
-> Out-of-the-box, the package backup includes:
->
-> - `pkglist.txt` → explicitly installed Pacman packages.
-> - `aurlist.txt` → explicitly installed AUR packages (via Yay).
+## 📁 Directory Structure
+
+The repository is organized as **stow packages**:
+
+```text
+dotfiles/
+├── Makefile                    # Simplified stow-based automation
+├── base/                       # Common files for all platforms
+│   ├── .gitconfig
+│   ├── .zshrc
+│   ├── .bashrc
+│   ├── .profile
+│   ├── .gitignore
+│   └── scripts/
+│       ├── auto-mount-cloud.sh
+│       └── open-url.sh
+├── archlinux/                  # Arch Linux specific files
+│   ├── .config/
+│   │   ├── hypr/
+│   │   │   ├── hyprland.conf
+│   │   │   ├── bindings.conf
+│   │   │   └── ...
+│   │   ├── waybar/
+│   │   ├── alacritty/
+│   │   ├── nvim/
+│   │   └── ...
+│   ├── .local/
+│   │   ├── bin/
+│   │   └── share/
+│   │       └── applications/
+│   └── packages/               # Package lists
+│       ├── pkglist.txt
+│       └── aurlist.txt
+├── darwin/                     # macOS specific files
+│   ├── .config/
+│   └── ...
+├── wallpapers/                 # Wallpaper collection
+└── misc/                       # Miscellaneous files
+```
 
 ---
 
 ## ✅ Quick Reference
 
+### Daily Usage
+
 ```bash
-# Check symlink status
+# Check status
 make status
 
-# Install/update dotfiles with safety checks  
-make fresh-install
+# Install/update dotfiles
+make install
 
-# Backup packages & configs
+# Preview changes before applying
+make preview
+
+# Reinstall symlinks after adding files
+make restow
+```
+
+### Package Management (Arch Linux)
+
+```bash
+# Backup current packages
 make backup-packages
-make backup-configs
 
-# Complete setup on a new machine
-make bootstrap
+# Restore packages on new machine
+make restore-packages
+```
 
-# Validate installation
-make validate
+### Troubleshooting
 
+```bash
 # Run health check
 make doctor
 
-# Special directory management
-make link-wallpapers     # Link ~/Pictures/wallpapers to dotfiles/wallpapers
-make link-scripts        # Link ~/Scripts to dotfiles/common/scripts
-make scan-langs          # Preview language directories that can be moved
-make link-langs          # Move & hide language dirs in ~/Developer/langs/
+# If you have conflicts with existing files
+make adopt
+
+# Remove all symlinks and start over
+make uninstall
+make install
 ```
 
 ---
 
-## 📂 Example File Tree
+## 🔄 Migration from Old Setup
 
-```text
-.
-├── Makefile
-├── install.sh
-├── common/
-│   ├── .config/
-│   │   └── nvim/
-│   │       └── init.lua
-│   ├── .gitconfig
-│   ├── .zshrc
-│   └── .profile
-├── archlinux/
-│   ├── .config/
-│   │   ├── hypr/
-│   │   │   └── hyprland.conf
-│   │   ├── waybar/
-│   │   │   └── config
-│   │   └── alacritty/
-│   │       └── alacritty.yml
-│   ├── .bashrc
-│   ├── pkglist.txt
-│   └── aurlist.txt
-└── darwin/
-    ├── .config/
-    │   └── sketchybar/
-    │       └── sketchybarrc
-    └── .zshrc
+If you're upgrading from the previous custom symlink system:
 
+1. **Backup your current setup** (automatic in migration)
+2. **Install stow**: `sudo pacman -S stow` or `brew install stow`  
+3. **Run the new install**: `make install`
+4. **Verify everything works**: `make status` and `make doctor`
+
+The new system:
+- ✅ **Eliminates circular symlink issues**
+- ✅ **Simplified maintenance** 
+- ✅ **Better conflict detection**
+- ✅ **Standard tool** (GNU Stow)
+- ✅ **Dry-run capabilities**
+
+---
+
+## 🚨 Important Notes
+
+> [!IMPORTANT]
+>
+> - **Conflicts**: Existing files that conflict are handled by stow's `--adopt` feature
+> - **Sensitive files**: Never commit SSH keys, API tokens, or other secrets
+> - **Platform detection**: Automatically detects Arch Linux vs macOS vs other Linux
+> - **Package lists**: Automatically maintained in `archlinux/packages/`
+
+### What Changed
+
+- ❌ **Removed**: Complex custom symlink logic that caused circular references
+- ❌ **Removed**: The `backup-configs` target (caused the circular symlink issues)
+- ✅ **Added**: GNU Stow for reliable symlink management
+- ✅ **Added**: Better conflict detection and resolution
+- ✅ **Added**: Dry-run capabilities with `make preview`
+- ✅ **Added**: Simplified directory structure
+
+---
+
+## 🛠️ Customization
+
+To customize for your setup:
+
+1. **Add files**: Place them in the appropriate stow package (`base/`, `archlinux/`, `darwin/`)
+2. **Platform-specific**: Use the platform directories for OS-specific configurations
+3. **Common files**: Use `base/` for files shared across all platforms
+4. **Re-stow**: Run `make restow` after adding new files
+
+The stow-based approach makes customization much more predictable and maintainable.
