@@ -22,7 +22,7 @@ PLATFORM := $(shell \
 	fi \
 )
 
-.PHONY: help install uninstall restow adopt status clean doctor backup-packages restore-packages preview list-packages bootstrap base archlinux darwin
+.PHONY: help install uninstall restow adopt status clean doctor backup-packages restore-packages preview list-packages bootstrap base archlinux darwin rstudio-build
 
 # Default target
 help: ## Show this help message
@@ -208,3 +208,17 @@ bootstrap: ## Complete setup: restore packages, then install dotfiles
 	fi
 	@$(MAKE) --no-print-directory install
 	@echo "🎉 Bootstrap complete!"
+
+rstudio-build: ## Build RStudio from source via AUR
+	@echo "🔨 Building RStudio from source via AUR..."
+	@echo "📦 Installing build dependencies..."
+	@yay -S --needed --noconfirm openssl-1.1 pandoc boost postgresql-libs cmake make gcc
+	@echo "📥 Cloning AUR rstudio-desktop repository..."
+	@if [ -d "../rstudio-desktop" ]; then \
+		echo "⚠️  Removing existing rstudio-desktop directory..."; \
+		rm -rf ../rstudio-desktop; \
+	fi
+	@cd .. && git clone https://aur.archlinux.org/rstudio-desktop.git
+	@echo "🏗️  Building and installing RStudio via makepkg..."
+	@cd ../rstudio-desktop && makepkg -si --needed --noconfirm
+	@echo "✅ RStudio build and installation complete!"
