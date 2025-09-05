@@ -7,9 +7,8 @@
 [![AUR](https://img.shields.io/badge/AUR-yay-1793D1?logo=arch-linux&logoColor=white)](https://aur.archlinux.org)
 [![macOS](https://img.shields.io/badge/macOS-000000?logo=apple&logoColor=white)](https://apple.com/macos)
 [![homebrew](https://img.shields.io/badge/homebrew-513D23?logo=homebrew&logoColor=white)](https://brew.sh)
-[![GNU Stow](https://img.shields.io/badge/Symlinks-GNU_Stow-blue?logo=gnu&logoColor=white)](https://www.gnu.org/software/stow/)
-[![Omarchy](https://img.shields.io/badge/Setup-Omarchy-FF4088?logo=linux&logoColor=white)](https://world.hey.com/dhh/omarchy-is-out-4666dd31)
-[![License: MIT](https://img.shields.io/badge/License-MIT-green.svg)](LICENSE)
+[![GNU Stow](https://img.shields.io/badge/GNU_Stow-blue?logo=gnu&logoColor=white)](https://www.gnu.org/software/stow/)
+[![License: MIT](https://img.shields.io/badge/License-MIT-darkgreen.svg)](LICENSE)
 
 These are my personal dotfiles for **Arch Linux with Omarchy + Hyprland**.  
 Now using **GNU Stow** for robust symlink management that eliminates circular symlink issues and provides a cleaner, more maintainable setup.
