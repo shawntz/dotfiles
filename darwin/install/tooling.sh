@@ -135,6 +135,7 @@ CASKS=(
   notion raycast rstudio sf-symbols via gimp github inkscape positron skim google-drive
   microsoft-word microsoft-powerpoint microsoft-excel cursor chatgpt localsend typora
   shortcat whatsapp messenger basecamp figma slack zoom ghostty nikitabobko/tap/aerospace
+  karabiner-elements hammerspoon
 )
 
 msg "Installing brew casks…"
