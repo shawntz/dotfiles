@@ -80,3 +80,5 @@ build/
 *.download
 *.partial
 Tinyspeck.png
+
+install/config/rstudio/rstudio/**
