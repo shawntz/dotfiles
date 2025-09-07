@@ -41,8 +41,29 @@ brew autoupdate stop >/dev/null 2>&1 || true
 brew autoupdate start --upgrade --cleanup --immediate >/dev/null 2>&1 || true
 brew cleanup -s >/dev/null || true
 
+install_brewfile() {
+  local DOTFILES_ROOT="${DOTFILES_ROOT:-$HOME/Developer/dotfiles}"
+  local BREWFILE_PATH="$DOTFILES_ROOT/darwin/package/Brewfile"
+
+  if ! command -v brew >/dev/null 2>&1; then
+    echo "⚠️  Homebrew is not installed. Skipping Brewfile installation."
+    return 0
+  fi
+
+  if [[ -f "$BREWFILE_PATH" ]]; then
+    echo "📦 Installing packages from Brewfile: $BREWFILE_PATH"
+    # Use --no-lock to avoid generating Brewfile.lock.json
+    brew bundle --file="$BREWFILE_PATH" --no-lock
+    echo "✅ Brewfile installation complete."
+  else
+    echo "ℹ️ No Brewfile found at $BREWFILE_PATH, skipping."
+  fi
+}
+
+install_brewfile
+
 ### ────────────────────────────────────────────────────────────────────────────
-### Brew formulae
+### Brew formulae (defaults for first install / if there's no Brewfile)
 ### ────────────────────────────────────────────────────────────────────────────
 FORMULAE=(
   jupyterlab macos-trash dockutil bat deno docker eza aria2
