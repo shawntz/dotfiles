@@ -26,5 +26,6 @@ bash "$SCRIPT_DIR/install/tooling.sh"
 bash "$SCRIPT_DIR/install/webapps.sh"
 bash "$SCRIPT_DIR/install/macos/set-defaults.sh"
 
-# If you call brewfile-sync, guard it so missing function doesn’t kill the run
 command -v brewfile-sync >/dev/null 2>&1 && brewfile-sync "$REPO_ROOT" || true
+
+bash "$SCRIPT_DIR/install/reboot.sh"
