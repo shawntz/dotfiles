@@ -9,30 +9,3 @@ fi
 if command -v zoxide &> /dev/null; then
   eval "$(zoxide init zsh)"
 fi
-
-if command -v fzf &> /dev/null; then
-  # Try system-wide (Arch/Ubuntu)
-  if [[ -f /usr/share/fzf/completion.bash ]]; then
-    source /usr/share/fzf/completion.bash
-  fi
-  if [[ -f /usr/share/fzf/key-bindings.bash ]]; then
-    source /usr/share/fzf/key-bindings.bash
-  fi
-
-  # Try Homebrew (macOS/Linuxbrew)
-  if [[ -f "$(brew --prefix 2>/dev/null)/opt/fzf/shell/completion.bash" ]]; then
-    source "$(brew --prefix)/opt/fzf/shell/completion.bash"
-  fi
-  if [[ -f "$(brew --prefix 2>/dev/null)/opt/fzf/shell/key-bindings.bash" ]]; then
-    source "$(brew --prefix)/opt/fzf/shell/key-bindings.bash"
-  fi
-
-  # Try local clone (relative to your dotfiles repo)
-  DOTFILES_ROOT="$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")/../.." && pwd)"
-  if [[ -f "$DOTFILES_ROOT/vendor/fzf/shell/completion.bash" ]]; then
-    source "$DOTFILES_ROOT/vendor/fzf/shell/completion.bash"
-  fi
-  if [[ -f "$DOTFILES_ROOT/vendor/fzf/shell/key-bindings.bash" ]]; then
-    source "$DOTFILES_ROOT/vendor/fzf/shell/key-bindings.bash"
-  fi
-fi
