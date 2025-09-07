@@ -17,6 +17,12 @@ Now using **GNU Stow** for robust symlink management that eliminates circular sy
 
 ## 🚀 First-Time Setup
 
+### One-liner setup for macOS
+
+```bash
+/usr/bin/env bash -c 'set -euo pipefail; tmp="$(mktemp -d)"; trap "rm -rf \"$tmp\"" EXIT; curl -fsSL "https://codeload.github.com/shawntz/dotfiles/tar.gz/refs/heads/master" | tar -xz -C "$tmp"; cd "$tmp"/dotfiles-*; bash ./install.sh -y'
+```
+
 ### Prerequisites
 
 Install stow and clone the repository:
