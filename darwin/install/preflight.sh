@@ -1,4 +1,4 @@
-#!/usr/bin/env bash
+#!/bin/sh
 set -euo pipefail
 
 ### ── helpers ────────────────────────────────────────────────────────────────
@@ -217,7 +217,7 @@ if [[ -n "${GH_TOKEN:-}" || -n "${GITHUB_TOKEN:-}" ]]; then
   warn "Example:  env -u GH_TOKEN -u GITHUB_TOKEN <your-install-cmd>"
 fi
 
-command -v gh >/dev/null || die "GitHub CLI (gh) is required."
+command -v gh >/dev/null 2>&1 || die "GitHub CLI 'gh' is required."
 
 # Ensure we are logged in to the correct host
 if ! gh auth status -h "$GH_HOST" >/dev/null 2>&1; then
