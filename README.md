@@ -20,7 +20,7 @@ Now using **GNU Stow** for robust symlink management that eliminates circular sy
 ### One-liner setup for macOS
 
 ```bash
-/usr/bin/env bash -c 'set -euo pipefail; tmp="$(mktemp -d)"; trap "rm -rf \"$tmp\"" EXIT; curl -fsSL "https://codeload.github.com/shawntz/dotfiles/tar.gz/refs/heads/master" | tar -xz -C "$tmp"; cd "$tmp"/dotfiles-*; bash ./install.sh -y'
+/usr/bin/env bash -c 'set -euo pipefail; dotfiles_dir="$HOME/.dotfiles"; rm -rf "$dotfiles_dir"; mkdir -p "$dotfiles_dir"; curl -fsSL "https://codeload.github.com/shawntz/dotfiles/tar.gz/refs/heads/master" | tar -xz -C "$dotfiles_dir"; cd "$dotfiles_dir"/dotfiles-*; mv * .* "$dotfiles_dir"/ 2>/dev/null || true; cd "$dotfiles_dir"; git init; git remote add origin https://github.com/shawntz/dotfiles.git; bash ./install.sh -y'
 ```
 
 ### Prerequisites

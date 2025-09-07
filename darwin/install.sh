@@ -25,7 +25,6 @@ bash "$SCRIPT_DIR/install/preflight.sh"
 bash "$SCRIPT_DIR/install/tooling.sh"
 bash "$SCRIPT_DIR/install/webapps.sh"
 bash "$SCRIPT_DIR/install/macos/set-defaults.sh"
-
+bash "$SCRIPT_DIR/install/activate.sh"
 command -v brewfile-sync >/dev/null 2>&1 && brewfile-sync "$REPO_ROOT" || true
-
 bash "$SCRIPT_DIR/install/reboot.sh"
