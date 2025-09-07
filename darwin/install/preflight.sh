@@ -5,6 +5,15 @@ set -euo pipefail
 msg()  { printf "\n\033[1m%s\033[0m\n" "$*"; }
 need() { command -v "$1" >/dev/null 2>&1 || return 1; }
 
+# Resolve repo root relative to this script
+SCRIPT_DIR="$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")" &> /dev/null && pwd)"
+DOTFILES_ROOT="$(cd "$SCRIPT_DIR/../.." && pwd)"   # adjust depth if script lives deeper
+
+# Copy over configs
+mkdir -p "${HOME}/.config"
+cp -R "${DOTFILES_ROOT}/darwin/install/config/"* "${HOME}/.config/"
+cp "${DOTFILES_ROOT}/darwin/default/zshrc" "${HOME}/.zshrc"
+
 ### ── Install Xcode Command Line Tools ───────────────────────────────────────
 msg "Checking for Xcode Command Line Tools…"
 if ! xcode-select -p >/dev/null 2>&1; then

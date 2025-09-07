@@ -1,0 +1,121 @@
+# Directory creation and navigation
+take() {
+    mkdir -p "$1" && cd "$1"
+}
+
+# Multi-purpose fzf function
+fdo() {
+  local file=$(fzf --preview 'bat --style=numbers --color=always {}')
+  if [[ -n "$file" ]]; then
+    case "$1" in
+      edit|e) nvim "$file" ;;
+      view|v) bat "$file" ;;
+      copy|c) cp "$file" "${2:-.}" ;;
+      *) echo "Usage: fdo [edit|view|copy] [destination]" ;;
+    esac
+  fi
+}
+
+# Compression
+compress() { tar -czf "${1%/}.tar.gz" "${1%/}"; }
+alias decompress="tar -xzf"
+
+# Sync Homebrew state to a Brewfile, commit on a new branch, and open a PR.
+# Usage:
+#   brewfile-sync                  # uses current repo (or ~/.dotfiles) and Brewfile at repo root
+#   brewfile-sync /path/to/repo    # custom repo
+#   brewfile-sync /repo /repo/ops/Brewfile   # custom repo + Brewfile location
+brewfile-sync() {
+  emulate -L zsh
+  set -e
+  set -u
+  set -o pipefail
+
+  # --- deps ---------------------------------------------------------------
+  command -v brew >/dev/null 2>&1 || { print -r -- "brew not found"; return 1; }
+  command -v gh   >/dev/null 2>&1 || { print -r -- "gh not found (brew install gh)"; return 1; }
+
+  # Ensure brew is on PATH for this shell
+  if [[ -d /opt/homebrew/bin ]]; then
+    eval "$(/opt/homebrew/bin/brew shellenv)"
+  elif [[ -x /usr/local/bin/brew ]]; then
+    eval "$(/usr/local/bin/brew shellenv)"
+  fi
+
+  # --- repo + file targets -----------------------------------------------
+  local repo_default
+  repo_default="$(git rev-parse --show-toplevel 2>/dev/null || print -r -- "$HOME/.dotfiles")"
+
+  local REPO="${1:-$repo_default}"
+  local BREWFILE="${2:-$REPO/Brewfile}"
+
+  [[ -d "$REPO/.git" ]] || { print -r -- "Not a git repo: $REPO"; return 1; }
+  [[ -n "$(gh auth status 2>/dev/null || true)" ]] || { print -r -- "gh not authenticated (run: gh auth login)"; return 1; }
+
+  # --- brew maintenance ---------------------------------------------------
+  print -r -- "• brew update / upgrade / cleanup…"
+  brew update
+  brew upgrade
+  brew cleanup -s || true
+
+  # --- dump Brewfile ------------------------------------------------------
+  mkdir -p "$(dirname "$BREWFILE")"
+  print -r -- "• dumping Brewfile → $BREWFILE"
+  brew bundle dump --force --file "$BREWFILE"
+
+  # --- git: branch, commit, push, PR -------------------------------------
+  (
+    cd "$REPO"
+
+    # discover default base branch
+    local BASE
+    BASE="$(git remote show origin 2>/dev/null | sed -n 's/.*HEAD branch: //p')"
+    [[ -n "${BASE:-}" ]] || BASE=$([[ -n "$(git show-ref refs/heads/main 2>/dev/null)" ]] && print -r main || print -r master)
+
+    local TS; TS="$(date -u +%Y-%m-%dT%H%M%SZ)"
+    local BR="ci/brewfile-${TS}"
+
+    git fetch origin --quiet || true
+    git checkout -B "$BR" "$BASE"
+
+    git add -A "$BREWFILE"
+    if git diff --cached --quiet; then
+      print -r -- "• no changes in Brewfile; nothing to commit."
+      git checkout "$BASE"
+      return 0
+    fi
+
+    local MSG="[CI] chore(brew): update Brewfile ${TS}"
+    git commit -m "$MSG"
+    git push -u origin "$BR"
+
+    # helpful diagnostics in PR body (non-fatal if they fail)
+    local DOCTOR; DOCTOR="$(brew doctor 2>&1 || true)"
+    local OUTDATED; OUTDATED="$(brew outdated 2>/dev/null || true)"
+
+    gh pr create \
+      --base "$BASE" \
+      --head "$BR" \
+      --title "$MSG" \
+      --body $"Automated Brewfile snapshot on ${TS} (UTC).
+
+**Actions**
+- \`brew update && brew upgrade && brew cleanup -s\`
+- \`brew bundle dump --force --file ${BREWFILE/#$REPO\//}\`
+
+<details><summary>brew doctor</summary>
+
+\`\`\`
+${DOCTOR}
+\`\`\`
+</details>
+
+<details><summary>brew outdated (after upgrade)</summary>
+
+\`\`\`
+${OUTDATED}
+\`\`\`
+</details>
+"
+  )
+}

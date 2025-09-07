@@ -1,0 +1,37 @@
+### ── Editors ────────────────────────────────────────────────────────────────
+# Prefer nvim, fall back to vim/nano if missing
+if command -v nvim >/dev/null 2>&1; then
+  export EDITOR="nvim"
+  export VISUAL="nvim"
+elif command -v vim >/dev/null 2>&1; then
+  export EDITOR="vim"
+  export VISUAL="vim"
+else
+  export EDITOR="nano"
+  export VISUAL="nano"
+fi
+
+# Used by `sudo -e` (sudoedit)
+export SUDO_EDITOR="${SUDO_EDITOR:-$VISUAL}"
+# Git uses this when it needs an editor (rebases, commits without -m)
+export GIT_EDITOR="${GIT_EDITOR:-$EDITOR}"
+
+### ── Pager / manpages ───────────────────────────────────────────────────────
+# Keep less as the base pager; wire bat for manpages (nice syntax highlighting)
+export PAGER="${PAGER:-less -FRX}"
+export LESS="${LESS:--R}"           # color passthrough
+export LESSHISTFILE="${LESSHISTFILE:--}"  # no ~/.lesshst
+
+if command -v bat >/dev/null 2>&1; then
+  # Your choice; keep “ansi” unless you pick another: (gruvbox, Nord, OneHalfDark, etc.)
+  export BAT_THEME="${BAT_THEME:-ansi}"
+  # Pretty manpages via bat (no line numbers, raw color, correct wrapping)
+  export MANPAGER="${MANPAGER:-sh -c 'col -bx | bat -l man -p'}"
+fi
+
+### ── Convenience envs ───────────────────────────────────────────────────────
+# Your original line, kept verbatim:
+export SUDO_EDITOR="$EDITOR"   # (kept for clarity; VISUAL/GIT_EDITOR already set)
+
+# Example: set VISUAL apps for CLIs that respect it
+export EDITOR VISUAL PAGER

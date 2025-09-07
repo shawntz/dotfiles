@@ -1,4 +1,5 @@
 #!/usr/bin/env zsh
+
 # Create a Chrome-like desktop app from a website using Nativefier
 # Usage: install_webapp "My App" "https://example.com" "https://example.com/icon.png"
 install_webapp() {
@@ -117,7 +118,19 @@ elif [[ -d /usr/local/bin ]]; then
 fi
 
 # Install webapps
+# https://macosicons.com/
 # install_webapp "Figma" "https://www.figma.com" "https://cdn.jim-nielsen.com/macos/1024/figma-2021-05-05.png?rf=1024"
 install_webapp "GitHub" "https://github.com/shawntz?tab=repositories" "https://github.com/shawntz/dotfiles/raw/refs/heads/master/darwin/install/icns/GitHub.icns"
-install_webapp "Gmail" "https://mail.google.com" "https://cdn.jim-nielsen.com/ios/512/gmail-2015-07-30.png?rf=1024"
-install_webapp "Google Calendar" "https://calendar.google.com" 
+install_webapp "Gmail" "https://mail.google.com" "https://github.com/shawntz/dotfiles/raw/refs/heads/master/darwin/install/icns/Gmail.icns"
+install_webapp "Google Calendar" "https://calendar.google.com" "https://github.com/shawntz/dotfiles/raw/refs/heads/master/darwin/install/icns/Calendar.icns"
+install_webapp "Google Tasks" "https://tasks.google.com" "https://github.com/shawntz/dotfiles/raw/refs/heads/master/darwin/install/icns/Clear.icns"
+install_webapp "Google Contacts" "https://contacts.google.com" "https://github.com/shawntz/dotfiles/raw/refs/heads/master/darwin/install/icns/Contacts.icns"
+install_webapp "Drive" "https://drive.google.com" "https://github.com/shawntz/dotfiles/raw/refs/heads/master/darwin/install/icns/Drive.icns"
+install_webapp "Gemini" "https://gemini.google.com" "https://github.com/shawntz/dotfiles/raw/refs/heads/master/darwin/install/icns/Gemini.icns"
+install_webapp "Google Keep" "https://keep.google.com" "https://github.com/shawntz/dotfiles/raw/refs/heads/master/darwin/install/icns/Keep.icns"
+install_webapp "Google Meet" "https://meet.google.com" "https://github.com/shawntz/dotfiles/raw/refs/heads/master/darwin/install/icns/Meet.icns"
+install_webapp "Google Messages" "https://messages.google.com/web/conversations" "https://github.com/shawntz/dotfiles/raw/refs/heads/master/darwin/install/icns/Messages.icns"
+install_webapp "Google Photos" "https://photos.google.com" "https://github.com/shawntz/dotfiles/raw/refs/heads/master/darwin/install/icns/Photos.icns"
+install_webapp "Google Docs" "https://docs.new" "https://github.com/shawntz/dotfiles/raw/refs/heads/master/darwin/install/icns/Docs.icns"
+install_webapp "Google Sheets" "https://sheets.new" "https://github.com/shawntz/dotfiles/raw/refs/heads/master/darwin/install/icns/Sheets.icns"
+install_webapp "Google Slides" "https://slides.new" "https://github.com/shawntz/dotfiles/raw/refs/heads/master/darwin/install/icns/Slides.icns"

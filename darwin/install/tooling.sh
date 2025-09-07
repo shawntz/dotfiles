@@ -60,6 +60,7 @@ FORMULAE=(
   fastfetch fd feh ffmpeg freetype fzf gcc git git-lfs htop imagemagick
   jq lazygit lazydocker neovim pandoc rclone ripgrep shfmt starship stow 
   tlrc tree tree-sitter wget yarn zoxide mise qpdf sketchybar tailscale xcodes
+  zsh-autosuggestions zsh-syntax-highlighting zsh-completions
 )
 
 msg "Installing brew formulae…"
@@ -122,7 +123,7 @@ CASKS=(
   1password beeper claude claude-code docker font-sketchybar-app-font google-chrome
   notion raycast rstudio sf-symbols via gimp github inkscape positron skim google-drive
   microsoft-word microsoft-powerpoint microsoft-excel cursor chatgpt localsend typora
-  whatsapp messenger basecamp figma slack zoom ghostty nikitabobko/tap/aerospace
+  shortcat whatsapp messenger basecamp figma slack zoom ghostty nikitabobko/tap/aerospace
 )
 
 msg "Installing brew casks…"

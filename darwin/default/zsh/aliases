@@ -1,0 +1,53 @@
+# Navigation shortcuts
+alias b='cd ..'                     # Go back one directory
+alias bb='cd ../..'                 # Go back two directories  
+alias bbb='cd ../../..'             # Go back three directories
+alias bbbb='cd ../../../..'         # Go back four directories
+alias bbbbb='cd ../../../../..'     # Go back five directories
+alias ..='cd ..'
+alias ...='cd ../..'
+alias ....='cd ../../..'
+
+# Shell shortcuts
+alias s='source ~/.zshrc'
+alias backup='brewfile-sync ~/Developer/dotfiles'
+
+# Git shortcuts
+alias lg='lazygit'
+alias g='git'
+alias gs='git status'               # Git status
+alias ga='git add'                  # Git add
+alias gc='git commit -m'            # Git commit with message (use: gc "message")
+alias gu='git push'                 # Git push
+alias gd='git pull'                 # Git pull
+alias gdf='git diff'                # Git diff
+alias gre='git restore'             # Git restore
+alias grm='git rm'                  # Git remove
+
+# fzf shortcuts for file operations
+alias fe='nvim $(fzf)'              # Edit selected file with neovim
+alias fv='bat $(fzf)'               # View selected file with bat
+alias fc='cp $(fzf) .'              # Copy selected file to current directory
+alias fr='rm -i $(fzf)'             # Remove selected file with confirmation
+
+# File system
+alias ls='eza -lh --group-directories-first --icons=auto'
+alias lsa='ls -a'
+alias lt='eza --tree --level=2 --long --icons --git'
+alias lta='lt -a'
+alias ff="fzf --preview 'bat --style=numbers --color=always {}'"
+alias cd="zd"
+zd() {
+  if [ $# -eq 0 ]; then
+    builtin cd ~ && return
+  elif [ -d "$1" ]; then
+    builtin cd "$1"
+  else
+    z "$@" && printf "\U000F17A9 " && pwd || echo "Error: Directory not found"
+  fi
+}
+
+# Tools
+alias d='docker'
+alias r='rails'
+n() { if [ "$#" -eq 0 ]; then nvim .; else nvim "$@"; fi; }

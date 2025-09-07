@@ -1,0 +1,65 @@
+### ── History (Zsh) ─────────────────────────────────────────────
+HISTFILE="$HOME/.zsh_history"
+HISTSIZE=32768
+SAVEHIST=$HISTSIZE
+
+# Append & write history as you go; keep timestamps; nicer search behavior
+setopt APPEND_HISTORY           # like bash's histappend
+setopt INC_APPEND_HISTORY       # write immediately
+setopt EXTENDED_HISTORY         # timestamps, durations
+setopt HIST_IGNORE_DUPS         # skip consecutive dup
+setopt HIST_IGNORE_ALL_DUPS     # drop older dup entries too
+setopt HIST_FIND_NO_DUPS        # no dup matches in history search
+setopt HIST_REDUCE_BLANKS       # trim extra spaces
+setopt HIST_IGNORE_SPACE        # ignore commands starting with space
+# setopt SHARE_HISTORY          # (optional) merge across concurrent shells
+
+### ── PATH ───────────────────────────────────────────────────────
+export PATH="./bin:$HOME/.local/bin:$PATH"
+
+### ── Disable command hashing (Bash `set +h` equivalent) ────────
+# In bash, `set +h` disables hash-all. In Zsh, disable HASH_CMDS:
+setopt NO_HASH_CMDS
+
+### ── Completion (native Zsh) ───────────────────────────────────
+# add site-functions for completions installed via Homebrew
+if command -v brew >/dev/null 2>&1; then
+  FPATH="$(brew --prefix)/share/zsh/site-functions:${FPATH}"
+fi
+
+autoload -Uz compinit
+# Use a cached dump (faster). Creates it if missing.
+compinit -d "${XDG_CACHE_HOME:-$HOME/.cache}/zsh/.zcompdump"
+
+# Optional: fix insecure completion dirs (quietly)
+if typeset -f compaudit >/dev/null; then
+  compaudit 2>/dev/null | xargs -r chmod g-w 2>/dev/null
+fi
+
+# A couple of nice completion styles
+zstyle ':completion:*' menu select
+zstyle ':completion:*' matcher-list 'm:{a-z}={A-Za-z}' 'r:|[._-]=* r:|=*'
+
+### ── Bash-completion fallback ─────
+# Requires the bash-completion file from Homebrew.
+if [[ -r /opt/homebrew/etc/bash_completion || -r /usr/local/etc/bash_completion ]]; then
+  autoload -Uz bashcompinit && bashcompinit
+  [[ -r /opt/homebrew/etc/bash_completion ]] && source /opt/homebrew/etc/bash_completion
+  [[ -r /usr/local/etc/bash_completion ]] && source /usr/local/etc/bash_completion
+fi
+
+### ── Autosuggestions & Syntax Highlighting ─────────────────────
+# brew install zsh-autosuggestions zsh-syntax-highlighting zsh-completions
+if command -v brew >/dev/null 2>&1; then
+  local BREW_PREFIX; BREW_PREFIX="$(brew --prefix)"
+
+  # Autosuggestions (type-ahead ghost text)
+  if [[ -r "$BREW_PREFIX/share/zsh-autosuggestions/zsh-autosuggestions.zsh" ]]; then
+    source "$BREW_PREFIX/share/zsh-autosuggestions/zsh-autosuggestions.zsh"
+  fi
+
+  # Syntax highlighting (must be near the end of .zshrc)
+  if [[ -r "$BREW_PREFIX/share/zsh-syntax-highlighting/zsh-syntax-highlighting.zsh" ]]; then
+    source "$BREW_PREFIX/share/zsh-syntax-highlighting/zsh-syntax-highlighting.zsh"
+  fi
+fi

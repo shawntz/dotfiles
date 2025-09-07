@@ -1,0 +1,7 @@
+# Get absolute path to this file’s directory (darwin/zsh)
+ZSH_DIR="$(cd -- "$(dirname -- "${(%):-%N}")" && pwd)"
+
+# Source each piece if it exists
+for f in shell aliases functions prompt envs init; do
+  [[ -f "$ZSH_DIR/$f" ]] && source "$ZSH_DIR/$f"
+done
