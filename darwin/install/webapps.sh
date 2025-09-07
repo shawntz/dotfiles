@@ -118,5 +118,6 @@ fi
 
 # Install webapps
 # install_webapp "Figma" "https://www.figma.com" "https://cdn.jim-nielsen.com/macos/1024/figma-2021-05-05.png?rf=1024"
-install_webapp "GitHub" "https://github.com/shawntz?tab=repositories" "https://cdn.jim-nielsen.com/macos/1024/github-desktop-2021-05-20.png?rf=1024"
+install_webapp "GitHub" "https://github.com/shawntz?tab=repositories" "https://github.com/shawntz/dotfiles/raw/refs/heads/master/darwin/install/icns/GitHub.icns"
 install_webapp "Gmail" "https://mail.google.com" "https://cdn.jim-nielsen.com/ios/512/gmail-2015-07-30.png?rf=1024"
+install_webapp "Google Calendar" "https://calendar.google.com" 
