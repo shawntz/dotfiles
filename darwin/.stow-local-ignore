@@ -1,0 +1,10 @@
+# Ignore non-packages and junk
+^\.stow-local-ignore$
+^README\.md$
+^LICENSE$
+^macos/?$
+^install/?$
+^.*\.png$
+^.*\.jpg$
+^.*\.DS_Store$
+

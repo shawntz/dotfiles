@@ -4,17 +4,6 @@ set -euo pipefail
 msg()  { printf "\n\033[1m%s\033[0m\n" "$*"; }
 need() { command -v "$1" >/dev/null 2>&1 || return 1; }
 
-# Ask for admin password up-front, then keep sudo alive while the script runs
-if [[ $EUID -ne 0 ]]; then
-  sudo -p "[admin password for setup] " -v
-  # Keep-alive: update existing `sudo` time stamp until script finishes
-  while true; do
-    sudo -n true
-    sleep 60
-    kill -0 "$$" 2>/dev/null || exit
-  done 2>/dev/null &
-fi
-
 ### ────────────────────────────────────────────────────────────────────────────
 ### Rosetta 2 (for Apple Silicon Macs)
 ### ────────────────────────────────────────────────────────────────────────────
@@ -150,23 +139,63 @@ brew search '/font-.*-nerd-font/' | awk '{ print $1 }' | xargs -I{} brew install
 ### ────────────────────────────────────────────────────────────────────────────
 ### Neovim bootstrap (LazyVim + custom overlay)
 ### ────────────────────────────────────────────────────────────────────────────
-SCRIPT_DIR="$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")" &> /dev/null && pwd)"
+set -euo pipefail
+
+msg() { printf "\033[1;32m==>\033[0m %s\n" "$*"; }
+
+SCRIPT_DIR="$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")" &>/dev/null && pwd)"
 DOTFILES_ROOT="$(cd "$SCRIPT_DIR/../../.." && pwd)"
-NVIM_DIR="${HOME}/.config/nvim"
-if [[ ! -d "$NVIM_DIR" ]]; then
-  msg "Bootstrapping Neovim with LazyVim + custom overlay…"
-  git clone https://github.com/LazyVim/starter "$NVIM_DIR"
-  if [[ -d "$DOTFILES_ROOT/darwin/install/config/nvim" ]]; then
-    cp -R "$DOTFILES_ROOT/darwin/install/config/nvim/"* "$NVIM_DIR/"
-  fi
-  rm -rf "$NVIM_DIR/.git" || true
-  echo "vim.opt.relativenumber = true" >> "$NVIM_DIR/lua/config/options.lua"
+
+# Stow package + repo paths
+STOW_DIR="$DOTFILES_ROOT/darwin"
+PKG="nvim"
+PKG_DIR="$STOW_DIR/$PKG/.config/nvim"     # <- this mirrors ~/.config/nvim
+TARGET_DIR="${HOME}/.config/nvim"         # <- will be a symlink after stow
+
+# Ensure package directory exists
+mkdir -p "$PKG_DIR"
+
+# If package dir is empty (first time), seed it with LazyVim starter
+if [[ -z "$(ls -A "$PKG_DIR" 2>/dev/null || true)" ]]; then
+  msg "Bootstrapping Neovim package with LazyVim starter…"
+  tmpdir="$(mktemp -d)"
+  git clone --depth=1 https://github.com/LazyVim/starter "$tmpdir/starter"
+  # move contents into the repo package dir
+  rsync -a --exclude=".git" "$tmpdir/starter/" "$PKG_DIR/"
+  rm -rf "$tmpdir"
 else
-  msg "Neovim config already exists at ${NVIM_DIR} (skipping)."
+  msg "Neovim package already has content (skipping clone)."
+fi
+
+OPTIONS_LUA="$PKG_DIR/lua/config/options.lua"
+mkdir -p "$(dirname "$OPTIONS_LUA")"
+if ! grep -q 'vim\.opt\.relativenumber\s*=\s*true' "${OPTIONS_LUA}" 2>/dev/null; then
+  echo 'vim.opt.relativenumber = true' >> "${OPTIONS_LUA}"
+fi
+
+# Stow the package into $HOME
+msg "Stowing Neovim package → ${TARGET_DIR}"
+if ! command -v stow &>/dev/null; then
+  if [[ "$(uname -s)" == "Darwin" ]]; then
+    command -v brew &>/dev/null || /bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)"
+    brew install stow
+  else
+    echo "Please install GNU stow."; exit 1
+  fi
+fi
+
+# Restow will replace existing correct links if needed
+stow -d "$STOW_DIR" -t "$HOME" -Rv "$PKG"
+
+if [[ -L "$TARGET_DIR" ]]; then
+  msg "✅ Neovim is now managed by Stow at ${TARGET_DIR} → ${PKG_DIR}"
+else
+  msg "⚠️ ${TARGET_DIR} is not a symlink. If you had a preexisting folder, consider:"
+  echo "   stow -d \"$STOW_DIR\" -t \"$HOME\" --adopt -Rv $PKG"
 fi
 
 ### ────────────────────────────────────────────────────────────────────────────
-### Final touches
+### Final homebrew touches
 ### ────────────────────────────────────────────────────────────────────────────
 msg "Final brew maintenance…"
 brew upgrade >/dev/null || true

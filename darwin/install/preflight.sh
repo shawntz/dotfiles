@@ -7,12 +7,7 @@ need() { command -v "$1" >/dev/null 2>&1 || return 1; }
 
 # Resolve repo root relative to this script
 SCRIPT_DIR="$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")" &> /dev/null && pwd)"
-DOTFILES_ROOT="$(cd "$SCRIPT_DIR/../.." && pwd)"   # adjust depth if script lives deeper
-
-# Copy over configs
-mkdir -p "${HOME}/.config"
-cp -R "${DOTFILES_ROOT}/darwin/install/config/"* "${HOME}/.config/"
-cp "${DOTFILES_ROOT}/darwin/default/zshrc" "${HOME}/.zshrc"
+DOTFILES_ROOT="$(cd "$SCRIPT_DIR/../.." && pwd)"
 
 ### ── Install Xcode Command Line Tools ───────────────────────────────────────
 msg "Checking for Xcode Command Line Tools…"
@@ -45,15 +40,38 @@ msg "Ensuring gum and gh are installed…"
 brew install charmbracelet/tap/gum gh >/dev/null
 
 ### ── Interactive prompts with gum ───────────────────────────────────────────
-msg "Collecting your identity with gum…"
+msg "Git config identity info…"
 
 USER_NAME="$(gum input --placeholder 'Full Name (e.g., Shawn T. Schwartz)' --prompt '> Name: ' )"
 USER_EMAIL="$(gum input --placeholder 'Email (e.g., you@example.com)' --prompt '> Email: ' )"
 USER_SITE="$(gum input --placeholder 'Website (e.g., https://example.com)' --prompt '> Website: ' )"
 
-gum confirm "Use these?\n  Name: $USER_NAME\n  Email: $USER_EMAIL\n  Site:  $USER_SITE" || {
+gum confirm "Use these?  Name: $USER_NAME  Email: $USER_EMAIL  Site:  $USER_SITE" || {
   echo "Cancelled."; exit 1;
 }
+
+### ────────────────────────────────────────────────────────────────────────────
+### Find stow packages: immediate subdirs, excluding ignored names
+### ────────────────────────────────────────────────────────────────────────────
+command -v stow >/dev/null 2>&1 || brew install stow
+
+mapfile -t PACKAGES < <(
+  find "$DARWIN_DIR" -mindepth 1 -maxdepth 1 -type d \
+    -not -name "install" \
+    -not -name "packages" \
+    -not -name "icns" \
+    -not -name "macos" \
+    -printf "%f\n" | sort
+)
+echo "Stowing: ${PACKAGES[*]}"
+stow -d "$DARWIN_DIR" -t "$TARGET" -Rv "${PACKAGES[@]}"
+
+if [[ -x "$DARWIN_DIR/install/macos/set-defaults.sh" ]]; then
+  "$DARWIN_DIR/install/macos/set-defaults.sh"
+fi
+
+echo "✅ Done."
+echo "Unstow a package:  stow -d \"$DARWIN_DIR\" -t \"$TARGET\" -D <pkg>"
 
 ### ── Persist env vars to Zsh ────────────────────────────────────────────────
 ZSHRC="${HOME}/.zshrc"
