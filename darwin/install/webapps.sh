@@ -10,7 +10,7 @@ install_webapp() {
   fi
 
   # Dependencies
-  for cmd in curl convert iconutil; do
+  for cmd in curl magick iconutil; do
     command -v "$cmd" >/dev/null 2>&1 || {
       echo "Missing dependency: $cmd (try: brew install imagemagick)" >&2
       return 1
@@ -35,14 +35,28 @@ install_webapp() {
 
   echo "Working in temp: $tmp"
 
-  # 1) Download icon
-  local icon_png="$tmp/icon_src.png"
+  # 1) Download icon and determine format
+  local icon_src="$tmp/icon_src"
   echo "Downloading icon..."
-  curl -fsSL "$icon_url" -o "$icon_png" || { echo "Icon download failed" >&2; return 1; }
+  curl -fsSL "$icon_url" -o "$icon_src" || { echo "Icon download failed" >&2; return 1; }
+  
+  # Detect if it's ICNS or other format
+  local icon_format
+  icon_format="$(file -b --mime-type "$icon_src")"
+  
+  local icon_png="$tmp/icon_src.png"
+  if [[ "$icon_format" == "image/x-icns" ]] || [[ "$icon_url" == *.icns ]]; then
+    # Convert ICNS to PNG using macOS sips command
+    echo "Converting ICNS to PNG..."
+    sips -s format png "$icon_src" --out "$icon_png" || { echo "ICNS conversion failed" >&2; return 1; }
+  else
+    # Just rename/copy if it's already a supported format
+    mv "$icon_src" "$icon_png"
+  fi
 
   # 2) Preserve aspect ratio: contain to 1024, pad to square (transparent)
   local square="$tmp/icon.square.png"
-  convert "$icon_png" -alpha on -background none -strip \
+  magick "$icon_png" -alpha on -background none -strip \
           -resize 1024x1024 \
           -gravity center -extent 1024x1024 \
           "$square" || { echo "Image conversion failed" >&2; return 1; }
@@ -50,8 +64,8 @@ install_webapp() {
   # 3) Build .iconset and .icns
   local iconset="$tmp/icon.iconset"; mkdir -p "$iconset"
   for s in 16 32 128 256 512; do
-    convert "$square" -resize ${s}x${s}          "$iconset/icon_${s}x${s}.png"
-    convert "$square" -resize $((s*2))x$((s*2))  "$iconset/icon_${s}x${s}@2x.png"
+    magick "$square" -resize ${s}x${s}          "$iconset/icon_${s}x${s}.png"
+    magick "$square" -resize $((s*2))x$((s*2))  "$iconset/icon_${s}x${s}@2x.png"
   done
   local icns="$tmp/icon.icns"
   iconutil -c icns "$iconset" -o "$icns" || { echo "iconutil failed" >&2; return 1; }
