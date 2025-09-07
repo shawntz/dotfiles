@@ -95,6 +95,7 @@ if need mise; then
   mise use -g r@latest      >/dev/null 2>&1 || true
 
   mise install -y || true
+  mise trust || true
 
   # Ruby on Rails after Ruby exists
   if need ruby && ! gem list -i rails >/dev/null 2>&1; then
@@ -139,59 +140,80 @@ brew search '/font-.*-nerd-font/' | awk '{ print $1 }' | xargs -I{} brew install
 ### ────────────────────────────────────────────────────────────────────────────
 ### Neovim bootstrap (LazyVim + custom overlay)
 ### ────────────────────────────────────────────────────────────────────────────
-set -euo pipefail
+if [ -n "${BASH_SOURCE:-}" ]; then
+  __SCRIPT_FILE="${BASH_SOURCE[0]}"
+elif [ -n "${ZSH_VERSION:-}" ]; then
+  # zsh: ${(%):-%N} gives current script path
+  eval '__SCRIPT_FILE="${(%):-%N}"'
+else
+  __SCRIPT_FILE="$0"
+fi
 
-msg() { printf "\033[1;32m==>\033[0m %s\n" "$*"; }
+# Directory containing THIS script (physical path)
+SCRIPT_DIR="$(cd -- "$(dirname -- "$__SCRIPT_FILE")" >/dev/null 2>&1 && pwd -P)"
 
-SCRIPT_DIR="$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")" &>/dev/null && pwd)"
-DOTFILES_ROOT="$(cd "$SCRIPT_DIR/../../.." && pwd)"
+# Your repo layout is: <repo>/darwin/install/tooling.sh
+# So the repo root is two levels up from this file
+DOTFILES_ROOT="$(cd -- "$SCRIPT_DIR/../.." >/dev/null 2>&1 && pwd -P)"
 
-# Stow package + repo paths
 STOW_DIR="$DOTFILES_ROOT/darwin"
 PKG="nvim"
-PKG_DIR="$STOW_DIR/$PKG/.config/nvim"     # <- this mirrors ~/.config/nvim
-TARGET_DIR="${HOME}/.config/nvim"         # <- will be a symlink after stow
+PKG_DIR="$STOW_DIR/$PKG/.config/nvim"   # mirrors ~/.config/nvim
+TARGET_DIR="$HOME/.config/nvim"         # will become a symlink to PKG_DIR
+
+msg "Neovim bootstrap (LazyVim + overlay)"
+
+# Ensure stow
+if ! command -v stow >/dev/null 2>&1; then
+  if [[ "$(uname -s)" == "Darwin" ]]; then
+    command -v brew >/dev/null 2>&1 || /bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)"
+    brew install stow
+  else
+    echo "Please install GNU stow." >&2; exit 1
+  fi
+fi
 
 # Ensure package directory exists
 mkdir -p "$PKG_DIR"
 
-# If package dir is empty (first time), seed it with LazyVim starter
+# Seed package with LazyVim if empty (first run)
 if [[ -z "$(ls -A "$PKG_DIR" 2>/dev/null || true)" ]]; then
   msg "Bootstrapping Neovim package with LazyVim starter…"
   tmpdir="$(mktemp -d)"
   git clone --depth=1 https://github.com/LazyVim/starter "$tmpdir/starter"
-  # move contents into the repo package dir
-  rsync -a --exclude=".git" "$tmpdir/starter/" "$PKG_DIR/"
+  rsync -a --delete --exclude=".git" "$tmpdir/starter/" "$PKG_DIR/"
   rm -rf "$tmpdir"
 else
-  msg "Neovim package already has content (skipping clone)."
+  msg "Neovim package already has content (skipping bootstrap)."
 fi
 
+# Ensure your overlay tweak exists
 OPTIONS_LUA="$PKG_DIR/lua/config/options.lua"
 mkdir -p "$(dirname "$OPTIONS_LUA")"
-if ! grep -q 'vim\.opt\.relativenumber\s*=\s*true' "${OPTIONS_LUA}" 2>/dev/null; then
-  echo 'vim.opt.relativenumber = true' >> "${OPTIONS_LUA}"
-fi
+grep -q 'vim\.opt\.relativenumber\s*=\s*true' "$OPTIONS_LUA" 2>/dev/null || \
+  echo 'vim.opt.relativenumber = true' >> "$OPTIONS_LUA"
 
-# Stow the package into $HOME
-msg "Stowing Neovim package → ${TARGET_DIR}"
-if ! command -v stow &>/dev/null; then
-  if [[ "$(uname -s)" == "Darwin" ]]; then
-    command -v brew &>/dev/null || /bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)"
-    brew install stow
-  else
-    echo "Please install GNU stow."; exit 1
+# Prepare target: if an existing folder/symlink is in the way, back it up & remove
+if [[ -e "$TARGET_DIR" || -L "$TARGET_DIR" ]]; then
+  # If it's already a symlink, just replace it; otherwise back it up
+  if [[ ! -L "$TARGET_DIR" ]]; then
+    bk="${TARGET_DIR}.pre-stow.$(date -u +%Y%m%dT%H%M%SZ)"
+    msg "Backing up existing ${TARGET_DIR} → ${bk}"
+    mv "$TARGET_DIR" "$bk"
   fi
+  rm -rf "$TARGET_DIR"
 fi
 
-# Restow will replace existing correct links if needed
-stow -d "$STOW_DIR" -t "$HOME" -Rv "$PKG"
+# Stow only the nvim package, ignoring Finder junk
+msg "Stowing Neovim package → ${TARGET_DIR}"
+stow -d "$STOW_DIR" -t "$HOME" -Rv --ignore='(^|/)\.DS_Store$' "$PKG"
 
+# Verify result
 if [[ -L "$TARGET_DIR" ]]; then
   msg "✅ Neovim is now managed by Stow at ${TARGET_DIR} → ${PKG_DIR}"
 else
-  msg "⚠️ ${TARGET_DIR} is not a symlink. If you had a preexisting folder, consider:"
-  echo "   stow -d \"$STOW_DIR\" -t \"$HOME\" --adopt -Rv $PKG"
+  msg "⚠️ ${TARGET_DIR} is not a symlink. If you had local files to merge, try:"
+  echo "   stow --adopt -d \"$STOW_DIR\" -t \"$HOME\" -Rv --ignore='(^|/)\\.DS_Store$' $PKG"
 fi
 
 ### ────────────────────────────────────────────────────────────────────────────

@@ -24,14 +24,29 @@ else
 fi
 
 ### ── Homebrew (for gh & gum) ────────────────────────────────────────────────
-if ! need brew; then
+if command -v brew >/dev/null 2>&1; then
+  msg "Homebrew already installed (prefix: $(brew --prefix)). Skipping install."
+  # Make sure this shell has brew’s env (idempotent)
+  eval "$($(command -v /opt/homebrew/bin/brew) shellenv)"
+else
   msg "Installing Homebrew…"
-  /bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)"
+  NONINTERACTIVE=1 /bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)"
+
   # Add brew to PATH for this script run
-  if [[ -d "/opt/homebrew/bin" ]]; then
-    eval "$(/opt/homebrew/bin/brew shellenv)"
+  if [[ -x "/opt/homebrew/bin/brew" ]]; then
+    eval "$(/opt/homebrew/bin/brew shellenv)"    # Apple Silicon default
+  elif [[ -x "/usr/local/bin/brew" ]]; then
+    eval "$(/usr/local/bin/brew shellenv)"       # Intel default
   else
-    eval "$(/usr/local/bin/brew shellenv)"
+    # Fallback: search common prefixes
+    BREW_BIN="$(/usr/bin/find /opt/homebrew /usr/local -type f -name brew 2>/dev/null | head -n1)"
+    if [[ -n "$BREW_BIN" ]]; then
+      eval "$("$BREW_BIN" shellenv)"
+    else
+      echo "⚠️  Homebrew install finished but 'brew' not found on PATH." >&2
+      echo "    Try opening a new shell or source brew’s shellenv manually." >&2
+      exit 1
+    fi
   fi
 fi
 
@@ -51,22 +66,51 @@ gum confirm "Use these?  Name: $USER_NAME  Email: $USER_EMAIL  Site:  $USER_SITE
 }
 
 ### ────────────────────────────────────────────────────────────────────────────
-### Find stow packages: immediate subdirs, excluding ignored names
+### Find stow packages: immediate subdirs, excluding ignored names (portable)
 ### ────────────────────────────────────────────────────────────────────────────
+
+# Ensure stow
 command -v stow >/dev/null 2>&1 || brew install stow
 
-mapfile -t PACKAGES < <(
-  find "$DARWIN_DIR" -mindepth 1 -maxdepth 1 -type d \
-    -not -name "install" \
-    -not -name "packages" \
-    -not -name "icns" \
-    -not -name "macos" \
-    -printf "%f\n" | sort
-)
-echo "Stowing: ${PACKAGES[*]}"
-stow -d "$DARWIN_DIR" -t "$TARGET" -Rv "${PACKAGES[@]}"
+find . -name .DS_Store -type f -print -delete
 
-if [[ -x "$DARWIN_DIR/install/macos/set-defaults.sh" ]]; then
+# Resolve script dir
+if [ -n "${BASH_SOURCE[0]:-}" ]; then
+  __SCRIPT_FILE="${BASH_SOURCE[0]}"
+elif (unsetopt 2>/dev/null | grep -q '^shwordsplit$') 2>/dev/null; then
+  # crude zsh detection path; use %N
+  __SCRIPT_FILE="${(%):-%N}"
+else
+  __SCRIPT_FILE="$0"
+fi
+__SCRIPT_DIR="$(cd -- "$(dirname -- "$__SCRIPT_FILE")" && pwd)"
+
+: "${DARWIN_DIR:=$(cd "$__SCRIPT_DIR/.." && pwd)}"
+: "${TARGET:=$HOME}"
+
+_ignore="install packages icns macos"
+PACKAGES=()
+for d in "$DARWIN_DIR"/*/; do
+  [ -d "$d" ] || continue
+  bname="$(basename "$d")"
+  skip=false
+  for ig in $_ignore; do
+    if [ "$bname" = "$ig" ]; then skip=true; break; fi
+  done
+  $skip && continue
+  PACKAGES+=("$bname")
+done
+
+# Sort the list (portable)
+if [ "${#PACKAGES[@]}" -gt 0 ]; then
+  IFS=$'\n' PACKAGES=($(printf '%s\n' "${PACKAGES[@]}" | sort)) ; unset IFS
+  echo "Stowing: ${PACKAGES[*]}"
+  stow -d "$DARWIN_DIR" -t "$TARGET" -Rv "${PACKAGES[@]}" --ignore='(^|/)\.DS_Store$'
+else
+  echo "Stowing: (none found)"
+fi
+
+if [ -x "$DARWIN_DIR/install/macos/set-defaults.sh" ]; then
   "$DARWIN_DIR/install/macos/set-defaults.sh"
 fi
 

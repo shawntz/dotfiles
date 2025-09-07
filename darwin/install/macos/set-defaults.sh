@@ -62,10 +62,13 @@ configure_macos_defaults() {
   w com.apple.dock tilesize                  int   64
 
   # Dock content
+  "$DOCKUTIL" --remove all --no-restart || true
+  killall Dock || true
+  
   "$DOCKUTIL" --remove "Downloads" --no-restart || true
   "$DOCKUTIL" --add "$HOME/Downloads" --view fan --sort dateadded --display folder --no-restart || true
-
-  # Optional: curate persistent apps (skips missing apps gracefully)
+  
+  # Curate persistent apps (skips missing apps gracefully)
   add_app() { [ -d "$1" ] && "$DOCKUTIL" --add "$1" --no-restart || true; }
   add_app "/System/Applications/Calendar.app"
   add_app "/Applications/Google Chrome.app"
@@ -192,12 +195,9 @@ configure_macos_defaults() {
   w com.apple.WindowManager AutoHide                  bool true
   w com.apple.WindowManager EnableTiledWindowMargins  bool true
 
-  ##############################################################################
-  # Accessibility / Zoom
-  ##############################################################################
-  w com.apple.universalaccess closeViewScrollWheelToggle bool true
-  w com.apple.universalaccess closeViewZoomFollowsFocus  bool true
-  w com.apple.universalaccess mouseDriverCursorSize      float 1.5
+  # Flush prefs caches and UI
+  sudo killall cfprefsd 2>/dev/null
+  killall SystemUIServer 2>/dev/null
 
   echo "macOS defaults configured."
 }
