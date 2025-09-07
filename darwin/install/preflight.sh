@@ -229,7 +229,7 @@ else
 fi
 
 if ! gh api -H "Accept: application/vnd.github+json" /user >/dev/null 2>&1; then
-  warn "Run: gh auth refresh -h $GH_HOST -s ${NEED_SCOPES[*]}  (then follow SSO prompts)"
+  warn "Run: gh auth refresh -h $GH_HOST -s ${NEED_SCOPES[*]}"
 fi
 
 SSH_PRIV="${HOME}/.ssh/id_ed25519"
