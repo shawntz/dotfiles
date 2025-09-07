@@ -5,3 +5,6 @@ ZSH_DIR="$(cd -- "$(dirname -- "${(%):-%N}")" && pwd)"
 for f in shell aliases functions prompt envs init; do
   [[ -f "$ZSH_DIR/$f" ]] && source "$ZSH_DIR/$f"
 done
+
+. "$HOME/.cargo/env"
+
