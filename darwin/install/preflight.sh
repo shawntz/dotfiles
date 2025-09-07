@@ -184,33 +184,100 @@ if ! grep -q "Host github.com" "$SSH_CONFIG" 2>/dev/null; then
   chmod 600 "$SSH_CONFIG"
 fi
 
-### ── gh auth login (SSH protocol) ───────────────────────────────────────────
-msg "Authenticating gh with SSH (will open a browser)…"
-# If already logged in, this will be a no-op
-if ! gh auth status >/dev/null 2>&1; then
-  gh auth login --hostname github.com --git-protocol ssh --web
+# ### ── gh auth login (SSH protocol) ───────────────────────────────────────────
+# msg "Authenticating gh with SSH (will open a browser)…"
+# # If already logged in, this will be a no-op
+# if ! gh auth status >/dev/null 2>&1; then
+#   gh auth login --hostname github.com --git-protocol ssh --web
+# fi
+# 
+# ### ── Upload keys to GitHub (auth + signing) ─────────────────────────────────
+# HOSTNAME_LABEL="$(scutil --computer-name 2>/dev/null || echo "macOS")"
+# 
+# # Add (or skip if already uploaded) the auth key
+# msg "Uploading SSH AUTH key to GitHub (if not already present)…"
+# if ! gh ssh-key list | grep -q "$(cat "${AUTH_KEY}.pub" | awk '{print $2}')" ; then
+#   gh ssh-key add "${AUTH_KEY}.pub" -t "${HOSTNAME_LABEL} auth key"
+# fi
+# 
+# gh auth refresh -h github.com -s admin:ssh_signing_key
+
+# ---- GitHub SSH key upload ---------------------------
+GH_HOST="${GH_HOST:-github.com}""
+NEED_SCOPES=("admin:public_key" "admin:ssh_signing_key")
+
+warn() { printf "\033[33m[warn]\033[0m %s\n" "$*" >&2; }
+info() { printf "\033[36m[info]\033[0m %s\n" "$*"; }
+die()  { printf "\033[31m[fail]\033[0m %s\n" "$*" >&2; exit 1; }
+
+# If a token is exported, gh will use it (and scopes may be wrong)
+if [[ -n "${GH_TOKEN:-}" || -n "${GITHUB_TOKEN:-}" ]]; then
+  warn "GH_TOKEN/GITHUB_TOKEN is set. This can cause 404/scope errors."
+  warn "Unset it for this step so gh can do OAuth with proper scopes."
+  warn "Example:  env -u GH_TOKEN -u GITHUB_TOKEN <your-install-cmd>"
 fi
 
-### ── Upload keys to GitHub (auth + signing) ─────────────────────────────────
-HOSTNAME_LABEL="$(scutil --computer-name 2>/dev/null || echo "macOS")"
+command -v gh >/dev/null || die "GitHub CLI (gh) is required."
 
-# Add (or skip if already uploaded) the auth key
-msg "Uploading SSH AUTH key to GitHub (if not already present)…"
-if ! gh ssh-key list | grep -q "$(cat "${AUTH_KEY}.pub" | awk '{print $2}')" ; then
-  gh ssh-key add "${AUTH_KEY}.pub" -t "${HOSTNAME_LABEL} auth key"
-fi
-
-gh auth refresh -h github.com -s admin:ssh_signing_key
-
-# Add (or skip) the signing key
-msg "Uploading SSH SIGNING key to GitHub (if not already present)…"
-if gh ssh-key add --help 2>&1 | grep -q -- '--type'; then
-  if ! gh ssh-key list --type signing 2>/dev/null | grep -q "$(cat "${SIGN_KEY}.pub" | awk '{print $2}')" ; then
-    gh ssh-key add "${SIGN_KEY}.pub" --type signing -t "${HOSTNAME_LABEL} signing key"
-  fi
+# Ensure we are logged in to the correct host
+if ! gh auth status -h "$GH_HOST" >/dev/null 2>&1; then
+  info "Logging into $GH_HOST with required scopes…"
+  gh auth login -h "$GH_HOST" -w -s "$(IFS=,; echo "${NEED_SCOPES[*]}")"
 else
-  msg "Your gh version may not support '--type signing'. You can still add the signing key manually in GitHub Settings → SSH and GPG keys → New SSH key (type: Signing)."
+  info "Refreshing scopes on $GH_HOST…"
+  gh auth refresh -h "$GH_HOST" $(printf ' -s %q' "${NEED_SCOPES[@]}")
 fi
+
+if ! gh api -H "Accept: application/vnd.github+json" /user >/dev/null 2>&1; then
+  warn "Run: gh auth refresh -h $GH_HOST -s ${NEED_SCOPES[*]}  (then follow SSO prompts)"
+fi
+
+SSH_PRIV="${HOME}/.ssh/id_ed25519"
+SSH_PUB="${SSH_PRIV}.pub"
+
+[[ -f "$SSH_PUB" ]] || die "Missing $SSH_PUB. Generate with: ssh-keygen -t ed25519 -f $SSH_PRIV"
+
+PUB_KEY_CONTENT="$(cat "$SSH_PUB")"
+KEY_TITLE="${KEY_TITLE:-$(hostname -s) ssh $(date +%Y-%m-%d)}"
+
+# Check if key already exists
+info "Checking existing SSH auth keys on GitHub…"
+if gh api /user/keys?per_page=100 | grep -qF "$(cut -d' ' -f2 <<<"$PUB_KEY_CONTENT")"; then
+  info "Key already present on GitHub. Skipping upload."
+else
+  info "Uploading SSH AUTH key to GitHub…"
+  gh api -X POST /user/keys \
+    -H "Accept: application/vnd.github+json" \
+    -f title="$KEY_TITLE" \
+    -f key="$PUB_KEY_CONTENT"
+  info "SSH auth key uploaded."
+fi
+
+# Upload as an SSH SIGNING key (for git commit signing)
+if [[ "${UPLOAD_SIGNING_KEY:-1}" == "1" ]]; then
+  info "Ensuring SSH SIGNING key is present…"
+  if gh api /user/ssh_signing_keys?per_page=100 | grep -qF "$(cut -d' ' -f2 <<<"$PUB_KEY_CONTENT")"; then
+    info "Signing key already present. Skipping."
+  else
+    gh api -X POST /user/ssh_signing_keys \
+      -H "Accept: application/vnd.github+json" \
+      -f title="$KEY_TITLE" \
+      -f key="$PUB_KEY_CONTENT"
+    info "SSH signing key uploaded."
+  fi
+fi
+# -------------------------------------------------------------------
+
+
+# # Add (or skip) the signing key
+# msg "Uploading SSH SIGNING key to GitHub (if not already present)…"
+# if gh ssh-key add --help 2>&1 | grep -q -- '--type'; then
+#   if ! gh ssh-key list --type signing 2>/dev/null | grep -q "$(cat "${SIGN_KEY}.pub" | awk '{print $2}')" ; then
+#     gh ssh-key add "${SIGN_KEY}.pub" --type signing -t "${HOSTNAME_LABEL} signing key"
+#   fi
+# else
+#   msg "Your gh version may not support '--type signing'. You can still add the signing key manually in GitHub Settings → SSH and GPG keys → New SSH key (type: Signing)."
+# fi
 
 ### ── Enable SSH commit signing in Git ───────────────────────────────────────
 msg "Enabling SSH commit signing…"
