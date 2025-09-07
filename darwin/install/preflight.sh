@@ -185,7 +185,7 @@ if ! grep -q "Host github.com" "$SSH_CONFIG" 2>/dev/null; then
 fi
 
 ### ── gh auth login (SSH protocol) ───────────────────────────────────────────
-msg "Authenticating with GitHub CLI (will open a browser)…"
+msg "Authenticating with GitHub CLI in the browser..."
 
 # Required scopes for SSH key management
 NEED_SCOPES=("admin:public_key" "admin:ssh_signing_key")
@@ -219,7 +219,7 @@ PUB_KEY_CONTENT="$(cat "${AUTH_KEY}.pub")"
 KEY_TITLE="${HOSTNAME_LABEL} auth key $(date +%Y-%m-%d)"
 
 # Add (or skip if already uploaded) the auth key
-msg "Uploading SSH AUTH key to GitHub (if not already present)…"
+msg "Uploading SSH AUTH key to GitHub if not already present..."
 if gh api /user/keys?per_page=100 | grep -qF "$(cut -d' ' -f2 <<<"$PUB_KEY_CONTENT")"; then
   msg "SSH auth key already present on GitHub. Skipping upload."
 else
@@ -231,7 +231,7 @@ else
 fi
 
 # Add the signing key
-msg "Uploading SSH SIGNING key to GitHub (if not already present)…"
+msg "Uploading SSH SIGNING key to GitHub if not already present..."
 SIGN_PUB_KEY_CONTENT="$(cat "${SIGN_KEY}.pub")"
 SIGN_KEY_TITLE="${HOSTNAME_LABEL} signing key $(date +%Y-%m-%d)"
 
