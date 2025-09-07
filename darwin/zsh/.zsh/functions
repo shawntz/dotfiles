@@ -20,6 +20,35 @@ fdo() {
 compress() { tar -czf "${1%/}.tar.gz" "${1%/}"; }
 alias decompress="tar -xzf"
 
+# Restow dotfiles
+restow() {
+  local DOTFILES_ROOT="${DOTFILES_ROOT:-$HOME/Developer/dotfiles}"
+  local TARGET="$HOME"
+
+  if ! command -v stow >/dev/null 2>&1; then
+    echo "stow not installed. Install it first (brew install stow / pacman -S stow / apt install stow)."
+    return 1
+  fi
+
+  echo "Re-stowing dotfiles from $DOTFILES_ROOT into $TARGET…"
+
+  # Go into dotfiles repo
+  cd "$DOTFILES_ROOT" || return 1
+
+  # Unstow all first to clear stale symlinks
+  for dir in */; do
+    stow -D --target="$TARGET" "${dir%/}"
+  done
+
+  # Stow everything again
+  for dir in */; do
+    stow --target="$TARGET" "${dir%/}"
+  done
+
+  echo "✅ Dotfiles re-stowed."
+}
+
+
 # Sync Homebrew state to a Brewfile, commit on a new branch, and open a PR.
 # Usage:
 #   brewfile-sync                  # uses current repo (or ~/.dotfiles) and Brewfile at repo root
