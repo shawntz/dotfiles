@@ -270,7 +270,7 @@ fi
 
 
 # # Add (or skip) the signing key
-# msg "Uploading SSH SIGNING key to GitHub (if not already present)…"
+# msg "Uploading SSH SIGNING key to GitHub..."
 # if gh ssh-key add --help 2>&1 | grep -q -- '--type'; then
 #   if ! gh ssh-key list --type signing 2>/dev/null | grep -q "$(cat "${SIGN_KEY}.pub" | awk '{print $2}')" ; then
 #     gh ssh-key add "${SIGN_KEY}.pub" --type signing -t "${HOSTNAME_LABEL} signing key"
