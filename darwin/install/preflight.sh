@@ -1,4 +1,4 @@
-#!/bin/sh
+#!/bin/zsh
 set -euo pipefail
 
 ### ── helpers ────────────────────────────────────────────────────────────────
@@ -6,9 +6,11 @@ msg()  { printf "\n\033[1m%s\033[0m\n" "$*"; }
 need() { command -v "$1" >/dev/null 2>&1 || return 1; }
 
 maximize() { 
-  read X Y W H < <(swift -e 'import AppKit; let f=NSScreen.main!.visibleFrame; 
-  print(Int(f.origin.x), Int(f.origin.y), Int(f.size.width), Int(f.size.height))')
-  # for Terminal.app
+  screen_info=$(swift -e 'import AppKit; let f=NSScreen.main!.visibleFrame; print(Int(f.origin.x), Int(f.origin.y), Int(f.size.width), Int(f.size.height))')
+  X=$(echo $screen_info | cut -d' ' -f1)
+  Y=$(echo $screen_info | cut -d' ' -f2)  
+  W=$(echo $screen_info | cut -d' ' -f3)
+  H=$(echo $screen_info | cut -d' ' -f4)
   osascript -e "tell application \"Terminal\" to set bounds of front window to {0, 0, $(($X+$W)), $(($Y+$H))}"
 }
 
