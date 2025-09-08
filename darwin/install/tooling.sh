@@ -43,7 +43,7 @@ brew cleanup -s >/dev/null || true
 
 install_brewfile() {
   local DOTFILES_ROOT="${DOTFILES_ROOT:-$HOME/Developer/dotfiles}"
-  local BREWFILE_PATH="$DOTFILES_ROOT/darwin/package/Brewfile"
+  local BREWFILE_PATH="$DOTFILES_ROOT/darwin/packages/Brewfile"
 
   if ! command -v brew >/dev/null 2>&1; then
     echo "⚠️  Homebrew is not installed. Skipping Brewfile installation."
