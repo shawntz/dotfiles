@@ -122,9 +122,9 @@ else
   echo "Stowing: (none found)"
 fi
 
-if [ -x "$DARWIN_DIR/install/macos/set-defaults.sh" ]; then
-  "$DARWIN_DIR/install/macos/set-defaults.sh"
-fi
+# if [ -x "$DARWIN_DIR/install/macos/set-defaults.sh" ]; then
+#   "$DARWIN_DIR/install/macos/set-defaults.sh"
+# fi
 
 echo "✅ Done."
 echo "Unstow a package:  stow -d \"$DARWIN_DIR\" -t \"$TARGET\" -D <pkg>"
