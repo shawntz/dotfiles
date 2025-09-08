@@ -6,8 +6,6 @@ set -euo pipefail
 msg()  { printf "\n\033[1m%s\033[0m\n" "$*"; }
 need() { command -v "$1" >/dev/null 2>&1 || return 1; }
 
-echo "testing 123"
-
 maximize() { 
   screen_info=$(swift -e 'import AppKit; let f=NSScreen.main!.visibleFrame; print(Int(f.origin.x), Int(f.origin.y), Int(f.size.width), Int(f.size.height))')
   X=$(echo $screen_info | cut -d' ' -f1)
