@@ -1,4 +1,5 @@
 theme = GruvboxDarkHard
+command = /bin/zsh -l
 
 macos-titlebar-style = transparent
 macos-titlebar-proxy-icon = hidden
@@ -16,7 +17,6 @@ clipboard-paste-protection = false
 window-decoration = true
 copy-on-select = true
 
-command = /run/current-system/sw/bin/fish
 click-repeat-interval = 500
 auto-update-channel = stable
 
