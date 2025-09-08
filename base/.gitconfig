@@ -1,14 +1,8 @@
-[alias]
-	co = checkout
-	br = branch
-	ci = commit
-	st = status
-[pull]
-	rebase = true
-[init]
-	defaultBranch = master
 [user]
 	name = Shawn Schwartz
 	email = shawn@shawnschwartz.com
-[credential]
-	helper = cache
+	signingkey = /Users/shawn.schwartz/.ssh/id_ed25519_signing.pub
+[gpg]
+	format = ssh
+[commit]
+	gpgsign = true
