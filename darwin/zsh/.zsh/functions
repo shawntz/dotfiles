@@ -63,6 +63,21 @@ restow() {
   echo "✅ Dotfiles re-stowed."
 }
 
+# Refresh macos defaults
+mac-sync() {
+  emulate -L zsh
+  set -u
+  set -o pipefail
+
+  local repo_default
+  repo_default="$(git rev-parse --show-toplevel 2>/dev/null || print -r -- "$HOME/.dotfiles")"
+
+  local REPO="${1:-$repo_default}"
+  REPO="$(cd "$REPO" && pwd)"  # Convert to absolute path
+
+  bash "$REPO"/darwin/install/macos/set-defaults.sh
+}
+
 # Sync Homebrew state to a Brewfile, commit on a new branch, and open a PR.
 # Usage:
 #   brewfile-sync                  # uses current repo (or ~/.dotfiles) and Brewfile at repo root
