@@ -56,9 +56,6 @@ bash "$SCRIPT_DIR/install/services.sh"
 drawlsp
 lspquote 6
 
-
-bash "$SCRIPT_DIR/install/sync.sh"
-
 drawlsp
 lspquote 7
 
