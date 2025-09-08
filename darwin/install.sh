@@ -10,7 +10,12 @@ REPO_ROOT="$(cd -- "$SCRIPT_DIR/.." >/dev/null 2>&1 && pwd)"
 msg()  { printf "\n\033[1m%s\033[0m\n" "$*"; }
 need() { command -v "$1" >/dev/null 2>&1; }
 
-drawlsp() { /opt/homebrew/bin/chafa --scale 0.66 "$DOTFILES_ROOT/misc/lsp.png"; sleep 2; }
+drawlsp() { pause; /opt/homebrew/bin/chafa --scale 0.66 "$DOTFILES_ROOT/misc/lsp.png"; sleep 2; }
+
+pause() {
+    echo "Press Enter to continue..."
+    read -r
+}
 
 # from https://adventuretime.fandom.com/wiki/Lumpy_Space_Princess/Quotes
 lspquote() {
@@ -37,6 +42,8 @@ lspquote() {
     idx=$(( RANDOM % ${#quotes[@]} ))
   fi
 
+  pause
+  
   echo "${quotes[$idx]}" | /opt/homebrew/bin/figlet | /opt/homebrew/bin/lolcat
 
   sleep 5
@@ -53,44 +60,71 @@ if [[ ${EUID:-$(id -u)} -ne 0 ]]; then
 fi
 
 # --- run the darwin-local install pieces, anchored to SCRIPT_DIR -------------
+echo "🔍 Running darwin install script..."
+echo "SCRIPT_DIR: $SCRIPT_DIR"
+
+pause
+
+echo "📋 Checking script files:"
+for script in preflight.sh tooling.sh webapps.sh; do
+    if [[ -f "$SCRIPT_DIR/install/$script" ]]; then
+        echo "✅ Found: $script"
+    else
+        echo "❌ Missing: $script"
+    fi
+done
+
+pause
+
+echo "🚀 Running preflight..."
 bash "$SCRIPT_DIR/install/preflight.sh"
+drawlsp
+lspquote 1
 
-# drawlsp
-# lspquote 1
+pause
 
-
+echo "🛠️ Installing tools..."
 bash "$SCRIPT_DIR/install/tooling.sh"
+drawlsp
+lspquote 2
 
-# drawlsp
-# lspquote 2
+pause
 
-
+echo "🌐 Installing webapps..."
 bash "$SCRIPT_DIR/install/webapps.sh"
+drawlsp
+lspquote 3
 
-# drawlsp
-# lspquote 3
-
+pause
 
 bash "$SCRIPT_DIR/install/macos/set-defaults.sh"
+drawlsp
+lspquote 4
 
-# drawlsp
-# lspquote 4
+pause
 
 
 bash "$SCRIPT_DIR/install/activate.sh"
 
-# drawlsp
-# lspquote 5
+drawlsp
+lspquote 5
+
+pause
 
 
 bash "$SCRIPT_DIR/install/services.sh"
 
-# drawlsp
-# lspquote 6
+pause
 
-# drawlsp
-# lspquote 7
+drawlsp
+lspquote 6
 
+pause
+
+drawlsp
+lspquote 7
+
+pause
 
 bash "$SCRIPT_DIR/install/reboot.sh"
 
