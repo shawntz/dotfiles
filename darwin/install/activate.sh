@@ -7,3 +7,4 @@ open -a Hammerspoon.app
 open -a Karabiner-Elements.app
 open -a Raycast.app
 open -a Alfred\ 5.app
+open -a Shortcat.app
