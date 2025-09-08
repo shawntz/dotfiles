@@ -2,6 +2,8 @@ local icons = require("icons")
 local colors = require("colors")
 
 local whitelist = { ["Spotify"] = true,
+					["YouTube"] = true,
+					["YouTube Music"] = true,
                     ["Music"] = true    };
 
 local media_cover = sbar.add("item", {

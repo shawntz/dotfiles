@@ -5,12 +5,28 @@ local app_icons = require("helpers.app_icons")
 
 local spaces = {}
 
-for i = 1, 10, 1 do
-  local space = sbar.add("space", "space." .. i, {
-    space = i,
+-- Get AeroSpace workspaces
+local function get_aerospace_workspaces()
+  local handle = io.popen("aerospace list-workspaces --all")
+  local result = handle:read("*a")
+  handle:close()
+  
+  local workspaces = {}
+  for workspace in result:gmatch("([^\n]+)") do
+    if workspace ~= "" then
+      table.insert(workspaces, workspace)
+    end
+  end
+  return workspaces
+end
+
+local workspaces = get_aerospace_workspaces()
+
+for i, workspace in ipairs(workspaces) do
+  local space = sbar.add("item", "space." .. workspace, {
     icon = {
       font = { family = settings.font.numbers },
-      string = i,
+      string = workspace,
       padding_left = 15,
       padding_right = 8,
       color = colors.white,
@@ -34,7 +50,7 @@ for i = 1, 10, 1 do
     popup = { background = { border_width = 5, border_color = colors.black } }
   })
 
-  spaces[i] = space
+  spaces[workspace] = space
 
   -- Single item bracket for space items to achieve double border on highlight
   local space_bracket = sbar.add("bracket", { space.name }, {
@@ -47,8 +63,7 @@ for i = 1, 10, 1 do
   })
 
   -- Padding space
-  sbar.add("space", "space.padding." .. i, {
-    space = i,
+  sbar.add("item", "space.padding." .. workspace, {
     script = "",
     width = settings.group_paddings,
   })
@@ -66,9 +81,8 @@ for i = 1, 10, 1 do
     }
   })
 
-  space:subscribe("space_change", function(env)
-    local selected = env.SELECTED == "true"
-    local color = selected and colors.grey or colors.bg2
+  space:subscribe("aerospace_workspace_change", function(env)
+    local selected = env.FOCUSED_WORKSPACE == workspace
     space:set({
       icon = { highlight = selected, },
       label = { highlight = selected },
@@ -81,11 +95,10 @@ for i = 1, 10, 1 do
 
   space:subscribe("mouse.clicked", function(env)
     if env.BUTTON == "other" then
-      space_popup:set({ background = { image = "space." .. env.SID } })
+      space_popup:set({ background = { image = "space." .. workspace } })
       space:set({ popup = { drawing = "toggle" } })
     else
-      local op = (env.BUTTON == "right") and "--destroy" or "--focus"
-      sbar.exec("yabai -m space " .. op .. " " .. env.SID)
+      sbar.exec("aerospace workspace " .. workspace)
     end
   end)
 
@@ -175,3 +188,4 @@ end)
 spaces_indicator:subscribe("mouse.clicked", function(env)
   sbar.trigger("swap_menus_and_spaces")
 end)
+
