@@ -83,3 +83,4 @@ Tinyspeck.png
 
 install/config/rstudio/rstudio/**
 **/.DS_Store
+.zshrc
