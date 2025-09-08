@@ -142,6 +142,8 @@ export USER_NAME USER_EMAIL USER_SITE
 
 ### ── Configure Git identity (user.name / user.email) ────────────────────────
 msg "Configuring Git identity…"
+rm -f ~/.gitconfig
+cp $DOTFILES_ROOT/base/.gitconfig
 git config --global user.name  "$USER_NAME"
 git config --global user.email "$USER_EMAIL"
 
