@@ -21,13 +21,10 @@ drawlsp() { /opt/homebrew/bin/chafa --scale 0.66 $DOTFILES_ROOT/misc/lsp.png }
 # from https://adventuretime.fandom.com/wiki/Lumpy_Space_Princess/Quotes
 lspquote() {
   local quotes=(
-#     "It just means he's changing into a Lumpy Space guy on account of my bite. It's just like um... you know... werewolf rules."
     "WHATEVERS 2009!"
-#     "First you should check out my house. It's, like, kinda lame but way less lame than, like, your house."
     "I said, 'Lump off,' Mom!"
     "The guys who use the antidote up here are notorious for being... smooth posers."
     "Buuuuumps!"
-#     "Oh, my Glob, you guys, drama bomb!"
     "Oh, my Glob. What the stuff are you doing?"
     "Well, if you want these lumps, you gotta put a ring on it. WHERE'S MY RING?"
     "MAH BEANS!"
@@ -46,7 +43,7 @@ lspquote() {
     idx=$(( RANDOM % ${#quotes[@]} ))
   fi
 
-  echo "${quotes[$idx]}" | /opt/homebrew/bin/figlet | opt/homebrew/bin/lolcat
+  echo "${quotes[$idx]}" | /opt/homebrew/bin/figlet | /opt/homebrew/bin/lolcat
 }
 
 # Resolve repo root relative to this script
@@ -296,3 +293,4 @@ msg "Enabling SSH commit signing…"
 git config --global gpg.format ssh
 git config --global user.signingkey "${SIGN_KEY}.pub"
 git config --global commit.gpgsign true
+
