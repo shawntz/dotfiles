@@ -89,6 +89,7 @@ brewfile-sync() {
   repo_default="$(git rev-parse --show-toplevel 2>/dev/null || print -r -- "$HOME/.dotfiles")"
 
   local REPO="${1:-$repo_default}"
+  REPO="$(cd "$REPO" && pwd)"  # Convert to absolute path
   local BREWFILE="${2:-$REPO/darwin/packages/Brewfile}"
 
   [[ -d "$REPO/.git" ]] || { echo "Not a git repo: $REPO"; return 1; }
