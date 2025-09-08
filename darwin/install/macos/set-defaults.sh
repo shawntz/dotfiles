@@ -210,8 +210,6 @@ configure_macos_defaults() {
   done
   
   defaults write com.apple.symbolichotkeys AppleSymbolicHotKeys -dict-add 64 '<dict><key>enabled</key><false/></dict>'
-  
-  # killall Dock; killall SystemUIServer
 
   echo "macOS defaults configured."
 }
