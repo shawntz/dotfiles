@@ -78,54 +78,33 @@ done
 pause
 
 echo "🚀 Running preflight..."
-# bash "$SCRIPT_DIR/install/preflight.sh"
-# drawlsp
-# lspquote 1
-
-pause
+bash "$SCRIPT_DIR/install/preflight.sh"
+drawlsp
+lspquote 1
 
 echo "🛠️ Installing tools..."
-# bash "$SCRIPT_DIR/install/tooling.sh"
-# drawlsp
-# lspquote 2
-
-pause
+bash "$SCRIPT_DIR/install/tooling.sh"
+drawlsp
+lspquote 2
 
 echo "🌐 Installing webapps..."
-# bash "$SCRIPT_DIR/install/webapps.sh"
-# drawlsp
-# lspquote 3
-
-# pause
+bash "$SCRIPT_DIR/install/webapps.sh"
+drawlsp
+lspquote 3
 
 bash "$SCRIPT_DIR/install/macos/set-defaults.sh"
 drawlsp
 lspquote 4
 
-pause
-
-
 bash "$SCRIPT_DIR/install/activate.sh"
-
 drawlsp
 lspquote 5
 
-pause
-
-
 bash "$SCRIPT_DIR/install/services.sh"
-
-pause
-
 drawlsp
 lspquote 6
-
-pause
 
 drawlsp
 lspquote 7
 
-pause
-
 bash "$SCRIPT_DIR/install/reboot.sh"
-
