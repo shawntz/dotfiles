@@ -2,7 +2,7 @@ local log = hs.logger.new('delete-words.lua', 'debug')
 
 local isInTerminal = function()
   app = hs.application.frontmostApplication():name()
-  return app == 'kitty' or app == 'Terminal'
+  return app == 'Ghostty' or app == 'Terminal'
 end
 
 -- Use option + h to delete previous word
