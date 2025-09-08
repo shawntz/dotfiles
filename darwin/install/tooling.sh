@@ -66,12 +66,12 @@ install_brewfile
 ### Brew formulae (defaults for first install / if there's no Brewfile)
 ### ────────────────────────────────────────────────────────────────────────────
 FORMULAE=(
-  jupyterlab macos-trash dockutil bat deno docker eza aria2 r
+  macos-trash dockutil bat deno docker eza aria2 r
   fastfetch fd feh ffmpeg freetype fzf gcc git git-lfs htop imagemagick
   jq lazygit lazydocker neovim pandoc rclone ripgrep shfmt starship stow 
   tlrc tree tree-sitter wget yarn zoxide mise qpdf sketchybar tailscale xcodes
   zsh-autosuggestions zsh-syntax-highlighting zsh-completions borders
-  switchaudio-osx nowplaying-cli
+  switchaudio-osx nowplaying-cli jupyterlab
 )
 
 msg "Installing brew formulae…"
