@@ -78,21 +78,21 @@ done
 pause
 
 echo "🚀 Running preflight..."
-bash "$SCRIPT_DIR/install/preflight.sh"
+# bash "$SCRIPT_DIR/install/preflight.sh"
 drawlsp
 lspquote 1
 
 pause
 
 echo "🛠️ Installing tools..."
-bash "$SCRIPT_DIR/install/tooling.sh"
+# bash "$SCRIPT_DIR/install/tooling.sh"
 drawlsp
 lspquote 2
 
 pause
 
 echo "🌐 Installing webapps..."
-bash "$SCRIPT_DIR/install/webapps.sh"
+# bash "$SCRIPT_DIR/install/webapps.sh"
 drawlsp
 lspquote 3
 
