@@ -19,7 +19,7 @@ maximize() {
 
 maximize
 
-#drawlsp() { /opt/homebrew/bin/chafa --scale 0.66 $DOTFILES_ROOT/misc/lsp.png }
+drawlsp() { /opt/homebrew/bin/chafa --scale 0.66 $DOTFILES_ROOT/misc/lsp.png }
 
 # from https://adventuretime.fandom.com/wiki/Lumpy_Space_Princess/Quotes
 # lspquote() {
