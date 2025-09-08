@@ -76,7 +76,7 @@ configure_macos_defaults() {
   add_app "/Applications/Ghostty.app"
   add_app "/Applications/RStudio.app"
   add_app "/System/Applications/Music.app"
-  add_app "/Applications/Slack.app"
+  add_app "/Applications/TinySpeck.app"
 
   killall Dock || true
 
