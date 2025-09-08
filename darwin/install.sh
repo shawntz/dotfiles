@@ -10,7 +10,7 @@ REPO_ROOT="$(cd -- "$SCRIPT_DIR/.." >/dev/null 2>&1 && pwd)"
 msg()  { printf "\n\033[1m%s\033[0m\n" "$*"; }
 need() { command -v "$1" >/dev/null 2>&1; }
 
-drawlsp() { pause; /opt/homebrew/bin/chafa --scale 0.66 "$DOTFILES_ROOT/misc/lsp.png"; sleep 2; }
+drawlsp() { pause; /opt/homebrew/bin/chafa --scale 0.66 "$REPO_ROOT/misc/lsp.png"; sleep 2; }
 
 pause() {
     echo "Press Enter to continue..."
