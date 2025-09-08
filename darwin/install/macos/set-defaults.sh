@@ -129,6 +129,7 @@ configure_macos_defaults() {
   w -g AppleScrollerPagingBehavior           bool  true
   w -g AppleShowAllExtensions                bool  true
   w -g AppleSpacesSwitchOnActivate           bool  false
+  w -g ApplePressAndHoldEnabled 			 bool  false
   w -g InitialKeyRepeat                      int   10
   w -g KeyRepeat                             int   1
   w -g NSAutomaticCapitalizationEnabled      bool  false
@@ -161,6 +162,8 @@ configure_macos_defaults() {
   w com.apple.screensaver askForPassword      int   1
   w com.apple.screensaver askForPasswordDelay float 5
   w com.apple.screencapture location          string "$HOME/Pictures/screenshots"
+  w NSGlobalDomain _HIHideMenuBar 			  bool  true
+
   killall SystemUIServer || true
 
   ##############################################################################
@@ -198,6 +201,16 @@ configure_macos_defaults() {
   # Flush prefs caches and UI
   sudo killall cfprefsd 2>/dev/null
   killall SystemUIServer 2>/dev/null
+
+  # Disable cmd + space => spotlight shortcut
+  for id in 64 65; do
+    /usr/libexec/PlistBuddy -c "Set :AppleSymbolicHotKeys:$id:enabled false" ~/Library/Preferences/com.apple.symbolichotkeys.plist 2>/dev/null || \
+    /usr/libexec/PlistBuddy -c "Add :AppleSymbolicHotKeys:$id:enabled bool false" ~/Library/Preferences/com.apple.symbolichotkeys.plist
+  done
+  
+  defaults write com.apple.symbolichotkeys AppleSymbolicHotKeys -dict-add 64 '<dict><key>enabled</key><false/></dict>'
+  
+  killall Dock; killall SystemUIServer
 
   echo "macOS defaults configured."
 }
