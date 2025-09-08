@@ -169,6 +169,6 @@ ${OUTDATED}
 "
 
     # Switch back to master branch
-    git checkout "$BASE"
+    git checkout master
   )
 }
