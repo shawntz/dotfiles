@@ -155,6 +155,9 @@ automatically-unhide-macos-hidden-apps = false
 
     # See: https://nikitabobko.github.io/AeroSpace/commands#mode
     cmd-semicolon = 'mode service'
+    
+    # Auto-tile 3 windows in Hyprland-style layout
+    ctrl-t = 'exec-and-forget $HOME/.config/aerospace/auto_tile_3.sh'
 
 # 'service' binding mode declaration.
 # See: https://nikitabobko.github.io/AeroSpace/guide#binding-modes
