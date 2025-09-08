@@ -93,8 +93,8 @@ else
 fi
 
 ### ── Install gum & gh ───────────────────────────────────────────────────────
-msg "Ensuring gum and gh + some other fun goodies are installed…"
-brew install charmbracelet/tap/gum gh lolcat figlet chafa >/dev/null
+msg "Ensuring gum, gh, and dockutil + some other fun goodies are installed…"
+brew install charmbracelet/tap/gum gh lolcat figlet chafa dockutil
 
 ### ── Interactive prompts with gum ───────────────────────────────────────────
 msg "Git config identity info…"
