@@ -19,35 +19,35 @@ maximize() {
 
 maximize
 
-drawlsp() { /opt/homebrew/bin/chafa --scale 0.66 $DOTFILES_ROOT/misc/lsp.png }
+#drawlsp() { /opt/homebrew/bin/chafa --scale 0.66 $DOTFILES_ROOT/misc/lsp.png }
 
 # from https://adventuretime.fandom.com/wiki/Lumpy_Space_Princess/Quotes
-# lspquote() {
-#   local quotes=(
-#     "WHATEVERS 2009!"
-#     "I said, 'Lump off,' Mom!"
-#     "The guys who use the antidote up here are notorious for being... smooth posers."
-#     "Buuuuumps!"
-#     "Oh, my Glob. What the stuff are you doing?"
-#     "Well, if you want these lumps, you gotta put a ring on it. WHERE'S MY RING?"
-#     "MAH BEANS!"
-#   )
+lspquote() {
+  local quotes=(
+    "WHATEVERS 2009!"
+    "I said, 'Lump off,' Mom!"
+    "The guys who use the antidote up here are notorious for being... smooth posers."
+    "Buuuuumps!"
+    "Oh, my Glob. What the stuff are you doing?"
+    "Well, if you want these lumps, you gotta put a ring on it. WHERE'S MY RING?"
+    "MAH BEANS!"
+  )
 
-#   local idx
-#   if [[ -n "$1" ]]; then
-#     # Clamp to valid range (1..N)
-#     if (( $1 >= 1 && $1 <= ${#quotes[@]} )); then
-#       idx=$(( $1 - 1 ))   # convert to 0-based
-#     else
-#       echo "⚠️ Invalid index. Pick between 1 and ${#quotes[@]}."
-#       return 1
-#     fi
-#   else
-#     idx=$(( RANDOM % ${#quotes[@]} ))
-#   fi
+  local idx
+  if [[ -n "$1" ]]; then
+    # Clamp to valid range (1..N)
+    if (( $1 >= 1 && $1 <= ${#quotes[@]} )); then
+      idx=$(( $1 - 1 ))   # convert to 0-based
+    else
+      echo "⚠️ Invalid index. Pick between 1 and ${#quotes[@]}."
+      return 1
+    fi
+  else
+    idx=$(( RANDOM % ${#quotes[@]} ))
+  fi
 
-#   echo "${quotes[$idx]}" | /opt/homebrew/bin/figlet | /opt/homebrew/bin/lolcat
-# }
+  echo "${quotes[$idx]}" | /opt/homebrew/bin/figlet | /opt/homebrew/bin/lolcat
+}
 
 # Resolve repo root relative to this script
 SCRIPT_DIR="$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")" &> /dev/null && pwd)"
