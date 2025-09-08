@@ -70,13 +70,12 @@ restow() {
 #   brewfile-sync /repo /repo/ops/Brewfile   # custom repo + Brewfile location
 brewfile-sync() {
   emulate -L zsh
-  set -e
   set -u
   set -o pipefail
 
   # --- deps ---------------------------------------------------------------
-  command -v brew >/dev/null 2>&1 || { print -r -- "brew not found"; return 1; }
-  command -v gh   >/dev/null 2>&1 || { print -r -- "gh not found (brew install gh)"; return 1; }
+  command -v brew >/dev/null 2>&1 || { echo "brew not found"; return 1; }
+  command -v gh   >/dev/null 2>&1 || { echo "gh not found (brew install gh)"; return 1; }
 
   # Ensure brew is on PATH for this shell
   if [[ -d /opt/homebrew/bin ]]; then
@@ -92,18 +91,25 @@ brewfile-sync() {
   local REPO="${1:-$repo_default}"
   local BREWFILE="${2:-$REPO/Brewfile}"
 
-  [[ -d "$REPO/.git" ]] || { print -r -- "Not a git repo: $REPO"; return 1; }
-  [[ -n "$(gh auth status 2>/dev/null || true)" ]] || { print -r -- "gh not authenticated (run: gh auth login)"; return 1; }
+  [[ -d "$REPO/.git" ]] || { echo "Not a git repo: $REPO"; return 1; }
+  if ! gh auth status &>/dev/null; then
+    echo "gh not authenticated. Launching gh auth login..."
+    gh auth login
+    if ! gh auth status &>/dev/null; then
+      echo "Authentication failed. Please try running 'gh auth login' manually."
+      return 1
+    fi
+  fi
 
   # --- brew maintenance ---------------------------------------------------
-  print -r -- "• brew update / upgrade / cleanup…"
+  echo "• brew update / upgrade / cleanup…"
   brew update
   brew upgrade
   brew cleanup -s || true
 
   # --- dump Brewfile ------------------------------------------------------
   mkdir -p "$(dirname "$BREWFILE")"
-  print -r -- "• dumping Brewfile → $BREWFILE"
+  echo "• dumping Brewfile → $BREWFILE"
   brew bundle dump --force --file "$BREWFILE"
 
   # --- git: branch, commit, push, PR -------------------------------------
@@ -113,7 +119,7 @@ brewfile-sync() {
     # discover default base branch
     local BASE
     BASE="$(git remote show origin 2>/dev/null | sed -n 's/.*HEAD branch: //p')"
-    [[ -n "${BASE:-}" ]] || BASE=$([[ -n "$(git show-ref refs/heads/main 2>/dev/null)" ]] && print -r main || print -r master)
+    [[ -n "${BASE:-}" ]] || BASE=$([[ -n "$(git show-ref refs/heads/main 2>/dev/null)" ]] && echo main || echo master)
 
     local TS; TS="$(date -u +%Y-%m-%dT%H%M%SZ)"
     local BR="ci/brewfile-${TS}"
@@ -123,7 +129,7 @@ brewfile-sync() {
 
     git add -A "$BREWFILE"
     if git diff --cached --quiet; then
-      print -r -- "• no changes in Brewfile; nothing to commit."
+      echo "• no changes in Brewfile; nothing to commit."
       git checkout "$BASE"
       return 0
     fi
