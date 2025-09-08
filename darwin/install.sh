@@ -22,9 +22,46 @@ fi
 
 # --- run the darwin-local install pieces, anchored to SCRIPT_DIR -------------
 bash "$SCRIPT_DIR/install/preflight.sh"
+
+drawlsp
+lspquote 1
+
+
 bash "$SCRIPT_DIR/install/tooling.sh"
+
+drawlsp
+lspquote 2
+
+
 bash "$SCRIPT_DIR/install/webapps.sh"
+
+drawlsp
+lspquote 3
+
+
 bash "$SCRIPT_DIR/install/macos/set-defaults.sh"
+
+drawlsp
+lspquote 4
+
+
 bash "$SCRIPT_DIR/install/activate.sh"
-command -v brewfile-sync >/dev/null 2>&1 && brewfile-sync "$REPO_ROOT" || true
+
+drawlsp
+lspquote 5
+
+
+bash "$SCRIPT_DIR/install/services.sh"
+
+drawlsp
+lspquote 6
+
+
+bash "$SCRIPT_DIR/install/sync.sh"
+
+drawlsp
+lspquote 7
+
+
 bash "$SCRIPT_DIR/install/reboot.sh"
+
