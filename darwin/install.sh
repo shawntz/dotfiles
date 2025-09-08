@@ -13,8 +13,9 @@ need() { command -v "$1" >/dev/null 2>&1; }
 drawlsp() { pause; /opt/homebrew/bin/chafa --scale 0.66 "$REPO_ROOT/misc/lsp.png"; sleep 2; }
 
 pause() {
-    echo "Press Enter to continue..."
-    read -r
+    # echo "Press Enter to continue..."
+    # read -r
+    echo ""
 }
 
 # from https://adventuretime.fandom.com/wiki/Lumpy_Space_Princess/Quotes
