@@ -196,7 +196,6 @@ configure_macos_defaults() {
   w com.apple.WindowManager AutoHide                  bool true
   w com.apple.WindowManager EnableTiledWindowMargins  bool false
   w com.apple.WindowManager GloballyEnabled   		  bool false
-  w com.apple.WindowManager EnableStandardClickToShowDesktop  bool  false
 
   # Flush prefs caches and UI
   sudo killall cfprefsd 2>/dev/null
