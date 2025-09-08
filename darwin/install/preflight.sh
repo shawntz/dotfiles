@@ -264,7 +264,7 @@ KEY_TITLE="${HOSTNAME_LABEL} auth key $(date +%Y-%m-%d)"
 
 # Add (or skip if already uploaded) the auth key
 msg "Uploading SSH AUTH key to GitHub if not already present..."
-if gh api /user/keys?per_page=100 | grep -qF "$(cut -d' ' -f2 <<<"$PUB_KEY_CONTENT")"; then
+if gh api /user/keys?per_page=100 | grep -qF "$(echo "$PUB_KEY_CONTENT" | cut -d' ' -f2)"; then
   msg "SSH auth key already present on GitHub. Skipping upload."
 else
   gh api -X POST /user/keys \
@@ -279,7 +279,7 @@ msg "Uploading SSH SIGNING key to GitHub if not already present..."
 SIGN_PUB_KEY_CONTENT="$(cat "${SIGN_KEY}.pub")"
 SIGN_KEY_TITLE="${HOSTNAME_LABEL} signing key $(date +%Y-%m-%d)"
 
-if gh api /user/ssh_signing_keys?per_page=100 | grep -qF "$(cut -d' ' -f2 <<<"$SIGN_PUB_KEY_CONTENT")"; then
+if gh api /user/ssh_signing_keys?per_page=100 | grep -qF "$(echo "$SIGN_PUB_KEY_CONTENT" | cut -d' ' -f2)"; then
   msg "SSH signing key already present on GitHub. Skipping upload."
 else
   gh api -X POST /user/ssh_signing_keys \
@@ -294,4 +294,13 @@ msg "Enabling SSH commit signing…"
 git config --global gpg.format ssh
 git config --global user.signingkey "${SIGN_KEY}.pub"
 git config --global commit.gpgsign true
+
+### ── Success & quick tests ──────────────────────────────────────────────────
+msg "Done! Quick checks:"
+echo "  • Env vars now in ~/.zshrc (reload with:  source ~/.zshrc )"
+echo "  • Test GitHub SSH:     ssh -T git@github.com"
+echo "  • Test signing (optional in a repo):"
+echo "      git commit --allow-empty -m 'test: signed commit'"
+echo "      git log --show-signature -1"
+
 
