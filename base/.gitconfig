@@ -6,3 +6,5 @@
 	format = ssh
 [commit]
 	gpgsign = true
+[help]
+	autocorrect = 1
