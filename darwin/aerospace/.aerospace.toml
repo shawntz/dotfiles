@@ -38,8 +38,14 @@ default-root-container-orientation = 'auto'
 # on-focused-monitor-changed = ['move-mouse monitor-lazy-center']
 
 exec-on-workspace-change = ['/bin/bash', '-c',
-    'sketchybar --trigger aerospace_workspace_change FOCUSED=$AEROSPACE_FOCUSED_WORKSPACE'
+    'sketchybar --trigger aerospace_workspace_change FOCUSED_WORKSPACE=$AEROSPACE_FOCUSED_WORKSPACE'
 ]
+
+# Trigger sketchybar updates on window focus changes AND move mouse
+
+# Create a script for auto-tiling when 3 windows are present
+# Note: AeroSpace doesn't have direct after-layout-change callbacks
+# We'll need to trigger this manually or through keybindings
 
 # You can effectively turn off macOS "Hide application" (cmd-h) feature by toggling this flag
 # Useful if you don't use this macOS feature, but accidentally hit cmd-h or cmd-alt-h key
