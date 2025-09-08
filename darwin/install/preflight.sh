@@ -296,12 +296,3 @@ msg "Enabling SSH commit signing…"
 git config --global gpg.format ssh
 git config --global user.signingkey "${SIGN_KEY}.pub"
 git config --global commit.gpgsign true
-
-### ── Success & quick tests ──────────────────────────────────────────────────
-msg "Done! Quick checks:"
-echo "  • Env vars now in ~/.zshrc (reload with:  source ~/.zshrc )"
-echo "  • Test GitHub SSH:     ssh -T git@github.com"
-echo "  • Test signing (optional in a repo):"
-echo "      git commit --allow-empty -m 'test: signed commit'"
-echo "      git log --show-signature -1"
-
