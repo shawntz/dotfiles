@@ -12,6 +12,8 @@ maximize() {
   osascript -e "tell application \"Terminal\" to set bounds of front window to {0, 0, $(($X+$W)), $(($Y+$H))}"
 }
 
+maximize
+
 drawlsp() { /opt/homebrew/bin/chafa --scale 0.66 $DOTFILES_ROOT/misc/lsp.png }
 
 # from https://adventuretime.fandom.com/wiki/Lumpy_Space_Princess/Quotes
@@ -183,7 +185,7 @@ export USER_NAME USER_EMAIL USER_SITE
 ### ── Configure Git identity (user.name / user.email) ────────────────────────
 msg "Configuring Git identity…"
 rm -f ~/.gitconfig
-cp $DOTFILES_ROOT/base/.gitconfig
+cp $DOTFILES_ROOT/base/.gitconfig ~/.gitconfig
 git config --global user.name  "$USER_NAME"
 git config --global user.email "$USER_EMAIL"
 
