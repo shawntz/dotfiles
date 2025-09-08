@@ -66,8 +66,8 @@ automatically-unhide-macos-hidden-apps = false
 #                 See:
 #                 https://nikitabobko.github.io/AeroSpace/guide#assign-workspaces-to-monitors
 [gaps]
-    inner.horizontal = 5
-    inner.vertical =   5
+    inner.horizontal = 15
+    inner.vertical =   15
     outer.left =       10
     outer.bottom =     10
     outer.top =        10
@@ -132,10 +132,10 @@ automatically-unhide-macos-hidden-apps = false
     cmd-3 = 'workspace 3'
     cmd-4 = 'workspace 4'
     cmd-5 = 'workspace 5'
-    cmd-6 = 'workspace 6'
-    cmd-7 = 'workspace 7'
-    cmd-8 = 'workspace 8'
-    cmd-9 = 'workspace 9'
+    #cmd-6 = 'workspace 6'
+    #cmd-7 = 'workspace 7'
+    #cmd-8 = 'workspace 8'
+    #cmd-9 = 'workspace 9'
 
     # See: https://nikitabobko.github.io/AeroSpace/commands#move-node-to-workspace
     cmd-alt-1 = 'move-node-to-workspace 1'
@@ -143,10 +143,10 @@ automatically-unhide-macos-hidden-apps = false
     cmd-alt-3 = 'move-node-to-workspace 3'
     cmd-alt-4 = 'move-node-to-workspace 4'
     cmd-alt-5 = 'move-node-to-workspace 5'
-    cmd-alt-6 = 'move-node-to-workspace 6'
-    cmd-alt-7 = 'move-node-to-workspace 7'
-    cmd-alt-8 = 'move-node-to-workspace 8'
-    cmd-alt-9 = 'move-node-to-workspace 9'
+    #cmd-alt-6 = 'move-node-to-workspace 6'
+    #cmd-alt-7 = 'move-node-to-workspace 7'
+    #cmd-alt-8 = 'move-node-to-workspace 8'
+    #cmd-alt-9 = 'move-node-to-workspace 9'
 
     # See: https://nikitabobko.github.io/AeroSpace/commands#workspace-back-and-forth
     alt-tab = 'workspace-back-and-forth'
