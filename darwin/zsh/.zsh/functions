@@ -39,7 +39,7 @@ restow() {
   # Find all directories to stow (excluding install and package directories)
   local packages_to_stow=()
   for dir in */; do
-    [[ -d "$dir" && "${dir%/}" != "install" && "${dir%/}" != "package" ]] && packages_to_stow+=("${dir%/}")
+    [[ -d "$dir" && "${dir%/}" != "install" && "${dir%/}" != "packages" ]] && packages_to_stow+=("${dir%/}")
   done
 
   if [[ ${#packages_to_stow[@]} -eq 0 ]]; then
@@ -89,7 +89,7 @@ brewfile-sync() {
   repo_default="$(git rev-parse --show-toplevel 2>/dev/null || print -r -- "$HOME/.dotfiles")"
 
   local REPO="${1:-$repo_default}"
-  local BREWFILE="${2:-$REPO/darwin/package/Brewfile}"
+  local BREWFILE="${2:-$REPO/darwin/packages/Brewfile}"
 
   [[ -d "$REPO/.git" ]] || { echo "Not a git repo: $REPO"; return 1; }
   if ! gh auth status &>/dev/null; then
