@@ -54,9 +54,9 @@ install_brewfile() {
     echo "📦 Installing packages from Brewfile: $BREWFILE_PATH"
     # Use --no-lock to avoid generating Brewfile.lock.json
     brew bundle --file="$BREWFILE_PATH" --no-lock
-    echo "✅ Brewfile installation complete."
+    echo "✅  Brewfile installation complete."
   else
-    echo "ℹ️ No Brewfile found at $BREWFILE_PATH, skipping."
+    echo "ℹ️  No Brewfile found at $BREWFILE_PATH, skipping."
   fi
 }
 
@@ -66,11 +66,12 @@ install_brewfile
 ### Brew formulae (defaults for first install / if there's no Brewfile)
 ### ────────────────────────────────────────────────────────────────────────────
 FORMULAE=(
-  jupyterlab macos-trash dockutil bat deno docker eza aria2
+  jupyterlab macos-trash dockutil bat deno docker eza aria2 r
   fastfetch fd feh ffmpeg freetype fzf gcc git git-lfs htop imagemagick
   jq lazygit lazydocker neovim pandoc rclone ripgrep shfmt starship stow 
   tlrc tree tree-sitter wget yarn zoxide mise qpdf sketchybar tailscale xcodes
-  zsh-autosuggestions zsh-syntax-highlighting zsh-completions
+  zsh-autosuggestions zsh-syntax-highlighting zsh-completions borders
+  switchaudio-osx nowplaying-cli
 )
 
 msg "Installing brew formulae…"
@@ -105,7 +106,6 @@ if need mise; then
   mise plugin add rust      >/dev/null 2>&1 || true
   mise plugin add java      >/dev/null 2>&1 || true
   mise plugin add lua       >/dev/null 2>&1 || true
-  mise plugin add r         >/dev/null 2>&1 || true  # community plugin for R
 
   mise use -g nodejs@lts    >/dev/null 2>&1 || true
   mise use -g python@latest >/dev/null 2>&1 || true
@@ -113,7 +113,6 @@ if need mise; then
   mise use -g rust@latest   >/dev/null 2>&1 || true
   mise use -g java@temurin-21 >/dev/null 2>&1 || true
   mise use -g lua@latest    >/dev/null 2>&1 || true
-  mise use -g r@latest      >/dev/null 2>&1 || true
 
   mise install -y || true
   mise trust || true
@@ -135,7 +134,7 @@ CASKS=(
   notion raycast rstudio sf-symbols via gimp github inkscape positron skim google-drive
   microsoft-word microsoft-powerpoint microsoft-excel cursor chatgpt localsend typora
   shortcat whatsapp messenger basecamp figma slack zoom ghostty nikitabobko/tap/aerospace
-  karabiner-elements hammerspoon
+  karabiner-elements hammerspoon alfred font-sf-pro font-sf-mono font-sf-compact
 )
 
 msg "Installing brew casks…"
