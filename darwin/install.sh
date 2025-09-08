@@ -55,41 +55,41 @@ fi
 # --- run the darwin-local install pieces, anchored to SCRIPT_DIR -------------
 bash "$SCRIPT_DIR/install/preflight.sh"
 
-drawlsp
-lspquote 1
+# drawlsp
+# lspquote 1
 
 
 bash "$SCRIPT_DIR/install/tooling.sh"
 
-drawlsp
-lspquote 2
+# drawlsp
+# lspquote 2
 
 
 bash "$SCRIPT_DIR/install/webapps.sh"
 
-drawlsp
-lspquote 3
+# drawlsp
+# lspquote 3
 
 
 bash "$SCRIPT_DIR/install/macos/set-defaults.sh"
 
-drawlsp
-lspquote 4
+# drawlsp
+# lspquote 4
 
 
 bash "$SCRIPT_DIR/install/activate.sh"
 
-drawlsp
-lspquote 5
+# drawlsp
+# lspquote 5
 
 
 bash "$SCRIPT_DIR/install/services.sh"
 
-drawlsp
-lspquote 6
+# drawlsp
+# lspquote 6
 
-drawlsp
-lspquote 7
+# drawlsp
+# lspquote 7
 
 
 bash "$SCRIPT_DIR/install/reboot.sh"
