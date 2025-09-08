@@ -8,7 +8,11 @@ sbar.exec("killall cpu_load >/dev/null; $CONFIG_DIR/helpers/event_providers/cpu_
 
 local cpu = sbar.add("graph", "widgets.cpu" , 42, {
   position = "right",
-  graph = { color = colors.blue },
+  graph = { 
+    color = colors.blue,
+    fill_color = colors.blue,
+    line_width = 1.5,
+  },
   background = {
     height = 22,
     color = { alpha = 0 },
@@ -34,7 +38,9 @@ local cpu = sbar.add("graph", "widgets.cpu" , 42, {
 cpu:subscribe("cpu_update", function(env)
   -- Also available: env.user_load, env.sys_load
   local load = tonumber(env.total_load)
-  cpu:push({ load / 100. })
+  -- Cap the load at 100% to prevent graph overflow
+  local normalized_load = math.min(load, 100) / 100.0
+  cpu:push({ normalized_load })
 
   local color = colors.blue
   if load > 30 then
