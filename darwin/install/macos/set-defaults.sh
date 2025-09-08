@@ -198,8 +198,6 @@ configure_macos_defaults() {
   w com.apple.WindowManager GloballyEnabled   		  bool false
   w com.apple.WindowManager EnableStandardClickToShowDesktop  bool  false
 
-  killall WindowManager
-
   # Flush prefs caches and UI
   sudo killall cfprefsd 2>/dev/null
   killall SystemUIServer 2>/dev/null
