@@ -22,7 +22,7 @@ alias decompress="tar -xzf"
 
 # Restow dotfiles
 restow() {
-  local DOTFILES_ROOT="${DOTFILES_ROOT:-$HOME/Developer/dotfiles}"
+  local DOTFILES_ROOT="${DOTFILES_ROOT:-$HOME/Developer/dotfiles/darwin}"
   local TARGET="$HOME"
 
   if ! command -v stow >/dev/null 2>&1; then
@@ -32,22 +32,36 @@ restow() {
 
   echo "Re-stowing dotfiles from $DOTFILES_ROOT into $TARGET…"
 
-  # Go into dotfiles repo
+  # Go into darwin dotfiles directory
   cd "$DOTFILES_ROOT" || return 1
+  find . -name .DS_Store -type f -print -delete
 
-  # Unstow all first to clear stale symlinks
+  # Find all directories to stow (excluding install directory)
+  local packages_to_stow=()
   for dir in */; do
-    stow -D --target="$TARGET" "${dir%/}"
+    [[ -d "$dir" && "${dir%/}" != "install" ]] && packages_to_stow+=("${dir%/}")
   done
 
-  # Stow everything again
-  for dir in */; do
-    stow --target="$TARGET" "${dir%/}"
+  if [[ ${#packages_to_stow[@]} -eq 0 ]]; then
+    echo "No packages found in $DOTFILES_ROOT"
+    return 1
+  fi
+
+  echo "Found packages: ${packages_to_stow[*]}"
+
+  # Unstow all first to clear stale symlinks
+  for pkg in "${packages_to_stow[@]}"; do
+    stow -D --target="$TARGET" "$pkg" 2>/dev/null || true
+  done
+
+  # Stow all packages with --adopt to handle conflicts
+  for pkg in "${packages_to_stow[@]}"; do
+    echo "Stowing $pkg..."
+    stow --adopt --target="$TARGET" "$pkg"
   done
 
   echo "✅ Dotfiles re-stowed."
 }
-
 
 # Sync Homebrew state to a Brewfile, commit on a new branch, and open a PR.
 # Usage:
@@ -114,7 +128,7 @@ brewfile-sync() {
       return 0
     fi
 
-    local MSG="[CI] chore(brew): update Brewfile ${TS}"
+    local MSG="[dotbot] chore(brew): update Brewfile ${TS}"
     git commit -m "$MSG"
     git push -u origin "$BR"
 
