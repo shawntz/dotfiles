@@ -129,26 +129,18 @@ automatically-unhide-macos-hidden-apps = false
     ctrl-shift-equal = 'resize height +50'
 
     # See: https://nikitabobko.github.io/AeroSpace/commands#workspace
-    cmd-1 = 'workspace 1'
-    cmd-2 = 'workspace 2'
-    cmd-3 = 'workspace 3'
-    cmd-4 = 'workspace 4'
-    cmd-5 = 'workspace 5'
-    #cmd-6 = 'workspace 6'
-    #cmd-7 = 'workspace 7'
-    #cmd-8 = 'workspace 8'
-    #cmd-9 = 'workspace 9'
+    cmd-ctrl-u = 'workspace 1'
+    cmd-ctrl-i = 'workspace 2'
+    cmd-ctrl-o = 'workspace 3'
+    cmd-ctrl-p = 'workspace 4'
+    cmd-ctrl-leftSquareBracket = 'workspace 5'
 
     # See: https://nikitabobko.github.io/AeroSpace/commands#move-node-to-workspace
-    cmd-alt-1 = 'move-node-to-workspace 1'
-    cmd-alt-2 = 'move-node-to-workspace 2'
-    cmd-alt-3 = 'move-node-to-workspace 3'
-    cmd-alt-4 = 'move-node-to-workspace 4'
-    cmd-alt-5 = 'move-node-to-workspace 5'
-    #cmd-alt-6 = 'move-node-to-workspace 6'
-    #cmd-alt-7 = 'move-node-to-workspace 7'
-    #cmd-alt-8 = 'move-node-to-workspace 8'
-    #cmd-alt-9 = 'move-node-to-workspace 9'
+    cmd-ctrl-n = 'move-node-to-workspace 1'
+    cmd-ctrl-m = 'move-node-to-workspace 2'
+    cmd-ctrl-comma = 'move-node-to-workspace 3'
+    cmd-ctrl-period = 'move-node-to-workspace 4'
+    cmd-ctrl-slash = 'move-node-to-workspace 5'
 
     # See: https://nikitabobko.github.io/AeroSpace/commands#workspace-back-and-forth
     alt-tab = 'workspace-back-and-forth'
