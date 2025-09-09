@@ -167,8 +167,9 @@ configure_macos_defaults() {
   ##############################################################################
   w com.apple.screensaver askForPassword int 1
   w com.apple.screensaver askForPasswordDelay float 5
-  w com.apple.screencapture location          string "$HOME/Pictures/screenshots"
-  w NSGlobalDomain _HIHideMenuBar 			  bool  true
+  mkdir -p "$HOME/Pictures/screenshots"
+  w com.apple.screencapture location string "$HOME/Pictures/screenshots"
+  w NSGlobalDomain _HIHideMenuBar bool true
 
   killall SystemUIServer || true
 
