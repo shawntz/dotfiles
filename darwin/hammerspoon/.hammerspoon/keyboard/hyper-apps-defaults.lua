@@ -4,14 +4,23 @@
 -- this file, save it as `hyper-apps.lua`, and edit the table below to configure
 -- your preferred shortcuts.
 return {
-  { 'a', 'Music' },             -- "A" for "Apple Music"
-  { 'b', 'Safari' },     -- "B" for "Browser"
-  { 'c', 'GCal' }, -- "D" for "Do!" ... or "Done!"
-  { 'e', 'Visual Studio Code' },              -- "E" for "Editor"
-  { 'f', 'Finder' },            -- "F" for "Finder"
-  { 'g', 'Gmail' },       -- "G" for "Gmail"
-  { 's', 'Slack' },             -- "S" for "Slack"
-  { 'k', 'kitty' },             -- "T" for "Terminal"
-  { 'r', 'RStudio' },             -- "T" for "Terminal"
-  { 'p', 'Positron' },             -- "T" for "Terminal"
+	{ "a", "ChatGPT" }, -- "A" for "Ask ChatGPT"
+	{ "b", "Beeper Desktop" },
+	{ "c", "Google Calendar" }, -- "C" for "Google Calendar"
+	{ "d", "Drive" }, -- "D" for "Google Drive"
+	{ "e", "Cursor" }, -- "E" for "Editor"
+	{ "f", "Finder" }, -- "F" for "Finder"
+	{ "g", "Gmail" }, -- "G" for "Gmail"
+	{ "h", "GitHub" },
+	{ "l", "LocalSend" },
+	{ "m", "Google Messages" },
+	{ "n", "Notion" },
+	-- { "p", "Positron" },
+	{ "p", "1Password" },
+	{ "r", "RStudio" },
+	{ "s", "TinySpeck" },
+	{ "t", "Google Tasks" },
+	{ "w", "Google Chrome" },
+	{ "y", "YouTube" },
+	{ "return", "Ghostty" },
 }
