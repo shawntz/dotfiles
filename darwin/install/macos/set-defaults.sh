@@ -72,7 +72,8 @@ configure_macos_defaults() {
   # Dock content
   "$DOCKUTIL" --remove all --no-restart || true
   killall Dock || true
-  
+  sleep 3 # Wait for Dock to restart before adding apps
+
   "$DOCKUTIL" --remove "Downloads" --no-restart || true
   "$DOCKUTIL" --add "$HOME/Downloads" --view fan --sort dateadded --display folder --no-restart || true
 
