@@ -123,8 +123,10 @@ automatically-unhide-macos-hidden-apps = false
     ctrl-cmd-l = 'move right'
 
     # See: https://nikitabobko.github.io/AeroSpace/commands#resize
-    ctrl-minus = 'resize smart -50'
-    ctrl-equal = 'resize smart +50'
+    ctrl-minus = 'resize width -50'
+    ctrl-equal = 'resize width +50'
+    ctrl-shift-minus = 'resize height -50'
+    ctrl-shift-equal = 'resize height +50'
 
     # See: https://nikitabobko.github.io/AeroSpace/commands#workspace
     cmd-1 = 'workspace 1'
