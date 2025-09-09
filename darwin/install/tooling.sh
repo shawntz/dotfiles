@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
-msg()  { printf "\n\033[1m%s\033[0m\n" "$*"; }
+msg() { printf "\n\033[1m%s\033[0m\n" "$*"; }
 need() { command -v "$1" >/dev/null 2>&1 || return 1; }
 
 ### ────────────────────────────────────────────────────────────────────────────
@@ -68,7 +68,7 @@ install_brewfile
 FORMULAE=(
   macos-trash dockutil bat deno docker eza aria2 r
   fastfetch fd feh ffmpeg freetype fzf gcc git git-lfs htop imagemagick
-  jq lazygit lazydocker neovim pandoc rclone ripgrep shfmt starship stow 
+  jq lazygit lazydocker neovim pandoc rclone ripgrep shfmt starship stow
   tlrc tree tree-sitter wget yarn zoxide mise qpdf sketchybar tailscale xcodes
   zsh-autosuggestions zsh-syntax-highlighting zsh-completions borders
   switchaudio-osx nowplaying-cli jupyterlab
@@ -81,15 +81,16 @@ for f in "${FORMULAE[@]}"; do
   else
     echo "• $f"
     if ! brew install "$f" >/dev/null 2>&1; then
-      echo "  ⚠️  Could not install $f (skipping)"; continue;
+      echo "  ⚠️  Could not install $f (skipping)"
+      continue
     fi
   fi
 done
 
 mkdir -p ~/Developer/Xcode
-xcodes list                   # see available versions
-xcodes install 16.4           # example; will prompt for Apple ID + 2FA
-sudo xcodes select 16.4       # set active developer dir
+xcodes list             # see available versions
+xcodes install 16.4     # example; will prompt for Apple ID + 2FA
+sudo xcodes select 16.4 # set active developer dir
 
 ### ────────────────────────────────────────────────────────────────────────────
 ### mise setup: languages & defaults
@@ -100,19 +101,19 @@ if need mise; then
   MISE_DIR="${HOME}/.config/mise"
   mkdir -p "$MISE_DIR"
 
-  mise plugin add nodejs    >/dev/null 2>&1 || true
-  mise plugin add python    >/dev/null 2>&1 || true
-  mise plugin add ruby      >/dev/null 2>&1 || true
-  mise plugin add rust      >/dev/null 2>&1 || true
-  mise plugin add java      >/dev/null 2>&1 || true
-  mise plugin add lua       >/dev/null 2>&1 || true
+  mise plugin add nodejs >/dev/null 2>&1 || true
+  mise plugin add python >/dev/null 2>&1 || true
+  mise plugin add ruby >/dev/null 2>&1 || true
+  mise plugin add rust >/dev/null 2>&1 || true
+  mise plugin add java >/dev/null 2>&1 || true
+  mise plugin add lua >/dev/null 2>&1 || true
 
-  mise use -g nodejs@lts    >/dev/null 2>&1 || true
+  mise use -g nodejs@lts >/dev/null 2>&1 || true
   mise use -g python@latest >/dev/null 2>&1 || true
-  mise use -g ruby@latest   >/dev/null 2>&1 || true
-  mise use -g rust@latest   >/dev/null 2>&1 || true
+  mise use -g ruby@latest >/dev/null 2>&1 || true
+  mise use -g rust@latest >/dev/null 2>&1 || true
   mise use -g java@temurin-21 >/dev/null 2>&1 || true
-  mise use -g lua@latest    >/dev/null 2>&1 || true
+  mise use -g lua@latest >/dev/null 2>&1 || true
 
   mise install -y || true
   mise trust || true
@@ -179,8 +180,8 @@ DOTFILES_ROOT="$(cd -- "$SCRIPT_DIR/../.." >/dev/null 2>&1 && pwd -P)"
 
 STOW_DIR="$DOTFILES_ROOT/darwin"
 PKG="nvim"
-PKG_DIR="$STOW_DIR/$PKG/.config/nvim"   # mirrors ~/.config/nvim
-TARGET_DIR="$HOME/.config/nvim"         # will become a symlink to PKG_DIR
+PKG_DIR="$STOW_DIR/$PKG/.config/nvim" # mirrors ~/.config/nvim
+TARGET_DIR="$HOME/.config/nvim"       # will become a symlink to PKG_DIR
 
 msg "Neovim bootstrap (LazyVim + overlay)"
 
@@ -190,7 +191,8 @@ if ! command -v stow >/dev/null 2>&1; then
     command -v brew >/dev/null 2>&1 || /bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)"
     brew install stow
   else
-    echo "Please install GNU stow." >&2; exit 1
+    echo "Please install GNU stow." >&2
+    exit 1
   fi
 fi
 
@@ -211,8 +213,8 @@ fi
 # Ensure your overlay tweak exists
 OPTIONS_LUA="$PKG_DIR/lua/config/options.lua"
 mkdir -p "$(dirname "$OPTIONS_LUA")"
-grep -q 'vim\.opt\.relativenumber\s*=\s*true' "$OPTIONS_LUA" 2>/dev/null || \
-  echo 'vim.opt.relativenumber = true' >> "$OPTIONS_LUA"
+grep -q 'vim\.opt\.relativenumber\s*=\s*true' "$OPTIONS_LUA" 2>/dev/null ||
+  echo 'vim.opt.relativenumber = true' >>"$OPTIONS_LUA"
 
 # Prepare target: if an existing folder/symlink is in the way, back it up & remove
 if [[ -e "$TARGET_DIR" || -L "$TARGET_DIR" ]]; then
