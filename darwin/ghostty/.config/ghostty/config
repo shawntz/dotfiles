@@ -1,4 +1,4 @@
-theme = GruvboxDarkHard
+theme = tokyonight
 command = /bin/zsh -l
 
 macos-titlebar-style = transparent
