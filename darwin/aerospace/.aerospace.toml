@@ -129,19 +129,19 @@ automatically-unhide-macos-hidden-apps = false
     ctrl-shift-equal = 'resize height +50'
 
     # See: https://nikitabobko.github.io/AeroSpace/commands#workspace
-    cmd-ctrl-u = 'workspace 1'
-    cmd-ctrl-i = 'workspace 2'
-    cmd-ctrl-o = 'workspace 3'
-    cmd-ctrl-p = 'workspace 4'
-    cmd-ctrl-leftSquareBracket = 'workspace 5'
+    cmd-ctrl-n = 'workspace 1'
+    cmd-ctrl-m = 'workspace 2'
+    cmd-ctrl-comma = 'workspace 3'
+    cmd-ctrl-period = 'workspace 4'
+    cmd-ctrl-slash = 'workspace 5'
 
     # See: https://nikitabobko.github.io/AeroSpace/commands#move-node-to-workspace
-    cmd-ctrl-n = 'move-node-to-workspace 1'
-    cmd-ctrl-m = 'move-node-to-workspace 2'
-    cmd-ctrl-comma = 'move-node-to-workspace 3'
-    cmd-ctrl-period = 'move-node-to-workspace 4'
-    cmd-ctrl-slash = 'move-node-to-workspace 5'
-
+    cmd-ctrl-u = 'move-node-to-workspace 1'
+    cmd-ctrl-i = 'move-node-to-workspace 2'
+    cmd-ctrl-o = 'move-node-to-workspace 3'
+    cmd-ctrl-p = 'move-node-to-workspace 4'
+    cmd-ctrl-leftSquareBracket = 'move-node-to-workspace 5'
+ 
     # See: https://nikitabobko.github.io/AeroSpace/commands#workspace-back-and-forth
     alt-tab = 'workspace-back-and-forth'
     # See: https://nikitabobko.github.io/AeroSpace/commands#move-workspace-to-monitor
