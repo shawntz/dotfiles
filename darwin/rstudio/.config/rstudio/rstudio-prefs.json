@@ -1,7 +1,6 @@
 {
     "restore_source_documents": false,
     "autohide_menubar": true,
-    "native_file_dialogs": true,
     "full_project_path_in_window_title": true,
     "save_workspace": "never",
     "load_workspace": false,
