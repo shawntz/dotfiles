@@ -1,7 +1,7 @@
 [user]
 	name = Shawn Schwartz
 	email = shawn@shawnschwartz.com
-	signingkey = /Users/shawn.schwartz/.ssh/id_ed25519_signing.pub
+	signingkey = ~/.ssh/id_ed25519.pub
 [gpg]
 	format = ssh
 [commit]
