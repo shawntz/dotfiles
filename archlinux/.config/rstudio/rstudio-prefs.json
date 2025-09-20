@@ -80,5 +80,6 @@
     "pdf_previewer": "none",
     "git_signed_commits": true,
     "posix_terminal_shell": "bash",
-    "graphics_backend": "ragg"
+    "graphics_backend": "ragg",
+    "jobs_tab_visibility": "shown"
 }
