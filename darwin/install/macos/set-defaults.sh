@@ -67,7 +67,7 @@ configure_macos_defaults() {
   w com.apple.dock show-recents bool false
   w com.apple.dock showhidden bool true
   w com.apple.dock static-only bool false
-  w com.apple.dock tilesize int 128
+  w com.apple.dock tilesize int 256
 
   # Dock content
   "$DOCKUTIL" --remove all --no-restart || true
@@ -79,30 +79,33 @@ configure_macos_defaults() {
 
   # Curate persistent apps (skips missing apps gracefully)
   add_app() { [ -d "$1" ] && "$DOCKUTIL" --add "$1" --no-restart || true; }
+  add_app "/Applications/Ghostty.app"
   add_app "/Applications/TinySpeck.app"
   add_app "/Applications/Google Chrome.app"
-  add_app "/Applications/Gmail.app"
-  add_app "/Applications/Google Calendar.app"
-  add_app "/Applications/Google Photos.app"
+  # add_app "/Applications/Gmail.app"
+  add_app "/Applications/Notion.app"
+  add_app "/Applications/Notion Calendar.app"
+  add_app "/Applications/Notion Mail.app"
+  # add_app "/Applications/Google Calendar.app"
   add_app "/Applications/Google Messages.app"
-  add_app "/Applications/Ghostty.app"
+  add_app "/Applications/Google Photos.app"
   add_app "/Applications/RStudio.app"
-  add_app "/Applications/Positron.app"
+  # add_app "/Applications/Positron.app"
   add_app "/Applications/Cursor.app"
-  add_app "/Applications/ChatGPT.app"
-  add_app "/Applications/Claude.app"
-  add_app "/Applications/Xcode-16.4.0.app"
-  add_app "/Applications/Bluesky.app"
-  add_app "/Applications/LocalSend.app"
-  add_app "/Applications/GitHub.app"
+  # add_app "/Applications/ChatGPT.app"
+  # add_app "/Applications/Claude.app"
+  # add_app "/Applications/Xcode-16.4.0.app"
+  # add_app "/Applications/Bluesky.app"
+  # add_app "/Applications/LocalSend.app"
+  # add_app "/Applications/GitHub.app"
   add_app "/Applications/Paperpile.app"
   # add_app "/Applications/Typora.app"
   # add_app "/Applications/Notion.app"
-  add_app "/Applications/Basecamp.app"
-  add_app "/System/Applications/Music.app"
+  # add_app "/Applications/Basecamp.app"
+  # add_app "/System/Applications/Music.app"
   # add_app "/Applications/The New York Times.app"
-  add_app "/Applications/Google Tasks.app"
-  add_app "/Applications/Beeper Desktop.app"
+  # add_app "/Applications/Google Tasks.app"
+  # add_app "/Applications/Beeper Desktop.app"
 
   killall Dock || true
 
