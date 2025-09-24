@@ -1,16 +1,17 @@
 #!/bin/bash
 
 options=(
-	style=round
-	width=5.0
-	hidpi=on
-	# active_color=0xffe2e2e3
-	# active_color=0x80e2e2e3
-	#active_color=0xff5294E2
-	active_color=0xffFFB86C
-	# inactive_color=0xffe2e2e3
-	inactive_color=0xff414550
-	background_color=0x20414550
+  style=round
+  width=5.0
+  hidpi=on
+  # active_color=0xffe2e2e3
+  # active_color=0x80e2e2e3
+  #active_color=0xff5294E2
+  active_color=0xffFFB86C
+  # inactive_color=0xffe2e2e3
+  inactive_color=0xff414550
+  background_color=0x20414550
+  blacklist="Loom"
 )
 
 borders "${options[@]}"
