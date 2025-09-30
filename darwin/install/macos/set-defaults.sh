@@ -80,7 +80,8 @@ configure_macos_defaults() {
   # Curate persistent apps (skips missing apps gracefully)
   add_app() { [ -d "$1" ] && "$DOCKUTIL" --add "$1" --no-restart || true; }
   add_app "/Applications/Ghostty.app"
-  add_app "/Applications/TinySpeck.app"
+  # add_app "/Applications/TinySpeck.app"
+  add_app "/Applications/Slack.app"
   add_app "/Applications/Google Chrome.app"
   # add_app "/Applications/Gmail.app"
   add_app "/Applications/Notion.app"
