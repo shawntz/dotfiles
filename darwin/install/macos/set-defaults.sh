@@ -75,7 +75,8 @@ configure_macos_defaults() {
   sleep 3 # Wait for Dock to restart before adding apps
 
   "$DOCKUTIL" --remove "Downloads" --no-restart || true
-  "$DOCKUTIL" --add "$HOME/Downloads" --view fan --sort dateadded --display folder --no-restart || true
+  # "$DOCKUTIL" --add "$HOME/Downloads" --view fan --sort dateadded --display folder --no-restart || true
+  "$DOCKUTIL" --add "$HOME/Downloads" --view fan --sort dateadded --display stack --no-restart || true
 
   # Curate persistent apps (skips missing apps gracefully)
   add_app() { [ -d "$1" ] && "$DOCKUTIL" --add "$1" --no-restart || true; }
@@ -91,7 +92,7 @@ configure_macos_defaults() {
   add_app "/Applications/RStudio.app"
   add_app "/Applications/Positron.app"
   add_app "/Applications/Cursor.app"
-  add_app "/Applications/Docker.app"
+  # add_app "/Applications/Docker.app"
   add_app "/Applications/Xcode-26.0.1.app"
   # add_app "/Applications/Google Calendar.app"
   # add_app "/Applications/Google Messages.app"
@@ -99,7 +100,7 @@ configure_macos_defaults() {
   add_app "/System/Applications/Phone.app"
   add_app "~/Applications/Chrome Apps.localized/Google Photos.app"
   add_app "/System/Applications/Music.app"
-  add_app "/Applications/1Password.app"
+  # add_app "/Applications/1Password.app"
   add_app "/System/Applications/System Settings.app"
   # add_app "/Applications/ChatGPT.app"
   # add_app "/Applications/Claude.app"
