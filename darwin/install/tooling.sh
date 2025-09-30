@@ -42,7 +42,7 @@ brew autoupdate start --upgrade --cleanup --immediate >/dev/null 2>&1 || true
 brew cleanup -s >/dev/null || true
 
 install_brewfile() {
-  local DOTFILES_ROOT="${DOTFILES_ROOT:-$HOME/Developer/dotfiles}"
+  local DOTFILES_ROOT="${DOTFILES_ROOT:-$HOME/.dotfiles}"
   local BREWFILE_PATH="$DOTFILES_ROOT/darwin/packages/Brewfile"
 
   if ! command -v brew >/dev/null 2>&1; then
@@ -154,8 +154,8 @@ done
 # with either `DISABLE_AUTOUPDATER=1` or
 # `claude config set -g autoUpdates false` and use
 # `brew upgrade --cask claude-code`.
-claude config set -g autoUpdates false
-brew upgrade --cask claude-code
+# claude config set -g autoUpdates false
+# brew upgrade --cask claude-code
 
 brew search '/font-.*-nerd-font/' | awk '{ print $1 }' | xargs -I{} brew install --cask {} || true
 
