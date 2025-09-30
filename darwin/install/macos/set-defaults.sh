@@ -67,7 +67,7 @@ configure_macos_defaults() {
   w com.apple.dock show-recents bool false
   w com.apple.dock showhidden bool true
   w com.apple.dock static-only bool false
-  w com.apple.dock tilesize int 256
+  w com.apple.dock tilesize int 72
 
   # Dock content
   "$DOCKUTIL" --remove all --no-restart || true
@@ -79,31 +79,37 @@ configure_macos_defaults() {
 
   # Curate persistent apps (skips missing apps gracefully)
   add_app() { [ -d "$1" ] && "$DOCKUTIL" --add "$1" --no-restart || true; }
-  add_app "/Applications/Ghostty.app"
-  # add_app "/Applications/TinySpeck.app"
-  add_app "/Applications/Slack.app"
   add_app "/Applications/Google Chrome.app"
+  add_app "/Applications/Slack.app"
+  # add_app "/Applications/TinySpeck.app"
   # add_app "/Applications/Gmail.app"
-  add_app "/Applications/Notion.app"
-  add_app "/Applications/Notion Calendar.app"
   add_app "/Applications/Notion Mail.app"
-  # add_app "/Applications/Google Calendar.app"
-  add_app "/Applications/Google Messages.app"
-  add_app "/Applications/Google Photos.app"
+  add_app "/Applications/Notion Calendar.app"
+  add_app "/Applications/Notion.app"
+  add_app "/Applications/Typora.app"
+  add_app "/Applications/Ghostty.app"
   add_app "/Applications/RStudio.app"
-  # add_app "/Applications/Positron.app"
+  add_app "/Applications/Positron.app"
   add_app "/Applications/Cursor.app"
+  add_app "/Applications/Docker.app"
+  add_app "/Applications/Xcode-26.0.1.app"
+  # add_app "/Applications/Google Calendar.app"
+  # add_app "/Applications/Google Messages.app"
+  add_app "/System/Applications/Messages.app"
+  add_app "/System/Applications/Phone.app"
+  add_app "~/Applications/Chrome Apps.localized/Google Photos.app"
+  add_app "/System/Applications/Music.app"
+  add_app "/Applications/1Password.app"
+  add_app "/System/Applications/System Settings.app"
   # add_app "/Applications/ChatGPT.app"
   # add_app "/Applications/Claude.app"
   # add_app "/Applications/Xcode-16.4.0.app"
   # add_app "/Applications/Bluesky.app"
   # add_app "/Applications/LocalSend.app"
   # add_app "/Applications/GitHub.app"
-  add_app "/Applications/Paperpile.app"
-  # add_app "/Applications/Typora.app"
+  # add_app "/Applications/Paperpile.app"
   # add_app "/Applications/Notion.app"
   # add_app "/Applications/Basecamp.app"
-  # add_app "/System/Applications/Music.app"
   # add_app "/Applications/The New York Times.app"
   # add_app "/Applications/Google Tasks.app"
   # add_app "/Applications/Beeper Desktop.app"
@@ -170,7 +176,7 @@ configure_macos_defaults() {
   w -g NSDocumentSaveNewDocumentsToCloud bool true
   w -g NSNavPanelExpandedStateForSaveMode bool true
   w -g NSNavPanelExpandedStateForSaveMode2 bool true
-  w -g NSTableViewDefaultSizeMode int 3
+  w -g NSTableViewDefaultSizeMode int 2
   w -g NSWindowResizeTime float 1.0
   w -g NSWindowShouldDragOnGesture bool true
   w -g PMPrintingExpandedStateForPrint bool true
@@ -191,7 +197,7 @@ configure_macos_defaults() {
   w com.apple.screensaver askForPasswordDelay float 5
   mkdir -p "$HOME/Pictures/screenshots"
   w com.apple.screencapture location string "$HOME/Pictures/screenshots"
-  w NSGlobalDomain _HIHideMenuBar bool true
+  w NSGlobalDomain _HIHideMenuBar bool false
 
   killall SystemUIServer || true
 
