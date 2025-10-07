@@ -117,6 +117,30 @@ brewfile-sync() {
     fi
   fi
 
+  # --- fetch remote Brewfile and install ---------------------------------
+  cd "$REPO"
+
+  # discover default base branch
+  local BASE
+  BASE="$(git remote show origin 2>/dev/null | sed -n 's/.*HEAD branch: //p')"
+  [[ -n "${BASE:-}" ]] || BASE=$([[ -n "$(git show-ref refs/heads/main 2>/dev/null)" ]] && echo main || echo master)
+
+  echo "• fetching latest remote Brewfile from origin/${BASE}…"
+  git fetch origin --quiet || true
+
+  # Extract remote Brewfile to temporary location
+  local TEMP_BREWFILE
+  TEMP_BREWFILE="$(mktemp)"
+  local BREWFILE_REL="${BREWFILE/#$REPO\//}"
+
+  if git show "origin/${BASE}:${BREWFILE_REL}" > "$TEMP_BREWFILE" 2>/dev/null; then
+    echo "• installing packages from remote Brewfile…"
+    brew bundle install --file="$TEMP_BREWFILE" || true
+  else
+    echo "• no remote Brewfile found (or this is the first sync); continuing…"
+  fi
+  rm -f "$TEMP_BREWFILE"
+
   # --- brew maintenance ---------------------------------------------------
   echo "• brew update / upgrade / cleanup…"
   brew update
@@ -129,12 +153,6 @@ brewfile-sync() {
   brew bundle dump --force --file "$BREWFILE"
 
   # --- git: branch, commit, push, PR -------------------------------------
-  cd "$REPO"
-
-  # discover default base branch
-  local BASE
-  BASE="$(git remote show origin 2>/dev/null | sed -n 's/.*HEAD branch: //p')"
-  [[ -n "${BASE:-}" ]] || BASE=$([[ -n "$(git show-ref refs/heads/main 2>/dev/null)" ]] && echo main || echo master)
 
   local TS; TS="$(date -u +%Y-%m-%dT%H%M%SZ)"
   local BR="ci/brewfile-${TS}"
@@ -164,6 +182,7 @@ brewfile-sync() {
     --body $"Automated Brewfile snapshot on ${TS} (UTC).
 
 **Actions**
+- Installed packages from remote Brewfile
 - \`brew update && brew upgrade && brew cleanup -s\`
 - \`brew bundle dump --force --file ${BREWFILE/#$REPO\//}\`
 
