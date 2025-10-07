@@ -135,7 +135,7 @@ brewfile-sync() {
 
   if git show "origin/${BASE}:${BREWFILE_REL}" > "$TEMP_BREWFILE" 2>/dev/null; then
     echo "• installing packages from remote Brewfile…"
-    brew bundle install --file="$TEMP_BREWFILE" || true
+    brew bundle install --file="$TEMP_BREWFILE"
   else
     echo "• no remote Brewfile found (or this is the first sync); continuing…"
   fi
