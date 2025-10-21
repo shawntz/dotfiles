@@ -117,29 +117,22 @@ brewfile-sync() {
     fi
   fi
 
-  # --- fetch remote Brewfile and install ---------------------------------
+  # --- discover default base branch ---------------------------------------
   cd "$REPO"
 
-  # discover default base branch
   local BASE
   BASE="$(git remote show origin 2>/dev/null | sed -n 's/.*HEAD branch: //p')"
   [[ -n "${BASE:-}" ]] || BASE=$([[ -n "$(git show-ref refs/heads/main 2>/dev/null)" ]] && echo main || echo master)
 
-  echo "• fetching latest remote Brewfile from origin/${BASE}…"
+  echo "• fetching latest from origin/${BASE}…"
   git fetch origin --quiet || true
 
-  # Extract remote Brewfile to temporary location
-  local TEMP_BREWFILE
-  TEMP_BREWFILE="$(mktemp)"
-  local BREWFILE_REL="${BREWFILE/#$REPO\//}"
-
-  if git show "origin/${BASE}:${BREWFILE_REL}" > "$TEMP_BREWFILE" 2>/dev/null; then
-    echo "• installing packages from remote Brewfile…"
-    brew bundle install --file="$TEMP_BREWFILE"
-  else
-    echo "• no remote Brewfile found (or this is the first sync); continuing…"
-  fi
-  rm -f "$TEMP_BREWFILE"
+  # --- dump current state FIRST to preserve local changes ----------------
+  # This ensures intentional local removals (e.g., uninstalled apps) are
+  # captured and synced to remote, rather than being reinstalled from remote.
+  mkdir -p "$(dirname "$BREWFILE")"
+  echo "• dumping current Brewfile state → $BREWFILE"
+  brew bundle dump --force --file "$BREWFILE"
 
   # --- brew maintenance ---------------------------------------------------
   echo "• brew update / upgrade / cleanup…"
@@ -147,9 +140,8 @@ brewfile-sync() {
   brew upgrade
   brew cleanup -s || true
 
-  # --- dump Brewfile ------------------------------------------------------
-  mkdir -p "$(dirname "$BREWFILE")"
-  echo "• dumping Brewfile → $BREWFILE"
+  # --- dump Brewfile again after upgrades --------------------------------
+  echo "• dumping final Brewfile → $BREWFILE"
   brew bundle dump --force --file "$BREWFILE"
 
   # --- git: branch, commit, push, PR -------------------------------------
@@ -182,9 +174,9 @@ brewfile-sync() {
     --body $"Automated Brewfile snapshot on ${TS} (UTC).
 
 **Actions**
-- Installed packages from remote Brewfile
+- \`brew bundle dump --force\` (captured current state)
 - \`brew update && brew upgrade && brew cleanup -s\`
-- \`brew bundle dump --force --file ${BREWFILE/#$REPO\//}\`
+- \`brew bundle dump --force --file ${BREWFILE/#$REPO\//}\` (final state)
 
 <details><summary>brew doctor</summary>
 
