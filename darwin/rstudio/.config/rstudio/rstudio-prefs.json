@@ -5,7 +5,6 @@
     "save_workspace": "never",
     "load_workspace": false,
     "initial_working_directory": "~",
-    "remove_history_duplicates": true,
     "restore_last_project": false,
     "auto_detect_indentation": true,
     "insert_native_pipe_operator": true,
@@ -79,5 +78,6 @@
     "pdf_previewer": "none",
     "git_signed_commits": true,
     "posix_terminal_shell": "bash",
-    "graphics_backend": "ragg"
+    "graphics_backend": "ragg",
+    "always_save_history": false
 }
