@@ -64,6 +64,11 @@ restow() {
 }
 
 # Refresh macos defaults
+# Usage:
+#   mac-sync                    # Apply defaults from config.yaml
+#   mac-sync -i                 # Interactive TUI mode
+#   mac-sync --interactive      # Interactive TUI mode
+#   mac-sync /path/to/repo      # Custom repo
 mac-sync() {
   emulate -L zsh
   set -u
@@ -73,9 +78,26 @@ mac-sync() {
   repo_default="$(git rev-parse --show-toplevel 2>/dev/null || print -r -- "$HOME/.dotfiles")"
 
   local REPO="${1:-$repo_default}"
+  local INTERACTIVE=false
+
+  # Check for interactive flag
+  if [[ "$REPO" == "-i" || "$REPO" == "--interactive" ]]; then
+    INTERACTIVE=true
+    REPO="$repo_default"
+  elif [[ "${2:-}" == "-i" || "${2:-}" == "--interactive" ]]; then
+    INTERACTIVE=true
+  fi
+
   REPO="$(cd "$REPO" && pwd)"  # Convert to absolute path
 
-  bash "$REPO"/darwin/install/macos/set-defaults.sh
+  if [[ "$INTERACTIVE" == "true" ]]; then
+    # Launch interactive TUI
+    bash "$REPO"/darwin/install/macos/interactive-config.sh
+  else
+    # Generate and apply defaults from config.yaml
+    bash "$REPO"/darwin/install/macos/generate-defaults-script.sh
+    bash "$REPO"/darwin/install/macos/set-defaults.sh
+  fi
 }
 
 # Sync Homebrew state to a Brewfile, commit on a new branch, and open a PR.
@@ -127,17 +149,31 @@ brewfile-sync() {
   echo "• fetching latest from origin/${BASE}…"
   git fetch origin --quiet || true
 
-  # --- dump current state FIRST to preserve local changes ----------------
-  # This ensures intentional local removals (e.g., uninstalled apps) are
-  # captured and synced to remote, rather than being reinstalled from remote.
+  # --- sync remote state to local FIRST -----------------------------------
+  # Check out the remote Brewfile and install anything that's in remote but not local.
+  # This ensures we sync remote packages to local before dumping local state.
   mkdir -p "$(dirname "$BREWFILE")"
-  echo "• dumping current Brewfile state → $BREWFILE"
+
+  # Temporarily checkout remote Brewfile to see what's in remote state
+  echo "• checking remote Brewfile state…"
+  git show "origin/${BASE}:${BREWFILE/#$REPO\//}" > "${BREWFILE}.remote" 2>/dev/null || true
+
+  if [[ -f "${BREWFILE}.remote" ]]; then
+    echo "• installing packages from remote Brewfile…"
+    brew bundle install --file="${BREWFILE}.remote" --no-lock 2>/dev/null || true
+    rm "${BREWFILE}.remote"
+  fi
+
+  # --- dump current state (now includes both local + remote) --------------
+  # This ensures any packages that were ONLY local (not in remote) get added
+  # to the Brewfile, preserving local additions across machines.
+  echo "• dumping current Brewfile state (local + remote) → $BREWFILE"
   brew bundle dump --force --file "$BREWFILE"
 
   # --- brew maintenance ---------------------------------------------------
   echo "• brew update / upgrade / cleanup…"
   brew update
-  brew upgrade
+  brew upgrade --greedy
   brew cleanup -s || true
 
   # --- dump Brewfile again after upgrades --------------------------------
