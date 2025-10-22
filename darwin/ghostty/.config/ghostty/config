@@ -9,7 +9,7 @@ window-vsync = true
 window-colorspace = display-p3
 quick-terminal-screen = macos-menu-bar
 
-font-size = 16
+font-size = 18
 scrollback-limit = 10_000
 window-theme = dark
 clipboard-read = allow
@@ -20,7 +20,7 @@ copy-on-select = true
 click-repeat-interval = 500
 auto-update-channel = stable
 
-background-opacity = 0.33
+background-opacity = 0.4
 background-blur-radius = 200
 
 macos-titlebar-style = hidden
