@@ -1,0 +1,151 @@
+# macOS System Configuration
+# This file contains all configurable defaults for macOS settings
+# Edit values here and run `mac-sync` to apply changes
+
+# Application Layer Firewall
+firewall:
+  allowdownloadsignedenabled: 1
+  allowsignedenabled: 1
+  globalstate: 0 # 0=off, 1=on
+# Control Center
+controlcenter:
+  hide_now_playing: false
+# Dock Settings
+dock:
+  autohide: false
+  autohide_delay: 0.0
+  autohide_time_modifier: 0.0
+  enable_spring_load_actions: true
+  appswitcher_all_displays: true
+  dashboard_in_overlay: true
+  expose_animation_duration: 0.0
+  expose_group_apps: true
+  launch_animation: false
+  minimize_effect: "suck" # Options: "genie", "suck", "scale"
+  minimize_to_application: false
+  mru_spaces: false # Automatically rearrange spaces
+  orientation: "left" # Options: "left", "bottom", "right"
+  scroll_to_open: true
+  show_process_indicators: true
+  show_recents: false
+  show_hidden: true
+  static_only: false
+  tile_size: 72
+  # Downloads folder settings
+  downloads:
+    view: "fan" # Options: "fan", "grid", "list", "auto"
+    sort: "dateadded" # Options: "dateadded", "name", "datemodified", "datecreated", "kind"
+    display: "stack" # Options: "stack", "folder"
+  apps:
+    - /Applications/Slack.app
+    - /Applications/1Password.app
+    - /Applications/Basecamp.app
+    - /Applications/Docker.app
+    - /Applications/Ghostty.app
+    - /Applications/Gmail.app
+    - /Applications/Google Chrome.app
+    - /Applications/Spotify.app
+    - /System/Applications/Messages.app
+    - /Applications/Notion.app
+    - /Applications/RStudio.app
+# Finder Settings
+finder:
+  show_all_extensions: true
+  default_search_scope: "SCcf" # SCcf=current folder, SCsp=this Mac
+  extension_change_warning: false
+  preferred_view_style: "Nlsv" # icnv=icon, clmv=column, Nlsv=list, glyv=gallery
+  new_window_target: "PfHm" # PfHm=Home, PfDe=Desktop, PfLo=Other
+  quit_menu_item: true
+  show_external_drives: true
+  show_hard_drives: true
+  show_mounted_servers: true
+  show_pathbar: true
+  show_removable_media: true
+  show_statusbar: true
+  show_posix_path_in_title: false
+  sort_folders_first: true
+  sort_folders_first_on_desktop: true
+# Launch Services
+launchservices:
+  disable_quarantine: false # Disable "Are you sure you want to open this application?"
+# Login Window
+loginwindow:
+  guest_enabled: true
+  login_text: "This device belongs to Shawn Schwartz"
+  power_off_disabled_while_logged_in: false
+  restart_disabled: false
+  restart_disabled_while_logged_in: false
+  shutdown_disabled: false
+  shutdown_disabled_while_logged_in: false
+  sleep_disabled: false
+# Global UI and Input Settings (NSGlobalDomain)
+global:
+  # Scrolling and clicking
+  scroller_paging_behavior: true
+  show_all_extensions: true
+  spaces_switch_on_activate: false
+  press_and_hold_enabled: false # false = key repeat, true = special characters
+  # Keyboard
+  initial_key_repeat: 10 # Lower is faster (15 default, 10-2 typical range)
+  key_repeat: 1 # Lower is faster (2 default, 1 fastest)
+  # Autocorrect features
+  automatic_capitalization: false
+  automatic_inline_prediction: false
+  automatic_dash_substitution: false
+  automatic_period_substitution: true
+  automatic_quote_substitution: false
+  automatic_spelling_correction: false
+  # Window and UI
+  automatic_window_animations: false
+  save_documents_to_cloud: true
+  expand_save_panel: true
+  expand_print_panel: true
+  table_view_size_mode: 2 # 1=small, 2=medium, 3=large
+  window_resize_time: 1.0
+  window_drag_on_gesture: true
+  # Mouse and Trackpad
+  mouse_tap_behavior: 1 # Enable tap to click
+  sound_beep_feedback: 1
+  spring_delay: 0.0
+  spring_enabled: false
+  swipe_scroll_direction: true # true=natural, false=traditional
+  trackpad_secondary_click: true
+  trackpad_force_click: true
+  trackpad_scaling: 3.0 # Tracking speed (0.0-3.0)
+  # Menu bar
+  hide_menu_bar: false
+# Screen Saver and Screen Capture
+screensaver:
+  ask_for_password: 1
+  ask_for_password_delay: 5
+  screenshot_location: "$HOME/Pictures/screenshots"
+# Spaces
+spaces:
+  spans_displays: false # false=separate spaces per display
+# Trackpad Settings
+trackpad:
+  # Built-in trackpad
+  actuation_strength: 0
+  clicking: 1
+  dragging: 1
+  first_click_threshold: 2
+  second_click_threshold: 2
+  right_click: 1
+  three_finger_drag: 1
+  three_finger_tap_gesture: 2
+  # Bluetooth trackpad (mirrors built-in)
+  bluetooth_clicking: 1
+  bluetooth_dragging: 1
+  bluetooth_right_click: 1
+  bluetooth_three_finger_drag: 1
+  bluetooth_three_finger_tap_gesture: 2
+# Window Manager (Stage Manager and Tiling)
+windowmanager:
+  app_window_grouping: true
+  autohide: true
+  enable_tiled_margins: false
+  globally_enabled: false # Stage Manager globally enabled
+  standard_click_to_show_desktop: false
+# Spotlight (Keyboard Shortcuts)
+spotlight:
+  disable_cmd_space: true # Disable Cmd+Space for Spotlight
