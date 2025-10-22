@@ -37,17 +37,17 @@ dock:
     sort: "dateadded" # Options: "dateadded", "name", "datemodified", "datecreated", "kind"
     display: "stack" # Options: "stack", "folder"
   apps:
-    - /Applications/Slack.app
-    - /Applications/1Password.app
-    - /Applications/Basecamp.app
-    - /Applications/Docker.app
-    - /Applications/Ghostty.app
-    - /Applications/Gmail.app
     - /Applications/Google Chrome.app
-    - /Applications/Spotify.app
-    - /System/Applications/Messages.app
+    - /Applications/Gmail.app
+    - /Applications/Slack.app
     - /Applications/Notion.app
     - /Applications/RStudio.app
+    - /Applications/Basecamp.app
+    - /System/Applications/Messages.app
+    - /Applications/Docker.app
+    - /Applications/Ghostty.app
+    - /Applications/Spotify.app
+    - /Applications/1Password.app
 # Finder Settings
 finder:
   show_all_extensions: true

@@ -77,17 +77,17 @@ configure_macos_defaults() {
 
   # Curate persistent apps (skips missing apps gracefully)
   add_app() { [ -d "$1" ] && "$DOCKUTIL" --add "$1" --no-restart || true; }
-  add_app "/Applications/Slack.app"
-  add_app "/Applications/1Password.app"
-  add_app "/Applications/Basecamp.app"
-  add_app "/Applications/Docker.app"
-  add_app "/Applications/Ghostty.app"
-  add_app "/Applications/Gmail.app"
   add_app "/Applications/Google Chrome.app"
-  add_app "/Applications/Spotify.app"
-  add_app "/System/Applications/Messages.app"
+  add_app "/Applications/Gmail.app"
+  add_app "/Applications/Slack.app"
   add_app "/Applications/Notion.app"
   add_app "/Applications/RStudio.app"
+  add_app "/Applications/Basecamp.app"
+  add_app "/System/Applications/Messages.app"
+  add_app "/Applications/Docker.app"
+  add_app "/Applications/Ghostty.app"
+  add_app "/Applications/Spotify.app"
+  add_app "/Applications/1Password.app"
 
   killall Dock || true
 
