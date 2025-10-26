@@ -53,7 +53,7 @@ install_brewfile() {
   if [[ -f "$BREWFILE_PATH" ]]; then
     echo "📦 Installing packages from Brewfile: $BREWFILE_PATH"
     # Use --no-lock to avoid generating Brewfile.lock.json
-    brew bundle --file="$BREWFILE_PATH" --no-lock
+    brew bundle install --file="$BREWFILE_PATH" --no-lock
     echo "✅  Brewfile installation complete."
   else
     echo "ℹ️  No Brewfile found at $BREWFILE_PATH, skipping."
