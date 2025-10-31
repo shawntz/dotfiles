@@ -79,5 +79,6 @@
     "git_signed_commits": true,
     "posix_terminal_shell": "bash",
     "graphics_backend": "ragg",
-    "always_save_history": false
+    "always_save_history": false,
+    "jobs_tab_visibility": "shown"
 }
