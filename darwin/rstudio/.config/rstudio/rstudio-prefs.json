@@ -26,7 +26,6 @@
     "warn_variable_defined_but_not_used": true,
     "style_diagnostics": true,
     "show_diagnostics_other": true,
-    "line_ending_conversion": "posix",
     "default_encoding": "UTF-8",
     "editor_keybindings": "vim",
     "indent_guides": "gray",
@@ -41,10 +40,10 @@
     "editor_theme": "Serendipity Light {rsthemes}",
     "panes": {
         "quadrants": [
-            "TabSet2",
-            "TabSet1",
             "Source",
-            "Console"
+            "Console",
+            "TabSet2",
+            "TabSet1"
         ],
         "tabSet1": [
             "Environment",
@@ -66,7 +65,7 @@
             "Packages"
         ],
         "console_left_on_top": false,
-        "console_right_on_top": false,
+        "console_right_on_top": true,
         "additional_source_columns": 0
     },
     "show_doc_outline_rmd": true,
@@ -77,7 +76,7 @@
     "visual_markdown_editing_font_size_points": 12,
     "pdf_previewer": "none",
     "git_signed_commits": true,
-    "posix_terminal_shell": "bash",
+    "posix_terminal_shell": "zsh",
     "graphics_backend": "ragg",
     "always_save_history": false,
     "jobs_tab_visibility": "shown"
