@@ -20,7 +20,7 @@ copy-on-select = true
 click-repeat-interval = 500
 auto-update-channel = stable
 
-background-opacity = 0.4
+background-opacity = 0.9
 background-blur-radius = 200
 
 macos-titlebar-style = hidden
