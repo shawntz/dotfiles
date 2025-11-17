@@ -1,7 +1,7 @@
 [tools]
 java = "temurin-21"
 lua = "latest"
-node = "lts"
+node = "latest"
 python = "latest"
 ruby = "latest"
 rust = "latest"
