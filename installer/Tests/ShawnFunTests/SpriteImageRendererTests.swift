@@ -66,13 +66,13 @@ final class SpriteImageRendererTests: XCTestCase {
         let picture = Sprite(id: "c", name: "C", frames: [], imageURL: URL(fileURLWithPath: "/tmp/c.png"))
 
         let sheet = try SpriteImageRenderer.contactSheet([tall, wide, picture], allFrames: true, scale: 1, gap: 1)
-        // Cells are 3×2 (the largest frame); 2 columns and 2 rows with 1-pixel gaps all round.
+        // Cells are 3×2 (the largest frame); 2 columns and 2 rows with 1-pixel gaps all around.
         XCTAssertEqual(sheet.width, 2 * 3 + 3)
         XCTAssertEqual(sheet.height, 2 * 2 + 3)
         let pixels = readPixels(sheet)
         XCTAssertEqual(pixels[1][1], red)
         XCTAssertEqual(pixels[2][2], red)
-        XCTAssertEqual(pixels[1][3], clear, "a 2-wide frame sits centred-left in a 3-wide cell")
+        XCTAssertEqual(pixels[1][3], clear, "a 2-wide frame sits centered-left in a 3-wide cell")
         XCTAssertEqual(pixels[1][5], green)
         XCTAssertEqual(pixels[5][1], blue, "a 1-tall frame sits on the bottom of its cell")
         XCTAssertEqual(pixels[4][1], clear)

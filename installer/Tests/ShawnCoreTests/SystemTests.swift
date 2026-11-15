@@ -376,7 +376,7 @@ final class SudoSessionTests: XCTestCase {
         let second = try await runHelper(server.helperPath, allowedBy: server)
         XCTAssertEqual(second, "p@ss word'\"$x\n")
         let third = try await runHelper(server.helperPath, allowedBy: server)
-        XCTAssertEqual(third, "", "the answer limit must be honoured")
+        XCTAssertEqual(third, "", "the answer limit must be honored")
 
         // A session that is no longer allowed gets nothing: the wrapper's session is allowed when it starts, and
         // withdrawn before it runs the helper.
@@ -491,7 +491,7 @@ final class SudoSessionTests: XCTestCase {
     }
 
     /// The helper is answered only while the privileged command runs: whatever it leaves running in its session
-    /// afterwards gets nothing.
+    /// afterward gets nothing.
     func testWhatAPrivilegedCommandLeavesBehindGetsNothingOnceItHasEnded() async throws {
         let directory = TempDirectory()
         var environment = SystemEnvironment.testSandbox(directory)
@@ -554,8 +554,8 @@ final class SudoSessionTests: XCTestCase {
             Command.shell("stolen=$(\"$SUDO_ASKPASS\"); echo \"stolen=[$stolen]\"; \"$FAKE_SUDO\" -A -- /bin/echo elevated")
                 .env(["FAKE_SUDO": environment.sudoPath]).silently().allowingSudo())
         XCTAssertEqual(brewLike.lines, ["stolen=[]", "elevated"])
-        let afterwards = try await plainRunner.run(Command.shell("'\(helper)'").silently())
-        XCTAssertEqual(afterwards.output, "", "once the privileged command has finished the helper is silent again")
+        let afterward = try await plainRunner.run(Command.shell("'\(helper)'").silently())
+        XCTAssertEqual(afterward.output, "", "once the privileged command has finished the helper is silent again")
 
         // A second call must not prompt again.
         try await session.ensureReady(reason: "again")

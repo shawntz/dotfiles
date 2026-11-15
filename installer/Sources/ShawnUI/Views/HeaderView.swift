@@ -94,8 +94,8 @@ struct ASCIIHeaderView: View {
             }
             for (row, line) in metrics.lines.enumerated() {
                 let position = metrics.rows > 1 ? CGFloat(row) / CGFloat(metrics.rows - 1) : 0.5
-                let colour = Self.blend(stops, at: position)
-                let attributed = Self.attributed(line, font: font, colour: colour, shadowAlpha: palette.glow > 0 ? 0.5 : 0.85)
+                let color = Self.blend(stops, at: position)
+                let attributed = Self.attributed(line, font: font, color: color, shadowAlpha: palette.glow > 0 ? 0.5 : 0.85)
                 let ctLine = CTLineCreateWithAttributedString(attributed)
                 let baseline = originY + CGFloat(row) * pitch + fontSize * ASCIIArtMetrics.blockCell.ascent
                 cg.textPosition = CGPoint(x: originX, y: baseline)
@@ -105,10 +105,10 @@ struct ASCIIHeaderView: View {
     }
 
     /// Solid blocks at full strength, the box-drawing "shadow" strokes dimmer, which gives the lettering depth.
-    static func attributed(_ line: String, font: NSFont, colour: NSColor, shadowAlpha: CGFloat) -> NSAttributedString {
+    static func attributed(_ line: String, font: NSFont, color: NSColor, shadowAlpha: CGFloat) -> NSAttributedString {
         let result = NSMutableAttributedString()
-        let solid: [NSAttributedString.Key: Any] = [.font: font, .foregroundColor: colour]
-        let shade: [NSAttributedString.Key: Any] = [.font: font, .foregroundColor: colour.withAlphaComponent(shadowAlpha)]
+        let solid: [NSAttributedString.Key: Any] = [.font: font, .foregroundColor: color]
+        let shade: [NSAttributedString.Key: Any] = [.font: font, .foregroundColor: color.withAlphaComponent(shadowAlpha)]
         for character in line {
             let isBoxDrawing = character.unicodeScalars.first.map { (0x2500...0x257F).contains($0.value) } ?? false
             result.append(NSAttributedString(string: String(character), attributes: isBoxDrawing ? shade : solid))

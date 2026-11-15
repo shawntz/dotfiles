@@ -97,7 +97,7 @@ final class ConfigResolverTests: XCTestCase {
         XCTAssertTrue(resolved.notes[0].hasPrefix("Using the config at ~/.shawn/config. The latest config from GitHub (octo/dots@main) did not arrive:"), resolved.notes[0])
     }
 
-    func testBundledConfigIsLabelledAsBundled() async throws {
+    func testBundledConfigIsLabeledAsBundled() async throws {
         writeConfig(in: temp, at: "Bundled.app/Contents/Resources/config", name: "Bundled")
         temp.write("Bundled.app/Contents/Info.plist", "<?xml version=\"1.0\"?><plist version=\"1.0\"><dict></dict></plist>")
         bundle = try XCTUnwrap(Bundle(path: temp.url.appendingPathComponent("Bundled.app").path))
@@ -132,14 +132,14 @@ final class ConfigResolverTests: XCTestCase {
 
     func testInvalidLocalConfigIsAnErrorListingEveryIssue() throws {
         temp.write("home/.shawn/config/installer.yaml", "schema: 1\nname: Broken\n")
-        temp.write("home/.shawn/config/steps/01.yaml", "id: one\ntitle: One\nitems:\n  - teleport: x\n  - ok: y\n    colour: red\n")
+        temp.write("home/.shawn/config/steps/01.yaml", "id: one\ntitle: One\nitems:\n  - teleport: x\n  - ok: y\n    color: red\n")
 
         XCTAssertThrowsError(try ConfigResolver.resolveLocal(options: ConfigResolveOptions(), registry: testRegistry(),
                                                              environment: environment, bundle: bundle)) { error in
             guard let error = error as? ConfigResolveError else { return XCTFail("unexpected error \(error)") }
             XCTAssertEqual(error.issues.count, 2, error.description)
             XCTAssertTrue(error.description.contains("teleport"), error.description)
-            XCTAssertTrue(error.description.contains("colour"), error.description)
+            XCTAssertTrue(error.description.contains("color"), error.description)
         }
     }
 
@@ -230,7 +230,7 @@ final class ConfigResolverTests: XCTestCase {
 
     func testABrokenWorkingCopyIsStillAnErrorEvenWithOtherConfigsAround() async throws {
         temp.write("home/Developer/dotfiles/installer/config/installer.yaml", metaYAML(name: "Checkout"))
-        temp.write("home/Developer/dotfiles/installer/config/steps/01.yaml", "id: one\ntitle: One\nitems:\n  - ok: x\n    colour: red\n")
+        temp.write("home/Developer/dotfiles/installer/config/steps/01.yaml", "id: one\ntitle: One\nitems:\n  - ok: x\n    color: red\n")
         let settingsFile = ShawnSettings.fileURL(environment: environment)
         try FileManager.default.createDirectory(at: settingsFile.deletingLastPathComponent(), withIntermediateDirectories: true)
         try Data(ShawnSettings(dotfilesRepo: "~/Developer/dotfiles").yaml.utf8).write(to: settingsFile)
@@ -242,14 +242,14 @@ final class ConfigResolverTests: XCTestCase {
             XCTFail("a broken working copy must not be replaced silently")
         } catch let error as ConfigResolveError {
             XCTAssertTrue(error.message.contains("home/Developer/dotfiles/installer/config has problems"), error.message)
-            XCTAssertTrue(error.description.contains("colour"), error.description)
+            XCTAssertTrue(error.description.contains("color"), error.description)
         }
         XCTAssertEqual(transport.urls, [])
     }
 
     func testABrokenExplicitPathIsStillAnErrorEvenWithARemoteRef() async throws {
         temp.write("explicit/installer.yaml", metaYAML(name: "Explicit"))
-        temp.write("explicit/steps/01.yaml", "id: one\ntitle: One\nitems:\n  - ok: x\n    colour: red\n")
+        temp.write("explicit/steps/01.yaml", "id: one\ntitle: One\nitems:\n  - ok: x\n    color: red\n")
         writeConfig(in: temp, at: "home/.shawn/config", name: "Installed")
         try useBundledConfig()
 

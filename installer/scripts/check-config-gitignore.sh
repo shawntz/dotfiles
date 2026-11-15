@@ -66,7 +66,7 @@ if [ -n "$ignored" ]; then
     problems=1
     printf '%serror:%s git ignores these files in %s, so commits and shawn pr leave them out:\n' "$_red" "$_reset" "$CONFIG_DIR" >&2
     printf '%s\n' "$ignored" | explain_ignored | sed 's/^/       /' >&2
-    printf '       Rename or move each one (the rule that hides it is in brackets), add a "!" exception for its folder to installer/.gitignore, or delete it if it is junk.\n' >&2
+    printf '       Rename or move each one (the rule that hides it is in parentheses), add a "!" exception for its folder to installer/.gitignore, or delete it if it is junk.\n' >&2
 fi
 
 # One made-up file in each documented place.

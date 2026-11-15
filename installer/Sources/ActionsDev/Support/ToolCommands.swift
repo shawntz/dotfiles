@@ -1,7 +1,7 @@
 import Foundation
 import ShawnCore
 
-/// Commands for third-party CLIs whose behaviour depends on inherited environment variables.
+/// Commands for third-party CLIs whose behavior depends on inherited environment variables.
 ///
 /// Some variables have to be removed rather than set: a stray `GH_TOKEN` makes `gh auth login`
 /// refuse to run, and `CLAUDECODE` makes the skills CLI and `claude` behave as if they were running

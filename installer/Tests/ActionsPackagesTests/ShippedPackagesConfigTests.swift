@@ -53,8 +53,8 @@ final class ShippedPackagesConfigTests: XCTestCase {
         let outcome = try await script.run(context)
         XCTAssertEqual(outcome, .done(nil))
         XCTAssertEqual(sandbox.calls("brew"), ["brew uninstall --formula --ignore-dependencies vercel"])
-        let afterwards = await script.check(context)
-        XCTAssertTrue(afterwards.isSatisfied, "\(afterwards)")
+        let afterward = await script.check(context)
+        XCTAssertTrue(afterward.isSatisfied, "\(afterward)")
 
         // A Mac where the cask went in while the formula still held the links (Homebrew skipped them):
         // the cask is reinstalled once the formula is gone, so its binaries get linked.

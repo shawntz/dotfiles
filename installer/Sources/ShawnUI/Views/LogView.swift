@@ -172,32 +172,32 @@ struct LogTextView: NSViewRepresentable {
             // Wrapped continuation lines sit under the text, not under the first character.
             paragraph.headIndent = Theme.monoAdvance * 11.5 * 2
 
-            var colour = palette.text.nsColor
+            var color = palette.text.nsColor
             var font = Theme.nsMono(11.5)
             var text = entry.text
 
             switch entry.kind {
             case .header:
                 text = "── \(entry.text) " + String(repeating: "─", count: max(3, 48 - entry.text.count))
-                colour = palette.faint.nsColor
+                color = palette.faint.nsColor
                 paragraph.paragraphSpacingBefore = 6
                 paragraph.headIndent = 0
             case .line(let style):
                 switch style {
-                case .command: colour = palette.cyan.nsColor
-                case .stdout: colour = palette.text.nsColor.withAlphaComponent(0.92)
-                case .stderr: colour = palette.orange.nsColor
-                case .info: colour = palette.dim.nsColor
-                case .success: colour = palette.mint.nsColor
-                case .warning: colour = palette.yellow.nsColor
+                case .command: color = palette.cyan.nsColor
+                case .stdout: color = palette.text.nsColor.withAlphaComponent(0.92)
+                case .stderr: color = palette.orange.nsColor
+                case .info: color = palette.dim.nsColor
+                case .success: color = palette.mint.nsColor
+                case .warning: color = palette.yellow.nsColor
                 case .error:
-                    colour = palette.red.nsColor
+                    color = palette.red.nsColor
                     font = Theme.nsMono(11.5, .bold)
                 }
-                if entry.isProgress { colour = palette.pink.nsColor }
+                if entry.isProgress { color = palette.pink.nsColor }
             }
 
-            let attributes: [NSAttributedString.Key: Any] = [.font: font, .foregroundColor: colour, .paragraphStyle: paragraph]
+            let attributes: [NSAttributedString.Key: Any] = [.font: font, .foregroundColor: color, .paragraphStyle: paragraph]
             return NSAttributedString(string: text + "\n", attributes: attributes)
         }
     }

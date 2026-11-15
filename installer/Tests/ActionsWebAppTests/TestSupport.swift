@@ -96,7 +96,7 @@ enum TestImages {
         return data as Data
     }
 
-    /// An opaque square in one colour.
+    /// An opaque square in one color.
     static func solidPNG(size: Int, red: CGFloat = 0.9, green: CGFloat = 0.1, blue: CGFloat = 0.1) -> Data {
         png(image(width: size, height: size) { context in
             context.setFillColor(CGColor(srgbRed: red, green: green, blue: blue, alpha: 1))

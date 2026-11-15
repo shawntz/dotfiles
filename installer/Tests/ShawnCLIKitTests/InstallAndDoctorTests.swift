@@ -492,7 +492,7 @@ final class InstallCommandTests: XCTestCase {
                 TTY.readLine(prompt: text, secret: secret, input: input, output: devNull, cancellation: cancellation)
             }
         }
-        // Longer than one polling slice, so the read has gone round its wait at least once.
+        // Longer than one polling slice, so the read has gone around its wait at least once.
         usleep(useconds_t(TTY.cancellationPollMilliseconds) * 2_500)
         _ = "2\nleft for later\n".withCString { write(output, $0, 17) }
         let answer = await prompt.value
@@ -652,7 +652,7 @@ final class PlanLoaderTests: XCTestCase {
         XCTAssertTrue(error.description.contains("teleport"), error.description)
         XCTAssertTrue(error.description.contains("the copy a previous install left"), error.description)
         XCTAssertTrue(error.description.contains("Run the latest Shawn's Dotfiles installer to replace it"), error.description)
-        XCTAssertEqual(harness.err.plain, "", "nothing was skipped in favour of something else, so there is no note")
+        XCTAssertEqual(harness.err.plain, "", "nothing was skipped in favor of something else, so there is no note")
     }
 
     /// The checkout (or $SHAWN_CONFIG_DIR) is what the user edits: its mistakes are reported, never papered
@@ -761,7 +761,7 @@ final class ShellIntegrationTests: XCTestCase {
         zshCheck(script)
         XCTAssertTrue(harness.launcher.requests.isEmpty && harness.replacer.requests.isEmpty)
 
-        // Sourcing it only defines functions, and the clone wrapper changes directory afterwards.
+        // Sourcing it only defines functions, and the clone wrapper changes directory afterward.
         let sandbox = Sandbox()
         let target = sandbox.home.appendingPathComponent("Developer/new-thing")
         try FileManager.default.createDirectory(at: target, withIntermediateDirectories: true)

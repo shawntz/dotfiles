@@ -395,7 +395,7 @@ final class DockTests: XCTestCase {
         XCTAssertEqual(try readPlist(saved), original)
     }
 
-    func testTileIdentityNormalisesBothSpellings() {
+    func testTileIdentityNormalizesBothSpellings() {
         let plain = PlistValue.dict(["tile-data": .dict(["file-data": .dict(["_CFURLString": .string("/Applications/Google Chrome.app"), "_CFURLStringType": .int(0)])])])
         let url = PlistValue.dict(["tile-data": .dict(["file-data": .dict(["_CFURLString": .string("file:///Applications/Google%20Chrome.app/"), "_CFURLStringType": .int(15)])]),
                                    "tile-type": .string("file-tile")])

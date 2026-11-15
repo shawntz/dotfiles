@@ -184,7 +184,7 @@ final class ConfigEditorTests: XCTestCase {
         let items = try XCTUnwrap(try YAML.parse(text)?.map?["items"]?.list)
         XCTAssertTrue(items.contains { $0.map?["npm"]?.string == "@openai/codex" }, text)
         let (again, second) = try insert("npm", "@openai/codex", into: text)
-        XCTAssertEqual(second, .alreadyPresent(line: 14), "a quoted value is recognised on the next run")
+        XCTAssertEqual(second, .alreadyPresent(line: 14), "a quoted value is recognized on the next run")
         XCTAssertEqual(again, text)
     }
 
@@ -210,7 +210,7 @@ final class ConfigEditorTests: XCTestCase {
 
         let (notion, notionResult) = try insert("cask", "notion", typed: [(key: "app", value: .string("Notion.app"))], into: apps)
         guard case .inserted(let notionLine) = notionResult else { return XCTFail("\(notionResult)") }
-        XCTAssertEqual(lines(notion, from: notionLine - 1, count: 4), ["    note: paid; needs your licence", "  - cask: notion", "    app: Notion.app", "  - cask: slack"],
+        XCTAssertEqual(lines(notion, from: notionLine - 1, count: 4), ["    note: paid; needs your license", "  - cask: notion", "    app: Notion.app", "  - cask: slack"],
                        "in alphabetical order: after middle, before slack")
 
         let (optional, optionalResult) = try insert("cask", "zzz-tool", typed: [(key: "optional", value: .bool(true))], into: apps)
@@ -244,8 +244,8 @@ final class ConfigEditorTests: XCTestCase {
         XCTAssertFalse(lines(brew, from: brewLine - 1, count: 1)[0].contains("optional"))
     }
 
-    func testGroupsAndOptionalItemsAreRecognised() {
-        let layout = ConfigEditor.analyse(packages.components(separatedBy: "\n"))
+    func testGroupsAndOptionalItemsAreRecognized() {
+        let layout = ConfigEditor.analyze(packages.components(separatedBy: "\n"))
         XCTAssertEqual(layout.items.map(\.group), [0, 0, 1, 1, 1, 2])
         XCTAssertEqual(layout.items.map(\.optional), [false, false, false, false, false, true])
         XCTAssertEqual(ConfigEditor.trailingOptionalStart(layout.items), 5)

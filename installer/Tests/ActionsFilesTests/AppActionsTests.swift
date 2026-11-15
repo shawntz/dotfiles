@@ -130,8 +130,8 @@ final class ManualTests: XCTestCase {
         XCTAssertNeeded(await item.check(), "the run that showed it (the app's RETRY FAILED / RESUME) lists it again")
 
         harness.environment.runID = "later"
-        let afterwards = await item.check()
-        XCTAssertEqual(afterwards, .satisfied("already shown"))
+        let afterward = await item.check()
+        XCTAssertEqual(afterward, .satisfied("already shown"))
         let inADryRun = await item.check(dryRun: true)
         XCTAssertEqual(inADryRun, .satisfied("already shown"))
 

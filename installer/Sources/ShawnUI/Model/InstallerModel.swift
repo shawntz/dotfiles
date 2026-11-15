@@ -68,9 +68,9 @@ final class InstallerModel {
     /// Held from the start of a real run until it ends (see `KeepAwake`).
     @ObservationIgnored private var keepAwakeToken: (any NSObjectProtocol)?
     @ObservationIgnored private var promptSerial = 0
-    /// True while a real run started with `askAgain` has questions to ask and has not got past them yet.
+    /// True while a real run started with `askAgain` has questions to ask and has not gotten past them yet.
     @ObservationIgnored private var isAskingAgain = false
-    /// Set once a real run with `askAgain` has got past its questions, so `--ask` asks again only once.
+    /// Set once a real run with `askAgain` has gotten past its questions, so `--ask` asks again only once.
     @ObservationIgnored private var hasAskedAgain = false
     @ObservationIgnored private var itemsByID: [String: PlannedItem] = [:]
     @ObservationIgnored private var stepIDByItemID: [String: String] = [:]
@@ -352,7 +352,7 @@ final class InstallerModel {
         selection.setItem(item, enabled: enabled)
     }
 
-    /// Items in `step` that are ticked (whether or not the step itself is on).
+    /// Items in `step` that are checked (whether or not the step itself is on).
     func selectedItemCount(in step: PlannedStep) -> Int {
         step.items.filter { selection.isEnabled(item: $0) }.count
     }

@@ -1,7 +1,7 @@
 import Foundation
 import ShawnCore
 
-/// An sRGB colour with alpha.
+/// An sRGB color with alpha.
 public struct RGBA: Equatable, Hashable, Sendable {
     public let red: UInt8
     public let green: UInt8
@@ -34,7 +34,7 @@ public struct RGBA: Equatable, Hashable, Sendable {
     }
 }
 
-/// One frame of pixel art: rows of optional colours (nil = transparent).
+/// One frame of pixel art: rows of optional colors (nil = transparent).
 public struct SpriteFrame: Equatable, Sendable {
     public let pixels: [[RGBA?]]
 
@@ -303,10 +303,10 @@ public struct FunConfig: Sendable {
             }
             if pair.value.lowercased() == "transparent" || pair.value.lowercased() == "none" {
                 palette[symbol] = RGBA?.none
-            } else if let colour = RGBA(hex: pair.value) {
-                palette[symbol] = colour
+            } else if let color = RGBA(hex: pair.value) {
+                palette[symbol] = color
             } else {
-                reader.error("palette colour for '\(pair.key)' is not a hex colour like \"#B57EDC\" (got '\(pair.value)')", key: "palette")
+                reader.error("palette color for '\(pair.key)' is not a hex color like \"#B57EDC\" (got '\(pair.value)')", key: "palette")
             }
         }
 
@@ -324,8 +324,8 @@ public struct FunConfig: Sendable {
                 }
                 var line: [RGBA?] = []
                 for symbol in row {
-                    if let colour = palette[symbol] {
-                        line.append(colour)
+                    if let color = palette[symbol] {
+                        line.append(color)
                     } else {
                         reader.error("frame \(index + 1), row \(rowIndex + 1) uses '\(symbol)', which is not in the palette", key: "frames")
                         line.append(nil)

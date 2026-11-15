@@ -2,9 +2,9 @@ import Foundation
 import ShawnFun
 
 extension Style {
-    /// The shared sprite renderer's colour mode for output in this style: no colour (a pipe, `NO_COLOR`,
-    /// `--no-color`) draws the silhouette in plain half blocks; otherwise 24-bit colour when the terminal
-    /// has it, the 256-colour palette when not.
+    /// The shared sprite renderer's color mode for output in this style: no color (a pipe, `NO_COLOR`,
+    /// `--no-color`) draws the silhouette in plain half blocks; otherwise 24-bit color when the terminal
+    /// has it, the 256-color palette when not.
     var spriteColorMode: TerminalSpriteRenderer.ColorMode {
         guard enabled else { return .plain }
         return trueColor ? .trueColor : .ansi256
@@ -14,7 +14,7 @@ extension Style {
 }
 
 /// Banner, speech bubbles and line-ups, drawn with ShawnFun's sprite renderer and speech bubble in the
-/// CLI's colours.
+/// CLI's colors.
 enum Painter {
     /// The ASCII header, shaded lavender → pink, or a one-line title when the terminal is too narrow.
     static func banner(_ header: String, style: Style, width: Int, tagline: String? = nil) -> [String] {
@@ -44,7 +44,7 @@ enum Painter {
     /// A rounded speech bubble around `text` (wrapped to `maxWidth` columns): lavender frame, yellow words.
     static func bubble(_ text: String, maxWidth: Int, style: Style, tail: SpeechBubble.Tail = .none) -> [String] {
         let lines = SpeechBubble.render(text, maxTextWidth: max(12, maxWidth), tail: tail)
-        // Rows are `[tail]╭──╮`, `[tail]│ words │` and `[tail]╰──╯`; only the words get the text colour.
+        // Rows are `[tail]╭──╮`, `[tail]│ words │` and `[tail]╰──╯`; only the words get the text color.
         let frame = tail == .left ? 2 : 1
         return lines.enumerated().map { index, line in
             let characters = Array(line)
@@ -65,7 +65,7 @@ enum Painter {
         return lines.map(trimTrailingSpaces)
     }
 
-    /// Every sprite in a row (wrapping to the terminal width), names centred underneath on one baseline.
+    /// Every sprite in a row (wrapping to the terminal width), names centered underneath on one baseline.
     static func lineUp(_ sprites: [Sprite], style: Style, width: Int, gap: Int = 3) -> [String] {
         let renderer = style.spriteRenderer
         let tiles: [[String]] = sprites.compactMap { sprite in

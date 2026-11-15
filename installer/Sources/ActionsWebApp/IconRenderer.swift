@@ -15,7 +15,7 @@ struct IconError: Error, Sendable, CustomStringConvertible {
 /// Turns any artwork into a macOS-style app icon and writes the `.iconset` that `iconutil` packs.
 ///
 /// Geometry follows Apple's macOS icon grid: a 1024 px canvas with an 824 px rounded-square body
-/// centred in it (a 100 px margin that holds the drop shadow).
+/// centered in it (a 100 px margin that holds the drop shadow).
 enum IconRenderer {
     static let canvasSize = 1024
     static let bodySize: CGFloat = 824
@@ -77,7 +77,7 @@ enum IconRenderer {
     }
 
     /// Looks at the alpha channel to decide how the artwork should be treated.
-    static func analyse(_ image: CGImage) throws -> Analysis {
+    static func analyze(_ image: CGImage) throws -> Analysis {
         let scale = min(1, 256 / CGFloat(max(image.width, image.height)))
         let width = max(1, Int((CGFloat(image.width) * scale).rounded()))
         let height = max(1, Int((CGFloat(image.height) * scale).rounded()))
@@ -131,11 +131,11 @@ enum IconRenderer {
         return Analysis(shape: shape, contentRect: contentRect, isLight: luminance / CGFloat(visible) > 0.85)
     }
 
-    // MARK: Normalising
+    // MARK: Normalizing
 
     /// A 1024 px macOS-style icon made from arbitrary artwork.
-    static func normalise(_ image: CGImage) throws -> CGImage {
-        let analysis = try analyse(image)
+    static func normalize(_ image: CGImage) throws -> CGImage {
+        let analysis = try analyze(image)
         let artwork = image.cropping(to: analysis.contentRect) ?? image
         let size = CGSize(width: artwork.width, height: artwork.height)
         let body = bodyRect
@@ -165,13 +165,13 @@ enum IconRenderer {
 
     // MARK: Letter tile
 
-    /// Tile colours: saturated enough to tell apps apart, dark enough for white type.
+    /// Tile colors: saturated enough to tell apps apart, dark enough for white type.
     static let palette: [(red: Int, green: Int, blue: Int)] = [
         (99, 102, 241), (124, 58, 237), (192, 38, 211), (219, 39, 119), (225, 29, 72), (234, 88, 12),
         (217, 119, 6), (5, 150, 105), (13, 148, 136), (8, 145, 178), (2, 132, 199), (37, 99, 235),
     ]
 
-    /// The same name always gets the same colour (FNV-1a, not Swift's per-process randomised hashing).
+    /// The same name always gets the same color (FNV-1a, not Swift's per-process randomized hashing).
     static func tileColor(for name: String) -> (red: Int, green: Int, blue: Int) {
         var hash: UInt32 = 2_166_136_261
         for byte in name.trimmingCharacters(in: .whitespaces).lowercased().utf8 {
@@ -187,7 +187,7 @@ enum IconRenderer {
         return String(String(character).uppercased().prefix(1))
     }
 
-    /// A rounded square in the name's colour with its initial, for sites without a usable icon.
+    /// A rounded square in the name's color with its initial, for sites without a usable icon.
     static func letterTile(for name: String) throws -> CGImage {
         let color = tileColor(for: name)
         func component(_ value: Int, lightened amount: CGFloat) -> CGFloat {
@@ -281,19 +281,19 @@ enum IconRenderer {
         }
     }
 
-    /// Largest rect with `size`'s aspect ratio inside `box`, centred.
+    /// Largest rect with `size`'s aspect ratio inside `box`, centered.
     static func fit(_ size: CGSize, in box: CGRect) -> CGRect {
         let scale = min(box.width / size.width, box.height / size.height)
-        return centred(CGSize(width: size.width * scale, height: size.height * scale), in: box)
+        return centered(CGSize(width: size.width * scale, height: size.height * scale), in: box)
     }
 
-    /// Smallest rect with `size`'s aspect ratio covering `box`, centred.
+    /// Smallest rect with `size`'s aspect ratio covering `box`, centered.
     static func fill(_ size: CGSize, in box: CGRect) -> CGRect {
         let scale = max(box.width / size.width, box.height / size.height)
-        return centred(CGSize(width: size.width * scale, height: size.height * scale), in: box)
+        return centered(CGSize(width: size.width * scale, height: size.height * scale), in: box)
     }
 
-    private static func centred(_ size: CGSize, in box: CGRect) -> CGRect {
+    private static func centered(_ size: CGSize, in box: CGRect) -> CGRect {
         CGRect(x: box.midX - size.width / 2, y: box.midY - size.height / 2, width: size.width, height: size.height)
     }
 }

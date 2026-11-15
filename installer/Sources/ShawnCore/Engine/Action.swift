@@ -67,7 +67,7 @@ public struct ActionError: Error, Sendable, CustomStringConvertible {
         return String(message[..<end])
     }
 
-    /// `text` with a full stop at the end, unless it already ends a sentence ("Did you mean 'app'?").
+    /// `text` with a period at the end, unless it already ends a sentence ("Did you mean 'app'?").
     public static func sentence(_ text: String) -> String {
         guard let last = text.last, !".!?…".contains(last) else { return text }
         return text + "."
@@ -144,7 +144,7 @@ public extension Action {
     func usedFiles(_ context: ValidationContext) -> [String] { [] }
 }
 
-/// Describes one item kind: how to recognise it in YAML and how to build its action.
+/// Describes one item kind: how to recognize it in YAML and how to build its action.
 public struct ActionDescriptor: Sendable {
     /// The YAML key, e.g. `brew`.
     public let kind: String
@@ -152,7 +152,7 @@ public struct ActionDescriptor: Sendable {
     public let summary: String
     /// A YAML example of one item.
     public let example: String
-    /// Builds the action. Read every option through the parser; unknown keys are reported automatically afterwards.
+    /// Builds the action. Read every option through the parser; unknown keys are reported automatically afterward.
     public let make: @Sendable (ItemParser) throws -> any Action
 
     public init(kind: String, summary: String, example: String, make: @escaping @Sendable (ItemParser) throws -> any Action) {

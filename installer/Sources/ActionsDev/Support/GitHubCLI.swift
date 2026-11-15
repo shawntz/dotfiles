@@ -91,7 +91,7 @@ enum OAuthScopes {
 
 /// Picks the one-time code, URL and result out of `gh auth login|refresh` output, one line at a time.
 ///
-/// Fed from the process pump thread, read afterwards from the action, hence the lock.
+/// Fed from the process pump thread, read afterward from the action, hence the lock.
 final class DeviceFlowWatcher: @unchecked Sendable {
     struct Prompt: Equatable {
         let code: String?
@@ -153,7 +153,7 @@ final class DeviceFlowWatcher: @unchecked Sendable {
 }
 
 /// Runs `gh` with the environment `research/gh-auth-flow.md` prescribes: prompts, spinners,
-/// colour and update checks off; tokens and host overrides from the parent removed.
+/// color and update checks off; tokens and host overrides from the parent removed.
 struct GitHubCLI {
     let executable: String
     let environment: SystemEnvironment

@@ -6,7 +6,7 @@ import Foundation
 /// will do without opening it.
 enum ShellCommandLine {
     enum Request: Equatable {
-        /// No recognised flag: open the window.
+        /// No recognized flag: open the window.
         case launch
         case printConfig
         /// Addresses to classify, optionally as seen from a page other than the app's home, and with the

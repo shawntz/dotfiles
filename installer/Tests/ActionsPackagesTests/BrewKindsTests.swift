@@ -140,7 +140,7 @@ final class BrewKindsTests: XCTestCase {
         XCTAssertEqual(sandbox.calls("brew"), ["brew trust mikker/tap"])
     }
 
-    func testTrustStoreHonoursXDGConfigHome() async throws {
+    func testTrustStoreHonorsXDGConfigHome() async throws {
         let sandbox = Sandbox()
         sandbox.installFakeBrew()
         sandbox.environment.baseEnvironment["XDG_CONFIG_HOME"] = sandbox.root.appendingPathComponent("xdg").path

@@ -160,7 +160,7 @@ struct TerminalCheckboxStyle: ToggleStyle {
 
 // MARK: - Small pieces
 
-/// A small labelled badge: `DRY RUN`, `SIMULATION`, `OPTIONAL`.
+/// A small labeled badge: `DRY RUN`, `SIMULATION`, `OPTIONAL`.
 struct Chip: View {
     @Environment(\.palette) private var palette
     let text: String

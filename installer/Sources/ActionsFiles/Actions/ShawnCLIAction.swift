@@ -130,7 +130,7 @@ struct ShawnCLIAction: Action {
 
         let binaryChanged: Bool
         do {
-            // Binaries are rebuilt artefacts, so the old copy is replaced rather than backed up. The write is
+            // Binaries are rebuilt artifacts, so the old copy is replaced rather than backed up. The write is
             // atomic (a new file), which leaves a running `shawn` process undisturbed.
             binaryChanged = try files.installFile(from: bundledShawn, to: locations.installedShawn, permissions: 0o755, backup: false).didChange
         } catch {

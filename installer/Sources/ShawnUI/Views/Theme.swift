@@ -1,7 +1,7 @@
 import AppKit
 import SwiftUI
 
-/// An sRGB colour usable from both SwiftUI and AppKit (the log view is an NSTextView).
+/// An sRGB color usable from both SwiftUI and AppKit (the log view is an NSTextView).
 struct ThemeColor: Equatable, Sendable {
     let red: Double
     let green: Double

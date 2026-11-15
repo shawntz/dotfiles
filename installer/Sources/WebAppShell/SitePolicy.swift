@@ -41,7 +41,7 @@ struct SitePolicy: Equatable {
 
     /// The registrable domain of the app's own URL, e.g. `carbonapp.co` for `https://my.carbonapp.co`.
     let homeSite: String
-    /// Normalised extra hosts; each also covers its subdomains.
+    /// Normalized extra hosts; each also covers its subdomains.
     let extraHosts: [String]
 
     init(homeURL: URL, extraHosts: [String]) {

@@ -114,7 +114,7 @@ struct ProjectsCommand: BuiltinCommand {
     }
 }
 
-/// Tells the `shawn` shell function (from `shawn shell-init`) where to `cd` afterwards.
+/// Tells the `shawn` shell function (from `shawn shell-init`) where to `cd` afterward.
 enum ChangeDirectory {
     static let variable = "SHAWN_CD_FILE"
 
@@ -174,7 +174,7 @@ struct CloneCommand: BuiltinCommand {
         var request: ProcessRequest
         var status: Int32
         if let slug = source.slug, let gh = ToolLocator.find("gh", environment: context.environment) {
-            // gh honours the protocol (ssh/https) chosen at `gh auth login`.
+            // gh honors the protocol (ssh/https) chosen at `gh auth login`.
             request = ProcessRequest(gh, ["repo", "clone", slug, target.path], environment: context.childEnvironment())
             status = await context.launcher.interactive(request)
             // gh refuses to do anything while logged out (exit 4), even for a public repo that git clones fine.

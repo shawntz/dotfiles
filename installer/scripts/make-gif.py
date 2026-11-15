@@ -7,10 +7,10 @@ Each frame shows for MS milliseconds (20 or more; GIF counts in hundredths of a 
 
 With --size, each frame is first reduced to WxH pixels by averaging the pixels each new one covers
 (a box filter), so a 2x render keeps sharper text than a 1x one. Lanczos is a little crisper, but its
-faint halos add colours. The README's tour comes out at 5.9 MB with Lanczos and 3.9 MB with the box.
+faint halos add colors. The README's tour comes out at 5.9 MB with Lanczos and 3.9 MB with the box.
 
-All frames share one palette of 255 colours, chosen from all of them (see shared_palette), and map
-onto it without dithering, so the window's flat colours stay flat and nothing flickers from one frame
+All frames share one palette of 255 colors, chosen from all of them (see shared_palette), and map
+onto it without dithering, so the window's flat colors stay flat and nothing flickers from one frame
 to the next. A frame that repeats the one before it only adds to that frame's time. Pillow then stores
 each frame as the rectangle that changed, with the pixels inside it that did not change left
 transparent.
@@ -34,8 +34,8 @@ except ImportError:
     fail(f"Pillow is not installed for {sys.executable}. Install it with: {sys.executable} -m pip install Pillow")
 
 # Index 255 stays out of the palette. Pillow uses it to mark the pixels a frame leaves as they were.
-COLOURS = 255
-# A colour the first half of the palette misses by more than this (0 to 255, as grey) gets a say in the second.
+COLORS = 255
+# A color the first half of the palette misses by more than this (0 to 255, as gray) gets a say in the second.
 MISS = 5
 # Pillow 12 renamed getdata; older versions only have that.
 FLATTENED = getattr(Image.Image, "get_flattened_data", None) or Image.Image.getdata
@@ -77,10 +77,10 @@ def load_frames(arguments, size=None):
     return frames, durations
 
 
-def palette_image(colours):
-    """A palette image with exactly these colours, so mapping a frame onto it never uses index 255."""
+def palette_image(colors):
+    """A palette image with exactly these colors, so mapping a frame onto it never uses index 255."""
     palette = Image.new("P", (1, 1))
-    palette.putpalette(colours)
+    palette.putpalette(colors)
     return palette
 
 
@@ -104,27 +104,27 @@ def shared_palette(frames):
 
     The first half comes from every pixel of every frame, so the large areas (the background, panels,
     text) match closely. Small things that show in few frames, such as a step's character, lose that
-    count. So the second half comes from the colours the first half matches badly.
+    count. So the second half comes from the colors the first half matches badly.
     """
     width, height = frames[0].size
     stack = Image.new("RGB", (width, height * len(frames)))
     for index, frame in enumerate(frames):
         stack.paste(frame, (0, index * height))
-    first = choose(stack, COLOURS // 2 + 1)
+    first = choose(stack, COLORS // 2 + 1)
 
     counts = {}
-    for colour_count, colour in stack.getcolors(1 << 24):
-        counts[colour] = colour_count
+    for color_count, color in stack.getcolors(1 << 24):
+        counts[color] = color_count
     unique = list(counts)
-    every_colour = picture_of(unique)
-    matched = every_colour.quantize(palette=palette_image(first), dither=Image.Dither.NONE).convert("RGB")
-    error = FLATTENED(ImageChops.difference(every_colour, matched).convert("L"))
+    every_color = picture_of(unique)
+    matched = every_color.quantize(palette=palette_image(first), dither=Image.Dither.NONE).convert("RGB")
+    error = FLATTENED(ImageChops.difference(every_color, matched).convert("L"))
     missed = []
-    for colour, colour_error in zip(unique, error):
-        if colour_error > MISS:
-            missed.extend([colour] * counts[colour])
-    colours = first + (choose(picture_of(missed), COLOURS - COLOURS // 2 - 1) if missed else [])
-    return palette_image(colours), colours
+    for color, color_error in zip(unique, error):
+        if color_error > MISS:
+            missed.extend([color] * counts[color])
+    colors = first + (choose(picture_of(missed), COLORS - COLORS // 2 - 1) if missed else [])
+    return palette_image(colors), colors
 
 
 def main(arguments):
@@ -139,10 +139,10 @@ def main(arguments):
         return 2
     output, frame_arguments = arguments[0], arguments[1:]
     frames, durations = load_frames(frame_arguments, size)
-    palette, colours = shared_palette(frames)
+    palette, colors = shared_palette(frames)
     indexed = [frame.quantize(palette=palette, dither=Image.Dither.NONE) for frame in frames]
     indexed[0].save(output, save_all=True, append_images=indexed[1:], duration=durations, loop=0,
-                    disposal=1, optimize=True, palette=bytes(colours))
+                    disposal=1, optimize=True, palette=bytes(colors))
     seconds = sum(durations) / 1000
     print(f"{output}: {len(frames)} frames, {seconds:.1f} s, {frames[0].size[0]}x{frames[0].size[1]}")
     return 0

@@ -66,14 +66,14 @@ enum Simulation {
     }
 
     private static func descriptor(kind: String, summary: String, example: String, timeScale: Double,
-                                   behaviour: @escaping @Sendable (ItemParser) -> SimulatedAction.Behaviour) -> ActionDescriptor {
+                                   behavior: @escaping @Sendable (ItemParser) -> SimulatedAction.Behavior) -> ActionDescriptor {
         ActionDescriptor(kind: kind, summary: summary, example: example) { parser in
             let title = parser.primaryString()
             let seconds = parser.options.double("seconds") ?? 1.5
             let command = parser.options.string("command")
             let subtitle = parser.options.string("subtitle")
             return SimulatedAction(title: title, subtitle: subtitle, command: command, seconds: max(0, seconds),
-                                   timeScale: timeScale, behaviour: behaviour(parser))
+                                   timeScale: timeScale, behavior: behavior(parser))
         }
     }
 
@@ -112,7 +112,7 @@ enum Simulation {
 
 /// One simulated item.
 struct SimulatedAction: Action {
-    enum Behaviour: Sendable {
+    enum Behavior: Sendable {
         case install(output: [String], warnings: [String], progress: Bool)
         case present(reason: String)
         case skip(reason: String)
@@ -129,15 +129,15 @@ struct SimulatedAction: Action {
     let command: String?
     let seconds: Double
     let timeScale: Double
-    let behaviour: Behaviour
+    let behavior: Behavior
 
     func check(_ context: ActionContext) async -> CheckResult {
-        if case .present(let reason) = behaviour { return .satisfied(reason) }
+        if case .present(let reason) = behavior { return .satisfied(reason) }
         return .needed(nil)
     }
 
     func run(_ context: ActionContext) async throws -> ActionOutcome {
-        switch behaviour {
+        switch behavior {
         case .present(let reason):
             return .done(reason)
 

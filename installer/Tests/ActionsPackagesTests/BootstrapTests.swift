@@ -265,7 +265,7 @@ final class HomebrewTests: XCTestCase {
         let updated = await Brew.hasUpdated(sandbox.context())
         XCTAssertTrue(updated)
         let downloads = sandbox.environment.cacheDirectory.appendingPathComponent("downloads")
-        XCTAssertEqual(try FileManager.default.contentsOfDirectory(atPath: downloads.path), [], "the package is removed afterwards")
+        XCTAssertEqual(try FileManager.default.contentsOfDirectory(atPath: downloads.path), [], "the package is removed afterward")
 
         sandbox.clearCalls()
         let second = try await sandbox.check("homebrew: install")

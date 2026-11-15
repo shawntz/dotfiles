@@ -268,7 +268,7 @@ struct StatusLineCommand: BuiltinCommand {
         let policy = ColorPolicy(environment: context.environment.baseEnvironment, noColorFlag: context.globals.noColor)
         let environment = context.environment.baseEnvironment
         let renderer = StatusLineRenderer(
-            // Claude Code captures the output (no TTY) but renders ANSI colour, so only an explicit opt-out turns it off.
+            // Claude Code captures the output (no TTY) but renders ANSI color, so only an explicit opt-out turns it off.
             style: Style(enabled: !policy.forcedOff, trueColor: true),
             columns: environment["COLUMNS"].flatMap(Int.init).flatMap { $0 > 0 ? $0 : nil } ?? 120,
             home: context.environment.home,

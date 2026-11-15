@@ -82,7 +82,7 @@ final class ShippedFunConfigTests: XCTestCase {
     }
 }
 
-/// Loader behaviour on fixtures written to temporary directories.
+/// Loader behavior on fixtures written to temporary directories.
 final class FunConfigLoaderTests: XCTestCase {
     private var directory: TempDirectory!
 
@@ -130,11 +130,11 @@ final class FunConfigLoaderTests: XCTestCase {
         XCTAssertFalse(fun.lines(for: .cancelled).isEmpty)
     }
 
-    func testBadPaletteColour() {
+    func testBadPaletteColor() {
         directory.write("fun/sprites/blob.yaml", sprite(palette: "  P: \"#GGG\"", frames: ["P."]))
         let messages = errors(load().issues)
         XCTAssertEqual(messages.count, 2, "\(messages)")
-        XCTAssertTrue(messages.contains { $0.contains("palette colour for 'P' is not a hex colour") }, "\(messages)")
+        XCTAssertTrue(messages.contains { $0.contains("palette color for 'P' is not a hex color") }, "\(messages)")
         XCTAssertTrue(messages.contains { $0.contains("uses 'P', which is not in the palette") }, "\(messages)")
     }
 

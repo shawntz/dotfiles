@@ -29,7 +29,7 @@ items:
       InitialKeyRepeat: 10                  # and start repeating sooner than it allows
       ApplePressAndHoldEnabled: false       # holding a key repeats it instead of showing accents
       AppleShowAllExtensions: true          # show every file extension in Finder
-      AppleMiniaturizeOnDoubleClick: false  # double-clicking a title bar never minimises the window
+      AppleMiniaturizeOnDoubleClick: false  # double-clicking a title bar never minimizes the window
       com.apple.sound.beep.volume: 0.0      # mute the alert sound
       com.apple.sound.beep.feedback: false  # no click sound when changing the volume
     restart: [Finder]

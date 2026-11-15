@@ -14,10 +14,10 @@ public struct SpriteImageError: Error, Equatable, Sendable, CustomStringConverti
     public var description: String { message }
 }
 
-/// Renders pixel art to bitmaps with hard pixel edges (nearest neighbour, never smoothed).
+/// Renders pixel art to bitmaps with hard pixel edges (nearest neighbor, never smoothed).
 ///
 /// Pixels are written straight into an sRGB RGBA buffer, so every output pixel is exactly a palette
-/// colour: no interpolation, no anti-aliasing, no colour management surprises. Used for snapshots,
+/// color: no interpolation, no anti-aliasing, no color management surprises. Used for snapshots,
 /// tests and tooling such as the app icon.
 public enum SpriteImageRenderer {
     /// Refuse anything bigger than this many output pixels (64 MB of RGBA) rather than exhaust memory.
@@ -67,7 +67,7 @@ public enum SpriteImageRenderer {
 
     /// A sheet for reviewing sprites side by side. With `allFrames`, one row per sprite and one column
     /// per frame (so animations can be checked); otherwise one row with the first frame of each.
-    /// Every cell is as big as the largest frame; frames sit centred and on the cell's bottom edge.
+    /// Every cell is as big as the largest frame; frames sit centered and on the cell's bottom edge.
     /// `gap` (in sprite pixels) separates cells and surrounds the sheet. Image-only sprites are left out.
     public static func contactSheet(_ sprites: [Sprite], allFrames: Bool = true, scale: Int = 4, gap: Int = 2,
                                     background: RGBA? = nil) throws -> CGImage {
@@ -109,7 +109,7 @@ public enum SpriteImageRenderer {
         return (width, height)
     }
 
-    /// Lays frames out in a grid of equal cells (in sprite pixels), each frame horizontally centred and
+    /// Lays frames out in a grid of equal cells (in sprite pixels), each frame horizontally centered and
     /// bottom-aligned in its cell, with `gap` transparent pixels between and around the cells.
     static func compose(_ grid: [[SpriteFrame]], cellWidth: Int, cellHeight: Int, gap: Int) -> SpriteFrame {
         let columns = grid.map(\.count).max() ?? 0

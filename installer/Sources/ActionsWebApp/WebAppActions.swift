@@ -175,7 +175,7 @@ enum WebAppRules {
     }
 
     /// `twitter.com` for "Twitter.com" or "*.twitter.com"; nil when it is not a host name (a URL, say).
-    /// The same normalisation WebAppShell applies when it reads `ShawnWebAppHosts`.
+    /// The same normalization WebAppShell applies when it reads `ShawnWebAppHosts`.
     static func normalizedHost(_ text: String) -> String? {
         var host = text.trimmingCharacters(in: .whitespacesAndNewlines).lowercased()
         while host.hasSuffix(".") { host.removeLast() }

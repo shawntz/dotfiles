@@ -96,7 +96,7 @@ struct FetchPlan: Equatable, Sendable {
 /// `<cacheDirectory>/config/<commit>/`: one complete config directory per commit.
 ///
 /// A commit directory only ever appears by renaming a fully downloaded staging directory into place,
-/// so it is either complete or absent; nothing inside it is modified afterwards.
+/// so it is either complete or absent; nothing inside it is modified afterward.
 struct ConfigCache: Sendable {
     static let stagingPrefix = ".staging-"
     static let refsFileName = "refs.json"

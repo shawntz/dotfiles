@@ -87,7 +87,7 @@ struct FakeAction: Action {
     var delay: TimeInterval = 0
     /// Waits in `run` until the gate opens (cancellation does not cut it short).
     var gate: HoldGate?
-    /// Counts runs; a counted item that succeeded once checks as already done afterwards.
+    /// Counts runs; a counted item that succeeded once checks as already done afterward.
     var counter: RunCounter?
 
     func check(_ context: ActionContext) async -> CheckResult {

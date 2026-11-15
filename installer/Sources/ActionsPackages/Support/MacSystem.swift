@@ -22,7 +22,7 @@ struct MacSystem: Sendable {
         /// silently while the App Store wants a password or Touch ID that nobody gives.
         var masInstallTimeout: TimeInterval = 30 * 60
         /// Bound on the background Xcode download (about 3 GB; four hours is roughly 200 KB/s). Killing mas does
-        /// not stop the App Store's own download, and `xcode: finish` keeps looking for Xcode.app afterwards.
+        /// not stop the App Store's own download, and `xcode: finish` keeps looking for Xcode.app afterward.
         var xcodeDownloadTimeout: TimeInterval = 4 * 60 * 60
         /// If Apple's installer dialog has not shown up this long after `xcode-select --install`, it is not coming.
         var cltDialogAppearanceTimeout: TimeInterval = 2 * 60

@@ -88,7 +88,7 @@ final class SampleOutputTests: XCTestCase {
         let harness = Harness(sandbox: sandbox, width: 110) { $0.inventory = FakeInventory(packages: installed) }
         _ = await harness.run(["--no-update", "drift", "--write", "--repo", checkout.path])
         let file = try String(contentsOf: checkout.appendingPathComponent("installer/config/steps/03-packages.yaml"), encoding: .utf8)
-        let text = "$ shawn drift --write\n" + harness.out.text + harness.err.text + "\n--- steps/03-packages.yaml afterwards ---\n" + file
+        let text = "$ shawn drift --write\n" + harness.out.text + harness.err.text + "\n--- steps/03-packages.yaml afterward ---\n" + file
         try text.write(to: samples.appendingPathComponent("drift.txt"), atomically: true, encoding: .utf8)
         // In its alphabetical place by name, whatever tap it comes from: graphite before ripgrep.
         XCTAssertTrue(file.contains("  - brew: fzf\n  - brew: withgraphite/tap/graphite\n  - brew: ripgrep\n"), file)

@@ -370,7 +370,7 @@ struct WebAppAction: Action {
         case .file(let url, let display):
             let data = try readIconFile(url, display: display)
             do {
-                let image = try IconRenderer.normalise(IconRenderer.decode(data))
+                let image = try IconRenderer.normalize(IconRenderer.decode(data))
                 return Icon(image: image, record: "file:\(display)#\(Digest.sha256(data))", origin: "file:\(display)")
             } catch {
                 throw ActionError("the icon '\(display)' cannot be used: \(InstallEngine.describe(error))",
@@ -410,7 +410,7 @@ struct WebAppAction: Action {
             return .failure(RemoteIconFailure(fallback: .unreachable, reason: InstallEngine.describe(error)))
         }
         do {
-            return .success(try IconRenderer.normalise(IconRenderer.decode(resource.data)))
+            return .success(try IconRenderer.normalize(IconRenderer.decode(resource.data)))
         } catch {
             return .failure(RemoteIconFailure(fallback: .unusable, reason: InstallEngine.describe(error)))
         }
@@ -419,7 +419,7 @@ struct WebAppAction: Action {
     private func discoveredIcon(for app: ResolvedWebApp, userAgent: String, context: ActionContext) async throws -> Icon {
         if let found = await IconDiscovery.find(for: app.url, fetcher: fetcher, userAgent: userAgent, log: { context.info($0) }) {
             do {
-                let image = try IconRenderer.normalise(found.image)
+                let image = try IconRenderer.normalize(found.image)
                 context.info("icon: \(found.url.absoluteString)")
                 return Icon(image: image, record: "auto", origin: "site:\(found.url.absoluteString)")
             } catch {

@@ -38,7 +38,7 @@ final class InstallerModelStateTests: XCTestCase {
 
         model.setStep(extras, enabled: false)
         XCTAssertEqual(model.enabledItemCount, 4, "a step that is off runs none of its items")
-        XCTAssertEqual(model.selectedItemCount(in: extras), 3, "ticks inside a switched-off step are remembered")
+        XCTAssertEqual(model.selectedItemCount(in: extras), 3, "check marks inside a switched-off step are remembered")
         XCTAssertEqual(model.status(of: optional), .disabled)
 
         for step in model.steps { model.setStep(step, enabled: false) }

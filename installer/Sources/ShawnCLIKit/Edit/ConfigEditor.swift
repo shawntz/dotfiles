@@ -63,7 +63,7 @@ enum ConfigEditor {
         var lines = text.components(separatedBy: "\n")
         let endsWithNewline = text.hasSuffix("\n")
         if endsWithNewline { lines.removeLast() }
-        let layout = analyse(lines)
+        let layout = analyze(lines)
 
         if let existing = layout.items.first(where: { $0.kind == kind && $0.value == value }) {
             return (text, .alreadyPresent(line: existing.start + 1))
@@ -149,7 +149,7 @@ enum ConfigEditor {
     }
 
     /// Finds the `items:` list and every item in it (kind, value, line span, optional, group).
-    static func analyse(_ lines: [String]) -> Layout {
+    static func analyze(_ lines: [String]) -> Layout {
         var layout = Layout(itemsLine: nil, flowEmpty: false, indent: "  ", items: [])
         guard let itemsLine = lines.firstIndex(where: { $0.range(of: "^items:\\s*(\\[\\s*\\])?\\s*(#.*)?$", options: .regularExpression) != nil }) else {
             return layout

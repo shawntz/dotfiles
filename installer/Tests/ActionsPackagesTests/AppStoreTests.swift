@@ -81,7 +81,7 @@ extension Sandbox {
 }
 
 final class MasTests: XCTestCase {
-    func testAsksOnceInstallsAsRootAndIsSatisfiedAfterwards() async throws {
+    func testAsksOnceInstallsAsRootAndIsSatisfiedAfterward() async throws {
         let sandbox = Sandbox()
         sandbox.installFakeMas()
         sandbox.stageAppStoreApp(id: "937984704", name: "Amphetamine")
@@ -99,7 +99,7 @@ final class MasTests: XCTestCase {
         XCTAssertEqual(question.defaultOptionID, AppStore.signedInOption)
         XCTAssertEqual(question.url?.scheme, "macappstore")
         XCTAssertEqual(sandbox.calls("root mas"), ["root mas install 937984704", "root mas install 1289583905"])
-        // While mas runs, a callout says what it may be waiting for; it is gone afterwards.
+        // While mas runs, a callout says what it may be waiting for; it is gone afterward.
         let shown = sandbox.attentions.compactMap { $0 }
         XCTAssertEqual(shown.map(\.title), ["Installing Amphetamine from the App Store", "Installing Pixelmator Pro from the App Store"])
         XCTAssertTrue(shown.allSatisfy { $0.message.contains("password or Touch ID") }, "\(shown)")

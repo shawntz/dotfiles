@@ -2,7 +2,7 @@ import AppKit
 import WebKit
 
 /// Camera and microphone access, asked per site. Answers last for the session, or for good when the
-/// person ticks "Remember"; App ▸ Reset Camera & Microphone Permissions forgets them.
+/// person checks "Remember"; App ▸ Reset Camera & Microphone Permissions forgets them.
 @MainActor
 final class MediaPermissionStore {
     private static let key = "ShawnWebAppMediaPermissions"

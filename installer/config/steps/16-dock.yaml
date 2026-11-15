@@ -32,8 +32,8 @@ items:
       settings:
         autohide: true                 # hide the Dock until the pointer reaches it
         launchanim: false              # no bouncing icons when an app opens
-        mineffect: scale               # minimise with the plain scale effect, not the genie
-        minimize-to-application: true  # minimised windows go into their app's icon
+        mineffect: scale               # minimize with the plain scale effect, not the genie
+        minimize-to-application: true  # minimized windows go into their app's icon
         mru-spaces: false              # keep Spaces in a fixed order
         orientation: bottom            # Dock along the bottom of the screen
         show-recents: false            # no section for recent apps

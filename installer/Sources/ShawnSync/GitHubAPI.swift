@@ -77,7 +77,7 @@ struct GitHubAPI: Sendable {
     ///
     /// The `application/vnd.github.sha` media type answers with the bare SHA. Passing the ETag of a
     /// previous answer turns an unchanged ref into an empty 304. GitHub exempts 304s from the rate limit
-    /// only for authorised requests; these are unauthenticated, so every lookup, 304 or not, uses one of
+    /// only for authorized requests; these are unauthenticated, so every lookup, 304 or not, uses one of
     /// the 60 requests an hour this network gets.
     func resolveCommit(ref: String, ifNoneMatch etag: String?) async throws -> CommitAnswer {
         var headers = ["Accept": "application/vnd.github.sha", "X-GitHub-Api-Version": Self.apiVersion]

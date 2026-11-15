@@ -8,11 +8,11 @@ final class SpriteLayoutTests: XCTestCase {
     private let pink = RGBA(red: 255, green: 0, blue: 255)
     private let blue = RGBA(red: 0, green: 0, blue: 255)
 
-    func testWholeNumberScaleCentredOnTheFloor() {
+    func testWholeNumberScaleCenteredOnTheFloor() {
         let layout = SpriteLayout.fit(width: 24, height: 20, in: CGSize(width: 100, height: 90))
         XCTAssertEqual(layout.scale, 4, "min(100/24, 90/20) = 4.1 → 4")
         XCTAssertEqual(layout.drawnSize, CGSize(width: 96, height: 80))
-        XCTAssertEqual(layout.origin, CGPoint(x: 2, y: 10), "centred horizontally, standing on the bottom edge")
+        XCTAssertEqual(layout.origin, CGPoint(x: 2, y: 10), "centered horizontally, standing on the bottom edge")
     }
 
     func testMaximumSpriteSizeAndTinyBoxes() {
@@ -38,7 +38,7 @@ final class SpriteLayoutTests: XCTestCase {
         XCTAssertEqual(CharacterLineup.sharedScale(for: [], cell: 64), 0)
     }
 
-    func testRunsMergeNeighbouringPixelsAndSkipTransparency() {
+    func testRunsMergeNeighboringPixelsAndSkipTransparency() {
         let frame = SpriteFrame(pixels: [
             [nil, pink, pink, blue],
             [pink, nil, nil, pink],
@@ -46,22 +46,22 @@ final class SpriteLayoutTests: XCTestCase {
         ])
         let runs = SpriteLayout.runs(in: frame)
         XCTAssertEqual(runs, [
-            .init(row: 0, column: 1, length: 2, colour: pink),
-            .init(row: 0, column: 3, length: 1, colour: blue),
-            .init(row: 1, column: 0, length: 1, colour: pink),
-            .init(row: 1, column: 3, length: 1, colour: pink),
+            .init(row: 0, column: 1, length: 2, color: pink),
+            .init(row: 0, column: 3, length: 1, color: blue),
+            .init(row: 1, column: 0, length: 1, color: pink),
+            .init(row: 1, column: 3, length: 1, color: pink),
         ])
         let clear = RGBA(red: 1, green: 2, blue: 3, alpha: 0)
-        XCTAssertTrue(SpriteLayout.runs(in: SpriteFrame(pixels: [[clear, clear]])).isEmpty, "fully transparent colours are skipped")
+        XCTAssertTrue(SpriteLayout.runs(in: SpriteFrame(pixels: [[clear, clear]])).isEmpty, "fully transparent colors are skipped")
     }
 
-    func testRunRectanglesAndSmallerFramesSitBottomCentred() {
+    func testRunRectanglesAndSmallerFramesSitBottomCentered() {
         let layout = SpriteLayout.fit(width: 4, height: 4, in: CGSize(width: 40, height: 40))
         XCTAssertEqual(layout.scale, 10)
-        let run = SpriteLayout.Run(row: 1, column: 2, length: 2, colour: pink)
+        let run = SpriteLayout.Run(row: 1, column: 2, length: 2, color: pink)
         XCTAssertEqual(layout.rect(for: run, frameWidth: 4, frameHeight: 4), CGRect(x: 20, y: 10, width: 20, height: 10))
         // A 2×2 frame inside the 4×4 sprite box: shifted right by 1 pixel and down by 2.
-        let small = SpriteLayout.Run(row: 0, column: 0, length: 1, colour: pink)
+        let small = SpriteLayout.Run(row: 0, column: 0, length: 1, color: pink)
         XCTAssertEqual(layout.rect(for: small, frameWidth: 2, frameHeight: 2), CGRect(x: 10, y: 20, width: 10, height: 10))
     }
 }
@@ -125,14 +125,14 @@ final class HeaderMetricsTests: XCTestCase {
         XCTAssertLessThanOrEqual(CGFloat(metrics.columns) * size * Theme.monoAdvance, 1000.5)
         XCTAssertLessThanOrEqual(metrics.height(fontSize: size), 96.5)
         XCTAssertLessThanOrEqual(size, 15)
-        // Rows are one full-block tall, so block characters on neighbouring rows touch.
+        // Rows are one full-block tall, so block characters on neighboring rows touch.
         XCTAssertEqual(ASCIIArtMetrics.blockCell.height, 1, accuracy: 0.05)
         XCTAssertGreaterThan(ASCIIArtMetrics.blockCell.ascent, 0.5)
         XCTAssertEqual(metrics.height(fontSize: 10), CGFloat(metrics.rows) * 10 * ASCIIArtMetrics.blockCell.height, accuracy: 0.001)
     }
 
     func testBoxDrawingStrokesAreDimmerThanBlocks() {
-        let attributed = ASCIIHeaderView.attributed("█╗", font: Theme.nsMono(10), colour: .white, shadowAlpha: 0.5)
+        let attributed = ASCIIHeaderView.attributed("█╗", font: Theme.nsMono(10), color: .white, shadowAlpha: 0.5)
         let block = attributed.attribute(.foregroundColor, at: 0, effectiveRange: nil) as? NSColor
         let stroke = attributed.attribute(.foregroundColor, at: 1, effectiveRange: nil) as? NSColor
         XCTAssertEqual(block?.alphaComponent, 1)

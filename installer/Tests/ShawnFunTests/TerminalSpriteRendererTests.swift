@@ -5,7 +5,7 @@ final class TerminalSpriteRendererTests: XCTestCase {
     private let esc = "\u{1B}["
     private let red = TestColors.red, green = TestColors.green, blue = TestColors.blue
 
-    /// 3×4 pixels: a same-colour cell, a two-colour cell, transparent cells, and upper-only / lower-only cells.
+    /// 3×4 pixels: a same-color cell, a two-color cell, transparent cells, and upper-only / lower-only cells.
     private var fixture: SpriteFrame {
         SpriteFrame(["RR.",
                      "RB.",
@@ -37,13 +37,13 @@ final class TerminalSpriteRendererTests: XCTestCase {
         XCTAssertFalse(lines.joined().contains("\u{1B}"))
     }
 
-    func testColourCodesAreOnlyEmittedWhenTheyChange() {
+    func testColorCodesAreOnlyEmittedWhenTheyChange() {
         let frame = SpriteFrame(["RRRR", "BBBB"], ["R": red, "B": blue])
         let lines = TerminalSpriteRenderer(colorMode: .trueColor).render(frame)
         XCTAssertEqual(lines, ["\(esc)38;2;255;0;0;48;2;0;0;255m▀▀▀▀\(esc)0m"])
     }
 
-    func testColoursThatShareAPaletteEntryMergeIn256Mode() {
+    func testColorsThatShareAPaletteEntryMergeIn256Mode() {
         let nearlyRed = RGBA(red: 250, green: 0, blue: 0)
         let frame = SpriteFrame(pixels: [[red], [nearlyRed]])
         XCTAssertEqual(TerminalSpriteRenderer(colorMode: .ansi256).render(frame), ["\(esc)48;5;196m \(esc)0m"])
@@ -112,7 +112,7 @@ final class TerminalSpriteRendererTests: XCTestCase {
                 }
                 rest = rest.dropFirst()
             }
-            XCTAssertTrue(line.hasSuffix("\(esc)0m") || !line.contains("\u{1B}"), "a line that sets colours must reset them")
+            XCTAssertTrue(line.hasSuffix("\(esc)0m") || !line.contains("\u{1B}"), "a line that sets colors must reset them")
             pixels += [upper, lower]
         }
         return pixels
@@ -175,7 +175,7 @@ final class TerminalSpriteRendererTests: XCTestCase {
         XCTAssertEqual(renderer.render(Sprite(id: "pic", name: "Picture", frames: [], imageURL: URL(fileURLWithPath: "/tmp/x.png"))), [])
     }
 
-    // MARK: Colour detection and palette
+    // MARK: Color detection and palette
 
     func testColorModeDetection() {
         typealias Mode = TerminalSpriteRenderer.ColorMode
@@ -241,7 +241,7 @@ final class TerminalSpriteRendererTests: XCTestCase {
         ])
     }
 
-    func testCaptionedCentresWhicheverIsNarrower() {
+    func testCaptionedCentersWhicheverIsNarrower() {
         XCTAssertEqual(TerminalSpriteRenderer.captioned(["██"], "Jake"), [" ██ ", "Jake"])
         XCTAssertEqual(TerminalSpriteRenderer.captioned(["█████"], "BMO"), ["█████", " BMO "])
     }
@@ -256,7 +256,7 @@ final class TerminalSpriteRendererTests: XCTestCase {
         ])
     }
 
-    func testSpeakingCentresAShortSpriteOnATallBubble() {
+    func testSpeakingCentersAShortSpriteOnATallBubble() {
         let lines = TerminalSpriteRenderer(colorMode: .plain)
             .speaking(["@@"], says: "one two three four five", maxTextWidth: 5, gap: 2)
         XCTAssertEqual(lines, [
@@ -275,7 +275,7 @@ final class TerminalSpriteRendererTests: XCTestCase {
         XCTAssertEqual(renderer.speaking(nil as Sprite?, says: "Lump!"), ["╭───────╮", "│ Lump! │", "╰───────╯"])
     }
 
-    func testBubbleColourTintsOnlyTheBubble() {
+    func testBubbleColorTintsOnlyTheBubble() {
         let renderer = TerminalSpriteRenderer(colorMode: .trueColor)
         let sprite = Sprite(id: "dot", name: "Dot", frames: [SpriteFrame(pixels: [[red], [red]])])
         let lines = renderer.speaking(sprite, says: "Hi", bubbleColor: TestColors.lavender)

@@ -230,7 +230,7 @@ final class ShippedConfigTests: XCTestCase {
         XCTAssertGreaterThan(uncheckable["manual"] ?? 0, 0, "the config has reminders only a person can act on")
     }
 
-    // MARK: Behaviour
+    // MARK: Behavior
 
     /// A dry run of absolutely everything (optional items included) must fail nothing and write nothing.
     func testDryRunOfEveryItemFailsNothingAndWritesNothing() async throws {

@@ -2,7 +2,7 @@ import Foundation
 
 /// The simulation's config directory, generated at launch. It uses the real config format (and the real
 /// loaders), with its own placeholder sprites, quips and header, so the layout can be judged before
-/// the real art exists and stays exercisable afterwards.
+/// the real art exists and stays exercisable afterward.
 enum SimulationConfig {
     /// Writes `config/` into `directory` and returns its URL.
     static func write(into directory: URL) throws -> URL {
@@ -109,7 +109,7 @@ enum SimulationConfig {
             hint: "check the token with `brew search lumpy`, then fix steps/02-packages.yaml"
           - sim-install: neovim
             optional: true
-            note: off by default; tick it in Customize
+            note: off by default; check it in Customize
             command: brew install --formula neovim
             output:
               - "==> Pouring neovim--0.12.0.arm64_tahoe.bottle.tar.gz"
@@ -285,7 +285,7 @@ enum SimulationConfig {
 
         var yaml: String {
             var lines = ["id: \(id)", "name: \"\(name)\"", "frame_ms: \(frameMilliseconds)", "palette:", "  \".\": transparent"]
-            for (symbol, colour) in palette { lines.append("  \"\(symbol)\": \"\(colour)\"") }
+            for (symbol, color) in palette { lines.append("  \"\(symbol)\": \"\(color)\"") }
             lines.append("frames:")
             for frame in frames {
                 lines.append("  - |")
@@ -470,8 +470,8 @@ struct PixelSketch: Equatable {
         let original = grid
         for row in 0..<height {
             for column in 0..<width where fills.contains(original[row][column]) {
-                let neighbours = [(column - 1, row), (column + 1, row), (column, row - 1), (column, row + 1)]
-                let onEdge = neighbours.contains { x, y in
+                let neighbors = [(column - 1, row), (column + 1, row), (column, row - 1), (column, row + 1)]
+                let onEdge = neighbors.contains { x, y in
                     !(0..<width).contains(x) || !(0..<height).contains(y) || original[y][x] == "."
                 }
                 if onEdge { grid[row][column] = symbol }

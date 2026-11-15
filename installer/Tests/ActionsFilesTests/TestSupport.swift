@@ -154,7 +154,7 @@ final class Harness {
     }
 
     /// A stand-in tool placed first on the sandbox PATH. Every call appends one line to `<name>.log`
-    /// with each argument in brackets: `[-g][-a][Google Chrome]`. `body` runs afterwards.
+    /// with each argument in brackets: `[-g][-a][Google Chrome]`. `body` runs afterward.
     @discardableResult
     func shim(_ name: String, body: String = "exit 0") -> URL {
         let bin = environment.brewPrefix.appendingPathComponent("bin")

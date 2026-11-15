@@ -1,12 +1,12 @@
 import Foundation
 import ShawnCore
 
-/// Colour roles; views map them onto the palette.
+/// Color roles; views map them onto the palette.
 enum Tone: Equatable {
     case faint, dim, text, pink, yellow, mint, red, cyan
 }
 
-/// How a status is drawn: one glyph in a fixed-width column, a colour, and words for VoiceOver.
+/// How a status is drawn: one glyph in a fixed-width column, a color, and words for VoiceOver.
 struct StatusLook: Equatable {
     /// One monospaced character. Ignored while `spins` is true.
     let glyph: String

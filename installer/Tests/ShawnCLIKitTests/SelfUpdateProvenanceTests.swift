@@ -64,7 +64,7 @@ final class SelfUpdateProvenanceTests: XCTestCase {
     }
 
     /// The old pre-pull adoption: an unknown build whose sources the run cannot rebuild must still be unknown
-    /// afterwards, not recorded as the pre-pull (or post-pull) HEAD.
+    /// afterward, not recorded as the pre-pull (or post-pull) HEAD.
     func testAPullNeverRecordsTheCheckoutAsTheBaseline() async {
         let fixture = UpdateFixture(recorded: false)
         fixture.writeInstallerRecord(sourceTree: nil, commit: nil)

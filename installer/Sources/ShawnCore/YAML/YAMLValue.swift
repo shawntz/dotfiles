@@ -284,7 +284,7 @@ public enum YAML {
 
     private static func convert(_ scalar: Node.Scalar, tag: Tag.Name) -> YAMLScalar {
         // Only plain (unquoted) scalars get implicit typing; anything quoted or
-        // written as a block scalar is a string, full stop.
+        // written as a block scalar is a string, period.
         guard scalar.style == .plain || scalar.style == .any else {
             return .string(scalar.string)
         }

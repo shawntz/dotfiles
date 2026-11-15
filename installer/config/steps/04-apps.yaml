@@ -8,14 +8,14 @@
 #   - cask: notion
 #     app: Notion.app
 #
-# `optional: true` leaves an item unticked until you switch it on in
+# `optional: true` leaves an item unchecked until you switch it on in
 # Customize. App Store apps (`mas:`) need the App Store id and the app's exact
 # name, and you must be signed in to the App Store; the installer asks once.
 # Keep each group in alphabetical order.
 
 id: apps
 title: Apps
-subtitle: The everyday apps, plus a few you can tick
+subtitle: The everyday apps, plus a few you can add
 mascot: bubblegum
 
 items:
@@ -34,14 +34,14 @@ items:
     app: Granola.app
   - cask: middle
     app: Middle.app
-    note: paid; needs your licence
+    note: paid; needs your license
   - cask: slack
     app: Slack.app
   - cask: spotify
     app: Spotify.app
   - cask: superkey
     app: Superkey.app
-    note: paid; needs your licence
+    note: paid; needs your license
   - cask: wispr-flow
     app: Wispr Flow.app
 
@@ -62,7 +62,7 @@ items:
   - cask: daisydisk
     app: DaisyDisk.app
     optional: true
-    note: paid; needs your licence
+    note: paid; needs your license
   - cask: firefox
     app: Firefox.app
     optional: true
@@ -98,7 +98,7 @@ items:
   - cask: screen-studio
     app: Screen Studio.app
     optional: true
-    note: paid; needs your licence
+    note: paid; needs your license
   - cask: sf-symbols
     app: SF Symbols.app
     optional: true

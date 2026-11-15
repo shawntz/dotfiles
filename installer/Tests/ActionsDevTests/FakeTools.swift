@@ -2,9 +2,9 @@ import Foundation
 @testable import ActionsDev
 
 /// Stateful fakes of gh, npx (skills CLI) and claude. State lives in files under the sandbox root
-/// so tests can arrange it ("already signed in", "key already uploaded") and inspect it afterwards.
+/// so tests can arrange it ("already signed in", "key already uploaded") and inspect it afterward.
 extension DevSandbox {
-    enum DeviceFlowBehaviour: String {
+    enum DeviceFlowBehavior: String {
         /// `! First copy your one-time code: 1A2B-C3D4`, then success.
         case code
         /// `! One-time code (ABCD-EF12) copied to clipboard`, then success.
@@ -23,7 +23,7 @@ extension DevSandbox {
 
     var ghState: URL { root.appendingPathComponent("gh") }
 
-    func installFakeGh(flow: DeviceFlowBehaviour = .code, hostKeys: [String] = gitHubHostKeyLines) {
+    func installFakeGh(flow: DeviceFlowBehavior = .code, hostKeys: [String] = gitHubHostKeyLines) {
         try! FileManager.default.createDirectory(at: ghState, withIntermediateDirectories: true)
         directory.write("gh/flow", flow.rawValue)
         directory.write("gh/meta", hostKeys.joined(separator: "\n") + "\n")

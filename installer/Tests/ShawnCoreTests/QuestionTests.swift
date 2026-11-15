@@ -167,9 +167,9 @@ final class QuestionConfigTests: XCTestCase {
             prompt: Asked twice
           - var: nickname
             prompt: Asked a third time
-          - var: colour
+          - var: color
             prompt: Pick one
-            format: colour
+            format: color
           - var: motto
             prompt: "two\\nlines"
             default_command: "  "
@@ -183,7 +183,7 @@ final class QuestionConfigTests: XCTestCase {
         XCTAssertTrue(text.contains("ask[4]: unknown key 'promt'. Did you mean 'prompt'?"), text)
         XCTAssertTrue(text.contains("ask[4]: missing required key 'prompt'"), text)
         XCTAssertTrue(text.contains("ask[6]: 'nickname' is already asked by ask[4]"), text)
-        XCTAssertTrue(text.contains("ask[7]: 'format' must be one of: text, email (got 'colour')"), text)
+        XCTAssertTrue(text.contains("ask[7]: 'format' must be one of: text, email (got 'color')"), text)
         XCTAssertTrue(text.contains("ask[8]: 'prompt' must be one line"), text)
         XCTAssertTrue(text.contains("ask[8]: 'default_command' must not be empty"), text)
         XCTAssertTrue(text.contains("ask[9]: missing required key 'var'"), text)

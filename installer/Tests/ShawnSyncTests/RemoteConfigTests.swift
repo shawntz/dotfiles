@@ -426,7 +426,7 @@ final class RemoteConfigTests: XCTestCase {
     }
 
     func testFilesAreNeverWrittenOutsideTheStagingDirectory() async throws {
-        // FetchPlan.make refuses such entries; this checks the second line of defence on its own.
+        // FetchPlan.make refuses such entries; this checks the second line of defense on its own.
         let commit = FakeRepo.commitSHA("first")
         let staging = temp.url.appendingPathComponent("cache/.staging-test")
         try FileManager.default.createDirectory(at: staging, withIntermediateDirectories: true)
@@ -531,12 +531,12 @@ final class RemoteConfigTests: XCTestCase {
     }
 
     func testBrokenRemoteConfigFallsBackNamingTheProblem() async throws {
-        let repo = FakeRepo.standard(extraStep: "id: extra\ntitle: Extra\nitems:\n  - ok: x\n    colour: blue\n")
+        let repo = FakeRepo.standard(extraStep: "id: extra\ntitle: Extra\nitems:\n  - ok: x\n    color: blue\n")
         repo.serve(on: transport)
 
         let result = await upgrade()
 
-        assertFellBack(result, mentioning: ["does not load with this installer", "colour", "otherwise the config on GitHub needs fixing"])
+        assertFellBack(result, mentioning: ["does not load with this installer", "color", "otherwise the config on GitHub needs fixing"])
     }
 
     // MARK: Deadline

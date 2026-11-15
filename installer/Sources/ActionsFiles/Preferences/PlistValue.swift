@@ -144,7 +144,7 @@ enum PlistValue: Equatable, Sendable, CustomStringConvertible {
         return String(number)
     }
 
-    /// Serialises a dictionary as a property list.
+    /// Serializes a dictionary as a property list.
     static func encode(_ values: [String: PlistValue], format: PropertyListSerialization.PropertyListFormat) throws -> Data {
         try PropertyListSerialization.data(fromPropertyList: values.mapValues(\.foundationObject), format: format, options: 0)
     }

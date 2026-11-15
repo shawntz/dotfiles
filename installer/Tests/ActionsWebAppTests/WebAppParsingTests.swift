@@ -38,7 +38,7 @@ final class WebAppParsingTests: XCTestCase {
         XCTAssertEqual(WebAppRules.defaultBundleID(for: "My Carbon App!"), "com.shawnschwartz.webapp.my-carbon-app")
     }
 
-    func testEveryOptionIsReadAndHostsAreNormalised() throws {
+    func testEveryOptionIsReadAndHostsAreNormalized() throws {
         let sandbox = WebAppSandbox(items: """
           - webapp: Carbon
             url: https://my.carbonapp.co
@@ -131,7 +131,7 @@ final class WebAppParsingTests: XCTestCase {
         XCTAssertTrue(text.contains("'url' must be a full https:// address"), text)
     }
 
-    func testHostNormalisation() {
+    func testHostNormalization() {
         XCTAssertEqual(WebAppRules.normalizedHost("Twitter.COM."), "twitter.com")
         XCTAssertEqual(WebAppRules.normalizedHost("*.twimg.com"), "twimg.com")
         XCTAssertEqual(WebAppRules.normalizedHost("localhost"), "localhost")

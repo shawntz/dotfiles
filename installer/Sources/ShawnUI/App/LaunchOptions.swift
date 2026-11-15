@@ -37,7 +37,7 @@ public struct LaunchOptions: Equatable, Sendable {
     public var configRef: String?
     /// Run against `SystemEnvironment.sandbox(root:)` instead of this Mac.
     public var sandboxRoot: String?
-    /// Dry run + fresh + start straight away, slowed down so it can be watched.
+    /// Dry run + fresh + start right away, slowed down so it can be watched.
     public var demo = false
     /// Swap in the built-in simulation config and kinds (design review, UI tests).
     public var simulate = false

@@ -13,7 +13,7 @@ enum Dispatcher {
 
     static let globalOptions: [OptionSpec] = [
         OptionSpec("no-update", "Skip shawn's own update check and the tool update before claude/codex/grok (also right after a YAML command: shawn claude --no-update)"),
-        OptionSpec("no-color", "Plain output without colours (also: NO_COLOR=1)"),
+        OptionSpec("no-color", "Plain output without colors (also: NO_COLOR=1)"),
         OptionSpec("config", value: "DIR", "Use this config directory"),
         OptionSpec("version", "Print the version"),
     ]

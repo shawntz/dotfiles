@@ -11,7 +11,7 @@ final class GitHubActionTests: XCTestCase {
         title: Test Mac
     """
 
-    private func prepared(flow: DevSandbox.DeviceFlowBehaviour = .code, baseEnvironment: [String: String] = ProcessInfo.processInfo.environment,
+    private func prepared(flow: DevSandbox.DeviceFlowBehavior = .code, baseEnvironment: [String: String] = ProcessInfo.processInfo.environment,
                           hostKeys: [String] = gitHubHostKeyLines) throws -> (DevSandbox, GitHubAction, PlannedItem, InstallPlan) {
         let sandbox = DevSandbox(baseEnvironment: baseEnvironment)
         sandbox.installFakeGh(flow: flow, hostKeys: hostKeys)
@@ -36,7 +36,7 @@ final class GitHubActionTests: XCTestCase {
         XCTAssertEqual(shown.last?.code, "1A2B-C3D4")
         XCTAssertEqual(shown.last?.url, URL(string: "https://github.com/login/device"))
         XCTAssertEqual(shown.last?.title, "Sign in to GitHub (github.com)")
-        XCTAssertNil(sandbox.attentions.last ?? Attention(title: "", message: ""), "the callout is cleared afterwards")
+        XCTAssertNil(sandbox.attentions.last ?? Attention(title: "", message: ""), "the callout is cleared afterward")
 
         // Keys were uploaded once per type, with GH_HOST naming the host.
         let pub = try XCTUnwrap(SSHPublicKey(line: sandbox.readHome(".ssh/id_ed25519.pub") ?? ""))
@@ -137,14 +137,14 @@ final class GitHubActionTests: XCTestCase {
 
     /// The usual way an unattended sign-in ends: gh reaches the code's expiry first and exits 1 itself.
     func testDeviceFlowExpiryInsideGhIsNeedsAttention() async throws {
-        for flow in [DevSandbox.DeviceFlowBehaviour.expire, .expiredToken] {
+        for flow in [DevSandbox.DeviceFlowBehavior.expire, .expiredToken] {
             let (sandbox, action, item, plan) = try prepared(flow: flow)
             let outcome = try await action.run(sandbox.context(item, plan))
             XCTAssertEqual(outcome, .needsAttention("GitHub sign-in was not finished within 15 minutes"), "\(flow)")
             XCTAssertEqual(sandbox.followUps.map(\.title), ["Sign in to GitHub (github.com)"], "\(flow)")
             XCTAssertEqual(sandbox.followUps.first?.url, URL(string: "https://github.com/login/device"))
             XCTAssertEqual(sandbox.attentions.compactMap { $0 }.last?.code, "1A2B-C3D4", "the code was shown while gh waited")
-            XCTAssertNil(sandbox.attentions.last ?? Attention(title: "", message: ""), "and cleared afterwards")
+            XCTAssertNil(sandbox.attentions.last ?? Attention(title: "", message: ""), "and cleared afterward")
             XCTAssertEqual(sandbox.ghRegisteredKeys("authentication"), [], "nothing after sign-in ran")
         }
     }

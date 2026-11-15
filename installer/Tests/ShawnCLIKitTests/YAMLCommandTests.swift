@@ -99,7 +99,7 @@ final class YAMLCommandTests: XCTestCase {
         XCTAssertTrue(request.environment["PATH"]?.contains(harness.sandbox.environment.localBin.path) ?? false, "installer tool dirs appended to PATH")
     }
 
-    func testUpdateRunsBeforeExecAndIsSummarisedInOneLine() async throws {
+    func testUpdateRunsBeforeExecAndIsSummarizedInOneLine() async throws {
         let harness = makeHarness()
         harness.launcher.respond("claude update", stdout: "Current version: 2.1.325\nChecking for updates to latest version...\nClaude Code is up to date (2.1.325)\n")
         _ = await harness.run(["claude"])

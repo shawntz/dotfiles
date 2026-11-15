@@ -3,7 +3,7 @@ import ShawnFun
 import SwiftUI
 
 /// Where a sprite's pixels go inside a box: the largest whole-number scale that fits (so pixels stay
-/// square and crisp), centred horizontally and standing on the bottom edge.
+/// square and crisp), centered horizontally and standing on the bottom edge.
 struct SpriteLayout: Equatable {
     let scale: CGFloat
     let origin: CGPoint
@@ -27,34 +27,34 @@ struct SpriteLayout: Equatable {
 
     var drawnSize: CGSize { CGSize(width: CGFloat(spriteWidth) * scale, height: CGFloat(spriteHeight) * scale) }
 
-    /// A horizontal run of same-coloured pixels in one frame.
+    /// A horizontal run of same-colored pixels in one frame.
     struct Run: Equatable {
         let row: Int
         let column: Int
         let length: Int
-        let colour: RGBA
+        let color: RGBA
     }
 
-    /// Merges neighbouring pixels of one colour so each run is a single rectangle (no hairline seams).
+    /// Merges neighboring pixels of one color so each run is a single rectangle (no hairline seams).
     static func runs(in frame: SpriteFrame) -> [Run] {
         var runs: [Run] = []
         for (row, pixels) in frame.pixels.enumerated() {
             var column = 0
             while column < pixels.count {
-                guard let colour = pixels[column], colour.alpha > 0 else {
+                guard let color = pixels[column], color.alpha > 0 else {
                     column += 1
                     continue
                 }
                 var end = column + 1
-                while end < pixels.count, pixels[end] == colour { end += 1 }
-                runs.append(Run(row: row, column: column, length: end - column, colour: colour))
+                while end < pixels.count, pixels[end] == color { end += 1 }
+                runs.append(Run(row: row, column: column, length: end - column, color: color))
                 column = end
             }
         }
         return runs
     }
 
-    /// The rectangle for a run of `frame`, which is bottom-centred within the sprite's own box when smaller.
+    /// The rectangle for a run of `frame`, which is bottom-centered within the sprite's own box when smaller.
     func rect(for run: Run, frameWidth: Int, frameHeight: Int) -> CGRect {
         let offsetX = CGFloat((spriteWidth - frameWidth) / 2)
         let offsetY = CGFloat(spriteHeight - frameHeight)
@@ -131,7 +131,7 @@ private struct PixelCanvas: View {
             let frame = sprite.frames[frameIndex]
             for run in SpriteLayout.runs(in: frame) {
                 let rect = layout.rect(for: run, frameWidth: frame.width, frameHeight: frame.height)
-                context.fill(Path(rect), with: .color(run.colour.color), style: FillStyle(antialiased: false))
+                context.fill(Path(rect), with: .color(run.color.color), style: FillStyle(antialiased: false))
             }
         }
     }

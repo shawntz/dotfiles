@@ -89,7 +89,7 @@ struct UpdateCommand: BuiltinCommand {
     commits that change the Swift sources first. Without a checkout, it refreshes the config from GitHub and \
     installs a newer shawn-v* release after checking its sha256. --rebuild rebuilds from the checkout even when \
     the record says shawn is current (for a binary copied in by hand). The exit status is 0 only when everything \
-    is current afterwards, or, with --check, when the update could go ahead as things stand. \
+    is current afterward, or, with --check, when the update could go ahead as things stand. \
     Set self_update.mode in cli.yaml to always, daily or off for the automatic check.
     """
     let options = [
@@ -140,7 +140,7 @@ struct UpdateCommand: BuiltinCommand {
     }
 
     /// What `shawn update` says last, and its exit status, for every outcome: success only when shawn and the
-    /// config are current afterwards (or, with `--check`, when the check itself worked).
+    /// config are current afterward (or, with `--check`, when the check itself worked).
     static func summary(of report: SelfUpdater.Report) -> Summary {
         let pulled = report.pulledCommits > 0 ? "pulled \(report.pulledCommits) commit\(report.pulledCommits == 1 ? "" : "s")" : nil
         func afterPull(_ text: String, joiner: String = ", but ") -> String { pulled.map { $0 + joiner + text } ?? text }

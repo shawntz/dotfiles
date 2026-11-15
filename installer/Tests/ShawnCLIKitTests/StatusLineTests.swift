@@ -80,7 +80,7 @@ final class StatusLineTests: XCTestCase {
         XCTAssertEqual(StatusLineRenderer(style: .off, columns: 100, home: home, quips: []).quip(for: a).map { StatusLineRenderer.fallbackQuips.contains($0) }, true)
     }
 
-    func testMeterColourShiftsAsItFills() {
+    func testMeterColorShiftsAsItFills() {
         let renderer = StatusLineRenderer(style: Style(enabled: true, trueColor: true), columns: 100, home: home, quips: [])
         XCTAssertTrue(renderer.meter(10, compact: false).contains("38;2;124;242;176"), "mint while there is room")
         XCTAssertTrue(renderer.meter(60, compact: false).contains("38;2;255;230;109"), "yellow past half")
@@ -131,12 +131,12 @@ final class StatusLineTests: XCTestCase {
         XCTAssertEqual(garbage.err.text, "")
     }
 
-    func testColourIsOnWithoutATTYUnlessNoColor() async {
+    func testColorIsOnWithoutATTYUnlessNoColor() async {
         let harness = Harness(sandbox: Sandbox(extraEnvironment: ["COLUMNS": "100"]), stdin: Self.sample) { services in
             services.statusGit = FakeStatusGit(root: nil, status: nil)
         }
         _ = await harness.run(["statusline"])
-        XCTAssertTrue(harness.out.text.contains("\u{1B}[38;2;"), "Claude Code renders ANSI colour even though stdout is a pipe")
+        XCTAssertTrue(harness.out.text.contains("\u{1B}[38;2;"), "Claude Code renders ANSI color even though stdout is a pipe")
         let plain = Harness(sandbox: Sandbox(extraEnvironment: ["COLUMNS": "100"]), stdin: Self.sample) { services in
             services.statusGit = FakeStatusGit(root: nil, status: nil)
         }

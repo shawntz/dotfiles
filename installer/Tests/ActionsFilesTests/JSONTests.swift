@@ -177,7 +177,7 @@ final class JSONTests: XCTestCase {
     }
 
     /// JSON keys are compared code point by code point: "é" written precomposed and as e + combining accent are two keys.
-    func testKeysThatDifferOnlyInUnicodeNormalisationStayApart() throws {
+    func testKeysThatDifferOnlyInUnicodeNormalizationStayApart() throws {
         let composed = "Caf\u{E9}"
         let decomposed = "Cafe\u{301}"
         let existing = try JSONParser.parse(#"{"Café": 1, "Café": 2, "other": 0}"#)

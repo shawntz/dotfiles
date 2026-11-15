@@ -16,7 +16,7 @@ mascot: lsp
 
 items:
   # ── Xcode ──────────────────────────────────────────────────────────────
-  # Accepts Xcode's licence, runs its first-launch setup, then selects it. A different
+  # Accepts Xcode's license, runs its first-launch setup, then selects it. A different
   # full Xcode you selected yourself, such as a beta, stays selected.
   - xcode: finish
   - xcode: finish
@@ -34,7 +34,7 @@ items:
     detail: >-
       1Password first, since it holds the other passwords; then Chrome, Slack,
       Spotify, Granola, Cursor, Claude, Docker and Wispr Flow. Superkey and
-      Middle need their licence keys.
+      Middle need their license keys.
   - manual: Allow the helper apps to control your Mac
     detail: >-
       Open Superkey, Middle and Wispr Flow once. Each asks for Accessibility

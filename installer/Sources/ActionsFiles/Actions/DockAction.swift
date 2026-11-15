@@ -6,7 +6,7 @@ import ShawnCore
 /// Tiles use the minimal format Apple's own default Dock and dockutil write (see research/apps-dock-system.md):
 /// `tile-data.file-data {_CFURLString: <POSIX path>, _CFURLStringType: 0}` plus `file-label` and `file-type`.
 /// The Dock fills in bookmarks, bundle ids and dates itself when it restarts, and rewrites the path as a
-/// `file://` URL, so comparisons normalise both spellings.
+/// `file://` URL, so comparisons normalize both spellings.
 struct DockAction: Action {
     struct AppEntry: Sendable, Equatable {
         /// The app, then its fallbacks: names (`Google Chrome`) or paths. The first one found is used, unless a
@@ -196,7 +196,7 @@ struct DockAction: Action {
 
     // MARK: Tiles
 
-    /// What a tile points at, normalised so the Dock's own `file://` spelling compares equal to a plain path.
+    /// What a tile points at, normalized so the Dock's own `file://` spelling compares equal to a plain path.
     enum TileIdentity: Equatable {
         case file(String)
         case folder(path: String, view: Int?, display: Int?, sort: Int?)

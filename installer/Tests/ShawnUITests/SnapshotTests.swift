@@ -20,7 +20,7 @@ final class SnapshotTests: XCTestCase {
         let bitmap = try XCTUnwrap(NSBitmapImageRep(data: data), file: file, line: line)
         XCTAssertEqual(bitmap.pixelsWide, Int(size.width) * scale, file: file, line: line)
         XCTAssertEqual(bitmap.pixelsHigh, Int(size.height) * scale, file: file, line: line)
-        // A blank or single-colour image compresses to almost nothing; a real screen does not.
+        // A blank or single-color image compresses to almost nothing; a real screen does not.
         XCTAssertGreaterThan(data.count, 40_000, "the image has real content", file: file, line: line)
         // The background must be the CRT purple-black, not white or transparent.
         let corner = try XCTUnwrap(bitmap.colorAt(x: 4, y: bitmap.pixelsHigh - 4)?.usingColorSpace(.sRGB), file: file, line: line)

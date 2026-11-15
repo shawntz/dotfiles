@@ -133,10 +133,10 @@ commands:
 
   grok:
     section: AI
-    summary: Grok CLI in your terminal's own colours (updates first)
+    summary: Grok CLI in your terminal's own colors (updates first)
     usage: "[grok arguments…]"
     help: |
-      Runs `grok update`, then starts grok with its "terminal" theme, so it wears the same colours
+      Runs `grok update`, then starts grok with its "terminal" theme, so it wears the same colors
       as Ghostty and Herdr. (Grok's status line can only be set in ~/.grok/config.toml.)
     update: grok update
     update_timeout: 60

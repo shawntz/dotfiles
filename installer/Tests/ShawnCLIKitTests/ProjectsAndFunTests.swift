@@ -136,14 +136,14 @@ final class FunTests: XCTestCase {
         return FunConfig.parseSprite(map, file: "blob.yaml", config: nil, collector: collector)!
     }
 
-    func testColourPolicyMapsOntoTheSharedSpriteRenderer() {
+    func testColorPolicyMapsOntoTheSharedSpriteRenderer() {
         XCTAssertEqual(Style.off.spriteColorMode, .plain)
-        XCTAssertEqual(Style(enabled: false, trueColor: true).spriteColorMode, .plain, "no colour means no escapes, whatever the terminal")
+        XCTAssertEqual(Style(enabled: false, trueColor: true).spriteColorMode, .plain, "no color means no escapes, whatever the terminal")
         XCTAssertEqual(Style(enabled: true, trueColor: true).spriteColorMode, .trueColor)
         XCTAssertEqual(Style(enabled: true, trueColor: false).spriteColorMode, .ansi256)
     }
 
-    func testHalfBlocksWithoutColourShowTheSilhouette() {
+    func testHalfBlocksWithoutColorShowTheSilhouette() {
         let lines = Style.off.spriteRenderer.render(sprite().frames[0])
         XCTAssertEqual(lines, ["▄██▄", "▀██▀"])
         // The shared renderer pads an odd number of rows at the top, so the art stands on its last line.
@@ -151,14 +151,14 @@ final class FunTests: XCTestCase {
         XCTAssertEqual(Style.off.spriteRenderer.render(odd), ["▄▄"])
     }
 
-    func testHalfBlocksWithColourUseForegroundAndBackground() {
+    func testHalfBlocksWithColorUseForegroundAndBackground() {
         let lines = Style(enabled: true, trueColor: true).spriteRenderer.render(sprite().frames[0])
         XCTAssertEqual(lines.count, 2)
         XCTAssertTrue(lines[0].hasPrefix("\u{1B}[38;2;181;126;220m▄"), lines[0])
         XCTAssertTrue(lines[0].contains("\u{1B}[48;2;255;230;109m▀"), "lavender (already the foreground) over yellow in one cell")
         XCTAssertTrue(lines[0].hasSuffix("\u{1B}[0m"))
         XCTAssertEqual(ANSIText.strip(lines[0]), "▄▀▀▄")
-        // Two pixels of one colour: a space on that background (the shared renderer's way of filling a cell).
+        // Two pixels of one color: a space on that background (the shared renderer's way of filling a cell).
         XCTAssertEqual(ANSIText.strip(lines[1]), "▀  ▀")
         let palette256 = Style(enabled: true, trueColor: false).spriteRenderer.render(sprite().frames[0])
         XCTAssertTrue(palette256[0].contains("\u{1B}[38;5;"))
@@ -170,9 +170,9 @@ final class FunTests: XCTestCase {
         XCTAssertEqual(wrapped.count, 5)
         XCTAssertEqual(Set(wrapped.map { TextWidth.of($0) }).count, 1, "every row the same width")
 
-        let coloured = Painter.bubble("Oh my glob", maxWidth: 40, style: Style(enabled: true, trueColor: true), tail: .left)
-        XCTAssertEqual(coloured.map(ANSIText.strip), [" ╭────────────╮", "─┤ Oh my glob │", " ╰────────────╯"])
-        XCTAssertTrue(coloured[1].contains("\u{1B}[38;2;255;230;109m Oh my glob "), "the words in the quote colour, the frame in lavender")
+        let colored = Painter.bubble("Oh my glob", maxWidth: 40, style: Style(enabled: true, trueColor: true), tail: .left)
+        XCTAssertEqual(colored.map(ANSIText.strip), [" ╭────────────╮", "─┤ Oh my glob │", " ╰────────────╯"])
+        XCTAssertTrue(colored[1].contains("\u{1B}[38;2;255;230;109m Oh my glob "), "the words in the quote color, the frame in lavender")
 
         let speaking = Painter.speaking(sprite(), says: "Oh my glob", style: .off, width: 80)
         XCTAssertEqual(speaking, ["  ▄██▄  ╭────────────╮", "  ▀██▀ ─┤ Oh my glob │", "        ╰────────────╯"])
@@ -243,7 +243,7 @@ final class FunTests: XCTestCase {
         XCTAssertEqual(TextWidth.wrap("one two three four", width: 9), ["one two", "three", "four"])
     }
 
-    func testColourPolicy() {
+    func testColorPolicy() {
         XCTAssertFalse(ColorPolicy(environment: ["NO_COLOR": "1"], noColorFlag: false).allows(tty: true))
         XCTAssertFalse(ColorPolicy(environment: [:], noColorFlag: true).allows(tty: true))
         XCTAssertFalse(ColorPolicy(environment: ["TERM": "dumb"], noColorFlag: false).allows(tty: true))

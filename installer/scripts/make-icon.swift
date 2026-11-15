@@ -94,7 +94,7 @@ struct Canvas {
                width: CGFloat(width) * cell, height: CGFloat(height) * cell)
     }
 
-    /// Draws `art` with its top-left cell at (column, row); `colors` maps characters to colours.
+    /// Draws `art` with its top-left cell at (column, row); `colors` maps characters to colors.
     func pixelArt(_ art: [String], column: Int, row: Int, colors: [Character: CGColor]) {
         for (y, line) in art.enumerated() {
             for (x, character) in line.enumerated() {
@@ -214,7 +214,7 @@ func drawScreen(_ canvas: Canvas) {
                                    startCenter: sheenCenter, startRadius: 0, endCenter: sheenCenter,
                                    endRadius: screenRect.width * 0.55, options: [])
     }
-    // Vignette: the tube darkens towards its corners.
+    // Vignette: the tube darkens toward its corners.
     context.drawRadialGradient(linearGradient([CGColor(srgbRed: 0, green: 0, blue: 0, alpha: 0),
                                                CGColor(srgbRed: 0, green: 0, blue: 0, alpha: 0.55)], locations: [0.55, 1]),
                                startCenter: center, startRadius: 0, endCenter: center, endRadius: screenRect.width * 0.78,

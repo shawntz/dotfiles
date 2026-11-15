@@ -12,23 +12,23 @@ struct Terminal: Sendable, Equatable {
     var stdinIsTTY: Bool
     /// Columns available on stdout.
     var width: Int
-    /// Colour on stdout.
+    /// Color on stdout.
     var color: Bool
-    /// Colour on stderr (notes, update lines).
+    /// Color on stderr (notes, update lines).
     var stderrColor: Bool
-    /// 24-bit colour escapes are understood (otherwise the 256-colour palette is used).
+    /// 24-bit color escapes are understood (otherwise the 256-color palette is used).
     var trueColor: Bool
 
-    /// No TTY, no colour: what tests and log files see.
+    /// No TTY, no color: what tests and log files see.
     static func plain(width: Int = 80) -> Terminal {
         Terminal(stdoutIsTTY: false, stderrIsTTY: false, stdinIsTTY: false, width: width, color: false, stderrColor: false, trueColor: false)
     }
 
     /// Looks at the real file descriptors and the environment.
     ///
-    /// Colour follows the usual conventions: `NO_COLOR` (any non-empty value) or `--no-color` turn it off,
+    /// Color follows the usual conventions: `NO_COLOR` (any non-empty value) or `--no-color` turn it off,
     /// `TERM=dumb` turns it off, `CLICOLOR_FORCE`/`FORCE_COLOR` turn it on even without a TTY, otherwise
-    /// a stream gets colour only when it is a terminal.
+    /// a stream gets color only when it is a terminal.
     static func detect(environment: [String: String], noColorFlag: Bool) -> Terminal {
         let stdoutTTY = isatty(STDOUT_FILENO) == 1
         let stderrTTY = isatty(STDERR_FILENO) == 1
@@ -48,7 +48,7 @@ struct Terminal: Sendable, Equatable {
     static func supportsTrueColor(_ environment: [String: String]) -> Bool {
         let colorTerm = environment["COLORTERM"]?.lowercased() ?? ""
         if colorTerm == "truecolor" || colorTerm == "24bit" { return true }
-        // Terminals that support 24-bit colour but do not always export COLORTERM.
+        // Terminals that support 24-bit color but do not always export COLORTERM.
         let program = environment["TERM_PROGRAM"] ?? ""
         return ["ghostty", "iTerm.app", "WezTerm", "vscode", "Herdr"].contains(program)
     }
@@ -86,7 +86,7 @@ struct ColorPolicy: Equatable {
     }
 }
 
-/// The house colours: a CRT from a universe where Lumpy Space is real.
+/// The house colors: a CRT from a universe where Lumpy Space is real.
 enum Palette {
     static let lavender = RGBA(red: 0xB5, green: 0x7E, blue: 0xDC)
     static let pink = RGBA(red: 0xFF, green: 0x8A, blue: 0xD8)
@@ -98,7 +98,7 @@ enum Palette {
     static let dim = RGBA(red: 0x8A, green: 0x82, blue: 0x99)
 }
 
-/// Wraps text in ANSI escapes, or returns it untouched when colour is off.
+/// Wraps text in ANSI escapes, or returns it untouched when color is off.
 struct Style: Sendable, Equatable {
     var enabled: Bool
     var trueColor: Bool
@@ -138,14 +138,14 @@ struct Style: Sendable, Equatable {
         return "\u{1B}[48;5;\(xterm256(color))m"
     }
 
-    /// Nearest entry of the xterm 6×6×6 colour cube (or the grey ramp for greys).
+    /// Nearest entry of the xterm 6×6×6 color cube (or the gray ramp for grays).
     static func xterm256(_ color: RGBA) -> Int {
         let r = Int(color.red), g = Int(color.green), b = Int(color.blue)
         if abs(r - g) < 10 && abs(g - b) < 10 {
-            let grey = (r + g + b) / 3
-            if grey < 8 { return 16 }
-            if grey > 238 { return 231 }
-            return 232 + (grey - 8) * 24 / 231
+            let gray = (r + g + b) / 3
+            if gray < 8 { return 16 }
+            if gray > 238 { return 231 }
+            return 232 + (gray - 8) * 24 / 231
         }
         func level(_ value: Int) -> Int { value < 48 ? 0 : value < 115 ? 1 : (value - 35) / 40 }
         return 16 + 36 * level(r) + 6 * level(g) + level(b)

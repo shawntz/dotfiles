@@ -104,7 +104,7 @@ public enum SpeechBubble {
 
     /// The bubble's lines, all the same display width. Text is wrapped to `maxTextWidth` columns and
     /// the bubble shrinks to fit short text. A tail adds one column on its side; it sits on the middle
-    /// text line (see `tailLine(textLineCount:)`). Plain text: colour it afterwards if needed.
+    /// text line (see `tailLine(textLineCount:)`). Plain text: color it afterward if needed.
     public static func render(_ text: String, maxTextWidth: Int = 36, tail: Tail = .left) -> [String] {
         let rows = TerminalText.wrap(text, width: maxTextWidth)
         let innerWidth = max(1, rows.map(TerminalText.displayWidth).max() ?? 0)

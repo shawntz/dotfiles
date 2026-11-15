@@ -101,7 +101,7 @@ func promptingRegistry(_ calls: ItemCalls) -> ActionRegistry {
 }
 
 /// Holds `stop()` at the moment it answers `prompt` until the engine has acted on that answer (`acted` is
-/// signalled) or half a second has passed. The hook runs inside `stop()`, on the main thread, so whatever the
+/// signaled) or half a second has passed. The hook runs inside `stop()`, on the main thread, so whatever the
 /// engine does with the answer happens before `stop()` goes on: if the run were not cancelled by then, the
 /// item would carry on as if nobody had pressed STOP. That is the race a real Stop & Quit loses only now and
 /// then; here it is lost every time. (The hook takes the place of the model's own "take the sheet down"

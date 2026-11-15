@@ -140,7 +140,7 @@ enum Suggest {
         return best?.candidate
     }
 
-    /// Levenshtein distance where swapping two neighbouring letters counts as one edit.
+    /// Levenshtein distance where swapping two neighboring letters counts as one edit.
     static func editDistance(_ lhs: String, _ rhs: String) -> Int {
         let left = Array(lhs), right = Array(rhs)
         if left.isEmpty { return right.count }

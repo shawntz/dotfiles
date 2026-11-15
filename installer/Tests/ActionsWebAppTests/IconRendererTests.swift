@@ -30,7 +30,7 @@ final class IconRendererTests: XCTestCase {
 
     func testOpaqueSquareIsFullBleed() throws {
         let image = try IconRenderer.decode(TestImages.solidPNG(size: 180))
-        let analysis = try IconRenderer.analyse(image)
+        let analysis = try IconRenderer.analyze(image)
         XCTAssertEqual(analysis.shape, .fullBleed)
         XCTAssertEqual(analysis.contentRect, CGRect(x: 0, y: 0, width: 180, height: 180))
         XCTAssertFalse(analysis.isLight)
@@ -42,7 +42,7 @@ final class IconRendererTests: XCTestCase {
             context.setFillColor(CGColor(srgbRed: 0, green: 0, blue: 1, alpha: 1))
             context.fill(CGRect(x: 20, y: 120, width: 60, height: 60))   // CG origin is bottom left: this is near the top
         }
-        let analysis = try IconRenderer.analyse(image)
+        let analysis = try IconRenderer.analyze(image)
         XCTAssertEqual(analysis.shape, .fullBleed)
         XCTAssertEqual(analysis.contentRect, CGRect(x: 20, y: 20, width: 60, height: 60))
     }
@@ -53,7 +53,7 @@ final class IconRendererTests: XCTestCase {
             context.setFillColor(CGColor(srgbRed: 0.2, green: 0.6, blue: 0.3, alpha: 1))
             context.fillPath()
         }
-        XCTAssertEqual(try IconRenderer.analyse(image).shape, .shaped)
+        XCTAssertEqual(try IconRenderer.analyze(image).shape, .shaped)
     }
 
     func testCircleAndThinLogoAreGlyphsAndWhiteLogosAreLight() throws {
@@ -61,7 +61,7 @@ final class IconRendererTests: XCTestCase {
             context.setFillColor(CGColor(srgbRed: 1, green: 0.5, blue: 0, alpha: 1))
             context.fillEllipse(in: CGRect(x: 0, y: 0, width: 256, height: 256))
         }
-        XCTAssertEqual(try IconRenderer.analyse(circle).shape, .glyph)
+        XCTAssertEqual(try IconRenderer.analyze(circle).shape, .glyph)
 
         let whiteCross = TestImages.image(width: 256, height: 256) { context in
             context.setStrokeColor(CGColor(gray: 1, alpha: 1))
@@ -70,28 +70,28 @@ final class IconRendererTests: XCTestCase {
             context.move(to: CGPoint(x: 40, y: 216)); context.addLine(to: CGPoint(x: 216, y: 40))
             context.strokePath()
         }
-        let analysis = try IconRenderer.analyse(whiteCross)
+        let analysis = try IconRenderer.analyze(whiteCross)
         XCTAssertEqual(analysis.shape, .glyph)
         XCTAssertTrue(analysis.isLight)
     }
 
     func testFullyTransparentImageIsRejected() {
         let empty = TestImages.image(width: 64, height: 64) { _ in }
-        XCTAssertThrowsError(try IconRenderer.normalise(empty)) { error in
+        XCTAssertThrowsError(try IconRenderer.normalize(empty)) { error in
             XCTAssertTrue("\(error)".contains("completely transparent"), "\(error)")
         }
     }
 
-    // MARK: Normalising
+    // MARK: Normalizing
 
     func testFullBleedArtworkIsMaskedToTheRoundedSquareWithAMargin() throws {
-        let icon = try IconRenderer.normalise(IconRenderer.decode(TestImages.solidPNG(size: 300)))
+        let icon = try IconRenderer.normalize(IconRenderer.decode(TestImages.solidPNG(size: 300)))
         XCTAssertEqual(icon.width, 1024)
         XCTAssertEqual(icon.height, 1024)
         XCTAssertEqual(TestImages.pixel(icon, x: 4, y: 4).alpha, 0, "the margin stays transparent")
-        let centre = TestImages.pixel(icon, x: 512, y: 512)
-        XCTAssertEqual(centre.alpha, 255)
-        XCTAssertGreaterThan(centre.red, 200)
+        let center = TestImages.pixel(icon, x: 512, y: 512)
+        XCTAssertEqual(center.alpha, 255)
+        XCTAssertGreaterThan(center.red, 200)
         // 40 px in from the body's corner lies outside a 185 px corner radius: masked away (at most faint shadow).
         let corner = TestImages.pixel(icon, x: 140, y: 140)
         XCTAssertLessThan(corner.alpha, 128)
@@ -99,14 +99,14 @@ final class IconRendererTests: XCTestCase {
     }
 
     func testShapedArtworkIsNotRoundedTwice() throws {
-        // A gently rounded tile (radius 10 %): its corner pixels survive normalisation even though they fall
+        // A gently rounded tile (radius 10 %): its corner pixels survive normalization even though they fall
         // outside the standard 22.5 % corner, because already-shaped artwork is never masked again.
         let tile = TestImages.image(width: 500, height: 500) { context in
             context.addPath(CGPath(roundedRect: CGRect(x: 0, y: 0, width: 500, height: 500), cornerWidth: 50, cornerHeight: 50, transform: nil))
             context.setFillColor(CGColor(srgbRed: 0.1, green: 0.2, blue: 0.9, alpha: 1))
             context.fillPath()
         }
-        let icon = try IconRenderer.normalise(tile)
+        let icon = try IconRenderer.normalize(tile)
         XCTAssertEqual(icon.width, 1024)
         XCTAssertEqual(TestImages.pixel(icon, x: 140, y: 140).alpha, 255)
         XCTAssertEqual(TestImages.pixel(icon, x: 95, y: 512).alpha, 0, "scaled to the 824 px body, with the margin kept")
@@ -118,10 +118,10 @@ final class IconRendererTests: XCTestCase {
             context.setFillColor(CGColor(srgbRed: 1, green: 0, blue: 0, alpha: 1))
             context.fillEllipse(in: CGRect(x: 0, y: 0, width: 128, height: 128))
         }
-        let icon = try IconRenderer.normalise(dot)
-        let centre = TestImages.pixel(icon, x: 512, y: 512)
-        XCTAssertEqual(centre.red, 255)
-        XCTAssertEqual(centre.green, 0)
+        let icon = try IconRenderer.normalize(dot)
+        let center = TestImages.pixel(icon, x: 512, y: 512)
+        XCTAssertEqual(center.red, 255)
+        XCTAssertEqual(center.green, 0)
         // Inside the body but outside the glyph's box: the white tile.
         let tile = TestImages.pixel(icon, x: 512, y: 140)
         XCTAssertEqual(tile.alpha, 255)
@@ -138,9 +138,9 @@ final class IconRendererTests: XCTestCase {
         XCTAssertEqual(IconRenderer.initial(of: "ßeta"), "S")
 
         XCTAssertTrue(IconRenderer.tileColor(for: "Carbon") == IconRenderer.tileColor(for: " carbon "))
-        let colours = Set(["X", "Carbon", "Gmail", "Calendar", "Linear", "Notion", "Figma", "Slack", "Drive", "Meet"]
+        let colors = Set(["X", "Carbon", "Gmail", "Calendar", "Linear", "Notion", "Figma", "Slack", "Drive", "Meet"]
             .map { "\(IconRenderer.tileColor(for: $0))" })
-        XCTAssertGreaterThan(colours.count, 3, "names spread over the palette")
+        XCTAssertGreaterThan(colors.count, 3, "names spread over the palette")
 
         let first = try IconRenderer.letterTile(for: "X")
         let second = try IconRenderer.letterTile(for: "X")
@@ -148,10 +148,10 @@ final class IconRendererTests: XCTestCase {
         XCTAssertEqual(TestImages.png(first), TestImages.png(second))
         XCTAssertEqual(TestImages.pixel(first, x: 4, y: 4).alpha, 0)
         // The X's strokes cross in the middle: white.
-        let centre = TestImages.pixel(first, x: 512, y: 512)
-        XCTAssertEqual(centre.alpha, 255)
-        XCTAssertGreaterThan(min(centre.red, centre.green, centre.blue), 240)
-        // Near the top of the body, off the letter: the tile colour.
+        let center = TestImages.pixel(first, x: 512, y: 512)
+        XCTAssertEqual(center.alpha, 255)
+        XCTAssertGreaterThan(min(center.red, center.green, center.blue), 240)
+        // Near the top of the body, off the letter: the tile color.
         let background = TestImages.pixel(first, x: 512, y: 130)
         XCTAssertEqual(background.alpha, 255)
         XCTAssertLessThan(min(background.red, background.green, background.blue), 200)

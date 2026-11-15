@@ -154,7 +154,7 @@ enum SnapshotProgress {
         }
     }
 
-    /// The item the run is on. `progress` (0 to 1) is how far it has got.
+    /// The item the run is on. `progress` (0 to 1) is how far it has gotten.
     private static func startItem(_ item: PlannedItem, position: Int, needsYou: Bool, progress: Double, model: InstallerModel) {
         model.apply(.itemStatus(itemID: item.id, status: .checking))
         // An item the run finds already done gets no further than its check.

@@ -6,7 +6,7 @@ import ShawnFun
 ///
 /// On a terminal: step headings with the step's mascot and a quip, a live "working on…" line that is
 /// rewritten in place, progress bars that overwrite themselves. Anywhere else (a pipe, a log file):
-/// one plain line per event, no cursor movement, no colour unless forced.
+/// one plain line per event, no cursor movement, no color unless forced.
 final class InstallRenderer: @unchecked Sendable {
     private let plan: InstallPlan
     private let fun: FunConfig

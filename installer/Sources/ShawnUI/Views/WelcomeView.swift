@@ -172,7 +172,7 @@ struct CustomizeView: View {
         VStack(spacing: Theme.Space.l + 2) {
             HeaderBlock(model: model, compact: true)
             TerminalPanel(title: "CUSTOMIZE") {
-                Text("OPTIONAL ITEMS START UNTICKED")
+                Text("OPTIONAL ITEMS START UNCHECKED")
                     .captionStyle(palette.faint.color)
             } content: {
                 CustomizeList(model: model)

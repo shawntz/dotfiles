@@ -6,7 +6,7 @@ import ShawnCore
 ///
 /// `exec` commands become the tool (execve), so it owns the real terminal, signals and exit status.
 /// Before that, the command's `update:` runs with its output captured, bounded by a timeout, and is
-/// summarised in one line on stderr; a failed or slow update still launches the tool. Ctrl-C during the
+/// summarized in one line on stderr; a failed or slow update still launches the tool. Ctrl-C during the
 /// update stops it (its whole process group) and shawn, and launches nothing.
 /// `run` commands replace shawn with `bash -c <script>` for the same reasons.
 enum YAMLCommandRunner {

@@ -4,17 +4,17 @@ import ShawnCore
 /// Draws pixel art in a terminal with Unicode half blocks.
 ///
 /// Each text cell shows two pixels stacked vertically: `▀` painted with the upper pixel as the
-/// foreground colour and the lower pixel as the background. Terminal cells are about twice as tall as
+/// foreground color and the lower pixel as the background. Terminal cells are about twice as tall as
 /// they are wide, so one column per pixel keeps the art square: a 16×16 sprite is 16 columns × 8 rows.
 ///
 /// Every function is pure and returns lines without newlines. A line assumes the terminal's default
-/// colours when it starts and resets them (`ESC[0m`) at its end if it changed them, so lines can be
+/// colors when it starts and resets them (`ESC[0m`) at its end if it changed them, so lines can be
 /// printed one by one or placed next to other text safely.
 public struct TerminalSpriteRenderer: Sendable {
     public enum ColorMode: String, Sendable, CaseIterable {
-        /// 24-bit colour escapes (`ESC[38;2;r;g;bm`).
+        /// 24-bit color escapes (`ESC[38;2;r;g;bm`).
         case trueColor = "truecolor"
-        /// The xterm 256-colour palette (`ESC[38;5;nm`), for terminals without 24-bit colour.
+        /// The xterm 256-color palette (`ESC[38;5;nm`), for terminals without 24-bit color.
         case ansi256 = "256"
         /// No escape sequences: the silhouette in half blocks, for pipes, log files and `NO_COLOR`.
         case plain
@@ -86,7 +86,7 @@ public struct TerminalSpriteRenderer: Sendable {
     }
 
     /// Several sprites in a row, bottom-aligned, `gap` columns apart, optionally with each name
-    /// centred underneath.
+    /// centered underneath.
     public func renderRow(_ sprites: [Sprite], frame: Int = 0, gap: Int = 2, captions: Bool = false) -> [String] {
         let blocks = sprites.map { sprite -> [String] in
             let lines = render(sprite, frame: frame)
@@ -98,7 +98,7 @@ public struct TerminalSpriteRenderer: Sendable {
     // MARK: Speech
 
     /// `spriteLines` with a speech bubble saying `text` to its right, the bubble's tail pointing at the
-    /// sprite and both centred on each other vertically. `bubbleColor` tints the bubble and its text
+    /// sprite and both centered on each other vertically. `bubbleColor` tints the bubble and its text
     /// (ignored in `plain` mode). With no sprite lines, just the bubble without a tail.
     public func speaking(_ spriteLines: [String], says text: String, maxTextWidth: Int = 36, gap: Int = 1,
                          bubbleColor: RGBA? = nil) -> [String] {
@@ -116,7 +116,7 @@ public struct TerminalSpriteRenderer: Sendable {
         return speaking(lines, says: text, maxTextWidth: maxTextWidth, gap: gap, bubbleColor: bubbleColor)
     }
 
-    /// `text` in the given foreground colour (unchanged in `plain` mode), reset at the end.
+    /// `text` in the given foreground color (unchanged in `plain` mode), reset at the end.
     public func colored(_ text: String, _ color: RGBA) -> String {
         guard colorMode != .plain, let code = paint(RGBA(red: color.red, green: color.green, blue: color.blue))?.foregroundCode else {
             return text
@@ -150,8 +150,8 @@ public struct TerminalSpriteRenderer: Sendable {
         return (0..<height).map { row in columns.map { $0[row] }.joined(separator: separator) }
     }
 
-    /// The block with `caption` centred on a new line underneath. When the caption is wider than
-    /// the block, the block is centred over the caption instead.
+    /// The block with `caption` centered on a new line underneath. When the caption is wider than
+    /// the block, the block is centered over the caption instead.
     public static func captioned(_ block: [String], _ caption: String) -> [String] {
         let blockWidth = block.map(TerminalText.displayWidth).max() ?? 0
         let captionWidth = TerminalText.displayWidth(caption)
@@ -162,9 +162,9 @@ public struct TerminalSpriteRenderer: Sendable {
         return lines + [TerminalText.pad(captionLine, toWidth: width)]
     }
 
-    // MARK: Colours
+    // MARK: Colors
 
-    /// Nearest colour in the xterm 256-colour palette (the 6×6×6 cube or the 24-step grey ramp).
+    /// Nearest color in the xterm 256-color palette (the 6×6×6 cube or the 24-step gray ramp).
     public static func ansi256Index(for color: RGBA) -> Int {
         let levels = [0, 95, 135, 175, 215, 255]
         func cubeStep(_ value: UInt8) -> Int {
@@ -177,14 +177,14 @@ public struct TerminalSpriteRenderer: Sendable {
         let cube = (levels[red], levels[green], levels[blue])
 
         let average = (Int(color.red) + Int(color.green) + Int(color.blue)) / 3
-        let greyStep = min(23, max(0, (average - 3) / 10))
-        let grey = 8 + greyStep * 10
+        let grayStep = min(23, max(0, (average - 3) / 10))
+        let gray = 8 + grayStep * 10
 
         func distance(_ other: (Int, Int, Int)) -> Int {
             let dr = Int(color.red) - other.0, dg = Int(color.green) - other.1, db = Int(color.blue) - other.2
             return dr * dr + dg * dg + db * db
         }
-        if distance((grey, grey, grey)) < distance(cube) { return 232 + greyStep }
+        if distance((gray, gray, gray)) < distance(cube) { return 232 + grayStep }
         return 16 + 36 * red + 6 * green + blue
     }
 
@@ -192,7 +192,7 @@ public struct TerminalSpriteRenderer: Sendable {
         ((frame % count) + count) % count
     }
 
-    /// The colour a pixel is drawn with in this mode, or nil when it is transparent here.
+    /// The color a pixel is drawn with in this mode, or nil when it is transparent here.
     private func paint(_ pixel: RGBA?) -> TerminalColor? {
         guard let pixel, pixel.alpha >= Self.opaqueAlphaThreshold else { return nil }
         switch colorMode {
@@ -202,7 +202,7 @@ public struct TerminalSpriteRenderer: Sendable {
         }
     }
 
-    /// One text line from two pixel rows. Colour codes are only emitted when they change.
+    /// One text line from two pixel rows. Color codes are only emitted when they change.
     private func line(upper: [TerminalColor?], lower: [TerminalColor?]) -> String {
         if colorMode == .plain {
             return String(zip(upper, lower).map { top, bottom -> Character in
@@ -232,7 +232,7 @@ public struct TerminalSpriteRenderer: Sendable {
             case let (nil, bottom?):
                 (glyph, wantForeground, wantBackground) = ("▄", bottom, .some(nil))
             case let (top?, bottom?) where top == bottom:
-                // A space on a coloured background fills the whole cell; no glyph edges, no contrast tweaks.
+                // A space on a colored background fills the whole cell; no glyph edges, no contrast tweaks.
                 (glyph, wantForeground, wantBackground) = (" ", nil, .some(top))
             case let (top?, bottom?):
                 (glyph, wantForeground, wantBackground) = ("▀", top, .some(bottom))
@@ -258,7 +258,7 @@ public struct TerminalSpriteRenderer: Sendable {
     }
 }
 
-/// A colour as the terminal will show it, so pixels that map to the same palette entry compare equal.
+/// A color as the terminal will show it, so pixels that map to the same palette entry compare equal.
 private enum TerminalColor: Equatable {
     case rgb(UInt8, UInt8, UInt8)
     case indexed(Int)
@@ -282,7 +282,7 @@ private enum TerminalColor: Equatable {
 }
 
 extension SpriteFrame {
-    /// Every pixel repeated `factor` times across and down (nearest neighbour). Short rows are
+    /// Every pixel repeated `factor` times across and down (nearest neighbor). Short rows are
     /// padded with transparent pixels to the frame's width.
     public func scaled(by factor: Int) -> SpriteFrame {
         let factor = max(1, factor)
