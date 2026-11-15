@@ -1,6 +1,6 @@
 #!/bin/bash
-# Tests for the build scripts: build-app.sh, make-dmg.sh, notarize.sh, release.sh and
-# check-config-gitignore.sh. Usage: scripts/tests/run.sh [part of a test name]
+# Tests for the build scripts: build-app.sh, make-dmg.sh, notarize.sh, release.sh,
+# check-config-gitignore.sh and make-media.sh. Usage: scripts/tests/run.sh [part of a test name]
 #
 # Each test runs a copy of the scripts in its own throwaway folder. Fakes from tests/fakes stand in
 # for swift, codesign, hdiutil, xcrun, spctl and security where a test asks for them, so nothing is

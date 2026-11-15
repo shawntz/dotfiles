@@ -365,6 +365,7 @@ All of this runs in `installer/`. Each script takes `--help`.
 | `make install-cli` | Builds `shawn` in release mode and installs it to `~/.local/bin`. It leaves `~/.shawn/state/cli.json` as it was. |
 | `make run` | Opens the installer in demo mode, a dry run that starts by itself. |
 | `make icon` | Redraws `Resources/AppIcon.icns`. |
+| `make media` | Draws the GIFs and stills of the app for this README into `build/media` (`MEDIA_DIR` for elsewhere). Each frame is a `--snapshot`, so no window opens. It needs Python 3 with Pillow (`PYTHON` names it). |
 | `make lint` | shellcheck on the scripts and their tests, and actionlint on the workflow when it is installed. |
 | `make clean` | Removes build products. |
 
@@ -448,7 +449,7 @@ Sources/
   ShawnUI/          the installer window; ShawnsDotfiles/ starts it
   ShawnCLIKit/      the shawn command; shawn/ starts it
 Tests/              one XCTest target per module
-scripts/            build, icon, disk image, notarize, release, the config's .gitignore check
+scripts/            build, icon, disk image, notarize, release, the config's .gitignore check, README media
 scripts/tests/      tests for those scripts, with fake signing tools in scripts/tests/fakes/
 Resources/          Info.plist template and the app icon
 ```
@@ -472,7 +473,7 @@ The installer app takes these flags, for example `swift run ShawnsDotfiles --dry
 | `--no-remote` | Does not fetch config from GitHub. |
 | `--config-ref REF` | Fetches config from this branch, tag or commit. |
 | `--simulate` | A built-in simulation config that goes through every screen. |
-| `--snapshot PATH` | Renders the window to a PNG and quits, without showing a window. Add `--snapshot-state` (`loading`, `welcome`, `customize`, `running`, `ask`, `ask-again`, `password`, `question`, `attention`, `finished`, `failed`, `stopped`, `dry-run-finished`, `config-error`), `--snapshot-size WxH` (each side 320 to 4000; default 1100x760), `--snapshot-scale 1\|2\|3` (default 2) and `--snapshot-contrast standard\|high`. Use it to check the design without screen recording. |
+| `--snapshot PATH` | Renders the window to a PNG and quits, without showing a window. Add `--snapshot-state` (`loading`, `welcome`, `customize`, `running`, `ask`, `ask-again`, `password`, `password-again`, `question`, `attention`, `finished`, `failed`, `stopped`, `dry-run-finished`, `config-error`), `--snapshot-size WxH` (each side 320 to 4000; default 1100x760), `--snapshot-scale 1\|2\|3` (default 2) and `--snapshot-contrast standard\|high`. `--snapshot-progress F` shows a run with no failures `F` of the way through (0 to 1), and `--snapshot-at-kind K` shows it as the first item of kind `K` starts. Both work with the screens built on the running screen: `running`, `password`, `password-again`, `question` and `attention`. Use it to check the design without screen recording. |
 | `-h`, `--help` | Lists these flags. |
 
 The CLI has the same safety valves: `shawn install --dry-run`, `shawn doctor`, and `shawn --config DIR` for another config.

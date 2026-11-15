@@ -10,7 +10,10 @@ public enum SnapshotState: String, CaseIterable, Sendable {
     case ask
     /// The same sheet after a reply was turned down, with the reason under the prompt.
     case askAgain = "ask-again"
+    /// The administrator password sheet on its first try.
     case password
+    /// The same sheet after a wrong password, with the reason under the prompt.
+    case passwordAgain = "password-again"
     case question
     case attention
     case finished
@@ -45,6 +48,8 @@ public struct LaunchOptions: Equatable, Sendable {
     public var snapshotScale = 2
     /// Render the snapshot with the Increase Contrast palette.
     public var snapshotHighContrast = false
+    /// Where in a run the screens built on the running screen show it (see `SnapshotProgress`).
+    public var snapshotPoint: SnapshotPoint?
     public var showHelp = false
 
     public init() {}
@@ -72,6 +77,8 @@ public struct LaunchOptions: Equatable, Sendable {
       --snapshot-size WxH     window size for the snapshot (default 1100x760)
       --snapshot-scale N      pixels per point, 1-3 (default 2)
       --snapshot-contrast C   standard or high (the Increase Contrast look)
+      --snapshot-progress F   show the run F of the way through, 0 to 1 (screens that show a run)
+      --snapshot-at-kind K    show the run as the first item of kind K starts (e.g. github)
       -h, --help              show this help
     """
 
@@ -141,6 +148,8 @@ public struct LaunchOptions: Equatable, Sendable {
                     throw LaunchOptionsError.invalidValue(flag: flag, value: text, expected: "1, 2 or 3")
                 }
                 options.snapshotScale = scale
+            case "--snapshot-progress": options.snapshotPoint = try .fraction(parseProgress(value(for: flag, inline: inline)))
+            case "--snapshot-at-kind": options.snapshotPoint = try .kind(value(for: flag, inline: inline))
             default:
                 throw LaunchOptionsError.unknownArgument(argument)
             }

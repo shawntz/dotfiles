@@ -52,7 +52,7 @@ final class LaunchOptionsTests: XCTestCase {
         for state in SnapshotState.allCases {
             XCTAssertEqual(try LaunchOptions.parse(["--snapshot-state", state.rawValue]).snapshotState, state)
         }
-        for required in ["welcome", "customize", "running", "ask", "ask-again", "password", "question", "attention", "finished", "failed", "config-error"] {
+        for required in ["welcome", "customize", "running", "ask", "ask-again", "password", "password-again", "question", "attention", "finished", "failed", "config-error"] {
             XCTAssertNotNil(SnapshotState(rawValue: required), required)
         }
     }

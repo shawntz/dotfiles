@@ -268,7 +268,7 @@ final class SimulationTests: XCTestCase {
             case .running:
                 XCTAssertEqual(model.phase, .running)
                 XCTAssertNotNil(model.currentItem)
-                XCTAssertTrue(model.log.entries.contains { $0.isProgress })
+                XCTAssertTrue(model.log.entries.contains { $0.itemID == model.currentItemID && $0.kind != .header }, "its output is on screen")
                 XCTAssertEqual(model.elapsed(at: model.now()), 192, accuracy: 0.5, "a fixed clock keeps snapshots stable")
             case .ask:
                 let request = try XCTUnwrap(model.activePrompt?.textRequest)
@@ -284,7 +284,11 @@ final class SimulationTests: XCTestCase {
                 XCTAssertNotNil(request.defaultValue)
                 XCTAssertEqual(request.attempt, 2)
                 XCTAssertEqual(request.lastError, AnswerFormat.email.problem(with: "x"), "the engine's own reason")
-            case .password: XCTAssertEqual(model.activePrompt?.isPassword, true)
+            case .password, .passwordAgain:
+                guard case .password(let request, _)? = model.activePrompt?.kind else { XCTFail("no password sheet"); continue }
+                XCTAssertEqual(request.attempt, state == .password ? 1 : 2)
+                XCTAssertEqual(request.lastError, state == .password ? nil : "That password was not accepted.",
+                               "a first try has nothing to explain")
             case .question: XCTAssertEqual(model.activePrompt?.isPassword, false)
             case .attention: XCTAssertEqual(model.attention?.attention.code, SnapshotScript.sampleAttention.code)
             case .finished: XCTAssertEqual(model.outcome, .success)

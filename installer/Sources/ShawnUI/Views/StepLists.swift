@@ -162,10 +162,17 @@ struct StepStatusRows: View {
                 .lineLimit(1)
                 .layoutPriority(1)
             if let detail = look.detail ?? (isCurrent ? look.label : nil) {
-                Text(detail)
-                    .foregroundStyle(palette.color(look.tone == .mint ? .faint : look.tone).opacity(0.85))
-                    .lineLimit(1)
-                    .truncationMode(.tail)
+                // Whole if it fits, else cut short to no fewer than 8 characters, else left out, so a long title
+                // never squeezes it to a letter. It gets what the title leaves before the spacer gets any.
+                let shortest = 8 * Theme.Size.small * Theme.monoAdvance
+                ViewThatFits(in: .horizontal) {
+                    Text(detail).fixedSize()
+                    Text(detail).truncationMode(.tail).frame(minWidth: shortest, idealWidth: shortest, alignment: .leading)
+                    Color.clear.frame(width: 0, height: 0)
+                }
+                .foregroundStyle(palette.color(look.tone == .mint ? .faint : look.tone).opacity(0.85))
+                .lineLimit(1)
+                .layoutPriority(0.5)
             }
             Spacer(minLength: 0)
         }

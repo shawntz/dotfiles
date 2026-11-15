@@ -4,6 +4,7 @@
 SWIFT  ?= swift
 BINDIR ?= $(HOME)/.local/bin
 CONFIG ?= config
+MEDIA_DIR ?= $(ROOT)/build/media
 
 # Works from anywhere: `make -C installer test` or `make -f installer/Makefile test`.
 ROOT := $(patsubst %/,%,$(dir $(abspath $(lastword $(MAKEFILE_LIST)))))
@@ -12,12 +13,12 @@ PACKAGE := --package-path "$(ROOT)"
 NO_SELF_UPDATE := SHAWN_NO_SELF_UPDATE=1 SHAWN_NO_UPDATE=1
 
 .DEFAULT_GOAL := help
-.PHONY: help build test test-scripts validate app dmg notarize release install-cli run icon lint clean
+.PHONY: help build test test-scripts validate app dmg notarize release install-cli run icon media lint clean
 
 help: ## List the targets
 	@echo "Shawn's Dotfiles. Targets:"
 	@awk 'BEGIN { FS = ":.*## " } /^[a-z-]+:.*## / { printf "  make %-13s %s\n", $$1, $$2 }' $(MAKEFILE_LIST)
-	@echo "Variables: SIGN_IDENTITY, ARCHS, CONFIGURATION, NOTARY_PROFILE (see scripts/*.sh --help)."
+	@echo "Variables: SIGN_IDENTITY, ARCHS, CONFIGURATION, NOTARY_PROFILE, MEDIA_DIR, PYTHON (see scripts/*.sh --help)."
 
 build: ## Debug build of the app, the CLI and the web-app shell
 	$(SWIFT) build $(PACKAGE)
@@ -57,6 +58,9 @@ run: ## Open the installer in demo mode (a dry run: nothing on this Mac changes)
 
 icon: ## Redraw Resources/AppIcon.icns from scripts/make-icon.swift
 	$(SWIFT) "$(ROOT)/scripts/make-icon.swift" "$(ROOT)/Resources/AppIcon.icns"
+
+media: ## Draw the README's GIFs and stills of the app into build/media (needs Pillow)
+	"$(ROOT)/scripts/make-media.sh" "$(MEDIA_DIR)"
 
 lint: ## shellcheck the scripts and their tests; actionlint the CI workflow when installed
 	shellcheck -x "$(ROOT)"/scripts/*.sh "$(ROOT)"/scripts/tests/*.sh "$(ROOT)"/scripts/tests/fakes/*

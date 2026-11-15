@@ -12,9 +12,11 @@ enum SnapshotScript {
     static let fixedNow = fixedRunStart.addingTimeInterval(192)
 
     static func apply(_ state: SnapshotState, to model: InstallerModel) {
-        // The run "starts" at fixedRunStart; the screen is looked at 3m 12s later.
+        // The run "starts" at fixedRunStart; the screen is looked at 3m 12s later. A run asks its questions as it
+        // starts, so those two screens are looked at two seconds in.
         model.now = { fixedRunStart }
-        defer { model.now = { fixedNow } }
+        let asksAtTheStart = state == .ask || state == .askAgain
+        defer { model.now = { asksAtTheStart ? fixedRunStart.addingTimeInterval(2) : fixedNow } }
         switch state {
         case .loading:
             break
@@ -31,10 +33,12 @@ enum SnapshotScript {
             // A real run asks its questions as soon as it starts, before the password and before any item.
             model.apply(.runStarted(totalItems: model.enabledItemCount))
             model.enqueue(.text(sampleTextRequest(for: model, again: state == .askAgain), PromptGate<String?>()))
-        case .password:
+        case .password, .passwordAgain:
             playRunning(model)
+            let again = state == .passwordAgain
             let request = PasswordRequest(reason: "Installing the package manager writes to /opt and needs administrator rights.",
-                                          attempt: 2, lastError: "That password was not accepted.", maxAttempts: SudoSession.maxAttempts)
+                                          attempt: again ? 2 : 1, lastError: again ? "That password was not accepted." : nil,
+                                          maxAttempts: SudoSession.maxAttempts)
             model.enqueue(.password(request, PromptGate<String?>()))
         case .question:
             playRunning(model)
@@ -112,43 +116,37 @@ enum SnapshotScript {
         }
     }
 
-    private static func enabledSteps(_ model: InstallerModel) -> [PlannedStep] {
+    static func enabledSteps(_ model: InstallerModel) -> [PlannedStep] {
         model.steps.filter { model.isEnabled($0) && model.selectedItemCount(in: $0) > 0 }
     }
 
-    private static func enabledItems(_ model: InstallerModel, in step: PlannedStep) -> [PlannedItem] {
+    static func enabledItems(_ model: InstallerModel, in step: PlannedStep) -> [PlannedItem] {
         step.items.filter { model.isEnabled($0) }
     }
 
     /// Finishes one item with a varied outcome and a little output, the way the engine reports it (a dry
     /// run only narrates the command). Returns the item's final status.
     @discardableResult
-    private static func finish(_ item: PlannedItem, index: Int, failing: Bool, needsYou: Bool = false,
+    static func finish(_ item: PlannedItem, index: Int, failing: Bool, needsYou: Bool = false,
                                model: InstallerModel) -> ItemStatus {
-        let name = slug(item.title)
         let status: ItemStatus
         model.apply(.itemStatus(itemID: item.id, status: .checking))
-        if !failing, !needsYou, index % 4 == 2 {
+        if !failing, !needsYou, SnapshotOutput.endsAlreadyDone(item, index: index) {
             status = .alreadyDone("already installed")
             model.apply(.itemStatus(itemID: item.id, status: status))
             return status
         }
         model.apply(.itemStatus(itemID: item.id, status: .running))
-        if model.runIsDryRun {
-            model.apply(.log(LogLine("[dry-run] $ install \(name)", style: .command, itemID: item.id)))
-        } else {
-            model.apply(.log(LogLine("$ install \(name)", style: .command, itemID: item.id)))
-            model.apply(.log(LogLine("==> Fetching \(name)", style: .stdout, itemID: item.id)))
-        }
+        model.apply(SnapshotOutput.start(item, model: model))
         if failing {
-            let message = "install \(name) failed (exit 1): Error: the download was interrupted (curl: (56) Recv failure: Connection reset by peer)"
+            let message = "\(SnapshotOutput.command(item, model: model)) failed (exit 1): Error: the download was interrupted (curl: (56) Recv failure: Connection reset by peer)"
             model.apply(.log(LogLine("curl: (56) Recv failure: Connection reset by peer", style: .stderr, itemID: item.id)))
             model.apply(.log(LogLine("✗ \(item.title): \(message)", style: .error, itemID: item.id)))
             status = .failed(message)
         } else if needsYou {
             status = .needsAttention("finish it by hand")
         } else {
-            if !model.runIsDryRun { model.apply(.log(LogLine("==> Installed \(name)", style: .stdout, itemID: item.id))) }
+            model.apply(SnapshotOutput.end(item, model: model))
             status = .done(nil)
         }
         model.apply(.itemStatus(itemID: item.id, status: status))
@@ -158,11 +156,9 @@ enum SnapshotScript {
     /// STOP lands while `item` runs: the model's own STOP, then exactly the events InstallEngine sends for an
     /// item interrupted mid-command (`.cancelled`, then the step `.stopped`).
     private static func interrupt(_ item: PlannedItem, in step: PlannedStep, model: InstallerModel) {
-        let name = slug(item.title)
         model.apply(.itemStatus(itemID: item.id, status: .checking))
         model.apply(.itemStatus(itemID: item.id, status: .running))
-        model.apply(.log(LogLine("$ install \(name)", style: .command, itemID: item.id)))
-        model.apply(.log(LogLine("==> Fetching \(name)", style: .stdout, itemID: item.id)))
+        model.apply(SnapshotOutput.inProgress(item, progress: 0.5, model: model))
         model.stop()
         model.apply(.attention(itemID: item.id, attention: nil))
         model.apply(.itemStatus(itemID: item.id, status: .cancelled))
@@ -171,6 +167,7 @@ enum SnapshotScript {
 
     /// About 40% through: earlier steps finished (one item failed), the middle step mid-item with live output.
     static func playRunning(_ model: InstallerModel) {
+        if let fraction = SnapshotProgress.takePending() { return SnapshotProgress.play(fraction, on: model) }
         let steps = enabledSteps(model)
         guard !steps.isEmpty else { return }
         model.apply(.runStarted(totalItems: model.enabledItemCount))
@@ -198,16 +195,7 @@ enum SnapshotScript {
         let item = items[runningIndex]
         model.apply(.itemStatus(itemID: item.id, status: .checking))
         model.apply(.itemStatus(itemID: item.id, status: .running))
-        let name = slug(item.title)
-        let lines: [LogLine] = [
-            LogLine("$ install \(name)", style: .command, itemID: item.id),
-            LogLine("==> Fetching downloads for: \(name)", style: .stdout, itemID: item.id),
-            LogLine("==> Downloading https://ghcr.io/v2/homebrew/core/\(name)/manifests/2.4.1", style: .stdout, itemID: item.id),
-            LogLine("Warning: \(name) 2.4.0 is already installed but outdated; upgrading.", style: .stderr, itemID: item.id),
-            LogLine("==> Pouring \(name)--2.4.1.arm64_tahoe.bottle.tar.gz", style: .stdout, itemID: item.id),
-            LogLine(String(repeating: "#", count: 21) + String(repeating: " ", count: 19) + "  52.4%", style: .stdout, itemID: item.id, isProgress: true),
-        ]
-        model.apply(lines.map { InstallEvent.log($0) })
+        model.apply(SnapshotOutput.inProgress(item, progress: 0.524, model: model))
         // Show the step's own line rather than the reaction to the earlier failure.
         model.advanceQuip()
     }
@@ -268,14 +256,9 @@ enum SnapshotScript {
         for followUp in followUps { model.apply(.followUp(followUp)) }
         summary.followUps = followUps
         summary.wasCancelled = stopped
-        summary.duration = 4 * 60 + 12
+        summary.duration = stopped ? SnapshotProgress.elapsed(atItem: stopIndex, model: model) : SnapshotProgress.runDuration
         // The engine writes no log file for a dry run.
         summary.logFile = dryRun ? nil : model.environment.logsDirectory.appendingPathComponent("install-20261114-221530.log")
         model.apply(.runFinished(summary))
-    }
-
-    private static func slug(_ title: String) -> String {
-        let lowered = title.lowercased().map { $0.isLetter || $0.isNumber ? $0 : "-" }
-        return String(lowered).split(separator: "-").joined(separator: "-")
     }
 }

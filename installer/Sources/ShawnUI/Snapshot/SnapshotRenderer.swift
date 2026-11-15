@@ -73,7 +73,7 @@ enum SnapshotCommand {
             } else {
                 model = try makeLocalModel(options: options, registry: registry)
             }
-            SnapshotScript.apply(options.snapshotState, to: model)
+            try SnapshotProgress.apply(options, to: model)
 
             let view = RootView(model: model, isSnapshot: true, forcedPalette: options.snapshotHighContrast ? .highContrast : nil)
             let data = try SnapshotRenderer.png(of: view, size: options.snapshotSize, scale: options.snapshotScale)
