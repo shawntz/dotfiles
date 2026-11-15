@@ -8,9 +8,9 @@ final class SnapshotOutputTests: XCTestCase {
     /// Real kind names played by FakeAction, so the output can be checked without the real actions.
     private func model(_ items: String, dryRun: Bool = false) throws -> InstallerModel {
         var registry = ActionRegistry()
-        for kind in ["brew", "cask", "manual", "copy", "github", "skill", "script", "defaults", "mas", "xcode", "ok"] {
+        for kind in ["brew", "cask", "manual", "copy", "github", "skill", "script", "defaults", "mas", "xcode", "open", "mkdir", "ok"] {
             registry.register(ActionDescriptor(kind: kind, summary: kind, example: "- \(kind): x") { parser in
-                for key in ["to", "run", "set", "source", "protocol"] { _ = parser.options.value(key) }
+                for key in ["to", "run", "set", "source", "protocol", "detail", "url", "check", "creates"] { _ = parser.options.value(key) }
                 return FakeAction(title: parser.primaryString())
             })
         }
@@ -29,6 +29,81 @@ final class SnapshotOutputTests: XCTestCase {
 
     private func lines(of index: Int, in model: InstallerModel) -> [String] {
         texts(SnapshotOutput.start(model.steps[0].items[index], model: model))
+    }
+
+    func testTheChecklistIsTheRemindersTheRunDidNotFindDone() throws {
+        let model = try model("""
+              - cask: spotify
+              - manual: Check your email
+                detail: "({{email}}) must be a verified address"
+                url: https://github.com/settings/emails
+              - manual: Log out and back in
+              - manual: Sign in to Dropbox
+                detail: Dropbox is open in the menu bar.
+              - brew: bat
+            """)
+        SnapshotScript.playFinished(model, failures: 0, stopped: false)
+        let items = model.steps[0].items
+        // The sample finds every fourth item already done, here the third, and that one adds nothing.
+        XCTAssertEqual(model.status(of: items[2]), .alreadyDone("already shown"))
+        XCTAssertEqual(model.status(of: items[1]), .needsAttention("Check your email"), "as the engine ends a reminder")
+        XCTAssertEqual(model.status(of: items[3]), .needsAttention("Sign in to Dropbox"))
+        let checklist = try XCTUnwrap(model.summary?.followUps)
+        XCTAssertEqual(checklist.map(\.title), ["Check your email", "Sign in to Dropbox"], "the reminders that ran, in order")
+        XCTAssertEqual(model.summary?.needsAttention, 2, "the count and the checklist agree")
+        XCTAssertNil(checklist[0].detail, "text that still names a {{variable}} is left out")
+        XCTAssertEqual(checklist[0].url, URL(string: "https://github.com/settings/emails"))
+        XCTAssertEqual(checklist[1].detail, "Dropbox is open in the menu bar.")
+        XCTAssertEqual(model.followUps, checklist)
+    }
+
+    func testAConfigWithNoRemindersEndsWithAnEmptyChecklist() throws {
+        let model = try model("""
+              - brew: bat
+              - cask: spotify
+            """)
+        SnapshotScript.playFinished(model, failures: 0, stopped: false)
+        XCTAssertEqual(model.summary?.followUps, [])
+        XCTAssertEqual(model.summary?.needsAttention, 0)
+    }
+
+    func testAnItemFoundDoneSaysWhyInItsActionsWords() throws {
+        let model = try model("""
+              - brew: bat
+              - copy: git/ignore
+                to: ~/.config/git/ignore
+              - defaults: com.apple.dock
+                set:
+                  autohide: true
+                  tilesize: 48
+              - manual: Log out and back in
+              - manual: Give Karabiner Accessibility access
+                check: "true"
+              - mkdir: ~/Developer
+              - script: Install the thing
+                run: make install
+                creates: ~/.local/bin/thing
+            """)
+        let reasons = model.steps[0].items.map { SnapshotOutput.alreadyDoneReason(for: $0) }
+        XCTAssertEqual(reasons, ["installed", "up to date", "all 2 set", "already shown", "already done", "exists", nil])
+    }
+
+    func testItemsTheEngineRunsEveryTimeAreNeverFoundDone() throws {
+        let model = try model("""
+              - open: Dropbox
+              - script: Say hello
+                run: echo hello
+              - script: Make the folder
+                run: mkdir -p ~/x
+                creates: ~/x
+              - brew: bat
+            """)
+        let items = model.steps[0].items
+        // Index 2 is one the sample would find done.
+        XCTAssertFalse(SnapshotOutput.endsAlreadyDone(items[0], index: 2), "open: runs every time")
+        XCTAssertFalse(SnapshotOutput.endsAlreadyDone(items[1], index: 2), "so does a script with no check: or creates:")
+        XCTAssertTrue(SnapshotOutput.endsAlreadyDone(items[2], index: 2), "a script with creates: can be done")
+        XCTAssertTrue(SnapshotOutput.endsAlreadyDone(items[3], index: 2))
     }
 
     func testEachKindPrintsWhatTheEngineDoes() throws {

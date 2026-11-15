@@ -124,7 +124,7 @@ enum SimulationConfig {
         items:
           - sim-question: Amphetamine
             question: Sign in to the App Store
-            message: "Open the App Store, sign in with your Apple Account, then come back. App Store apps cannot be installed until you do."
+            message: "Open the App Store, sign in with your Apple Account, then come back. The installer cannot install App Store apps until you do."
             options: ["I'm signed in", "Skip App Store apps"]
             url: "macappstore://apps.apple.com/app/id937984704"
             command: sudo mas install 937984704

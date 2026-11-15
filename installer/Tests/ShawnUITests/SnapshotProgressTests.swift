@@ -194,7 +194,7 @@ final class SnapshotProgressTests: XCTestCase {
 
     /// The screens built on the running screen show the run at the point, with their sheet or callout on top.
     func testEveryScreenOnTheRunningScreenMoves() throws {
-        for state in [SnapshotState.running, .password, .passwordAgain, .question, .attention] {
+        for state in [SnapshotState.running, .question, .attention] {
             var options = LaunchOptions()
             options.snapshotState = state
             options.snapshotPoint = .fraction(0.25)
@@ -202,11 +202,21 @@ final class SnapshotProgressTests: XCTestCase {
             try SnapshotProgress.apply(options, to: model) { _ in }
             XCTAssertEqual(model.elapsed(at: model.now()), (0.25 * SnapshotProgress.runDuration).rounded(), state.rawValue)
             switch state {
-            case .password, .passwordAgain: XCTAssertEqual(model.activePrompt?.isPassword, true)
             case .question: XCTAssertEqual(model.activePrompt?.isPassword, false)
             case .attention: XCTAssertEqual(model.attention?.itemID, model.currentItemID)
             default: XCTAssertNil(model.activePrompt)
             }
+        }
+    }
+
+    /// A run asks for the password before its first step, so that sheet has no point of a run to move to.
+    func testThePasswordSheetShowsNoRunToMove() throws {
+        for state in [SnapshotState.password, .passwordAgain] {
+            var options = LaunchOptions()
+            options.snapshotState = state
+            options.snapshotPoint = .fraction(0.25)
+            let model = try simulationModel()
+            XCTAssertThrowsError(try SnapshotProgress.apply(options, to: model) { _ in }, state.rawValue)
         }
     }
 

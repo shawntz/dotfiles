@@ -90,9 +90,7 @@ enum SnapshotProgress {
         let timeline = Timeline(model)
         guard !timeline.steps.isEmpty else { return }
         model.apply(.runStarted(totalItems: model.enabledItemCount))
-        model.apply(.log(LogLine("Asked for administrator rights once for the whole run.", style: .info)))
 
-        let needsYou = needsYouPositions(itemCount: timeline.items.count)
         var clock = fraction * timeline.total
         var position = 0
         for (stepIndex, step) in timeline.steps.enumerated() {
@@ -103,12 +101,11 @@ enum SnapshotProgress {
             clock -= weight
             let finished = min(items.count, Int(reached))
             for item in items.prefix(finished) {
-                SnapshotScript.finish(item, index: position, failing: false, needsYou: needsYou.contains(position), model: model)
+                SnapshotScript.finish(item, index: position, failing: false, in: step, model: model)
                 position += 1
             }
             guard finished == items.count else {
-                startItem(items[finished], position: position, needsYou: needsYou.contains(position),
-                          progress: reached - Double(finished), model: model)
+                startItem(items[finished], position: position, progress: reached - Double(finished), model: model)
                 showStepLine(stepIndex: stepIndex, model: model)
                 return
             }
@@ -116,11 +113,6 @@ enum SnapshotProgress {
         }
         // Every item is through. The engine sends `.runFinished` next.
         showStepLine(stepIndex: timeline.steps.count - 1, model: model)
-    }
-
-    /// The two items `SnapshotScript.playFinished` leaves for the person to finish by hand.
-    static func needsYouPositions(itemCount: Int) -> Set<Int> {
-        [itemCount / 3 + 1, itemCount * 2 / 3 + 1]
     }
 
     /// The run's time, in item-sized units: each step takes its own items plus an even share of the same size again.
@@ -155,10 +147,10 @@ enum SnapshotProgress {
     }
 
     /// The item the run is on. `progress` (0 to 1) is how far it has gotten.
-    private static func startItem(_ item: PlannedItem, position: Int, needsYou: Bool, progress: Double, model: InstallerModel) {
+    private static func startItem(_ item: PlannedItem, position: Int, progress: Double, model: InstallerModel) {
         model.apply(.itemStatus(itemID: item.id, status: .checking))
         // An item the run finds already done gets no further than its check.
-        guard needsYou || !SnapshotOutput.endsAlreadyDone(item, index: position) else { return }
+        guard !SnapshotOutput.endsAlreadyDone(item, index: position) else { return }
         model.apply(.itemStatus(itemID: item.id, status: .running))
         model.apply(SnapshotOutput.inProgress(item, progress: progress, model: model))
     }

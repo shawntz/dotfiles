@@ -264,7 +264,10 @@ final class SimulationTests: XCTestCase {
             switch state {
             case .loading: XCTAssertEqual(model.phase, .loading)
             case .welcome: XCTAssertEqual(model.phase, .welcome)
-            case .customize: XCTAssertEqual(model.phase, .customize)
+            case .customize:
+                XCTAssertEqual(model.phase, .customize)
+                XCTAssertFalse(model.steps.flatMap(\.items).contains { !$0.enabledByDefault && model.isEnabled($0) },
+                               "the sheet says optional items start unchecked, so none is checked")
             case .running:
                 XCTAssertEqual(model.phase, .running)
                 XCTAssertNotNil(model.currentItem)
@@ -286,6 +289,9 @@ final class SimulationTests: XCTestCase {
                 XCTAssertEqual(request.lastError, AnswerFormat.email.problem(with: "x"), "the engine's own reason")
             case .password, .passwordAgain:
                 guard case .password(let request, _)? = model.activePrompt?.kind else { XCTFail("no password sheet"); continue }
+                XCTAssertNil(model.currentItem, "a run asks for the password before its first step")
+                XCTAssertEqual(model.elapsed(at: model.now()), 0, accuracy: 0.5)
+                XCTAssertEqual(request.reason, "Some steps need administrator rights (Homebrew, system installers).", "the engine's own reason")
                 XCTAssertEqual(request.attempt, state == .password ? 1 : 2)
                 XCTAssertEqual(request.lastError, state == .password ? nil : "That password was not accepted.",
                                "a first try has nothing to explain")

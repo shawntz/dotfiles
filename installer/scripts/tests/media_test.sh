@@ -12,7 +12,7 @@ test_media_needs_an_output_folder() {
     run "$T/pkg/scripts/make-media.sh" --help
     assert_status 0
     local file
-    for file in tour.gif sheets.gif welcome.png finished.png icon-256.png icon-512.png; do
+    for file in tour.gif sheets.gif welcome.png finished.png icon-256.png; do
         assert_contains "$OUT" "$file" "--help"
     done
 }

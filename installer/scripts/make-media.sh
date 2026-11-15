@@ -18,7 +18,6 @@ Makes these files in OUTPUT_DIR, replacing any already there:
   welcome.png    the welcome screen at 2x
   finished.png   the finished screen at 2x
   icon-256.png   the app icon, 256 pixels square
-  icon-512.png   the app icon, 512 pixels square
 
 Every frame is a --snapshot of the app's SwiftUI views, rendered offscreen with --no-remote and a
 throwaway --sandbox in a temporary folder. No window opens and nothing records the screen. The app
@@ -51,20 +50,20 @@ RUN_FRAME_MS=150
 # before the run starts. MS is how long it stays. A sheet goes before the run frame at the same
 # point, and sheets at the same point keep this order.
 TOUR_SHEETS=(
-    "ask - 1400"
-    "password 0 1200"
-    "attention github 1500"
+    "ask - 2400"
+    "password - 2400"
+    "attention github 2600"
 )
 # The screens sheets.gif shows, in order, one "STATE WHERE" per line, WHERE as above.
 SHEETS=(
     "customize -"
     "ask -"
-    "password 0"
-    "question mas"
+    "password -"
+    "question xcode"
     "attention github"
     "dry-run-finished -"
 )
-SHEET_MS=2000
+SHEET_MS=2500
 
 CONFIG_DIR="${CONFIG_DIR:-$INSTALLER_ROOT/config}"
 PYTHON="${PYTHON:-python3}"
@@ -193,12 +192,9 @@ cp "$FRAMES/still-welcome.png" "$WORK/out/welcome.png"
 cp "$FRAMES/still-finished.png" "$WORK/out/finished.png"
 
 step "Converting the app icon"
-for pixels in 256 512; do
-    sips -s format png -Z "$pixels" "$ICON" --out "$WORK/out/icon-$pixels.png" >/dev/null ||
-        die "sips could not convert $ICON"
-done
+sips -s format png -Z 256 "$ICON" --out "$WORK/out/icon-256.png" >/dev/null || die "sips could not convert $ICON"
 # The corners must be see-through and the middle drawn; a failed conversion gives neither.
-"$PYTHON" - "$WORK/out/icon-256.png" "$WORK/out/icon-512.png" <<'EOF' || die "the converted icon is wrong"
+"$PYTHON" - "$WORK/out/icon-256.png" <<'EOF' || die "the converted icon is wrong"
 import sys
 from PIL import Image
 for path in sys.argv[1:]:

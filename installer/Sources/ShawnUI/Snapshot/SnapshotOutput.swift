@@ -12,10 +12,59 @@ enum SnapshotOutput {
     /// Kinds that stop and wait for the person (a sign-in, a code). In snapshots they are never already done,
     /// so the sheet or callout they bring up always has a running item to belong to.
     static let waitingKinds: Set<String> = ["github", "mas", "xcode"]
+    /// Kinds that put a reminder on the checklist and end needing you, as `manual:` does in a real run.
+    /// `sim-manual` is the built-in simulation's stand-in.
+    static let reminderKinds: Set<String> = ["manual", "sim-manual"]
 
-    /// Whether the snapshots find this item already done: every fourth one, except the kinds that wait for you.
+    /// Whether the snapshots find this item already done: every fourth one, except the kinds that wait for you
+    /// and the items the engine runs every time.
     static func endsAlreadyDone(_ item: PlannedItem, index: Int) -> Bool {
-        index % 4 == 2 && !waitingKinds.contains(item.config.kind)
+        index % 4 == 2 && !waitingKinds.contains(item.config.kind) && !runsEveryTime(item)
+    }
+
+    /// Items the engine runs on every run, because nothing can tell whether they are done.
+    static func runsEveryTime(_ item: PlannedItem) -> Bool {
+        let options = item.config.options
+        switch item.config.kind {
+        case "open": return true
+        case "script": return options["check"] == nil && options["creates"] == nil
+        case "download": return options["replace"]?.bool == true
+        default: return false
+        }
+    }
+
+    /// Why an item found already done is done, in the words its action uses where they do not depend on the
+    /// Mac. Nil where the action's reason names something only a real Mac has (a path, an account, a version).
+    static func alreadyDoneReason(for item: PlannedItem) -> String? {
+        let options = item.config.options
+        switch item.config.kind {
+        case "manual", "sim-manual": return options["check"] == nil ? "already shown" : "already done"
+        case "copy": return "up to date"
+        case "json-merge": return "already merged"
+        case "mkdir": return "exists"
+        case "symlink": return "link in place"
+        case "defaults": return (options["set"]?.map?.entries.count).map { "all \($0) set" }
+        case "dock": return "Dock already set up"
+        case "login-item": return "opens at login"
+        case "ssh-key": return "key exists"
+        case "script": return options["check"] == nil ? nil : "its check passes"
+        case "brew", "cask", "tap", "npm", "xcode-clt", "homebrew", "rosetta": return "installed"
+        case let kind where kind.hasPrefix("sim-"): return "already installed"
+        default: return nil
+        }
+    }
+
+    /// The checklist entry a reminder adds: its title, with the detail and the link the config gives it. Nil for
+    /// every other kind.
+    static func followUp(for item: PlannedItem, in step: PlannedStep? = nil) -> FollowUp? {
+        guard reminderKinds.contains(item.config.kind) else { return nil }
+        let options = item.config.options
+        // Text that still names a {{variable}} would show its braces, so it is left out.
+        let detail = options["detail"]?.string.flatMap { $0.contains("{{") ? nil : $0 }
+        let url = options["url"]?.string.flatMap { $0.contains("{{") ? nil : URL(string: $0) }
+        // The engine titles the entry with the reminder's own text, whatever `name:` the item shows under.
+        let task = item.config.value.string.flatMap { $0.contains("{{") ? nil : $0 }
+        return FollowUp(id: "snapshot-\(item.id)", title: task ?? item.title, detail: detail, url: url, stepID: step?.id)
     }
 
     /// What the item prints from its start until its work is done.
@@ -110,7 +159,7 @@ enum SnapshotOutput {
             let target = options["to"]?.string ?? "~/Developer/\(lastComponent(item.title))"
             run("git -c http.lowSpeedLimit=1 -c http.lowSpeedTime=120 clone --progress -- https://github.com/\(item.title).git \(target)")
             output("Cloning into '\(target)'...")
-        case "manual":
+        case "manual", "sim-manual":
             note("added to your checklist: \(item.title)")
         case "copy":
             let target = options["to"]?.string ?? "~/\(value)"

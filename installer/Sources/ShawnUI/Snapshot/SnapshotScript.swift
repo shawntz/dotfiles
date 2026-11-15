@@ -12,11 +12,12 @@ enum SnapshotScript {
     static let fixedNow = fixedRunStart.addingTimeInterval(192)
 
     static func apply(_ state: SnapshotState, to model: InstallerModel) {
-        // The run "starts" at fixedRunStart; the screen is looked at 3m 12s later. A run asks its questions as it
-        // starts, so those two screens are looked at two seconds in.
+        // The run "starts" at fixedRunStart; the screen is looked at 3m 12s later. A run asks its questions and
+        // then for the password before its first step, so those four screens are looked at with the clock still
+        // at zero, and a tour that goes from one to the next never runs its clock backward.
         model.now = { fixedRunStart }
-        let asksAtTheStart = state == .ask || state == .askAgain
-        defer { model.now = { asksAtTheStart ? fixedRunStart.addingTimeInterval(2) : fixedNow } }
+        let beforeTheFirstStep = [SnapshotState.ask, .askAgain, .password, .passwordAgain].contains(state)
+        defer { model.now = { beforeTheFirstStep ? fixedRunStart : fixedNow } }
         switch state {
         case .loading:
             break
@@ -25,7 +26,6 @@ enum SnapshotScript {
         case .welcome:
             break
         case .customize:
-            enableFirstOptionalItem(in: model)
             model.showCustomize()
         case .running:
             playRunning(model)
@@ -34,9 +34,10 @@ enum SnapshotScript {
             model.apply(.runStarted(totalItems: model.enabledItemCount))
             model.enqueue(.text(sampleTextRequest(for: model, again: state == .askAgain), PromptGate<String?>()))
         case .password, .passwordAgain:
-            playRunning(model)
+            // A real run asks once, before its first step starts, with this reason (see InstallEngine.run).
+            model.apply(.runStarted(totalItems: model.enabledItemCount))
             let again = state == .passwordAgain
-            let request = PasswordRequest(reason: "Installing the package manager writes to /opt and needs administrator rights.",
+            let request = PasswordRequest(reason: "Some steps need administrator rights (Homebrew, system installers).",
                                           attempt: again ? 2 : 1, lastError: again ? "That password was not accepted." : nil,
                                           maxAttempts: SudoSession.maxAttempts)
             model.enqueue(.password(request, PromptGate<String?>()))
@@ -72,12 +73,13 @@ enum SnapshotScript {
 
     static let sampleQuestion = Question(
         title: "Sign in to the App Store",
-        message: "Open the App Store, sign in with your Apple Account, then come back. App Store apps cannot be installed until you do.",
+        message: "Open the App Store, sign in with your Apple Account, then come back. The installer cannot install App Store apps until you do.",
         options: [
             Question.Option(id: "signed-in", label: "I'm signed in", isDefault: true),
             Question.Option(id: "skip", label: "Skip App Store apps"),
         ],
-        url: URL(string: "macappstore://apps.apple.com/app/id937984704")
+        // Xcode's page: its download is the first App Store install of a run, so that is when the app asks.
+        url: URL(string: "macappstore://apps.apple.com/app/id497799835")
     )
 
     /// The config's first question on its first try, with an offered answer. With `again`, the email question on its
@@ -107,15 +109,6 @@ enum SnapshotScript {
 
     // MARK: Scripts
 
-    private static func enableFirstOptionalItem(in model: InstallerModel) {
-        for step in model.steps where model.isEnabled(step) {
-            if let optional = step.items.first(where: { !$0.enabledByDefault }) {
-                model.setItem(optional, enabled: true)
-                return
-            }
-        }
-    }
-
     static func enabledSteps(_ model: InstallerModel) -> [PlannedStep] {
         model.steps.filter { model.isEnabled($0) && model.selectedItemCount(in: $0) > 0 }
     }
@@ -125,14 +118,15 @@ enum SnapshotScript {
     }
 
     /// Finishes one item with a varied outcome and a little output, the way the engine reports it (a dry
-    /// run only narrates the command). Returns the item's final status.
+    /// run only narrates the command). A reminder (`manual:`) that the run does not find already done ends as
+    /// the engine ends it: on the checklist, needing you. Returns the item's final status.
     @discardableResult
-    static func finish(_ item: PlannedItem, index: Int, failing: Bool, needsYou: Bool = false,
-                               model: InstallerModel) -> ItemStatus {
+    static func finish(_ item: PlannedItem, index: Int, failing: Bool, in step: PlannedStep? = nil,
+                       model: InstallerModel) -> ItemStatus {
         let status: ItemStatus
         model.apply(.itemStatus(itemID: item.id, status: .checking))
-        if !failing, !needsYou, SnapshotOutput.endsAlreadyDone(item, index: index) {
-            status = .alreadyDone("already installed")
+        if !failing, SnapshotOutput.endsAlreadyDone(item, index: index) {
+            status = .alreadyDone(SnapshotOutput.alreadyDoneReason(for: item))
             model.apply(.itemStatus(itemID: item.id, status: status))
             return status
         }
@@ -143,8 +137,9 @@ enum SnapshotScript {
             model.apply(.log(LogLine("curl: (56) Recv failure: Connection reset by peer", style: .stderr, itemID: item.id)))
             model.apply(.log(LogLine("✗ \(item.title): \(message)", style: .error, itemID: item.id)))
             status = .failed(message)
-        } else if needsYou {
-            status = .needsAttention("finish it by hand")
+        } else if let followUp = SnapshotOutput.followUp(for: item, in: step) {
+            model.apply(.followUp(followUp))
+            status = .needsAttention(followUp.title)
         } else {
             model.apply(SnapshotOutput.end(item, model: model))
             status = .done(nil)
@@ -171,7 +166,6 @@ enum SnapshotScript {
         let steps = enabledSteps(model)
         guard !steps.isEmpty else { return }
         model.apply(.runStarted(totalItems: model.enabledItemCount))
-        model.apply(.log(LogLine("Asked for administrator rights once for the whole run.", style: .info)))
 
         let currentIndex = min(steps.count - 1, max(1, steps.count * 2 / 5))
         for (stepIndex, step) in steps.enumerated() where stepIndex < currentIndex {
@@ -179,7 +173,7 @@ enum SnapshotScript {
             var failures = 0
             for (index, item) in enabledItems(model, in: step).enumerated() {
                 let failing = stepIndex == currentIndex - 1 && index == enabledItems(model, in: step).count - 1 && stepIndex > 0
-                finish(item, index: index, failing: failing, model: model)
+                finish(item, index: index, failing: failing, in: step, model: model)
                 if failing { failures += 1 }
             }
             model.apply(.stepStatus(stepID: step.id, status: failures == 0 ? .done : .finishedWithFailures(failures)))
@@ -190,7 +184,7 @@ enum SnapshotScript {
         let items = enabledItems(model, in: current)
         let runningIndex = min(items.count - 1, items.count / 2)
         for (index, item) in items.enumerated() where index < runningIndex {
-            finish(item, index: index, failing: false, model: model)
+            finish(item, index: index, failing: false, in: current, model: model)
         }
         let item = items[runningIndex]
         model.apply(.itemStatus(itemID: item.id, status: .checking))
@@ -217,9 +211,6 @@ enum SnapshotScript {
                 failingIndices.insert(index)
             }
         }
-        // A couple of items a person has to finish by hand, as a real run of a full config has.
-        let attentionIndices = Set([allItems.count / 3 + 1, allItems.count * 2 / 3 + 1]).subtracting(failingIndices)
-
         var position = 0
         run: for step in steps {
             model.apply(.stepStatus(stepID: step.id, status: .running))
@@ -229,8 +220,7 @@ enum SnapshotScript {
                     interrupt(item, in: step, model: model)
                     break run
                 }
-                let status = finish(item, index: position, failing: failingIndices.contains(position),
-                                    needsYou: attentionIndices.contains(position), model: model)
+                let status = finish(item, index: position, failing: failingIndices.contains(position), in: step, model: model)
                 switch status {
                 case .done: summary.done += 1
                 case .alreadyDone: summary.alreadyDone += 1
@@ -245,16 +235,8 @@ enum SnapshotScript {
             model.apply(.stepStatus(stepID: step.id, status: stepFailures == 0 ? .done : .finishedWithFailures(stepFailures)))
         }
 
-        let followUps = [
-            FollowUp(id: "snapshot-accessibility", title: "Allow Accessibility for Hammerspoon",
-                     detail: "System Settings → Privacy & Security → Accessibility → turn on Hammerspoon.",
-                     url: URL(string: "x-apple.systempreferences:com.apple.preference.security?Privacy_Accessibility")),
-            FollowUp(id: "snapshot-logout", title: "Log out and back in", detail: "Key repeat settings apply after you log in again."),
-            FollowUp(id: "snapshot-dropbox", title: "Sign in to Dropbox", detail: "Dropbox is running; sign in from its menu bar icon.",
-                     url: URL(string: "https://www.dropbox.com/login")),
-        ]
-        for followUp in followUps { model.apply(.followUp(followUp)) }
-        summary.followUps = followUps
+        // The checklist is what the run's reminders put on it, in the order they ran.
+        summary.followUps = model.followUps
         summary.wasCancelled = stopped
         summary.duration = stopped ? SnapshotProgress.elapsed(atItem: stopIndex, model: model) : SnapshotProgress.runDuration
         // The engine writes no log file for a dry run.
