@@ -8,11 +8,15 @@ public struct RunOptions: Equatable, Sendable {
     public var assumeFresh: Bool
     /// Pause after each simulated command so a dry run is watchable.
     public var dryRunDelay: TimeInterval
+    /// Ask every question the enabled items need again, offering the saved answer as the default
+    /// (`shawn install --ask`). A dry run never asks.
+    public var askAgain: Bool
 
-    public init(dryRun: Bool = false, assumeFresh: Bool = false, dryRunDelay: TimeInterval = 0) {
+    public init(dryRun: Bool = false, assumeFresh: Bool = false, dryRunDelay: TimeInterval = 0, askAgain: Bool = false) {
         self.dryRun = dryRun
         self.assumeFresh = assumeFresh
         self.dryRunDelay = dryRunDelay
+        self.askAgain = askAgain
     }
 }
 
@@ -70,7 +74,8 @@ public final class ActionContext: @unchecked Sendable {
     public let options: RunOptions
     public let step: StepConfig
     public let item: ItemConfig
-    /// Config `vars:` plus machine built-ins (`home`, `user`, `hostname`, `arch`, `brew_prefix`, ...).
+    /// Config `vars:`, the answers to the config's questions, and machine built-ins (`home`, `user`, `hostname`,
+    /// `arch`, `brew_prefix`, ...). A question without an answer is pending: `expand` leaves it as written.
     public let vars: TemplateVars
     /// Runs commands (dry-run aware, output goes to this item's log).
     public let commands: CommandRunner
@@ -80,15 +85,17 @@ public final class ActionContext: @unchecked Sendable {
     public let shared: SharedState
     private let emit: @Sendable (InstallEvent) -> Void
 
+    /// `vars` are the run's variables; without them, the context uses the answers saved on this Mac.
     public init(config: InstallerConfig, environment: SystemEnvironment, options: RunOptions, step: StepConfig, item: ItemConfig,
                 sudo: (any SudoProviding)?, interaction: any UserInteraction, shared: SharedState,
-                emit: @escaping @Sendable (InstallEvent) -> Void) {
+                vars: TemplateVars? = nil, emit: @escaping @Sendable (InstallEvent) -> Void) {
         self.config = config
         self.environment = environment
         self.options = options
         self.step = step
         self.item = item
-        self.vars = Self.makeVars(config: config, environment: environment)
+        self.vars = vars ?? Self.makeVars(config: config, environment: environment,
+                                          answers: AnswerStore(environment: environment).answers(for: config.meta.ask))
         self.interaction = interaction
         self.shared = shared
         self.emit = emit
@@ -101,13 +108,24 @@ public final class ActionContext: @unchecked Sendable {
         self.files = FileOps(environment: environment, dryRun: options.dryRun, log: sink)
     }
 
-    public static func makeVars(config: InstallerConfig, environment: SystemEnvironment) -> TemplateVars {
+    /// Machine built-ins, `config_dir`, `answers` to the config's questions, then `vars:`, which may use the others.
+    /// A question with no entry in `answers` is pending: validation knows it, and `expand` leaves it as written.
+    /// Answers to names the config does not ask for are ignored.
+    public static func makeVars(config: InstallerConfig, environment: SystemEnvironment, answers: [String: String] = [:]) -> TemplateVars {
         var values = environment.templateVariables
         values["config_dir"] = config.root.path
-        // Config vars may reference the built-ins (and each other, in declaration-independent single pass).
-        let builtins = TemplateVars(values)
-        for (key, value) in config.meta.vars { values[key] = builtins.expand(value) }
-        return TemplateVars(values)
+        var pending: Set<String> = []
+        for question in config.meta.ask where values[question.name] == nil {
+            if let answer = answers[question.name] {
+                values[question.name] = answer
+            } else {
+                pending.insert(question.name)
+            }
+        }
+        // Config vars may reference the built-ins and the answers (not each other: one pass, in no particular order).
+        let known = TemplateVars(values, pending: pending)
+        for (key, value) in config.meta.vars { values[key] = known.expand(value) }
+        return TemplateVars(values, pending: pending)
     }
 
     public var dryRun: Bool { options.dryRun }
@@ -146,9 +164,14 @@ public final class ActionContext: @unchecked Sendable {
 
     /// Expands `{{variables}}` and a leading `~`, returning an absolute file URL.
     public func path(_ text: String) -> URL {
-        let expanded = PathExpansion.expandTilde(vars.expand(text), home: environment.home)
+        Self.path(text, vars: vars, home: environment.home)
+    }
+
+    /// `path(_:)` without a context. A relative path starts in `home`.
+    public static func path(_ text: String, vars: TemplateVars, home: URL) -> URL {
+        let expanded = PathExpansion.expandTilde(vars.expand(text), home: home)
         if expanded.hasPrefix("/") { return URL(fileURLWithPath: expanded) }
-        return environment.home.appendingPathComponent(expanded)
+        return home.appendingPathComponent(expanded)
     }
 
     /// `~`-abbreviated path for messages.

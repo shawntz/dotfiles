@@ -121,6 +121,15 @@ public protocol Action: Sendable {
     var isCheckable: Bool { get }
     /// Static problems (missing payload files, unknown variables). No machine access.
     func validate(_ context: ValidationContext) -> [String]
+    /// Text this action fills `{{variables}}` into that the item's YAML may not show: an option's default (the
+    /// `ssh-key` comment is `{{email}}` unless the item sets one) or a payload file it templates. The plan reads it,
+    /// with the item's own text, to learn which of the config's questions the item needs. No machine access.
+    func impliedText(_ context: ValidationContext) -> [String]
+    /// Files this action makes, as written (`ssh-key` makes the key and its `.pub`). While this item waits for an
+    /// answer, a later item that uses one of them waits too, until the file exists. No machine access.
+    func madeFiles(_ context: ValidationContext) -> [String]
+    /// Files this action needs that an earlier item may make (`github` uploads the public key). No machine access.
+    func usedFiles(_ context: ValidationContext) -> [String]
     func check(_ context: ActionContext) async -> CheckResult
     func run(_ context: ActionContext) async throws -> ActionOutcome
 }
@@ -130,6 +139,9 @@ public extension Action {
     var sudo: SudoNeed { .never }
     var isCheckable: Bool { true }
     func validate(_ context: ValidationContext) -> [String] { [] }
+    func impliedText(_ context: ValidationContext) -> [String] { [] }
+    func madeFiles(_ context: ValidationContext) -> [String] { [] }
+    func usedFiles(_ context: ValidationContext) -> [String] { [] }
 }
 
 /// Describes one item kind: how to recognise it in YAML and how to build its action.

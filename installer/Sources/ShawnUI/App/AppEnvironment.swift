@@ -93,3 +93,17 @@ enum AppEnvironment {
         return ConfigResolveOptions(explicitPath: explicit, allowRemote: options.allowRemote, remoteRef: options.configRef)
     }
 }
+
+extension InstallerModel.Settings {
+    /// The model's settings from the launch flags. The live app and the simulation both build theirs here, so a
+    /// test of this function covers how a flag such as `--ask` reaches the live app.
+    init(options: LaunchOptions, mode: RunMode, isSimulation: Bool = false) {
+        self.init()
+        self.mode = mode
+        self.isSimulation = isSimulation
+        assumeFresh = options.startsFresh
+        askAgain = options.askAgain
+        autoStart = options.autoStart && mode != .snapshot
+        dryRunDelay = options.demo ? 0.25 : 0
+    }
+}

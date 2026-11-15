@@ -22,23 +22,43 @@ public final class InstallEngine: @unchecked Sendable {
         self.sudo = SudoSession(environment: environment, interaction: interaction, dryRun: options.dryRun)
     }
 
-    private func makeContext(step: PlannedStep, item: PlannedItem, emit: @escaping @Sendable (InstallEvent) -> Void) -> ActionContext {
+    private func makeContext(step: PlannedStep, item: PlannedItem, vars: TemplateVars, emit: @escaping @Sendable (InstallEvent) -> Void) -> ActionContext {
         ActionContext(config: plan.config, environment: environment, options: options, step: step.config, item: item.config,
-                      sudo: sudo, interaction: interaction, shared: shared, emit: emit)
+                      sudo: sudo, interaction: interaction, shared: shared, vars: vars, emit: emit)
     }
 
     // MARK: Scan
 
-    /// Read-only pass over the enabled items: which are already done? Changes nothing.
+    /// Read-only pass over the enabled items: which are already done? Changes nothing and asks nothing. An item
+    /// that waits for a question without a saved answer (`InstallPlan.waitingQuestions`) is not checked: it is
+    /// reported as needed, waiting for the answer.
     public func scan(selection: Selection, onResult: @escaping @Sendable (String, CheckResult) -> Void) async {
+        let answers = AnswerStore(environment: environment).answers(for: plan.config.meta.ask)
+        let vars = ActionContext.makeVars(config: plan.config, environment: environment, answers: answers)
+        let waiting = plan.waitingQuestions(for: selection.enabledItems(in: plan), unanswered: Self.unanswered(plan.config, answers))
         for step in plan.steps where selection.isEnabled(step: step) {
             for item in step.items where selection.isEnabled(item: item) {
                 if Task.isCancelled { return }
-                let context = makeContext(step: step, item: item, emit: { _ in })
+                if let questions = waiting[item.id] {
+                    onResult(item.id, .needed(Self.waitingMessage(questions)))
+                    continue
+                }
+                let context = makeContext(step: step, item: item, vars: vars, emit: { _ in })
                 let result = options.assumeFresh ? CheckResult.needed(nil) : await item.action.check(context)
                 onResult(item.id, result)
             }
         }
+    }
+
+    /// `waiting for an answer: <prompt>`, the status of an item held back for its questions.
+    public static func waitingMessage(_ questions: [VariableQuestion]) -> String {
+        if questions.count == 1 { return "waiting for an answer: \(questions[0].prompt)" }
+        return "waiting for \(questions.count) answers: " + questions.map(\.prompt).joined(separator: "; ")
+    }
+
+    /// The names of the config's questions that `answers` has no answer to.
+    public static func unanswered(_ config: InstallerConfig, _ answers: [String: String]) -> Set<String> {
+        Set(config.meta.ask.map(\.name).filter { answers[$0] == nil })
     }
 
     // MARK: Run
@@ -69,8 +89,17 @@ public final class InstallEngine: @unchecked Sendable {
             emit(.log(LogLine("Dry run: nothing on this Mac will be changed.", style: .info)))
         }
 
+        // The questions come first, before the password: an item waiting for an answer does not run, so it may
+        // not need the password at all.
+        let answers = await settleQuestions(for: enabledItems, emit: emit)
+        // In a real run, an item that mentions a question without an answer is neither checked nor run, so text
+        // that still holds `{{name}}` never reaches this Mac. Nor is an item that needs a file only such an item
+        // would make. A dry run fills every gap and holds nothing back.
+        let waiting = options.dryRun ? [:] : plan.waitingQuestions(for: enabledItems, unanswered: answers.unanswered)
+        var heldBack: [(item: PlannedItem, step: StepConfig, questions: [VariableQuestion])] = []
+
         // Ask for the password up front rather than twenty minutes in.
-        if !options.dryRun, enabledItems.contains(where: { $0.action.sudo == .always }) {
+        if !options.dryRun, !Task.isCancelled, enabledItems.contains(where: { $0.action.sudo == .always && waiting[$0.id] == nil }) {
             do {
                 try await sudo.ensureReady(reason: "Some steps need administrator rights (Homebrew, system installers).")
             } catch {
@@ -106,8 +135,14 @@ public final class InstallEngine: @unchecked Sendable {
                     emit(.itemStatus(itemID: item.id, status: .disabled))
                     continue
                 }
+                if let questions = waiting[item.id] {
+                    summary.needsAttention += 1
+                    heldBack.append((item, step.config, questions))
+                    emit(.itemStatus(itemID: item.id, status: .needsAttention(Self.waitingMessage(questions))))
+                    continue
+                }
 
-                let context = makeContext(step: step, item: item, emit: emitCollecting)
+                let context = makeContext(step: step, item: item, vars: answers.vars, emit: emitCollecting)
                 emit(.itemStatus(itemID: item.id, status: .checking))
                 let check = options.assumeFresh ? CheckResult.needed(nil) : await item.action.check(context)
                 if case .satisfied(let reason) = check {
@@ -164,6 +199,9 @@ public final class InstallEngine: @unchecked Sendable {
         }
         sudo.invalidate()
 
+        for followUp in answerFollowUps(heldBack: heldBack) {
+            emitCollecting(.followUp(followUp))
+        }
         summary.followUps = followUps.all
         summary.duration = Date().timeIntervalSince(started)
         emit(.runFinished(summary))

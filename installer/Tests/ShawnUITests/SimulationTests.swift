@@ -9,6 +9,8 @@ import XCTest
 private struct ScriptedInteraction: UserInteraction {
     var passwords: [String?] = ["secret"]
     var answer: (@Sendable (Question) -> String)?
+    /// Replies to the text sheet; without it, the offered answer is taken.
+    var text: (@Sendable (TextRequest) -> String?)?
 
     func requestAdminPassword(reason: String, attempt: Int, lastError: String?) async -> String? {
         attempt <= passwords.count ? passwords[attempt - 1] : nil
@@ -16,6 +18,11 @@ private struct ScriptedInteraction: UserInteraction {
 
     func ask(_ question: Question) async -> String {
         answer?(question) ?? question.defaultOptionID
+    }
+
+    func askText(_ request: TextRequest) async -> String? {
+        guard let text else { return request.defaultValue }
+        return text(request)
     }
 }
 
@@ -104,6 +111,7 @@ final class SimulationTests: XCTestCase {
         func status(_ title: String) -> ItemStatus? {
             plan.allItems.first { $0.title == title }.flatMap { statuses[$0.id] }
         }
+        XCTAssertEqual(status("Git email"), .done(nil), "nobody to ask, so the offered answer is taken")
         XCTAssertEqual(status("Xcode Command Line Tools"), .alreadyDone("already installed"))
         XCTAssertEqual(status("Package manager"), .done(nil), "the simulated password check accepts any password")
         XCTAssertEqual(status("Intel helper"), .skipped("not needed on Apple silicon"))
@@ -168,6 +176,34 @@ final class SimulationTests: XCTestCase {
         XCTAssertTrue(reason.contains("Skip App Store apps"), reason)
     }
 
+    func testSkippingTheSimulatedTextQuestionLeavesItWaiting() async throws {
+        let (resolved, environment, _) = try loadSimulation(timeScale: 0)
+        let plan = resolved.plan
+        let engine = InstallEngine(plan: plan, environment: environment, options: RunOptions(dryRun: true),
+                                   interaction: ScriptedInteraction(text: { _ in nil }))
+        let log = EventLog()
+        _ = await engine.run(selection: .only(steps: ["bootstrap"], in: plan)) { log.add($0) }
+        let item = try XCTUnwrap(plan.allItems.first { $0.title == "Git email" })
+        XCTAssertEqual(log.finalStatuses[item.id], .needsAttention("waiting for an answer: Your email address for Git commits"))
+        XCTAssertFalse(FileManager.default.fileExists(atPath: AnswerStore(environment: environment).url.path))
+    }
+
+    /// STOP while the simulation's text sheet is up stops the run. The Git email item ends as stopped, not as waiting
+    /// for an answer, as a real run's question does.
+    @MainActor
+    func testStopAtTheSimulatedTextSheetStopsTheItem() async throws {
+        let directory = makeTempDirectory()
+        let model = try SnapshotCommand.makeSimulationModel(options: LaunchOptions(), scratch: directory.url, mode: .simulation,
+                                                            timeScale: 0.001)
+        model.start()
+        try await waitUntil { model.activePrompt?.textRequest != nil }
+        model.stop()
+        try await waitUntil(timeout: 10) { model.phase == .finished }
+        let item = try XCTUnwrap(model.plan?.allItems.first { $0.title == "Git email" })
+        XCTAssertEqual(model.status(of: item), .cancelled)
+        XCTAssertEqual(model.outcome, .stopped)
+    }
+
     /// `--simulate` end to end: the model drives the real engine over the simulated kinds, and the test
     /// answers the password and question sheets the way a person would.
     @MainActor
@@ -192,6 +228,10 @@ final class SimulationTests: XCTestCase {
                 case .question(let question, _):
                     answered.append("question")
                     model.answer(optionID: question.defaultOptionID)
+                case .text(let request, _):
+                    // First a reply the format turns down, then Return on the offered answer.
+                    answered.append("text \(request.attempt)")
+                    model.submitText(request.attempt == 1 ? "lumpy at example dot com" : "")
                 }
             }
             if model.attention != nil { answered.append("attention") }
@@ -201,6 +241,12 @@ final class SimulationTests: XCTestCase {
         XCTAssertEqual(model.outcome, .failures(1))
         XCTAssertEqual(model.failures.map(\.item.title), ["Lumpy Space Radio"])
         XCTAssertTrue(answered.contains("password") && answered.contains("question"), "\(answered)")
+        XCTAssertEqual(Array(answered.prefix(3)), ["text 1", "text 2", "password"],
+                       "the text sheet comes first, as in a real run, and asks again after a reply it turned down")
+        XCTAssertTrue(model.log.entries.contains { $0.text == "Answer: lumpy@example.com (simulated: not saved)" })
+        let answers = AnswerStore(environment: model.environment).url
+        XCTAssertTrue(answers.path.hasPrefix(directory.url.path), "the simulation's answers file would be in its scratch folder")
+        XCTAssertFalse(FileManager.default.fileExists(atPath: answers.path), "and the simulation writes none")
         XCTAssertEqual(model.followUps.count, 2)
         XCTAssertTrue(recorder.copied.isEmpty && recorder.opened.isEmpty, "the simulation never copies or opens by itself")
         XCTAssertTrue(model.log.entries.contains { $0.isProgress == false && $0.text.contains("100.0%") }, "progress frames ended in a final line")
@@ -224,6 +270,20 @@ final class SimulationTests: XCTestCase {
                 XCTAssertNotNil(model.currentItem)
                 XCTAssertTrue(model.log.entries.contains { $0.isProgress })
                 XCTAssertEqual(model.elapsed(at: model.now()), 192, accuracy: 0.5, "a fixed clock keeps snapshots stable")
+            case .ask:
+                let request = try XCTUnwrap(model.activePrompt?.textRequest)
+                XCTAssertEqual(model.phase, .running)
+                XCTAssertNil(model.currentItem, "a run asks its questions before any item")
+                XCTAssertNotNil(request.defaultValue, "the sheet shows an offered answer")
+                XCTAssertEqual(request.attempt, 1)
+                XCTAssertNil(request.lastError, "a first try has nothing to explain")
+                XCTAssertEqual(model.quipMoment, .question)
+            case .askAgain:
+                let request = try XCTUnwrap(model.activePrompt?.textRequest)
+                XCTAssertNil(model.currentItem)
+                XCTAssertNotNil(request.defaultValue)
+                XCTAssertEqual(request.attempt, 2)
+                XCTAssertEqual(request.lastError, AnswerFormat.email.problem(with: "x"), "the engine's own reason")
             case .password: XCTAssertEqual(model.activePrompt?.isPassword, true)
             case .question: XCTAssertEqual(model.activePrompt?.isPassword, false)
             case .attention: XCTAssertEqual(model.attention?.attention.code, SnapshotScript.sampleAttention.code)

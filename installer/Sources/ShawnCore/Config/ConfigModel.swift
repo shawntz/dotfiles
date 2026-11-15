@@ -105,13 +105,82 @@ public struct ConfigMeta: Equatable, Sendable {
     public var remote: RemoteConfigRef?
     /// User-defined template variables (`{{name}}`), in declaration order.
     public var vars: [String: String]
+    /// Variables the installer asks the person for (`ask:`), in the order they are asked.
+    public var ask: [VariableQuestion]
 
-    public init(schema: Int, name: String, tagline: String? = nil, remote: RemoteConfigRef? = nil, vars: [String: String] = [:]) {
+    public init(schema: Int, name: String, tagline: String? = nil, remote: RemoteConfigRef? = nil, vars: [String: String] = [:],
+                ask: [VariableQuestion] = []) {
         self.schema = schema
         self.name = name
         self.tagline = tagline
         self.remote = remote
         self.vars = vars
+        self.ask = ask
+    }
+}
+
+/// How an answer to a question must look (`format:` of an `ask:` entry).
+public enum AnswerFormat: String, CaseIterable, Equatable, Sendable {
+    /// Any text that is not empty once trimmed.
+    case text
+    /// One address: something, an `@`, then something with a dot in it, and none of the characters that would make
+    /// it a list, a pattern or a quoted name (`, ; * < > ( ) [ ] " ' \`). The answer goes into git's allowed-signers
+    /// file, where a comma starts another signer and `*` matches every address.
+    case email
+
+    /// Why `answer` is not acceptable, or nil when it is. Every format wants one line of printable text. An arrow key
+    /// at the terminal prompt types an escape code into the line, and that must not reach ~/.gitconfig.
+    public func problem(with answer: String) -> String? {
+        let trimmed = answer.trimmingCharacters(in: .whitespacesAndNewlines)
+        if trimmed.isEmpty { return "This needs an answer." }
+        if trimmed.contains(where: \.isNewline) { return "Use one line." }
+        if trimmed.unicodeScalars.contains(where: { $0.properties.generalCategory == .control }) {
+            return "Use only printable characters, with no tabs or escape codes. At the terminal prompt, fix a typo with Backspace, not the arrow keys."
+        }
+        switch self {
+        case .text:
+            return nil
+        case .email:
+            let part = #"[^@\s,;*<>()\[\]"'\\]+"#
+            let looksLikeAddress = trimmed.range(of: "^\(part)@\(part)\\.\(part)$", options: .regularExpression) != nil
+            return looksLikeAddress ? nil : "That does not look like an email address, such as name@example.com."
+        }
+    }
+}
+
+/// One entry of `ask:` in `installer.yaml`: a variable the installer asks the person for, once per Mac.
+/// The answer is kept in `~/.shawn/answers.json` and steps use it like any other `{{variable}}`.
+public struct VariableQuestion: Equatable, Sendable {
+    /// The variable's name (`var:`), as steps write it inside `{{ }}`.
+    public var name: String
+    /// One line shown to the person (`prompt:`).
+    public var prompt: String
+    /// A literal default (`default:`); it may use `{{vars}}`.
+    public var defaultValue: String?
+    /// A `/bin/sh` one-liner whose first line of output is the default (`default_command:`). It wins over `default:`
+    /// when that line passes `format`.
+    public var defaultCommand: String?
+    public var format: AnswerFormat
+    public var source: SourceRef?
+
+    public init(name: String, prompt: String, defaultValue: String? = nil, defaultCommand: String? = nil,
+                format: AnswerFormat = .text, source: SourceRef? = nil) {
+        self.name = name
+        self.prompt = prompt
+        self.defaultValue = defaultValue
+        self.defaultCommand = defaultCommand
+        self.format = format
+        self.source = source
+    }
+
+    /// The variable in words, for messages: `your full name` for `full_name`.
+    public var spokenName: String {
+        "your " + name.replacingOccurrences(of: "_", with: " ").replacingOccurrences(of: "-", with: " ")
+    }
+
+    /// What a dry run puts in place of an answer it does not have, so its narration still reads sensibly.
+    public var dryRunPlaceholder: String {
+        "(\(spokenName), asked on a real run)"
     }
 }
 
@@ -187,6 +256,11 @@ public struct InstallerConfig: Sendable {
 
     public func step(_ id: String) -> StepConfig? {
         steps.first { $0.id == id }
+    }
+
+    /// The question that asks for `variable`, if any.
+    public func question(_ variable: String) -> VariableQuestion? {
+        meta.ask.first { $0.name == variable }
     }
 }
 

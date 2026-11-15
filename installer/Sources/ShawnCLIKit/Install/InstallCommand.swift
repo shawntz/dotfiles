@@ -9,17 +9,19 @@ struct InstallCommand: BuiltinCommand {
     let aliases = ["sync"]
     let section = BuiltinSection.setup
     let summary = "Set this Mac up from the config (safe to re-run)"
-    let usage = "[--dry-run] [--only step,…] [--skip step,…] [--yes] [--fresh] [--config DIR] [--no-remote]"
+    let usage = "[--dry-run] [--only step,…] [--skip step,…] [--yes] [--ask] [--fresh] [--config DIR] [--no-remote]"
     let details: String? = """
     Runs every step of the config, the same engine as the app. Items that are already in place are skipped, so it \
-    is safe to run again after a failure. It asks for the administrator password itself (echo off) only when an \
-    item needs it; --dry-run changes nothing and asks nothing.
+    is safe to run again after a failure. First it asks the config's questions (such as your name and email for \
+    Git) that the chosen steps need and that have no answer in ~/.shawn/answers.json yet, then the administrator \
+    password (echo off), only when an item needs it. --dry-run changes nothing and asks nothing.
     """
     let options = [
         OptionSpec("dry-run", short: "n", "Show what would happen; change nothing"),
         OptionSpec("only", value: "STEPS", "Run only these steps (comma-separated ids)"),
         OptionSpec("skip", value: "STEPS", "Leave these steps out"),
         OptionSpec("yes", short: "y", "Do not ask for confirmation; questions take their default answer"),
+        OptionSpec("ask", "Ask the config's questions again, offering the saved answers"),
         OptionSpec("fresh", "Treat every item as not done yet (demos)"),
         OptionSpec("config", value: "DIR", "Use this config directory"),
         OptionSpec("no-remote", "Do not fetch the latest config from GitHub"),
@@ -61,7 +63,8 @@ struct InstallCommand: BuiltinCommand {
                 return ExitCode.usage
             }
             let steps = resolved.plan.steps.filter { selection.isEnabled(step: $0) }.count
-            guard TTY.confirm("Set up this Mac: \(items.count) items in \(steps) steps from \(resolved.config.source)?") else {
+            let what = "\(items.count) item\(items.count == 1 ? "" : "s") in \(steps) step\(steps == 1 ? "" : "s")"
+            guard TTY.confirm("Set up this Mac: \(what) from \(resolved.config.source)?") else {
                 context.note("ok, nothing changed")
                 return ExitCode.ok
             }
@@ -69,7 +72,8 @@ struct InstallCommand: BuiltinCommand {
 
         let interaction = context.interaction(TerminalInteraction.Options(assumeYes: parsed.has("yes"), allowPrompts: interactive && !dryRun))
         let engine = InstallEngine(plan: resolved.plan, environment: context.environment,
-                                   options: RunOptions(dryRun: dryRun, assumeFresh: parsed.has("fresh")), interaction: interaction)
+                                   options: RunOptions(dryRun: dryRun, assumeFresh: parsed.has("fresh"), askAgain: parsed.has("ask")),
+                                   interaction: interaction)
         let desktop: (any DesktopActions)? = interactive && !context.environment.isSandbox && !dryRun ? context.services.desktop : nil
         let renderer = InstallRenderer(plan: resolved.plan, selection: selection, fun: FunConfig.load(from: resolved.config).fun,
                                        terminal: context.terminal, out: context.out, desktop: desktop)

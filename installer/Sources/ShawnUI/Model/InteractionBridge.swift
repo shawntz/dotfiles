@@ -2,7 +2,7 @@ import Foundation
 import ShawnCore
 
 /// Hands one answer to a suspended engine call, exactly once, whoever gets there first:
-/// the person (Unlock / Cancel), STOP, or the engine task being cancelled.
+/// the person (a button on the sheet), STOP, or the engine task being cancelled.
 final class PromptGate<Answer: Sendable>: @unchecked Sendable {
     private let lock = NSLock()
     private var continuation: CheckedContinuation<Answer, Never>?
@@ -63,6 +63,8 @@ struct PendingPrompt: Identifiable {
     enum Kind {
         case password(PasswordRequest, PromptGate<String?>)
         case question(Question, PromptGate<String>)
+        /// One line of text for a question from `ask:` in `installer.yaml`. Nil means no answer.
+        case text(TextRequest, PromptGate<String?>)
     }
 
     let id: Int
@@ -73,11 +75,19 @@ struct PendingPrompt: Identifiable {
         return false
     }
 
-    /// Gives the engine its "nobody answered" value: no password, or the question's default option.
+    /// The request when this is the text sheet.
+    var textRequest: TextRequest? {
+        if case .text(let request, _) = kind { return request }
+        return nil
+    }
+
+    /// Gives the engine its "nobody answered" value: no password, the question's default option, or no text.
+    /// No text saves nothing. A question asked again keeps its saved answer, and any other stays unanswered.
     func resolveWithDefault() {
         switch kind {
         case .password(_, let gate): gate.resolve(nil)
         case .question(let question, let gate): gate.resolve(question.defaultOptionID)
+        case .text(_, let gate): gate.resolve(nil)
         }
     }
 }
@@ -104,6 +114,16 @@ final class InteractionBridge: UserInteraction, @unchecked Sendable {
         let gate = PromptGate<String>()
         return await suspend(on: gate, cancelValue: question.defaultOptionID) { presenter in
             presenter.enqueue(.question(question, gate))
+        }
+    }
+
+    /// The text sheet. Nil when the person presses SKIP, when STOP or quitting takes the sheet down, when the
+    /// engine task is cancelled, and when no run is on screen to show it. The engine saves an accepted answer;
+    /// the app never does.
+    func askText(_ request: TextRequest) async -> String? {
+        let gate = PromptGate<String?>()
+        return await suspend(on: gate, cancelValue: nil) { presenter in
+            presenter.enqueue(.text(request, gate))
         }
     }
 

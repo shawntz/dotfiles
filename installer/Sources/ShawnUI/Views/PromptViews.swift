@@ -19,6 +19,8 @@ struct PromptOverlay: View {
                     PasswordPanel(model: model, request: request)
                 case .question(let question, _):
                     QuestionPanel(model: model, question: question)
+                case .text(let request, _):
+                    TextPanel(model: model, request: request)
                 }
             }
             .id(prompt.id)
@@ -109,6 +111,105 @@ struct PasswordPanel: View {
         let entered = password
         password = ""
         model.submitPassword(entered)
+    }
+}
+
+/// A question from `ask:` in `installer.yaml`: one line of text, with the offered answer already in the field and
+/// selected, so Return keeps it and typing replaces it. Each attempt is a new prompt, so a reply the engine turned
+/// down comes back as a fresh sheet with the offered answer and the reason.
+struct TextPanel: View {
+    @Environment(\.palette) private var palette
+    let model: InstallerModel
+    let request: TextRequest
+    @State private var text: String
+    @FocusState private var fieldFocused: Bool
+
+    init(model: InstallerModel, request: TextRequest) {
+        self.model = model
+        self.request = request
+        _text = State(initialValue: request.defaultValue ?? "")
+    }
+
+    private var canContinue: Bool { Self.canContinue(with: text, request: request) }
+
+    /// An empty field takes the offered answer, so it may be sent only when there is one.
+    static func canContinue(with text: String, request: TextRequest) -> Bool {
+        request.defaultValue != nil || !text.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty
+    }
+
+    var body: some View {
+        PromptCard(title: "QUESTION", tint: .yellow) {
+            MascotCard(sprite: model.speaker, speaker: model.speaker?.name, quip: model.quip, spriteSize: 64)
+            Text(request.prompt)
+                .font(Theme.mono(Theme.Size.title + 2, .bold))
+                .foregroundStyle(palette.text.color)
+                .fixedSize(horizontal: false, vertical: true)
+            if let lastError = request.lastError {
+                Text("✗ " + ActionError.sentences(lastError, "try \(request.attempt) of \(InstallEngine.maxAnswerAttempts)."))
+                    .font(Theme.mono(Theme.Size.small, .semibold))
+                    .foregroundStyle(palette.red.color)
+                    .fixedSize(horizontal: false, vertical: true)
+            }
+            HStack(spacing: Theme.Space.s) {
+                Text(">").font(Theme.mono(Theme.Size.title, .bold)).foregroundStyle(palette.yellow.color)
+                TextField(Self.placeholder(for: request), text: $text)
+                    .textFieldStyle(.plain)
+                    .font(Theme.mono(Theme.Size.title))
+                    .foregroundStyle(palette.text.color)
+                    .focused($fieldFocused)
+                    .onSubmit(submit)
+                    .accessibilityLabel(request.prompt)
+            }
+            .padding(.horizontal, Theme.Space.m)
+            .padding(.vertical, 9)
+            .background(palette.background.color, in: RoundedRectangle(cornerRadius: 4))
+            .overlay(RoundedRectangle(cornerRadius: 4).strokeBorder(palette.yellow.color.opacity(fieldFocused ? 0.9 : 0.5), lineWidth: 1))
+            Text(Self.note(for: request, answersFile: model.answersFileDisplayPath, isSimulation: model.settings.isSimulation))
+                .font(Theme.mono(Theme.Size.small))
+                .foregroundStyle(palette.dim.color)
+                .fixedSize(horizontal: false, vertical: true)
+            HStack(spacing: Theme.Space.m) {
+                Spacer()
+                Button("Skip") { model.skipText() }
+                    .buttonStyle(.terminal(.secondary))
+                    .keyboardShortcut(.cancelAction)
+                    .help(Self.skipHelp(for: request))
+                Button("Continue ⏎", action: submit)
+                    .buttonStyle(.terminal(.primary))
+                    .keyboardShortcut(.defaultAction)
+                    .disabled(!canContinue)
+                    .accessibilityLabel("Continue")
+            }
+        }
+        // Focusing the field selects what it holds, so typing replaces the offered answer.
+        .onAppear { fieldFocused = true }
+    }
+
+    private func submit() {
+        guard canContinue else { return }
+        model.submitText(text)
+    }
+
+    /// Dim text in the empty field: the offered answer, which an empty reply takes, or an example of the format.
+    static func placeholder(for request: TextRequest) -> String {
+        if let offered = request.defaultValue { return offered }
+        return request.format == .email ? "name@example.com" : "your answer"
+    }
+
+    /// The line under the field: where the answer goes and what SKIP does. When the offered answer is the saved one
+    /// (`--ask`), SKIP keeps it and the items run with it.
+    static func note(for request: TextRequest, answersFile: String, isSimulation: Bool) -> String {
+        if isSimulation {
+            return "Simulation: the answer only goes to the log, and nothing is saved. SKIP leaves it unanswered."
+        }
+        let saved = "Saved on this Mac in \(answersFile), so later runs do not ask again. "
+        if request.defaultIsSaved { return saved + "SKIP keeps the saved answer." }
+        return saved + "SKIP leaves it unanswered, and the items that need it wait for the next run."
+    }
+
+    /// The SKIP button's tooltip.
+    static func skipHelp(for request: TextRequest) -> String {
+        request.defaultIsSaved ? "Keep the saved answer." : "Leave it unanswered. The items that need it wait for the next run."
     }
 }
 

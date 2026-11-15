@@ -163,11 +163,23 @@ final class CLIContext: @unchecked Sendable {
         cachedCLI = nil
     }
 
-    /// `{{variables}}` for YAML commands: machine built-ins, config `vars:`, and `{{shawn_bin}}`.
+    /// `{{variables}}` for YAML commands: machine built-ins, config `vars:`, the answers saved in
+    /// `~/.shawn/answers.json`, and `{{shawn_bin}}`. A question without an answer is pending (left as written).
     func templateVars() -> TemplateVars {
-        var vars = lightConfig().map { ActionContext.makeVars(config: $0, environment: environment) } ?? TemplateVars(environment.templateVariables)
+        var vars = lightConfig().map {
+            ActionContext.makeVars(config: $0, environment: environment, answers: AnswerStore(environment: environment).answers(for: $0.meta.ask))
+        } ?? TemplateVars(environment.templateVariables)
         vars["shawn_bin"] = shawnBinary.path
         return vars
+    }
+
+    /// The questions a plain `shawn install` asks when they have no answer: those that an item it runs by default
+    /// needs, in the config on disk. A question only `cli.yaml` or an optional item uses is not among them, so
+    /// advice to answer in 'shawn install --ask' is given only for these. Nil when that config does not load.
+    func questionsInstallAsks() -> Set<String>? {
+        guard case .success(let resolved) = PlanLoader.local(context: self) else { return nil }
+        let plan = resolved.plan
+        return Set(plan.questions(for: Selection.defaults(for: plan).enabledItems(in: plan)).map(\.name))
     }
 
     /// Environment for programs the user runs through shawn: their own environment (not the installer's
@@ -231,7 +243,8 @@ struct ConfigPlace: Sendable, Equatable {
     let source: ConfigSource
 }
 
-/// Reads only `installer.yaml` (leniently): the CLI needs the name, vars and remote, not the whole plan.
+/// Reads only `installer.yaml` (leniently): the CLI needs the name, vars, questions and remote, not the whole plan.
+/// A question it cannot make sense of is left out (`shawn config validate` reports it).
 enum LightConfig {
     static func load(_ location: ConfigPlace) -> InstallerConfig {
         let root = location.url.standardizedFileURL
@@ -245,6 +258,14 @@ enum LightConfig {
             }
             for entry in map["vars"]?.map?.entries ?? [] {
                 if let value = entry.value.string { meta.vars[entry.key] = value }
+            }
+            for entry in map["ask"]?.list ?? [] {
+                guard let question = entry.map, let name = question["var"]?.string, TemplateVars.isValidName(name),
+                      meta.vars[name] == nil, !TemplateVars.builtinNames.contains(name), !meta.ask.contains(where: { $0.name == name }),
+                      let prompt = question["prompt"]?.string, !prompt.trimmingCharacters(in: .whitespaces).isEmpty else { continue }
+                meta.ask.append(VariableQuestion(name: name, prompt: prompt, defaultValue: question["default"]?.string,
+                                                 defaultCommand: question["default_command"]?.string,
+                                                 format: AnswerFormat(rawValue: question["format"]?.string ?? "") ?? .text))
             }
         }
         return InstallerConfig(root: root, meta: meta, steps: [], source: location.source)

@@ -6,6 +6,10 @@ public enum SnapshotState: String, CaseIterable, Sendable {
     case welcome
     case customize
     case running
+    /// The sheet for a question from `ask:` on its first try, with an offered answer.
+    case ask
+    /// The same sheet after a reply was turned down, with the reason under the prompt.
+    case askAgain = "ask-again"
     case password
     case question
     case attention
@@ -23,6 +27,8 @@ public struct LaunchOptions: Equatable, Sendable {
     public var dryRun = false
     /// Treat every item as not yet done.
     public var assumeFresh = false
+    /// Ask the config's questions again on the first real run, offering the saved answers.
+    public var askAgain = false
     public var configPath: String?
     public var allowRemote = true
     public var configRef: String?
@@ -54,6 +60,7 @@ public struct LaunchOptions: Equatable, Sendable {
 
       --dry-run               start with DRY RUN on (nothing on this Mac is changed)
       --fresh                 treat every item as not done yet (first run only)
+      --ask                   ask the config's questions again, once, in the first real run that needs them
       --config DIR            use the config in DIR (no GitHub fetch unless --config-ref is given)
       --no-remote             do not fetch the latest config from GitHub
       --config-ref REF        fetch this branch, tag or commit of the config
@@ -100,6 +107,7 @@ public struct LaunchOptions: Equatable, Sendable {
             switch flag {
             case "--dry-run": options.dryRun = true
             case "--fresh": options.assumeFresh = true
+            case "--ask": options.askAgain = true
             case "--no-remote": options.allowRemote = false
             case "--demo": options.demo = true
             case "--simulate": options.simulate = true
@@ -137,7 +145,7 @@ public struct LaunchOptions: Equatable, Sendable {
                 throw LaunchOptionsError.unknownArgument(argument)
             }
 
-            if inline != nil, ["--dry-run", "--fresh", "--no-remote", "--demo", "--simulate", "--help"].contains(flag) {
+            if inline != nil, ["--dry-run", "--fresh", "--ask", "--no-remote", "--demo", "--simulate", "--help"].contains(flag) {
                 throw LaunchOptionsError.unexpectedValue(flag)
             }
         }

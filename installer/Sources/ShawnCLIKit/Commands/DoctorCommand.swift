@@ -10,7 +10,8 @@ struct DoctorCommand: BuiltinCommand {
     Runs every enabled item's check (it changes nothing) and a few environment checks: Homebrew, git identity, \
     GitHub CLI login, an SSH key, and ~/.local/bin on PATH. Exits 1 when anything is missing. Items that have \
     no way to tell whether they are done (opening an app, a reminder without a check:) are listed under \
-    "Can't be checked" and never count as missing.
+    "Can't be checked" and never count as missing. So are items that need an answer this Mac has not given yet \
+    (see 'shawn config answers'); doctor never asks.
     """
 
     struct Check: Equatable {
@@ -51,13 +52,19 @@ struct DoctorCommand: BuiltinCommand {
 
     /// Checks every enabled item; prints one line per step and the items still to do, then the items no
     /// check can confirm under their own heading. Returns how many items are missing (never counting those).
+    /// An item that needs a question with no saved answer is not checked: its text is not complete yet. Neither is
+    /// an item that needs a file only such an item would make (`InstallPlan.waitingQuestions`).
     func scan(_ plan: InstallPlan, context: CLIContext) async -> Int {
         let style = context.style
         let defaults = Selection.defaults(for: plan)
+        let engine = InstallEngine(plan: plan, environment: context.environment, options: RunOptions(dryRun: true))
+        let answers = AnswerStore(environment: context.environment).answers(for: plan.config.meta.ask)
+        let waiting = plan.waitingQuestions(for: defaults.enabledItems(in: plan), unanswered: InstallEngine.unanswered(plan.config, answers))
+            .mapValues(InstallEngine.waitingMessage)
+        let canCheck: (PlannedItem) -> Bool = { $0.action.isCheckable && waiting[$0.id] == nil }
         // Only items that can say "already done" are worth a check.
         var selection = defaults
-        for item in plan.allItems where !item.action.isCheckable { selection.itemOverrides[item.id] = false }
-        let engine = InstallEngine(plan: plan, environment: context.environment, options: RunOptions(dryRun: true))
+        for item in plan.allItems where !canCheck(item) { selection.itemOverrides[item.id] = false }
         let results = ResultBox()
         await engine.scan(selection: selection) { id, result in results.set(id, result) }
         var missing = 0
@@ -65,8 +72,8 @@ struct DoctorCommand: BuiltinCommand {
         for step in plan.steps where defaults.isEnabled(step: step) {
             let items = step.items.filter { defaults.isEnabled(item: $0) }
             guard !items.isEmpty else { continue }
-            let checkable = items.filter(\.action.isCheckable)
-            let unknown = items.filter { !$0.action.isCheckable }
+            let checkable = items.filter(canCheck)
+            let unknown = items.filter { !canCheck($0) }
             uncheckable += unknown.map { (step.config.title, $0) }
             let unknownNote = unknown.isEmpty ? "" : " · \(unknown.count) can't be checked"
             guard !checkable.isEmpty else {
@@ -87,7 +94,8 @@ struct DoctorCommand: BuiltinCommand {
             context.out.line("")
             context.out.line(style.heading("Can't be checked (\(uncheckable.count))") + style.muted(" · nothing can tell whether these are done, so they never count as missing"))
             for entry in uncheckable {
-                context.out.line("  " + style.muted("·") + " \(entry.item.title)" + style.muted(" (\(entry.item.config.kind)) · \(entry.step)"))
+                let reason = waiting[entry.item.id].map { " · \($0)" } ?? ""
+                context.out.line("  " + style.muted("·") + " \(entry.item.title)" + style.muted(" (\(entry.item.config.kind)) · \(entry.step)\(reason)"))
             }
         }
         return missing

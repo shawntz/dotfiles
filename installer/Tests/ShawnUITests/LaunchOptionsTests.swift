@@ -14,17 +14,19 @@ final class LaunchOptionsTests: XCTestCase {
         XCTAssertEqual(options.snapshotSize, CGSize(width: 1100, height: 760))
         XCTAssertEqual(options.snapshotScale, 2)
         XCTAssertFalse(options.autoStart)
+        XCTAssertFalse(options.askAgain)
     }
 
     func testEveryFlag() throws {
         let options = try LaunchOptions.parse([
-            "--dry-run", "--fresh", "--config", "~/cfg", "--no-remote", "--config-ref", "feature/x",
+            "--dry-run", "--fresh", "--ask", "--config", "~/cfg", "--no-remote", "--config-ref", "feature/x",
             "--sandbox", "/tmp/box", "--simulate", "--snapshot", "/tmp/out.png", "--snapshot-state", "config-error",
             "--snapshot-size", "960x640", "--snapshot-scale", "1", "--snapshot-contrast", "high",
         ])
         XCTAssertTrue(options.snapshotHighContrast)
         XCTAssertTrue(options.dryRun)
         XCTAssertTrue(options.assumeFresh)
+        XCTAssertTrue(options.askAgain)
         XCTAssertEqual(options.configPath, "~/cfg")
         XCTAssertFalse(options.allowRemote)
         XCTAssertEqual(options.configRef, "feature/x")
@@ -50,7 +52,7 @@ final class LaunchOptionsTests: XCTestCase {
         for state in SnapshotState.allCases {
             XCTAssertEqual(try LaunchOptions.parse(["--snapshot-state", state.rawValue]).snapshotState, state)
         }
-        for required in ["welcome", "customize", "running", "password", "question", "attention", "finished", "failed", "config-error"] {
+        for required in ["welcome", "customize", "running", "ask", "ask-again", "password", "question", "attention", "finished", "failed", "config-error"] {
             XCTAssertNotNil(SnapshotState(rawValue: required), required)
         }
     }
@@ -76,6 +78,9 @@ final class LaunchOptionsTests: XCTestCase {
         XCTAssertThrowsError(try LaunchOptions.parse(["--dry-run=yes"])) { error in
             XCTAssertEqual(error as? LaunchOptionsError, .unexpectedValue("--dry-run"))
         }
+        XCTAssertThrowsError(try LaunchOptions.parse(["--ask=email"])) { error in
+            XCTAssertEqual(error as? LaunchOptionsError, .unexpectedValue("--ask"))
+        }
     }
 
     func testIgnoresArgumentsMacOSAddsWhenLaunching() throws {
@@ -86,10 +91,35 @@ final class LaunchOptionsTests: XCTestCase {
     func testHelp() throws {
         XCTAssertTrue(try LaunchOptions.parse(["--help"]).showHelp)
         XCTAssertTrue(try LaunchOptions.parse(["-h"]).showHelp)
-        for flag in ["--dry-run", "--fresh", "--config", "--no-remote", "--config-ref", "--sandbox", "--demo", "--simulate",
+        for flag in ["--dry-run", "--fresh", "--ask", "--config", "--no-remote", "--config-ref", "--sandbox", "--demo", "--simulate",
                      "--snapshot", "--snapshot-state", "--snapshot-size"] {
             XCTAssertTrue(LaunchOptions.usage.contains(flag), "usage mentions \(flag)")
         }
+    }
+
+    /// `--ask` reaches the model; `InstallerModel.start()` turns it into `RunOptions.askAgain`.
+    @MainActor
+    func testAskReachesTheModel() throws {
+        let directory = makeTempDirectory()
+        let options = try LaunchOptions.parse(["--simulate", "--ask"])
+        let model = try SnapshotCommand.makeSimulationModel(options: options, scratch: directory.url, mode: .simulation)
+        XCTAssertTrue(model.settings.askAgain)
+        XCTAssertTrue(LaunchOptions.usage.contains("--ask                   ask the config's questions again"))
+    }
+
+    /// The live app builds its settings from the flags with the same function as the simulation, so `--ask` reaches
+    /// a real run too, where it matters (the simulation always runs dry).
+    func testTheFlagsReachTheLiveAppsSettings() throws {
+        XCTAssertFalse(InstallerModel.Settings(options: try LaunchOptions.parse([]), mode: .live).askAgain)
+        let ask = InstallerModel.Settings(options: try LaunchOptions.parse(["--ask"]), mode: .live)
+        XCTAssertTrue(ask.askAgain)
+        XCTAssertEqual(ask.mode, .live)
+        XCTAssertFalse(ask.isSimulation)
+        let demo = InstallerModel.Settings(options: try LaunchOptions.parse(["--demo"]), mode: .live)
+        XCTAssertTrue(demo.autoStart && demo.assumeFresh)
+        XCTAssertEqual(demo.dryRunDelay, 0.25)
+        XCTAssertFalse(InstallerModel.Settings(options: try LaunchOptions.parse(["--demo"]), mode: .snapshot).autoStart,
+                       "a snapshot never starts a run by itself")
     }
 
     func testResolveOptionsFollowTheFlags() throws {

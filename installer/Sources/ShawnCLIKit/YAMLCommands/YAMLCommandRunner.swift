@@ -26,6 +26,20 @@ enum YAMLCommandRunner {
         }
 
         let vars = context.templateVars()
+        // A question without an answer would reach the command line as "{{name}}": refuse instead.
+        if let pending = pendingVariables(of: command, vars: vars, configVars: context.lightConfig()?.meta.vars ?? [:]).first {
+            let name = pending.question
+            let prompt = context.lightConfig()?.question(name)?.prompt ?? name
+            let uses = pending.written == name ? "{{\(name)}}" : "{{\(pending.written)}}, which uses {{\(name)}}"
+            context.fail("shawn \(command.name): this command uses \(uses), and \"\(prompt)\" has no answer on this Mac yet")
+            let file = context.display(AnswerStore(environment: context.environment).url)
+            if context.questionsInstallAsks()?.contains(name) == true {
+                context.err.line("Set \"\(name)\" in \(file), or answer it in 'shawn install --ask'. Then try again.")
+            } else {
+                context.err.line("'shawn install' does not ask it, because nothing it runs by default uses it. Set \"\(name)\" in \(file). Then try again.")
+            }
+            return ExitCode.failure
+        }
         var overrides = Dictionary(command.environment.map { ($0.name, vars.expand($0.value)) }, uniquingKeysWith: { _, last in last })
         overrides["SHAWN_COMMAND"] = command.name
         // PATH below gets shawn's fallback directories appended; scripts that report on PATH want the original.
@@ -72,6 +86,31 @@ enum YAMLCommandRunner {
             context.fail("shawn \(command.name): could not start \(request.path): \(String(cString: strerror(code)))")
             return ExitCode.cannotExecute
         }
+    }
+
+    /// Questions without an answer that the command's expanded text mentions: `env:`, `exec:` and `update:`
+    /// (a `run:` script is passed to bash as written). A `vars:` entry the text names counts with the questions its
+    /// value uses, as installer.yaml writes it in `configVars`. Each question comes with the name the text wrote.
+    static func pendingVariables(of command: CLIConfig.Command, vars: TemplateVars,
+                                 configVars: [String: String]) -> [(question: String, written: String)] {
+        var texts = command.environment.map(\.value)
+        if let update = command.update { texts.append(update) }
+        if case .exec(let parts) = command.action {
+            for part in parts {
+                switch part {
+                case .text(let text): texts.append(text)
+                case .json(let value): texts.append(JSONText.encode(value))
+                }
+            }
+        }
+        var pending: [(question: String, written: String)] = []
+        for written in texts.flatMap(TemplateVars.names(in:)) {
+            for name in [written] + TemplateVars.names(in: configVars[written] ?? "")
+            where vars[name] == nil && vars.pending.contains(name) && !pending.contains(where: { $0.question == name }) {
+                pending.append((name, written))
+            }
+        }
+        return pending
     }
 
     /// The tool's argv: `exec` with `{{variables}}` expanded, `json:` elements as one compact-JSON

@@ -1,6 +1,22 @@
 import XCTest
 @testable import ShawnKit
 
+/// Records the text questions the engine asks, and answers none.
+private final class TextRequests: UserInteraction, @unchecked Sendable {
+    private let lock = NSLock()
+    private var ids: [String] = []
+
+    var asked: [String] { lock.withLock { ids } }
+
+    func requestAdminPassword(reason: String, attempt: Int, lastError: String?) async -> String? { nil }
+    func ask(_ question: Question) async -> String { question.defaultOptionID }
+
+    func askText(_ request: TextRequest) async -> String? {
+        lock.withLock { ids.append(request.id) }
+        return nil
+    }
+}
+
 /// Whole-system checks against the real `config/` directory with every real item kind.
 /// These are what CI runs on a pull request that edits the YAML.
 final class ShippedConfigTests: XCTestCase {
@@ -87,6 +103,36 @@ final class ShippedConfigTests: XCTestCase {
         XCTAssertLessThanOrEqual(headerLines.map(\.count).max() ?? 0, 66, "the header must fit the window")
     }
 
+    /// Anyone can use this config: it asks for the Git identity instead of naming a person. The git step's items
+    /// that write the identity need those answers, so a run asks before it writes them.
+    func testTheGitIdentityIsAskedForNotWrittenIntoTheConfig() throws {
+        let config = try ConfigLoader.load(from: Self.configDirectory).config
+        XCTAssertEqual(config.meta.ask.map(\.name), ["full_name", "email"])
+        XCTAssertEqual(config.meta.ask.map(\.format), [.text, .email])
+        for question in config.meta.ask {
+            XCTAssertFalse(question.prompt.isEmpty)
+            XCTAssertNil(question.defaultValue, "a literal default would put somebody's identity back into the config")
+            let command = question.defaultCommand ?? ""
+            XCTAssertTrue(command.contains("git config --global --get user."), "\(question.name) offers what git already has")
+            // Questions come before the bootstrap step, so on a new Mac `git` is Apple's stub, which opens an install dialog.
+            XCTAssertTrue(command.hasPrefix(#"tools=$(xcode-select -p 2>/dev/null) && [ -x "$tools/usr/bin/git" ] && git "#),
+                          "\(question.name) runs git only when the developer tools have it: \(command)")
+        }
+        XCTAssertNil(config.meta.vars["full_name"])
+        XCTAssertNil(config.meta.vars["email"])
+        for (name, value) in config.meta.vars {
+            XCTAssertFalse(value.contains("@"), "vars: '\(name)' looks like an email address")
+        }
+
+        let plan = try loadPlan(environment: try makeSandbox())
+        let needs = Dictionary(plan.allItems.filter { $0.config.stepID == "git" }.map { ($0.config.kind + ":" + $0.title, plan.questions(for: $0).map(\.name)) },
+                               uniquingKeysWith: { first, _ in first })
+        XCTAssertEqual(needs["git-config:Git identity & settings"], ["full_name", "email"])
+        XCTAssertEqual(needs["ssh-key:~/.ssh/id_ed25519"], ["email"], "the key's comment is the email")
+        XCTAssertEqual(needs["git-signing:Git commit signing"], ["email"], "allowed_signers names the email")
+        XCTAssertEqual(needs["manual:Check your email on GitHub"], ["email"])
+    }
+
     func testEveryItemKindIsDocumented() {
         let registry = ShawnKit.makeRegistry()
         XCTAssertGreaterThan(registry.kinds.count, 20)
@@ -104,7 +150,11 @@ final class ShippedConfigTests: XCTestCase {
               FileManager.default.isExecutableFile(atPath: "/usr/bin/git") else {
             throw XCTSkip("not inside the git repository")
         }
-        let files = regularFiles(under: Self.configDirectory).map { "installer/config/\($0)" }
+        // Finder leaves .DS_Store in any folder someone has opened. git ignores it on purpose, the installer never
+        // copies it, and scripts/check-config-gitignore.sh leaves it out too.
+        let files = regularFiles(under: Self.configDirectory)
+            .filter { ($0 as NSString).lastPathComponent != ".DS_Store" }
+            .map { "installer/config/\($0)" }
         let process = Process()
         process.executableURL = URL(fileURLWithPath: "/usr/bin/git")
         process.arguments = ["-C", repository.path, "check-ignore", "--stdin"]
@@ -190,12 +240,14 @@ final class ShippedConfigTests: XCTestCase {
         var selection = Selection()
         for item in plan.allItems { selection.setItem(item, enabled: true) }
 
-        let engine = InstallEngine(plan: plan, environment: environment, options: RunOptions(dryRun: true, assumeFresh: true))
+        let questions = TextRequests()
+        let engine = InstallEngine(plan: plan, environment: environment, options: RunOptions(dryRun: true, assumeFresh: true), interaction: questions)
         let summary = await engine.run(selection: selection) { _ in }
 
         XCTAssertTrue(summary.failures.isEmpty, "dry-run failures:\n" + summary.failures.map { "\($0.itemID) \($0.title): \($0.message)" }.joined(separator: "\n"))
         XCTAssertEqual(summary.total, plan.allItems.count)
         XCTAssertEqual(regularFiles(under: root), [], "a dry run must not create files")
+        XCTAssertEqual(questions.asked, [], "a dry run asks nothing")
     }
 
     /// The file-based items are applied for real to a sandbox home; a second run must then find nothing to do.
@@ -219,9 +271,20 @@ final class ShippedConfigTests: XCTestCase {
         }
         XCTAssertGreaterThan(chosen, 10, "expected the config to contain file-based items")
 
+        // The answers a person gave on an earlier run, so the git step's identity items run too.
+        try AnswerStore(environment: environment).save("Pat Example", for: "full_name")
+        try AnswerStore(environment: environment).save("pat@example.com", for: "email")
+
         let first = await InstallEngine(plan: plan, environment: environment).run(selection: selection) { _ in }
         XCTAssertTrue(first.failures.isEmpty, "failures:\n" + first.failures.map { "\($0.itemID) \($0.title): \($0.message)" }.joined(separator: "\n"))
         XCTAssertGreaterThan(first.done, 5)
+        XCTAssertEqual(first.followUps.filter { $0.id.hasPrefix("answer-") }, [], "every question has its answer")
+        let gitconfig = try String(contentsOf: environment.home.appendingPathComponent(".gitconfig"), encoding: .utf8)
+        XCTAssertTrue(gitconfig.contains("name = Pat Example") && gitconfig.contains("email = pat@example.com"), gitconfig)
+        for file in [".gitconfig", ".ssh/id_ed25519.pub", ".config/git/allowed_signers"] {
+            let text = try String(contentsOf: environment.home.appendingPathComponent(file), encoding: .utf8)
+            XCTAssertFalse(text.contains("{{"), "\(file) still holds a variable:\n\(text)")
+        }
 
         environment.runID = "second"
         let second = await InstallEngine(plan: plan, environment: environment).run(selection: selection) { _ in }

@@ -326,6 +326,11 @@ final class InstallerModelStateTests: XCTestCase {
         XCTAssertEqual(model.quipMoment, .password)
         model.cancelPassword()
 
+        // A question from ask: has lines of its own. The waiting lines complain about a wait that has not happened.
+        model.enqueue(.text(TextRequest(id: "email", prompt: "Your email"), PromptGate<String?>()))
+        XCTAssertEqual(model.quipMoment, .question)
+        model.skipText()
+
         model.apply(.itemStatus(itemID: "base/0", status: .failed("kaboom")))
         model.apply(.runFinished(InstallSummary()))
         XCTAssertEqual(model.quip, "mostly")

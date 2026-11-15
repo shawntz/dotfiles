@@ -50,6 +50,36 @@ public struct Attention: Equatable, Sendable {
     }
 }
 
+/// A request for one line of text: the answer to a question from `ask:` in `installer.yaml`.
+public struct TextRequest: Equatable, Sendable {
+    /// The variable being asked for (`email`). The same on every attempt.
+    public let id: String
+    /// One line to show the person.
+    public let prompt: String
+    /// What an empty reply means: the saved answer, or the config's default. Nil when there is none.
+    public let defaultValue: String?
+    /// How the answer must look. The engine checks the reply; a front end may check it too.
+    public let format: AnswerFormat
+    /// 1 for the first ask. 2 and 3 follow a reply that did not pass `format`.
+    public let attempt: Int
+    /// Why the previous reply was not accepted, as a sentence. Nil on the first attempt.
+    public let lastError: String?
+    /// True when `defaultValue` is the answer saved on this Mac, asked again (`RunOptions.askAgain`). Declining then
+    /// keeps that answer, and the items that need it run with it. False when declining leaves the question unanswered.
+    public let defaultIsSaved: Bool
+
+    public init(id: String, prompt: String, defaultValue: String? = nil, format: AnswerFormat = .text, attempt: Int = 1, lastError: String? = nil,
+                defaultIsSaved: Bool = false) {
+        self.id = id
+        self.prompt = prompt
+        self.defaultValue = defaultValue
+        self.format = format
+        self.attempt = attempt
+        self.lastError = lastError
+        self.defaultIsSaved = defaultIsSaved
+    }
+}
+
 /// How the engine talks to whoever is running it: the GUI, the terminal, or nobody.
 public protocol UserInteraction: Sendable {
     /// Asks for the administrator password. `attempt` starts at 1; `lastError` says why the previous try failed.
@@ -58,9 +88,20 @@ public protocol UserInteraction: Sendable {
 
     /// Asks a question and returns the chosen option's id.
     func ask(_ question: Question) async -> String
+
+    /// Asks for one line of text. Returns nil when the person declines or nobody can be asked.
+    /// An empty reply takes `request.defaultValue`. The default implementation answers with the default without asking.
+    func askText(_ request: TextRequest) async -> String?
 }
 
-/// For headless runs and tests: never prompts, optionally supplies a known password.
+public extension UserInteraction {
+    func askText(_ request: TextRequest) async -> String? {
+        request.defaultValue
+    }
+}
+
+/// For headless runs and tests: never prompts, optionally supplies a known password. Questions take their
+/// default answer, text included (nil when a text question has no default).
 public struct NonInteractive: UserInteraction {
     public let password: String?
 

@@ -140,7 +140,7 @@ struct FakeAction: Action {
 
 /// Writes a config directory into `directory` and returns its URL.
 @discardableResult
-func makeConfig(in directory: TempDirectory, meta: String = "name: Test Dotfiles\ntagline: testing, testing\n",
+func makeConfig(in directory: TempDirectory, meta: String = defaultMeta,
                 steps: [String: String], extraFiles: [String: String] = [:]) -> URL {
     let root = directory.url.appendingPathComponent("config")
     directory.write("config/installer.yaml", meta)
@@ -207,25 +207,31 @@ extension XCTestCase {
     /// A configured model over a temporary config (removed when the test ends).
     @MainActor
     func makeModel(steps: [String: String] = standardSteps, registry: ActionRegistry = FakeAction.registry(),
-                   mode: RunMode = .live, dryRun: Bool = false, assumeFresh: Bool = false, desktop: DesktopActions = .none,
-                   quipSeed: Int = 0, extraFiles: [String: String] = [:],
+                   meta: String = defaultMeta, mode: RunMode = .live, dryRun: Bool = false, assumeFresh: Bool = false,
+                   askAgain: Bool = false, desktop: DesktopActions = .none, quipSeed: Int = 0,
+                   extraFiles: [String: String] = [:],
                    logCapacity: Int = LogBuffer.defaultCapacity) throws -> (InstallerModel, TempDirectory) {
-        try buildModel(in: makeTempDirectory(), steps: steps, registry: registry, mode: mode, dryRun: dryRun,
-                       assumeFresh: assumeFresh, desktop: desktop, quipSeed: quipSeed, extraFiles: extraFiles,
-                       logCapacity: logCapacity)
+        try buildModel(in: makeTempDirectory(), steps: steps, registry: registry, meta: meta, mode: mode, dryRun: dryRun,
+                       assumeFresh: assumeFresh, askAgain: askAgain, desktop: desktop, quipSeed: quipSeed,
+                       extraFiles: extraFiles, logCapacity: logCapacity)
     }
 }
 
+/// `installer.yaml` of the test configs.
+let defaultMeta = "name: Test Dotfiles\ntagline: testing, testing\n"
+
 @MainActor
-private func buildModel(in directory: TempDirectory, steps: [String: String], registry: ActionRegistry, mode: RunMode,
-                        dryRun: Bool, assumeFresh: Bool, desktop: DesktopActions, quipSeed: Int, extraFiles: [String: String],
+private func buildModel(in directory: TempDirectory, steps: [String: String], registry: ActionRegistry, meta: String,
+                        mode: RunMode, dryRun: Bool, assumeFresh: Bool, askAgain: Bool, desktop: DesktopActions,
+                        quipSeed: Int, extraFiles: [String: String],
                         logCapacity: Int) throws -> (InstallerModel, TempDirectory) {
-    let root = makeConfig(in: directory, steps: steps, extraFiles: extraFiles)
+    let root = makeConfig(in: directory, meta: meta, steps: steps, extraFiles: extraFiles)
     let environment = SystemEnvironment.testSandbox(directory)
     let resolved = try ConfigResolver.load(directory: root, source: .local(root.path), registry: registry, environment: environment)
     var settings = InstallerModel.Settings()
     settings.mode = mode
     settings.assumeFresh = assumeFresh
+    settings.askAgain = askAgain
     settings.logCapacity = logCapacity
     let model = InstallerModel(registry: registry, environment: environment,
                                resolveOptions: ConfigResolveOptions(explicitPath: root, allowRemote: false),

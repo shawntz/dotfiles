@@ -42,6 +42,8 @@ final class InstallerModel {
         /// The built-in simulation config and kinds: the engine always runs dry and the UI says so.
         var isSimulation = false
         var assumeFresh = false
+        /// `--ask`: the first real run that needs the config's questions asks them again, offering the saved answers.
+        var askAgain = false
         var autoStart = false
         /// Pause after each dry-run command (the `--demo` pace).
         var dryRunDelay: TimeInterval = 0
@@ -66,6 +68,10 @@ final class InstallerModel {
     /// Held from the start of a real run until it ends (see `KeepAwake`).
     @ObservationIgnored private var keepAwakeToken: (any NSObjectProtocol)?
     @ObservationIgnored private var promptSerial = 0
+    /// True while a real run started with `askAgain` has questions to ask and has not got past them yet.
+    @ObservationIgnored private var isAskingAgain = false
+    /// Set once a real run with `askAgain` has got past its questions, so `--ask` asks again only once.
+    @ObservationIgnored private var hasAskedAgain = false
     @ObservationIgnored private var itemsByID: [String: PlannedItem] = [:]
     @ObservationIgnored private var stepIDByItemID: [String: String] = [:]
 
@@ -112,7 +118,7 @@ final class InstallerModel {
     private var logHasUnfiledLines = false
     private(set) var isStopping = false
     private(set) var runCount = 0
-    /// Password and question prompts, oldest first; the first one is on screen.
+    /// Password, question and text prompts, oldest first; the first one is on screen.
     private(set) var prompts: [PendingPrompt] = []
     /// The finished screen shows the run's log in place of the failures and follow-ups. A dry run opens on
     /// it (its narration of what would happen is the point of it); the person can switch either way.
@@ -370,8 +376,13 @@ final class InstallerModel {
         // `--fresh` (and `--demo`) skip the checks on the first run only. A later run is a retry, a resume or
         // the real run after a dry run, and the finished screen promises those skip what is already done.
         let fresh = settings.assumeFresh && runCount == 0
+        // `--ask` asks again in the first real run that gets past its questions. A dry run before it says what that
+        // run will ask. A run that needs no answer, or one stopped before or at a question, leaves `--ask` for the
+        // next run. RETRY FAILED and RESUME after it keep the answers just given instead of asking a third time.
+        let askAgain = settings.askAgain && !hasAskedAgain
         let options = RunOptions(dryRun: dryRun || settings.isSimulation, assumeFresh: fresh,
-                                 dryRunDelay: dryRun ? settings.dryRunDelay : 0)
+                                 dryRunDelay: dryRun ? settings.dryRunDelay : 0, askAgain: askAgain)
+        isAskingAgain = askAgain && !options.dryRun && !plan.questions(for: selection.enabledItems(in: plan)).isEmpty
         // The engine writes no log file for a dry run, and the simulation always runs dry.
         beginRun(writesLogFile: !options.dryRun)
         if fresh {
@@ -450,6 +461,11 @@ final class InstallerModel {
 
         case .itemStatus(let itemID, let status):
             itemStatuses[itemID] = status
+            // The engine settles every question before it reports on an item it takes, so `--ask` is used up now.
+            if isAskingAgain, status != .disabled {
+                isAskingAgain = false
+                hasAskedAgain = true
+            }
             switch status {
             case .checking, .running:
                 currentItemID = itemID
@@ -558,6 +574,7 @@ final class InstallerModel {
         switch kind {
         case .password(_, let gate): gate.whenResolved(removeWhenAnswered)
         case .question(_, let gate): gate.whenResolved(removeWhenAnswered)
+        case .text(_, let gate): gate.whenResolved(removeWhenAnswered)
         }
     }
 
@@ -578,6 +595,28 @@ final class InstallerModel {
         guard let prompt = prompts.first, case .question(_, let gate) = prompt.kind else { return }
         removePrompt(id: prompt.id)
         gate.resolve(optionID)
+    }
+
+    /// CONTINUE on the text sheet. The engine gets the reply as typed: it trims it, an empty reply takes the
+    /// offered answer, and a reply that does not fit the question's format comes back as a new sheet with the
+    /// reason. The engine saves the answer it accepts; the model keeps no copy.
+    func submitText(_ text: String) {
+        guard let prompt = prompts.first, case .text(_, let gate) = prompt.kind else { return }
+        removePrompt(id: prompt.id)
+        gate.resolve(text)
+    }
+
+    /// SKIP on the text sheet: the engine keeps the saved answer when it offered one (`--ask`). Otherwise the question
+    /// stays unanswered for this run, and the items that need it wait.
+    func skipText() {
+        guard let prompt = prompts.first, case .text(_, let gate) = prompt.kind else { return }
+        removePrompt(id: prompt.id)
+        gate.resolve(nil)
+    }
+
+    /// Where the engine keeps the answers, as the text sheet names it (`~/.shawn/answers.json`).
+    var answersFileDisplayPath: String {
+        PathExpansion.abbreviate(AnswerStore(environment: environment).url.path, home: environment.home)
     }
 
     private func removePrompt(id: Int) {
@@ -642,7 +681,10 @@ final class InstallerModel {
             if dryRun { return .dryRun }
             return quipsInPhase == 0 ? .launch : .idle
         case .running:
-            if let prompt = prompts.first { return prompt.isPassword ? .password : .waiting }
+            if let prompt = prompts.first {
+                if prompt.isPassword { return .password }
+                return prompt.textRequest != nil ? .question : .waiting
+            }
             if attention != nil { return .waiting }
             if isStopping { return .cancelled }
             switch recentEvent {

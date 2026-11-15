@@ -734,7 +734,7 @@ final class ShellIntegrationTests: XCTestCase {
         XCTAssertTrue(script.contains("'(-n --dry-run)'{-n,--dry-run}'[Show what would happen; change nothing]'"))
         XCTAssertTrue(script.contains("'--config[Use this config directory]:dir:_files -/'"))
         XCTAssertTrue(script.contains("        claude)\n          words[1]='claude'; _normal\n"), "wrappers hand over to the tool's own completion")
-        XCTAssertTrue(script.contains("'1:action:(path show validate kinds edit brewfile)'"))
+        XCTAssertTrue(script.contains("'1:action:(path show validate kinds answers edit brewfile)'"))
         zshCheck(script)
 
         // It defines a working completion function in a real zsh.

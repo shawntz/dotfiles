@@ -27,6 +27,7 @@ A real run holds off idle sleep until it ends, so the Mac does not go to sleep p
 
 ### What it asks you for
 
+- Your name and email address for Git. The first run that includes the git step asks for them before the admin password, offering the name and email that git on this Mac already has, and keeps your answers in `~/.shawn/answers.json`. Later runs reuse them. `shawn install --ask`, or the app started with `--ask`, asks again and offers the saved answers. Skipping a question asked again keeps its saved answer. If you skip a question that has no answer yet, the items that need it wait instead of running: the git identity, the SSH key, commit signing and the reminder to check your email on GitHub. On a Mac without the SSH key yet, the GitHub sign-in waits too, because it uploads that key. They count as needing you, not as failed, and the checklist says how to answer. A dry run asks nothing and shows the offered answer, or a placeholder, in its place.
 - Your admin password, once. When a selected item needs admin rights, the app asks before the first step starts and reuses the password for the rest of the run. Only these commands can use it, and only while they run: `softwareupdate` and Apple's `installer`, Homebrew's install script, `brew install --cask`, `mas`, Xcode's setup, and items marked `sudo: true`. No other item, and no other program on the Mac, gets the password. If you cancel, the run carries on and the steps that need admin rights fail. RETRY FAILED asks again.
 - The App Store. macOS has no way to sign in to the App Store from a script. Before the first App Store install (Xcode, then Amphetamine), the app asks you to sign in to the App Store app and choose "I'm signed in" or "Skip App Store apps". If nobody answers within ten minutes, the run skips App Store apps. Every skipped App Store app goes on the checklist with a link to its store page, whether you chose to skip or nobody answered. While `mas` installs an app, macOS may ask for your Apple Account password or Touch ID. The app stops a `mas` install that is still running after 30 minutes and puts that app on the checklist.
 - A GitHub code. The git step signs in to GitHub with the `gh` CLI. A banner shows a one-time code in large type, copies it to the clipboard and opens github.com/login/device. Paste the code there and approve. The app then uploads your new SSH key for pushing and for commit signing. If you do not finish signing in within 15 minutes, the item stops waiting and adds a checklist entry.
@@ -70,7 +71,7 @@ The config lives in `config/`:
 
 ```
 config/
-  installer.yaml        name, tagline, where newer config comes from, {{vars}}
+  installer.yaml        name, tagline, where newer config comes from, {{vars}}, the questions it asks
   steps/NN-name.yaml    one file per step, run in filename order
   files/                files that copy: and json-merge: items install
   skills/<name>/        agent skills bundled with the installer
@@ -184,6 +185,21 @@ commands:
 
 Once it is merged, `shawn weather` works on every Mac on its next `shawn` call (see [how changes reach your other Macs](#how-changes-reach-your-other-macs)).
 
+### A question the installer asks
+
+`installer.yaml`, under `ask:`. Steps use the answer like any variable, here `{{editor_theme}}`. A run asks a question only when an item it runs mentions the variable, and asks in the order of the list.
+
+```yaml
+ask:
+  - var: editor_theme
+    prompt: Which theme should the editor use?
+    default: dark
+```
+
+`var:` and `prompt:` are required. `default:` is the answer offered, and it may use other variables. `default_command:` is a `/bin/sh` line whose first line of output is offered instead, when that line passes `format:`. It runs as you, in dry runs too, so it must only read, and it gets 5 seconds. `format: email` turns down a reply that does not look like an address and asks again with the reason, three times at most. Every format also turns down a reply with a tab or an escape code. An arrow key at the terminal prompt types one. A name under `vars:` cannot also be asked, and neither can a built-in one. `shawn config answers` lists the questions and the answers saved on this Mac.
+
+A YAML command in `cli.yaml` may use an answer too, also through a `vars:` entry, and it refuses to run while that answer is missing. Set an answer that only `cli.yaml` uses in `~/.shawn/answers.json`, because no run asks it.
+
 ### A setting for one Mac only
 
 Keep it out of the repo. The installed `~/.zshrc` reads `~/.zshrc.local` near its end, and nothing in this config writes that file. The git step includes `~/.gitconfig.local` at the end of your global git config, so that file overrides every git setting the step writes, signing included.
@@ -212,7 +228,7 @@ CI builds, tests and validates the config on every pull request that touches `in
 
 `shawn config kinds` prints every kind with a summary and an example, generated from the code. If this table and that list disagree, the list is right.
 
-Any text option may use `{{variables}}`. These are the ones under `vars:` in `installer.yaml`, plus `{{home}}`, `{{user}}`, `{{hostname}}`, `{{arch}}`, `{{brew_prefix}}`, `{{applications}}`, `{{state_dir}}` (`~/.shawn`) and `{{config_dir}}`. Any path may start with `~`.
+Any text option may use `{{variables}}`. These are the ones under `vars:` in `installer.yaml` and the answers to its `ask:` questions, plus `{{home}}`, `{{user}}`, `{{hostname}}`, `{{arch}}`, `{{brew_prefix}}`, `{{applications}}`, `{{state_dir}}` (`~/.shawn`) and `{{config_dir}}`. Any path may start with `~`.
 
 ### Packages
 
@@ -275,14 +291,14 @@ The installer puts `shawn` in `~/.local/bin`. Run `shawn` on its own for the ful
 |---|---|
 | `shawn`, `shawn help [command]` | The banner, a quip from LSP, and every command by section. |
 | `shawn version` | Version, where the config comes from, the checkout path and when it last checked for updates. |
-| `shawn install` (or `shawn sync`) | Runs the installer in the terminal. `--dry-run` (`-n`), `--only step,…` and `--skip step,…` (step ids such as `packages`), `--yes` (`-y`), `--fresh`, `--config DIR`, `--no-remote`. It asks before it starts, and without a terminal it needs `--yes`. With `--yes`, every question takes its default answer, which for the App Store question is "I'm signed in". It asks for the admin password itself only when an item needs it, never in a dry run. The first Ctrl-C stops the item in progress and prints the summary, also while a question or password prompt is open. A second Ctrl-C quits at once. Exits 0 when nothing failed, 1 when something did and 130 when stopped. It does not keep the Mac awake, so run a long install as `caffeinate -i shawn install`. |
-| `shawn doctor` | Checks this Mac against the config without changing anything. It checks every enabled item, plus Homebrew, git identity, GitHub sign-in, an SSH key and `~/.local/bin` on `PATH`. It lists the items it cannot check (`open:`, a `manual:` without `check:`, a `script:` with neither `check:` nor `creates:`) apart under "Can't be checked" and never counts them as missing. Exits 1 if anything is missing. |
+| `shawn install` (or `shawn sync`) | Runs the installer in the terminal. `--dry-run` (`-n`), `--only step,…` and `--skip step,…` (step ids such as `packages`), `--yes` (`-y`), `--ask`, `--fresh`, `--config DIR`, `--no-remote`. It asks before it starts, and without a terminal it needs `--yes`. Then it asks the config's questions that the chosen steps need and that have no saved answer, with the offered answer in brackets. Return takes it, and Return with nothing offered skips the question. `--ask` asks them all again. With `--yes`, every question takes its default answer, which for the App Store question is "I'm signed in". It asks for the admin password itself only when an item needs it, never in a dry run. The first Ctrl-C stops the item in progress and prints the summary, also while a question or password prompt is open. A second Ctrl-C quits at once. Exits 0 when nothing failed, 1 when something did and 130 when stopped. It does not keep the Mac awake, so run a long install as `caffeinate -i shawn install`. |
+| `shawn doctor` | Checks this Mac against the config without changing anything. It checks every enabled item, plus Homebrew, git identity, GitHub sign-in, an SSH key and `~/.local/bin` on `PATH`. It lists the items it cannot check (`open:`, a `manual:` without `check:`, a `script:` with neither `check:` nor `creates:`) apart under "Can't be checked" and never counts them as missing. An item that waits for an answer this Mac has not saved goes there too, with the question. Doctor never asks. Exits 1 if anything is missing. |
 | `shawn drift [--write] [--repo PATH]` | What Homebrew, the App Store and npm have on this Mac that the config does not list, with the YAML to add, and the other way round. `--write` adds the missing lines to the step files in the checkout. |
 | `shawn add <kind> <name> [--option value …] [--no-install] [--pr] [--dry-run] [--repo PATH]` | Installs it and adds its YAML line. `--pr` opens a pull request. |
 | `shawn pr [-m message] [--repo PATH]` | Opens a pull request for your uncommitted config changes. |
 | `shawn update [--check] [--rebuild]` | Runs the update check [described below](#how-shawn-updates-itself) now, explaining each step, whatever `self_update.mode` says. `--check` only reports, takes no lock, writes nothing and fetches nothing. So it can tell that your local commits and the remote's new commits have diverged only once an earlier run has fetched those new commits. `--rebuild` rebuilds `shawn` from the checkout even when the record says it is current. Exits 0 when everything is current afterwards, or with `--check` when the update could go ahead. Exits 69 when GitHub cannot be reached, and 1 otherwise. |
 | `shawn upgrade [name …] [--list]` | Runs the upgrades listed under `upgrade:` in `cli.yaml` (Homebrew, App Store apps, Claude Code, Codex, Grok, skills and more) and reports each one. Name entries to run only those; `--list` shows them. |
-| `shawn config [path\|show\|validate [DIR]\|kinds\|edit\|brewfile]` | Where the config is, the plan, a check that lists every problem, the item kinds, the config in `$EDITOR`, or a Brewfile made from the config. |
+| `shawn config [path\|show\|validate [DIR]\|kinds\|answers\|edit\|brewfile]` | Where the config is, the plan, a check that lists every problem, the item kinds, the questions with the answers saved on this Mac, the config in `$EDITOR`, or a Brewfile made from the config. `answers` only reads: it shows each question, its answer or "not answered yet", and where the answers file is. It also says when `shawn install` does not ask a question, because nothing it runs by default uses it. |
 | `shawn statusline` | The Claude Code status line: model, folder, git branch, context meter, cost and a quip. Reads Claude's JSON on stdin and never fails. |
 | `shawn lsp`, `shawn quote`, `shawn party`, `shawn banner` | LSP with a quip, a random quote, every sprite at once, the ASCII header. |
 | `shawn projects [--paths]`, `shawn clone <repo> [directory]`, `shawn new <name> [--github] [--public]` | Repos in `~/Developer` with branch and state; clone into `~/Developer`; start a new project there (git, README, .gitignore; `--github` also creates the repo with `gh`, private unless `--public`). |
@@ -449,13 +465,14 @@ The installer app takes these flags, for example `swift run ShawnsDotfiles --dry
 |---|---|
 | `--dry-run` | Starts with DRY RUN on, so the run shows every command without running it. |
 | `--fresh` | Treats this Mac as brand new on the first run, so no item counts as done. RETRY FAILED, RESUME and RUN FOR REAL… then skip what is done. |
+| `--ask` | Asks the config's questions again on the next real run that needs them, offering the saved answers. A run stopped before it gets past them leaves `--ask` for the next run. |
 | `--demo` | Dry run plus fresh, starts by itself and is paced for watching. `make run` uses it. |
 | `--sandbox DIR` | Runs against a throwaway home and Applications folder under `DIR` instead of this Mac. Without `--config`, it uses the first config found on this Mac as it is. |
 | `--config DIR` | Uses exactly this config folder, with no GitHub fetch unless you add `--config-ref`. |
 | `--no-remote` | Does not fetch config from GitHub. |
 | `--config-ref REF` | Fetches config from this branch, tag or commit. |
 | `--simulate` | A built-in simulation config that goes through every screen. |
-| `--snapshot PATH` | Renders the window to a PNG and quits, without showing a window. Add `--snapshot-state` (`loading`, `welcome`, `customize`, `running`, `password`, `question`, `attention`, `finished`, `failed`, `stopped`, `dry-run-finished`, `config-error`), `--snapshot-size WxH` (each side 320 to 4000; default 1100x760), `--snapshot-scale 1\|2\|3` (default 2) and `--snapshot-contrast standard\|high`. Use it to check the design without screen recording. |
+| `--snapshot PATH` | Renders the window to a PNG and quits, without showing a window. Add `--snapshot-state` (`loading`, `welcome`, `customize`, `running`, `ask`, `ask-again`, `password`, `question`, `attention`, `finished`, `failed`, `stopped`, `dry-run-finished`, `config-error`), `--snapshot-size WxH` (each side 320 to 4000; default 1100x760), `--snapshot-scale 1\|2\|3` (default 2) and `--snapshot-contrast standard\|high`. Use it to check the design without screen recording. |
 | `-h`, `--help` | Lists these flags. |
 
 The CLI has the same safety valves: `shawn install --dry-run`, `shawn doctor`, and `shawn --config DIR` for another config.

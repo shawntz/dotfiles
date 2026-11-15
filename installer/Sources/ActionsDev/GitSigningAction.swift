@@ -39,6 +39,12 @@ struct GitSigningAction: Action {
         context.unknownVariableMessages(in: publicKeyPath, field: "git-signing") + context.unknownVariableMessages(in: email, field: "email")
     }
 
+    /// The signer's email, which is `{{email}}` when the item does not set one: allowed_signers needs that answer.
+    func impliedText(_ context: ValidationContext) -> [String] { [email] }
+
+    /// The public key it signs with, which an `ssh-key` item before it may make.
+    func usedFiles(_ context: ValidationContext) -> [String] { [publicKeyPath] }
+
     /// The git settings this item owns, in the order they are written.
     func settings(_ context: ActionContext) -> [(key: String, value: String, type: String?)] {
         [

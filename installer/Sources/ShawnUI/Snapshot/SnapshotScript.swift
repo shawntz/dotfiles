@@ -27,6 +27,10 @@ enum SnapshotScript {
             model.showCustomize()
         case .running:
             playRunning(model)
+        case .ask, .askAgain:
+            // A real run asks its questions as soon as it starts, before the password and before any item.
+            model.apply(.runStarted(totalItems: model.enabledItemCount))
+            model.enqueue(.text(sampleTextRequest(for: model, again: state == .askAgain), PromptGate<String?>()))
         case .password:
             playRunning(model)
             let request = PasswordRequest(reason: "Installing the package manager writes to /opt and needs administrator rights.",
@@ -71,6 +75,24 @@ enum SnapshotScript {
         ],
         url: URL(string: "macappstore://apps.apple.com/app/id937984704")
     )
+
+    /// The config's first question on its first try, with an offered answer. With `again`, the email question on its
+    /// second try: the config's own prompt when it asks for an email, and the engine's reason for turning down the
+    /// first reply.
+    static func sampleTextRequest(for model: InstallerModel, again: Bool = false) -> TextRequest {
+        let questions = model.plan?.config.meta.ask ?? []
+        if again {
+            let question = questions.first { $0.format == .email }
+            return TextRequest(id: question?.name ?? "email", prompt: question?.prompt ?? "Your email address for Git commits",
+                               defaultValue: "you@example.com", format: .email, attempt: 2,
+                               lastError: AnswerFormat.email.problem(with: "you at example dot com"))
+        }
+        let question = questions.first
+        let format = question?.format ?? .text
+        return TextRequest(id: question?.name ?? "full_name",
+                           prompt: question?.prompt ?? "Your name, as Git should record it on your commits",
+                           defaultValue: format == .email ? "lsp@example.com" : "Lumpy Space Princess", format: format)
+    }
 
     static let sampleAttention = Attention(
         title: "Sign in to GitHub",

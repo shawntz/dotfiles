@@ -38,6 +38,13 @@ final class SnapshotTests: XCTestCase {
         try assertImage(data, size: CGSize(width: 1100, height: 760), scale: 2)
     }
 
+    func testTheTextSheetRendersToAPNG() throws {
+        for state in [SnapshotState.ask, .askAgain] {
+            let data = try render(state, scale: 1)
+            try assertImage(data, size: CGSize(width: 1100, height: 760), scale: 1)
+        }
+    }
+
     func testEveryStateRendersAtTheMinimumWindowSize() throws {
         for state in SnapshotState.allCases {
             let data = try render(state, size: Theme.minimumWindowSize, scale: 1)

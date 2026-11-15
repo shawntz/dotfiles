@@ -45,6 +45,12 @@ struct SSHKeyAction: Action {
         context.unknownVariableMessages(in: path, field: "ssh-key") + context.unknownVariableMessages(in: comment, field: "comment")
     }
 
+    /// The comment, which is `{{email}}` when the item does not set one: the key needs that answer.
+    func impliedText(_ context: ValidationContext) -> [String] { [comment] }
+
+    /// The key and its `.pub`. A `github` or `git-signing` item that uses the key waits while this item does.
+    func madeFiles(_ context: ValidationContext) -> [String] { [path, path + ".pub"] }
+
     // MARK: Paths
 
     private func keyURL(_ context: ActionContext) -> URL { context.path(path) }

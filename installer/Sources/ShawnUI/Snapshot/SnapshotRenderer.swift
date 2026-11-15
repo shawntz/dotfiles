@@ -97,15 +97,10 @@ enum SnapshotCommand {
         let root = try SimulationConfig.write(into: scratch)
         let resolved = try ConfigResolver.load(directory: root, source: .local(root.path), registry: registry, environment: environment)
         let fun = FunConfig.load(from: resolved.config)
-        var settings = InstallerModel.Settings()
-        settings.mode = mode
-        settings.isSimulation = true
-        settings.assumeFresh = options.startsFresh
-        settings.autoStart = options.autoStart && mode != .snapshot
-        settings.dryRunDelay = options.demo ? 0.25 : 0
         let model = InstallerModel(registry: registry, environment: environment,
                                    resolveOptions: ConfigResolveOptions(explicitPath: root, allowRemote: false),
-                                   settings: settings, dryRun: options.startsInDryRun)
+                                   settings: InstallerModel.Settings(options: options, mode: mode, isSimulation: true),
+                                   dryRun: options.startsInDryRun)
         if configureNow {
             model.configure(resolved, fun: fun.fun, funIssues: fun.issues, extraNotes: [simulationNote])
         }

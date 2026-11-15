@@ -7,12 +7,13 @@ struct ConfigCommand: BuiltinCommand {
     let name = "config"
     let section = BuiltinSection.config
     let summary = "Where the config is, what it plans, and whether it is valid"
-    let usage = "[path | show | validate [DIR] | kinds | edit | brewfile]"
+    let usage = "[path | show | validate [DIR] | kinds | answers | edit | brewfile]"
     let subcommands: [(name: String, summary: String)] = [
         ("path", "Where the config comes from (the default)"),
         ("show", "Every step and item the installer would run"),
         ("validate", "Check the config (or DIR) and list every problem; exit 1 if any"),
         ("kinds", "Every item kind with its summary and an example"),
+        ("answers", "The config's questions and the answers saved on this Mac (read-only)"),
         ("edit", "Open the config directory in $EDITOR"),
         ("brewfile", "A Brewfile generated from the config's packages"),
     ]
@@ -26,6 +27,7 @@ struct ConfigCommand: BuiltinCommand {
         case "show": return show(context)
         case "validate": return validate(parsed.positionals.dropFirst().first, context: context)
         case "kinds": return kinds(context)
+        case "answers": return answers(context)
         case "edit": return edit(context)
         case "brewfile": return brewfile(context)
         default:
@@ -148,6 +150,48 @@ struct ConfigCommand: BuiltinCommand {
         }
         return ExitCode.ok
     }
+
+    /// Each question with its saved answer, and where the answers file is. Reads only; asks nothing.
+    private func answers(_ context: CLIContext) -> Int32 {
+        let style = context.style
+        guard let config = context.lightConfig() else {
+            context.fail("no config found")
+            return ExitCode.failure
+        }
+        let store = AnswerStore(environment: context.environment)
+        context.out.line(style.heading("Answers") + style.muted(" · \(context.display(store.url))"))
+        if store.load() == .unreadable {
+            context.warn("\(context.display(store.url)) is not a JSON object of text values, so it counts as empty. "
+                         + "The next answer saved replaces it, and the old copy goes to the backups folder.")
+        }
+        let questions = config.meta.ask
+        guard !questions.isEmpty else {
+            context.out.line(style.muted("  This config asks no questions."))
+            return ExitCode.ok
+        }
+        let saved = store.saved
+        let valid = store.answers(for: questions)
+        let installAsks = context.questionsInstallAsks()
+        let nameWidth = (questions.map { $0.name.count }.max() ?? 0) + 2
+        let answerWidth = (questions.map { TextWidth.of(valid[$0.name] ?? Self.notAnswered) }.max() ?? 0) + 2
+        for question in questions {
+            let answer = valid[question.name].map { TextWidth.pad($0, to: answerWidth) } ?? style.muted(TextWidth.pad(Self.notAnswered, to: answerWidth))
+            context.out.line("  " + style.accent(TextWidth.pad(question.name, to: nameWidth)) + answer + style.muted(question.prompt))
+            // In quotes, with any escape code shown as text rather than sent to the terminal.
+            if valid[question.name] == nil, let rejected = saved[question.name], let problem = question.format.problem(with: rejected) {
+                context.out.line("  " + String(repeating: " ", count: nameWidth) + style.warn("The saved answer, \(rejected.debugDescription), does not count. \(problem)"))
+            }
+            if let installAsks, !installAsks.contains(question.name) {
+                context.out.line("  " + String(repeating: " ", count: nameWidth)
+                                 + style.muted("'shawn install' does not ask it, because nothing it runs by default uses it."))
+            }
+        }
+        let installAsksAny = installAsks.map { asked in questions.contains { asked.contains($0.name) } } ?? true
+        context.out.line(style.muted(installAsksAny ? "Ask again with 'shawn install --ask', or edit the file." : "Edit the file to change an answer."))
+        return ExitCode.ok
+    }
+
+    private static let notAnswered = "not answered yet"
 
     private func edit(_ context: CLIContext) -> Int32 {
         guard let place = context.configLocation() else {

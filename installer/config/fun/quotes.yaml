@@ -61,6 +61,13 @@ moments:
     - "macOS wants your password. It has, like, serious trust issues."
     - "Just the admin password, babe. I promise I'm not writing it in my diary."
     - "One password and I can stop asking permission for every little thing."
+  question:
+    - "Quick question, and then I do literally everything else."
+    - "Who even are you? Type it in. I'm a princess, not a mind reader."
+    - "Tell me who you are. I need to know whose Mac I'm making fabulous."
+    - "Your name, not mine. Putting mine on your commits would be so awkward."
+    - "One little answer and I never ask again. Royal promise."
+    - "Spell it right, babe. This is going on every commit you ever make."
   idle:
     - "Press START, babe. This Mac isn't going to lump itself."
     - "I've checked my phone, like, eleven times. Are we starting or what?"

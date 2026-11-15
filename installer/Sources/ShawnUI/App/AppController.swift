@@ -57,14 +57,10 @@ final class AppController: NSObject, NSApplicationDelegate, NSWindowDelegate {
             return model
         }
         let environment = try AppEnvironment.make(options: options)
-        var settings = InstallerModel.Settings()
-        settings.mode = .live
-        settings.assumeFresh = options.startsFresh
-        settings.autoStart = options.autoStart
-        settings.dryRunDelay = options.demo ? 0.25 : 0
         return InstallerModel(registry: registry, environment: environment,
                               resolveOptions: AppEnvironment.resolveOptions(options: options),
-                              settings: settings, dryRun: options.startsInDryRun, desktop: .live, keepAwake: .live,
+                              settings: InstallerModel.Settings(options: options, mode: .live), dryRun: options.startsInDryRun,
+                              desktop: .live, keepAwake: .live,
                               quipSeed: Int.random(in: 0..<10_000))
     }
 

@@ -42,6 +42,10 @@ enum SimulationConfig {
         quips:
           - "Bootstrapping. It's like a makeover, but for computers."
         items:
+          - sim-ask: Git email
+            prompt: Your email address for Git commits
+            default: lumpy@example.com
+            format: email
           - sim-present: Xcode Command Line Tools
             reason: already installed
           - sim-admin: Package manager

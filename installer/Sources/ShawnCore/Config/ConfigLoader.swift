@@ -3,7 +3,7 @@ import Foundation
 /// Loads a config directory:
 ///
 ///     config/
-///       installer.yaml      name, vars, remote repo
+///       installer.yaml      name, vars, questions (ask), remote repo
 ///       steps/*.yaml        one file per installer step, run in filename order
 ///       files/, skills/, fun/, cli.yaml ...   (read by the modules that own them)
 public enum ConfigLoader {
@@ -86,8 +86,49 @@ public enum ConfigLoader {
         for pair in reader.stringPairs("vars") {
             meta.vars[pair.key] = pair.value
         }
+        meta.ask = loadQuestions(reader.readers("ask"), vars: meta.vars, file: file)
         reader.finish()
         return meta
+    }
+
+    /// `ask:` entries: `var`, `prompt`, and optionally `default`, `default_command` and `format`.
+    private static func loadQuestions(_ entries: [MapReader], vars: [String: String], file: String) -> [VariableQuestion] {
+        var questions: [VariableQuestion] = []
+        var firstEntry: [String: Int] = [:]
+        for (index, entry) in entries.enumerated() {
+            let name = entry.requiredString("var")
+            let prompt = entry.requiredString("prompt")
+            let defaultValue = entry.string("default")
+            let defaultCommand = entry.string("default_command")
+            let format = AnswerFormat(rawValue: entry.oneOf("format", AnswerFormat.allCases.map(\.rawValue), default: AnswerFormat.text.rawValue)) ?? .text
+            entry.finish()
+
+            if prompt.contains(where: \.isNewline) {
+                entry.error("'prompt' must be one line", key: "prompt")
+            } else if !prompt.isEmpty, prompt.trimmingCharacters(in: .whitespaces).isEmpty {
+                // Only spaces would show the terminal "? : " and the app's sheet an empty heading.
+                entry.error("'prompt' must not be empty", key: "prompt")
+            }
+            if let defaultCommand, defaultCommand.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty {
+                entry.error("'default_command' must not be empty", key: "default_command")
+            }
+            guard !name.isEmpty else { continue }
+            if !TemplateVars.isValidName(name) {
+                entry.error("'var' must be a variable name: letters, digits, '_' and '-', starting with a letter or '_' (got '\(name)')", key: "var")
+            } else if TemplateVars.builtinNames.contains(name) {
+                entry.error("'\(name)' is a built-in variable, so it cannot be asked. Pick another name", key: "var")
+            } else if vars[name] != nil {
+                entry.error("'\(name)' is also declared under vars:. A variable comes from vars: or from ask:, not both", key: "var")
+            } else if let first = firstEntry[name] {
+                entry.error("'\(name)' is already asked by ask[\(first)]", key: "var")
+            } else {
+                firstEntry[name] = index + 1
+                let line = entry.map.line(of: "var") ?? entry.source.line
+                questions.append(VariableQuestion(name: name, prompt: prompt, defaultValue: defaultValue, defaultCommand: defaultCommand,
+                                                  format: format, source: SourceRef(file: file, line: line)))
+            }
+        }
+        return questions
     }
 
     // MARK: steps/*.yaml

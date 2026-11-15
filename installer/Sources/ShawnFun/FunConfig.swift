@@ -83,6 +83,8 @@ public struct ShowQuote: Equatable, Sendable {
 public enum Moment: String, CaseIterable, Sendable {
     case launch
     case password
+    /// A question from `ask:` is on screen.
+    case question
     case idle
     case working
     case waiting
@@ -129,6 +131,7 @@ public struct FunConfig: Sendable {
         showQuotes: [],
         moments: [
             .launch: ["Oh my glob. Let's set up this Mac."],
+            .question: ["One quick question first."],
             .working: ["Working on it. Don't rush me."],
             .success: ["Nailed it."],
             .failure: ["Ugh. That one didn't work."],

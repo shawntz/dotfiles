@@ -94,6 +94,84 @@ final class InteractionBridgeTests: XCTestCase {
         XCTAssertTrue(model.prompts.isEmpty)
     }
 
+    // MARK: The text sheet
+
+    private let textRequest = TextRequest(id: "email", prompt: "Your email address for Git commits", defaultValue: "ann@example.com",
+                                          format: .email)
+
+    func testTextIsHandedBackToTheEngineAsTyped() async throws {
+        let (model, _) = try runningModel()
+        let bridge = model.interaction
+        let request = textRequest
+        let answer = Task.detached { await bridge.askText(request) }
+        try await waitUntil { model.activePrompt != nil }
+        XCTAssertEqual(model.activePrompt?.textRequest, request)
+        XCTAssertFalse(model.activePrompt?.isPassword ?? true)
+        XCTAssertEqual(model.quipMoment, .question)
+
+        model.answer(optionID: "yes")
+        model.submitPassword("nope")
+        XCTAssertNotNil(model.activePrompt, "the other sheets' buttons do not answer it")
+
+        model.submitText(" bea@example.com ")
+        let text = await answer.value
+        XCTAssertEqual(text, " bea@example.com ", "the engine trims it, not the sheet")
+        XCTAssertNil(model.activePrompt)
+    }
+
+    func testSkipAnswersWithNothing() async throws {
+        let (model, _) = try runningModel()
+        let bridge = model.interaction
+        let request = textRequest
+        let answer = Task.detached { await bridge.askText(request) }
+        try await waitUntil { model.activePrompt != nil }
+        model.cancelPassword()
+        XCTAssertNotNil(model.activePrompt)
+        model.skipText()
+        let text = await answer.value
+        XCTAssertNil(text, "not the offered answer: SKIP leaves the question unanswered")
+        XCTAssertNil(model.activePrompt)
+    }
+
+    func testStopWhileTheTextSheetIsOpenAnswersWithNothing() async throws {
+        let (model, _) = try runningModel()
+        let bridge = model.interaction
+        let request = textRequest
+        let first = Task.detached { await bridge.askText(request) }
+        try await waitUntil { model.prompts.count == 1 }
+        let password = Task.detached { await bridge.requestAdminPassword(reason: "r", attempt: 1, lastError: nil) }
+        try await waitUntil { model.prompts.count == 2 }
+        XCTAssertNotNil(model.activePrompt?.textRequest, "the first prompt is on screen")
+
+        model.stop()
+        let text = await first.value
+        let declined = await password.value
+        XCTAssertNil(text)
+        XCTAssertNil(declined)
+        XCTAssertTrue(model.prompts.isEmpty)
+    }
+
+    func testCancellingTheEngineTaskTakesTheTextSheetDown() async throws {
+        let (model, _) = try runningModel()
+        let bridge = model.interaction
+        let request = textRequest
+        let waiting = Task.detached { await bridge.askText(request) }
+        try await waitUntil { model.activePrompt != nil }
+        waiting.cancel()
+        let text = await waiting.value
+        XCTAssertNil(text)
+        try await waitUntil { model.activePrompt == nil }
+    }
+
+    func testTheTextSheetOutsideARunAnswersWithNothingAtOnce() async throws {
+        let (model, _) = try makeModel()
+        let bridge = model.interaction
+        let request = textRequest
+        let text = await Task.detached { await bridge.askText(request) }.value
+        XCTAssertNil(text, "nobody saw the question, so the offered answer is not taken for them")
+        XCTAssertTrue(model.prompts.isEmpty)
+    }
+
     func testPromptGateResolvesExactlyOnce() async {
         let gate = PromptGate<String>()
         let callbacks = Counter()

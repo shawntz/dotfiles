@@ -67,6 +67,30 @@ struct CopyAction: Action {
         return problems
     }
 
+    /// With `template: true`, the text of the payload: its `{{variables}}` are filled in on the way.
+    func impliedText(_ context: ValidationContext) -> [String] {
+        guard template else { return [] }
+        let root = context.config.url("files/" + context.vars.expand(source))
+        var urls: [URL] = []
+        if context.configPathIsDirectory("files/" + context.vars.expand(source)) {
+            let excluded = self.excluded
+            let enumerator = FileManager.default.enumerator(at: root, includingPropertiesForKeys: [.isRegularFileKey])
+            while let url = enumerator?.nextObject() as? URL {
+                if excluded.contains(url.lastPathComponent) {
+                    enumerator?.skipDescendants()
+                    continue
+                }
+                if (try? url.resourceValues(forKeys: [.isRegularFileKey]))?.isRegularFile == true { urls.append(url) }
+            }
+        } else {
+            urls = [root]
+        }
+        return urls.compactMap { url in
+            guard let data = FileManager.default.contents(atPath: url.path), !data.contains(0) else { return nil }
+            return String(data: data, encoding: .utf8)
+        }
+    }
+
     // MARK: Paths
 
     struct Paths {

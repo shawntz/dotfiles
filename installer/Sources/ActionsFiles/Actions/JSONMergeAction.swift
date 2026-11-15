@@ -81,6 +81,12 @@ struct JSONMergeAction: Action {
         return problems
     }
 
+    /// The text values of the `from:` file: their `{{variables}}` are filled in on the way.
+    func impliedText(_ context: ValidationContext) -> [String] {
+        guard let from, let patch = try? Self.loadPatch(context.config.url("files/" + context.vars.expand(from))) else { return [] }
+        return JSONValue.object(patch).allStrings
+    }
+
     // MARK: Loading
 
     /// Reads the `from:` file: JSON when it ends in `.json`, YAML otherwise. Its top level must be a mapping.

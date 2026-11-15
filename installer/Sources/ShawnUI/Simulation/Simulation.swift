@@ -5,7 +5,7 @@ import ShawnCore
 /// of the installer can be seen (and tested) without touching the Mac.
 ///
 /// The simulated kinds only ever run `/bin/sh` to print canned output (so the log shows real stdout,
-/// stderr and `\r` progress frames through the real `CommandRunner`), and they ask their questions and
+/// stderr and `\r` progress frames through the real `CommandRunner`), and they ask their questions, text and
 /// password through `context.interaction` like real actions do. The engine runs them with dry-run on,
 /// so `SudoSession` never invokes `sudo`.
 enum Simulation {
@@ -50,6 +50,12 @@ enum Simulation {
                 url: url(parser, "url")
             )
             return .question(question, output: parser.options.stringList("output"))
+        })
+        registry.register(descriptor(kind: "sim-ask", summary: "asks for one line of text, like a question from ask: (nothing is saved)",
+                                     example: "- sim-ask: Git email\n  prompt: Your email address for Git commits\n  format: email",
+                                     timeScale: timeScale) { parser in
+            let format = AnswerFormat(rawValue: parser.options.oneOf("format", AnswerFormat.allCases.map(\.rawValue), default: "text")) ?? .text
+            return .text(prompt: parser.options.requiredString("prompt"), offered: parser.options.string("default"), format: format)
         })
         registry.register(descriptor(kind: "sim-admin", summary: "asks for the administrator password (any non-empty one works)",
                                      example: "- sim-admin: Package manager", timeScale: timeScale) { parser in
@@ -114,6 +120,7 @@ struct SimulatedAction: Action {
         case manual(detail: String?, url: URL?)
         case signIn(code: String, url: URL?, message: String)
         case question(Question, output: [String])
+        case text(prompt: String, offered: String?, format: AnswerFormat)
         case admin(reason: String, output: [String])
     }
 
@@ -170,6 +177,28 @@ struct SimulatedAction: Action {
             if answer != question.defaultOptionID { return .skipped("you chose \"\(label)\"") }
             try await stream(output, warnings: [], progress: false, context: context)
             return .done(nil)
+
+        case .text(let prompt, let offered, let format):
+            // The engine asks the config's questions only in real runs, and the simulation always runs dry, so this
+            // item puts up the same sheet itself. Like the engine, it checks the reply and asks again with the
+            // reason. Unlike the engine, it saves nothing.
+            var lastError: String?
+            for attempt in 1...InstallEngine.maxAnswerAttempts {
+                let request = TextRequest(id: "simulated", prompt: prompt, defaultValue: offered, format: format,
+                                          attempt: attempt, lastError: lastError)
+                let reply = await context.interaction.askText(request)
+                try Task.checkCancellation()
+                guard let reply else { break }
+                let trimmed = reply.trimmingCharacters(in: .whitespacesAndNewlines)
+                let answer = trimmed.isEmpty ? (offered ?? "") : trimmed
+                if let problem = format.problem(with: answer) {
+                    lastError = problem
+                    continue
+                }
+                context.info("Answer: \(answer) (simulated: not saved)")
+                return .done(nil)
+            }
+            return .needsAttention("waiting for an answer: \(prompt)")
 
         case .admin(let reason, let output):
             var lastError: String?

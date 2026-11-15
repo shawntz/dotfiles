@@ -77,6 +77,12 @@ struct GitHubAction: Action {
             + context.unknownVariableMessages(in: keyTitle, field: "title")
     }
 
+    /// The public key it uploads, which an `ssh-key` item before it may make.
+    func usedFiles(_ context: ValidationContext) -> [String] {
+        guard let keyPath, !uploadTypes.isEmpty else { return [] }
+        return [keyPath]
+    }
+
     // MARK: Scopes
 
     /// What the token must allow: uploading needs write:*, and write:* also covers the listing pre-check.

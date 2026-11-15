@@ -26,7 +26,7 @@ private let cleanSteps = ["01.yaml": "id: one\ntitle: One\nitems:\n  - ok: alpha
 private let sixItems = ["01.yaml": "id: one\ntitle: One\nitems:\n" + ["alpha", "beta", "gamma", "delta", "epsilon", "zeta"].map { "  - ok: \($0)\n" }.joined()]
 
 /// What the engine did with the prompting test items, in order, with a signal for each kind of call.
-private final class ItemCalls: @unchecked Sendable {
+final class ItemCalls: @unchecked Sendable {
     let checked = DispatchSemaphore(value: 0)
     let ran = DispatchSemaphore(value: 0)
     let answered = DispatchSemaphore(value: 0)
@@ -41,7 +41,8 @@ private final class ItemCalls: @unchecked Sendable {
     var all: [String] { lock.withLock { calls } }
 }
 
-/// Needs administrator rights (`sudo: always`, like Homebrew) or might (`.maybe`, like a cask). Never runs sudo.
+/// Needs administrator rights (`sudo: always`, like Homebrew), might (`.maybe`, like a cask) or does not (`.never`).
+/// Never runs sudo.
 private struct AdminAction: Action {
     let title: String
     let sudo: SudoNeed
@@ -81,9 +82,12 @@ private struct AskingAction: Action {
     }
 }
 
-/// The fake kinds plus `admin-always`, `admin-maybe` and `asks`, all recording into `calls`.
-private func promptingRegistry(_ calls: ItemCalls) -> ActionRegistry {
+/// The fake kinds plus `admin-always`, `admin-maybe`, `asks` and `records` (needs nothing), all recording into `calls`.
+func promptingRegistry(_ calls: ItemCalls) -> ActionRegistry {
     var registry = FakeAction.registry()
+    registry.register(ActionDescriptor(kind: "records", summary: "records its calls", example: "- records: x") { parser in
+        AdminAction(title: parser.primaryString(), sudo: .never, calls: calls)
+    })
     registry.register(ActionDescriptor(kind: "admin-always", summary: "needs sudo", example: "- admin-always: x") { parser in
         AdminAction(title: parser.primaryString(), sudo: .always, calls: calls)
     })
@@ -102,11 +106,12 @@ private func promptingRegistry(_ calls: ItemCalls) -> ActionRegistry {
 /// item would carry on as if nobody had pressed STOP. That is the race a real Stop & Quit loses only now and
 /// then; here it is lost every time. (The hook takes the place of the model's own "take the sheet down"
 /// callback, which `stop()` does not need: it clears the sheets itself.)
-private func holdStop(answering prompt: PendingPrompt, until acted: DispatchSemaphore) {
+func holdStop(answering prompt: PendingPrompt, until acted: DispatchSemaphore) {
     let hold: @Sendable () -> Void = { _ = acted.wait(timeout: .now() + 0.5) }
     switch prompt.kind {
     case .password(_, let gate): gate.whenResolved(hold)
     case .question(_, let gate): gate.whenResolved(hold)
+    case .text(_, let gate): gate.whenResolved(hold)
     }
 }
 

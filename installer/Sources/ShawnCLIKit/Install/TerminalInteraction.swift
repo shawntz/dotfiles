@@ -3,7 +3,8 @@ import Foundation
 import ShawnCore
 
 /// Answers the engine's questions at the terminal: the admin password (typed with echo off on
-/// `/dev/tty`, so it works even when stdout is piped to a log) and multiple-choice questions.
+/// `/dev/tty`, so it works even when stdout is piped to a log), multiple-choice questions and
+/// one-line text questions (echo on).
 struct TerminalInteraction: UserInteraction {
     struct Options: Sendable, Equatable {
         /// `--yes`: questions take their default answer.
@@ -14,6 +15,9 @@ struct TerminalInteraction: UserInteraction {
 
     let options: Options
     let style: Style
+    /// Reads a text answer: the terminal, or a script in tests. Takes the prompt, whether to hide what is typed,
+    /// and the cancellation the run's `PromptScope` withdraws.
+    var textReader: @Sendable (String, Bool, TTY.Cancellation) -> String? = { TTY.readLine(prompt: $0, secret: $1, cancellation: $2) }
 
     func requestAdminPassword(reason: String, attempt: Int, lastError: String?) async -> String? {
         guard options.allowPrompts else { return nil }
@@ -39,6 +43,24 @@ struct TerminalInteraction: UserInteraction {
             return question.options[number - 1].id
         }
         return question.defaultOptionID
+    }
+
+    /// `? Your email address for Git commits [jane@example.com]: `. Return takes the default; with no default it skips
+    /// the question (nil). With `--yes`, or without a terminal, the default is taken without asking.
+    func askText(_ request: TextRequest) async -> String? {
+        guard options.allowPrompts, !options.assumeYes else { return request.defaultValue }
+        guard let line = await Self.read(prompt: Self.textPrompt(request, style: style), secret: false, reader: textReader) else { return nil }
+        let reply = line.trimmingCharacters(in: .whitespacesAndNewlines)
+        return reply.isEmpty ? request.defaultValue : reply
+    }
+
+    static func textPrompt(_ request: TextRequest, style: Style) -> String {
+        // Start on a clean line: the install output may be showing a live status line.
+        var prompt = "\r\u{1B}[2K"
+        if let lastError = request.lastError { prompt += style.bad("✗") + " \(lastError)\n" }
+        prompt += style.accent("?") + " " + style.bold(request.prompt)
+        prompt += request.defaultValue.map { " [\($0)]" } ?? style.muted(" (Enter to skip)")
+        return prompt + ": "
     }
 
     /// Reads one line from the terminal on its own thread. When the waiting task is cancelled (a question

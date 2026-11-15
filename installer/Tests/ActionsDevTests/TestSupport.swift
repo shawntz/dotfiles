@@ -204,8 +204,8 @@ final class DevSandbox {
 
     /// Writes `config/` with one step holding `items` (YAML list entries indented by two spaces).
     @discardableResult
-    func writeConfig(items: String, files: [String: String] = [:]) -> URL {
-        directory.write("config/installer.yaml", Self.installerYAML)
+    func writeConfig(items: String, files: [String: String] = [:], installer: String = installerYAML) -> URL {
+        directory.write("config/installer.yaml", installer)
         directory.write("config/steps/01-dev.yaml", "id: dev\ntitle: Developer\nitems:\n\(items)\n")
         for (path, contents) in files { directory.write("config/\(path)", contents) }
         return root.appendingPathComponent("config")
@@ -217,8 +217,8 @@ final class DevSandbox {
         return registry
     }
 
-    func plan(items: String, files: [String: String] = [:]) throws -> InstallPlan {
-        let root = writeConfig(items: items, files: files)
+    func plan(items: String, files: [String: String] = [:], installer: String = installerYAML) throws -> InstallPlan {
+        let root = writeConfig(items: items, files: files, installer: installer)
         let config = try ConfigLoader.load(from: root).config
         return InstallPlan.build(config: config, registry: registry(), environment: environment)
     }
