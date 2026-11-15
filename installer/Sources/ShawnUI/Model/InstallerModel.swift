@@ -297,6 +297,11 @@ final class InstallerModel {
     func look(of item: PlannedItem) -> StatusLook {
         let status = status(of: item)
         if status == .pending, phase == .finished { return .notStarted }
+        // A reminder ends with its own title as the message. The row shows the title already, so it says where
+        // the reminder went (the terminal leaves the repeat out, see InstallRenderer).
+        if case .needsAttention(let message) = status, message == item.title {
+            return ItemStatus.needsAttention("on your checklist").look
+        }
         return status.look
     }
 

@@ -160,7 +160,8 @@ struct SimulatedAction: Action {
         case .manual(let detail, let url):
             try await pause(seconds / 3)
             context.followUp(title, detail: detail, url: url)
-            return .needsAttention(detail ?? title)
+            // As `manual:` ends in the engine: with its own title, which the row shows as "on your checklist".
+            return .needsAttention(title)
 
         case .signIn(let code, let url, let message):
             context.info("Waiting for you to approve the sign-in in your browser…")

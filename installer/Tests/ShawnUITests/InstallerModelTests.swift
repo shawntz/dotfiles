@@ -221,6 +221,17 @@ final class InstallerModelStateTests: XCTestCase {
         }
     }
 
+    func testAReminderRowSaysWhereItWentInsteadOfRepeatingItsTitle() throws {
+        let (model, _) = try makeModel()
+        let item = try XCTUnwrap(model.item("base/0"))
+        // The engine ends a reminder with its own title as the message.
+        model.apply(.itemStatus(itemID: item.id, status: .needsAttention(item.title)))
+        XCTAssertEqual(model.look(of: item), StatusLook("!", .yellow, "needs you", detail: "on your checklist"))
+        // Any other message shows as it is.
+        model.apply(.itemStatus(itemID: item.id, status: .needsAttention("click the button")))
+        XCTAssertEqual(model.look(of: item).detail, "click the button")
+    }
+
     func testFollowUpsAreDeduplicatedAndMergedWithTheSummary() throws {
         let recorder = DesktopRecorder()
         let (model, _) = try makeModel(desktop: recorder.actions)
