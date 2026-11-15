@@ -162,12 +162,10 @@ struct StepStatusRows: View {
                 .lineLimit(1)
                 .layoutPriority(1)
             if let detail = look.detail ?? (isCurrent ? look.label : nil) {
-                // Whole if it fits, else cut short to no fewer than 8 characters, else left out, so a long title
-                // never squeezes it to a letter. It gets what the title leaves before the spacer gets any.
-                let shortest = 8 * Theme.Size.small * Theme.monoAdvance
+                // Whole if it fits, else left out, so a long title never cuts it to a fragment such as
+                // "already insta…". The glyph in front of the row still says how the item ended.
                 ViewThatFits(in: .horizontal) {
                     Text(detail).fixedSize()
-                    Text(detail).truncationMode(.tail).frame(minWidth: shortest, idealWidth: shortest, alignment: .leading)
                     Color.clear.frame(width: 0, height: 0)
                 }
                 .foregroundStyle(palette.color(look.tone == .mint ? .faint : look.tone).opacity(0.85))

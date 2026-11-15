@@ -63,6 +63,16 @@ struct NowCard: View {
         .padding(.top, Theme.Space.xs)
     }
 
+    /// Whether an item's title only says its step's title again ("Dock" in "Dock", "shawn CLI" in "The shawn
+    /// CLI"), so the NOW line shows the step alone and not "Dock › Dock".
+    static func repeats(_ item: String, step: String) -> Bool {
+        func plain(_ text: String) -> String {
+            let lowered = text.lowercased()
+            return lowered.hasPrefix("the ") ? String(lowered.dropFirst(4)) : lowered
+        }
+        return plain(item) == plain(step)
+    }
+
     private var nowLine: some View {
         HStack(alignment: .firstTextBaseline, spacing: Theme.Space.s) {
             Text(model.isStopping ? "STOPPING" : "NOW")
@@ -71,7 +81,7 @@ struct NowCard: View {
                 Text(step.config.title)
                     .foregroundStyle(palette.dim.color)
                     .lineLimit(1)
-                if let item = model.currentItem {
+                if let item = model.currentItem, !Self.repeats(item.title, step: step.config.title) {
                     Text("›").foregroundStyle(palette.faint.color)
                     Text(item.title)
                         .foregroundStyle(palette.text.color)
