@@ -44,6 +44,7 @@ public final class MapReader {
     public let collector: IssueCollector
     private var consumed: Set<String> = []
     private var knownKeys: Set<String> = []
+    private var alsoSuggested: Set<String> = []
 
     public init(map: YAMLMap, source: SourceRef, context: String, collector: IssueCollector) {
         self.map = map
@@ -230,10 +231,16 @@ public final class MapReader {
         }
     }
 
+    /// Names keys worth suggesting for a typo although this reader never holds them, because something else
+    /// reads them first: an item's `name`, `note` and `optional`.
+    public func suggest(_ keys: Set<String>) {
+        alsoSuggested.formUnion(keys)
+    }
+
     /// Reports every key that no accessor asked for.
     public func finish() {
         for key in map.keys where !consumed.contains(key) {
-            if let suggestion = Self.closestMatch(to: key, in: knownKeys) {
+            if let suggestion = Self.closestMatch(to: key, in: knownKeys.union(alsoSuggested)) {
                 error("unknown key '\(key)'. Did you mean '\(suggestion)'?", key: key)
             } else if knownKeys.isEmpty {
                 error("unknown key '\(key)' (this entry takes no extra options)", key: key)
@@ -290,6 +297,8 @@ public final class ItemParser {
         self.item = item
         self.collector = collector
         self.options = MapReader(map: item.options, source: item.source, context: Self.context(for: item), collector: collector)
+        // The loader takes these out before the kind sees its options, so a typo of one lands here.
+        options.suggest(ItemConfig.commonKeys)
     }
 
     static func context(for item: ItemConfig) -> String {

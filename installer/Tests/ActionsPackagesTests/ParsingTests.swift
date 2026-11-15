@@ -85,6 +85,10 @@ final class ParsingTests: XCTestCase {
         expect("xcode: finish\nplatforms: [android]", "must be among iOS, watchOS, tvOS, visionOS")
         expect("tap: buildkite", "must look like user/repo")
         expect("tap: buildkite/buildkite\ntrsted: true", "Did you mean 'trusted'")
+        // The keys every item takes are read before the kind's own, and a typo of one still gets its suggestion.
+        expect("brew: eza\noptionl: true", "unknown key 'optionl'. Did you mean 'optional'?")
+        expect("brew: eza\nnmae: Eza", "unknown key 'nmae'. Did you mean 'name'?")
+        expect("brew: eza\nnotes: fast ls", "unknown key 'notes'. Did you mean 'note'?")
         expect("tap: a/b\ntrusted: maybe", "must be true or false")
         expect("brew: foo/bar", "user/tap/name")
         expect("brew: has space", "user/tap/name")
