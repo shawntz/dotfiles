@@ -15,11 +15,15 @@ A Mac app that sets up a brand-new Mac the way Shawn's laptop is set up. It inst
 
 ### Download and open
 
+There is no release yet. Until there is one, build the app from a checkout with `make app SIGN_IDENTITY=-` (see [Build, sign, notarize, release](#build-sign-notarize-release)), copy `build/Shawn's Dotfiles.app` to the new Mac and open it there. [If macOS won't open it](#if-macos-wont-open-it) has the fix. Once a release exists:
+
 1. On the new Mac, open the [releases page](https://github.com/shawntz/dotfiles/releases) and download `ShawnsDotfiles-<version>.dmg` from the newest `shawn-v…` release.
 2. Open the disk image and drag Shawn's Dotfiles onto the Applications shortcut.
 3. Open it from Applications. macOS asks once whether to open an app downloaded from the internet. Choose Open.
 
-The welcome screen shows where the config came from. On a new Mac with a network connection it reads `config: shawntz/dotfiles@master (abc1234)`. That means the app fetched the newest config from GitHub, so a disk image from months ago still installs today's setup, unless that config needs a newer app. Offline, it reads `config: bundled with the app` and uses the copy inside the app.
+![The welcome screen, with the plan of 17 steps on the left, Lumpy Space Princess and her speech bubble on the right, and the DRY RUN, CUSTOMIZE… and START controls along the bottom](../.github/media/welcome.png)
+
+The welcome screen shows where the config came from. On a new Mac with a network connection it reads `config: shawntz/dotfiles@master (abc1234)`. That means the app fetched the newest config from GitHub, so a disk image from months ago still installs today's setup, unless that config needs a newer app. Offline, it reads `config: bundled with the app` and uses the copy inside the app. Run from a checkout, as in the picture, it reads that config folder's path.
 
 Press START to run everything, or CUSTOMIZE… to pick steps and items first. Optional items start unchecked. With DRY RUN switched on, the run shows what each item would do and changes nothing. A finished dry run opens on its log, and RUN FOR REAL… takes you back to the start screen with DRY RUN off and the same selection. Nothing changes until you press START.
 
@@ -28,7 +32,7 @@ A real run holds off idle sleep until it ends, so the Mac does not go to sleep p
 ### What it asks you for
 
 - Your name and email address for Git. The first run that includes the git step asks for them before the admin password, offering the name and email that git on this Mac already has, and keeps your answers in `~/.shawn/answers.json`. Later runs reuse them. `shawn install --ask`, or the app started with `--ask`, asks again and offers the saved answers. Skipping a question asked again keeps its saved answer. If you skip a question that has no answer yet, the items that need it wait instead of running: the git identity, the SSH key, commit signing and the reminder to check your email on GitHub. On a Mac without the SSH key yet, the GitHub sign-in waits too, because it uploads that key. They count as needing you, not as failed, and the checklist says how to answer. A dry run asks nothing and shows the offered answer, or a placeholder, in its place.
-- Your admin password, once. When a selected item needs admin rights, the app asks before the first step starts and reuses the password for the rest of the run. Only these commands can use it, and only while they run: `softwareupdate` and Apple's `installer`, Homebrew's install script, `brew install --cask`, `mas`, Xcode's setup, and items marked `sudo: true`. No other item, and no other program on the Mac, gets the password. If you cancel, the run carries on and the steps that need admin rights fail. RETRY FAILED asks again.
+- Your admin password, once. When a selected item needs admin rights, the app asks before the first step starts and reuses the password for the rest of the run. Only the commands of these items can use it, and only while they run: the Command Line Tools, Rosetta, Homebrew, casks, App Store apps, Xcode, `.pkg` downloads and items marked `sudo: true`. No other item, and no other program on the Mac, gets the password. If you cancel, the run carries on and the steps that need admin rights fail. RETRY FAILED asks again.
 - The App Store. macOS has no way to sign in to the App Store from a script. Before the first App Store install (Xcode, then Amphetamine), the app asks you to sign in to the App Store app and choose "I'm signed in" or "Skip App Store apps". If nobody answers within ten minutes, the run skips App Store apps. Every skipped App Store app goes on the checklist with a link to its store page, whether you chose to skip or nobody answered. While `mas` installs an app, macOS may ask for your Apple Account password or Touch ID. The app stops a `mas` install that is still running after 30 minutes and puts that app on the checklist.
 - A GitHub code. The git step signs in to GitHub with the `gh` CLI. A banner shows a one-time code in large type, copies it to the clipboard and opens github.com/login/device. Paste the code there and approve. The app then uploads your new SSH key for pushing and for commit signing. If you do not finish signing in within 15 minutes, the item stops waiting and adds a checklist entry.
 
@@ -37,6 +41,8 @@ Xcode downloads in the background while the other steps run. Before the download
 The last step waits for Xcode, up to three hours by default. It then accepts the license if that is still needed, runs Xcode's first-launch setup and selects it with `xcode-select`. If you selected another full Xcode yourself, such as a beta, that one stays selected and the app sets up `/Applications/Xcode.app` next to it. If Xcode never arrives, you get a checklist entry, not a failure.
 
 ### What you still do by hand
+
+![The final screen of a run: the counts, all eight characters, the checklist of things only you can do and the steps](../.github/media/finished.png)
 
 Some steps only a person can do. The app adds each one to a checklist on the final screen, with an Open button that goes to the right place in System Settings or on the web. A reminder with a `check:` (for example, whether Karabiner has Accessibility access) comes back on later runs until its check passes. The app shows a reminder without one once per Mac, records it in `~/.shawn/state/reminders.json`, and shows it again on a run with `--fresh`. Later runs before you quit the app, such as RETRY FAILED or RESUME, list it again.
 
@@ -52,7 +58,7 @@ STOP ends a run cleanly. The app marks the item that was running as stopped, not
 
 ### If macOS won't open it
 
-Release builds carry a Developer ID signature and Apple's notarization ticket, so they open normally. Gatekeeper blocks a build signed ad hoc (see [signing](#signing)) on any other Mac. To open one anyway, try to open it once, then go to System Settings, Privacy & Security, and click Open Anyway.
+Release builds carry a Developer ID signature and Apple's notarization ticket, so they open normally. Gatekeeper blocks a build signed ad hoc (see [signing](#signing)) that another Mac downloaded or received by AirDrop. To open one anyway, try to open it once, then go to System Settings, Privacy & Security, and click Open Anyway.
 
 On a Mac that already has Xcode you can also build and run it from a checkout:
 
@@ -245,7 +251,7 @@ Everything that runs `brew` needs the `homebrew` item to have worked first.
 | `cask` | cask token | `args: […]`, `app: Name.app`, `launch: true\|false` (default false; needs `app:`) | `brew install --cask`. With `app:`, an app already in /Applications counts as installed. `launch: true` opens it afterward. |
 | `mas` | App Store id | `name:` (required; the app's name in /Applications) | Installs from the App Store with `mas install`, falling back to `mas get`, after asking once per run whether you are signed in. Stops each `mas` command after 30 minutes. A skipped, failed or stopped install adds a checklist entry that links to the app's store page. |
 | `npm` | package name | none | `npm install -g`. |
-| `download` | URL of a .dmg, .zip or .pkg | `app: Name.app`, `type: auto\|dmg\|zip\|pkg`, `to:` (default /Applications), `sha256:`, `team_id:`, `verify: true\|false` (default true), `replace: true\|false` (default false), `launch: true\|false` | Downloads the file, checks `sha256` and the Developer ID signature and team, then copies the app into place or runs the package installer. An app already there counts as done unless `replace: true`, which moves the old copy to the backup folder and installs it again on every run. |
+| `download` | URL of a .dmg, .zip or .pkg | `app: Name.app`, `type: auto\|dmg\|zip\|pkg`, `to:` (default /Applications), `sha256:`, `team_id:`, `verify: true\|false` (default true), `replace: true\|false` (default false), `launch: true\|false` | Downloads the file, checks `sha256` and the Developer ID signature and team, then copies the app into place or runs the package installer. An app already there counts as done unless `replace: true`, which moves the old copy to the backup folder and installs it again on every run. A `.pkg` with no `app:` also installs again on every run, because nothing names the app to look for. |
 | `script` | display name | `run:` (required), `check:`, `creates:`, `shell: bash\|zsh\|sh`, `sudo: true\|false`, `env: {K: V}`, `cwd:`, `timeout:` (seconds) | Runs a shell script (bash and zsh with `set -euo pipefail`). It counts as done when the `creates:` path exists and `check:` exits 0. Give either or both. With neither, it runs every time and `shawn doctor` cannot check it. `sudo: true` runs the whole script as root; without it, the script cannot use the admin password. |
 
 ### Files and settings
@@ -365,7 +371,7 @@ All of this runs in `installer/`. Each script takes `--help`.
 | `make install-cli` | Builds `shawn` in release mode and installs it to `~/.local/bin`. It leaves `~/.shawn/state/cli.json` as it was. |
 | `make run` | Opens the installer in demo mode, a dry run that starts by itself. |
 | `make icon` | Redraws `Resources/AppIcon.icns`. |
-| `make media` | Draws the GIFs and stills of the app for this README into `build/media` (`MEDIA_DIR` for elsewhere). Each frame is a `--snapshot`, so no window opens. It needs Python 3 with Pillow (`PYTHON` names it). |
+| `make media` | Draws the GIFs, stills and icon that the two READMEs show. They go into `build/media`, or into `MEDIA_DIR` when you set it, and the READMEs read them from `.github/media`. Each frame is a `--snapshot`, so no window opens. It needs Python 3 with Pillow (`PYTHON` names it). |
 | `make lint` | shellcheck on the scripts and their tests, and actionlint on the workflow when it is installed. |
 | `make clean` | Removes build products. |
 
@@ -391,7 +397,7 @@ Shawn's Dotfiles.app/Contents/
 `SIGN_IDENTITY` picks the certificate:
 
 - Left unset, the script uses the first "Developer ID Application" identity in your keychain, or signs ad hoc when there is none and says so.
-- `-` signs ad hoc. The app runs on the Mac that built it; Gatekeeper blocks it elsewhere.
+- `-` signs ad hoc. The app runs on the Mac that built it; Gatekeeper blocks a copy that another Mac downloaded or received by AirDrop.
 - Anything else names an identity by its name or SHA-1, as `security find-identity -v -p codesigning` lists them.
 
 The script signs the helpers before the app, all with the hardened runtime, and checks the result with `codesign --verify --deep --strict`. The app is not sandboxed (it runs `brew` and `sudo`) and needs no entitlements. `scripts/build-app.sh --print-identity` shows which identity it would use.
@@ -473,7 +479,7 @@ The installer app takes these flags, for example `swift run ShawnsDotfiles --dry
 | `--no-remote` | Does not fetch config from GitHub. |
 | `--config-ref REF` | Fetches config from this branch, tag or commit. |
 | `--simulate` | A built-in simulation config that goes through every screen. |
-| `--snapshot PATH` | Renders the window to a PNG and quits, without showing a window. Add `--snapshot-state` (`loading`, `welcome`, `customize`, `running`, `ask`, `ask-again`, `password`, `password-again`, `question`, `attention`, `finished`, `failed`, `stopped`, `dry-run-finished`, `config-error`), `--snapshot-size WxH` (each side 320 to 4000; default 1100x760), `--snapshot-scale 1\|2\|3` (default 2) and `--snapshot-contrast standard\|high`. `--snapshot-progress F` shows a run with no failures `F` of the way through (0 to 1), and `--snapshot-at-kind K` shows it as the first item of kind `K` starts. Both work with the screens built on the running screen: `running`, `password`, `password-again`, `question` and `attention`. Use it to check the design without screen recording. |
+| `--snapshot PATH` | Renders the window to a PNG and quits, without showing a window. Add `--snapshot-state` (`loading`, `welcome`, `customize`, `running`, `ask`, `ask-again`, `password`, `password-again`, `question`, `attention`, `finished`, `failed`, `stopped`, `dry-run-finished`, `config-error`), `--snapshot-size WxH` (each side 320 to 4000; default 1100x760), `--snapshot-scale 1\|2\|3` (default 2) and `--snapshot-contrast standard\|high`. `--snapshot-progress F` shows a run `F` of the way through (0 to 1), with no failures, and `--snapshot-at-kind K` shows it as the first item of kind `K` starts. Both work with the screens built on the running screen: `running`, `question` and `attention`. Use it to check the design without screen recording. |
 | `-h`, `--help` | Lists these flags. |
 
 The CLI has the same safety valves: `shawn install --dry-run`, `shawn doctor`, and `shawn --config DIR` for another config.

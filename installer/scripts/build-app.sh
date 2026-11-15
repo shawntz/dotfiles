@@ -33,8 +33,8 @@ changes, when they change during the build, or outside a git checkout.
 
 Signing: with SIGN_IDENTITY unset, the first "Developer ID Application" identity in your
 keychain is used; without one the app is signed ad hoc, which runs on this Mac but is blocked
-by Gatekeeper on others. Helpers are signed before the app, all with the hardened runtime; a
-secure timestamp is added only for a real identity.
+by Gatekeeper on a Mac that downloads it or receives it by AirDrop. Helpers are signed before
+the app, all with the hardened runtime; a secure timestamp is added only for a real identity.
 
 Examples:
   scripts/build-app.sh                              # release, arm64, auto identity
@@ -193,7 +193,7 @@ xattr -cr "$APP"
 step "Signing with $SIGN_LABEL ($SIGN_SOURCE)"
 if is_ad_hoc && [ -z "${SIGN_IDENTITY:-}" ]; then
     warn "no \"Developer ID Application\" identity found, so the app is signed ad hoc."
-    note "It runs on this Mac; Gatekeeper blocks it on others. Set SIGN_IDENTITY to choose an identity."
+    note "It runs on this Mac; Gatekeeper blocks a copy that another Mac downloads or receives by AirDrop. Set SIGN_IDENTITY to choose an identity."
 fi
 set_codesign_flags
 sign() { # <label> <codesign arguments...>; codesign's chatter is shown only when it fails
