@@ -259,7 +259,7 @@ final class TextQuestionTests: XCTestCase {
         XCTAssertEqual(TextPanel.placeholder(for: bare), "name@example.com")
         XCTAssertEqual(TextPanel.placeholder(for: TextRequest(id: "full_name", prompt: "Your name")), "your answer")
         XCTAssertEqual(TextPanel.note(for: bare, answersFile: "~/.shawn/answers.json", isSimulation: false),
-                       "Saved on this Mac in ~/.shawn/answers.json, so later runs do not ask again. "
+                       "The app saves it on this Mac in ~/.shawn/answers.json, so later runs do not ask again. "
                        + "SKIP leaves it unanswered, and the items that need it wait for the next run.")
         XCTAssertTrue(TextPanel.note(for: bare, answersFile: "~/.shawn/answers.json", isSimulation: true).contains("nothing is saved"))
         XCTAssertEqual(TextPanel.skipHelp(for: offered), "Leave it unanswered. The items that need it wait for the next run.",
@@ -275,7 +275,7 @@ final class TextQuestionTests: XCTestCase {
         let request = try await textSheet(model)
         XCTAssertTrue(request.defaultIsSaved)
         XCTAssertEqual(TextPanel.note(for: request, answersFile: model.answersFileDisplayPath, isSimulation: false),
-                       "Saved on this Mac in ~/.shawn/answers.json, so later runs do not ask again. SKIP keeps the saved answer.")
+                       "The app saves it on this Mac in ~/.shawn/answers.json, so later runs do not ask again. SKIP keeps the saved answer.")
         XCTAssertEqual(TextPanel.skipHelp(for: request), "Keep the saved answer.")
         model.skipText()
         try await waitUntil { model.phase == .finished }

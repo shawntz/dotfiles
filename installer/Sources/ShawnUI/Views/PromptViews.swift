@@ -86,7 +86,7 @@ struct PasswordPanel: View {
             .padding(.vertical, 9)
             .background(palette.background.color, in: RoundedRectangle(cornerRadius: 4))
             .overlay(RoundedRectangle(cornerRadius: 4).strokeBorder(palette.pink.color.opacity(fieldFocused ? 0.9 : 0.5), lineWidth: 1))
-            Text("The password you use to log in to this Mac. It goes straight to sudo for this run and is never saved.")
+            Text("The password you use to log in to this Mac. It goes straight to sudo for this run, and the app never saves it.")
                 .font(Theme.mono(Theme.Size.small))
                 .foregroundStyle(palette.dim.color)
                 .fixedSize(horizontal: false, vertical: true)
@@ -202,7 +202,7 @@ struct TextPanel: View {
         if isSimulation {
             return "Simulation: the answer only goes to the log, and nothing is saved. SKIP leaves it unanswered."
         }
-        let saved = "Saved on this Mac in \(answersFile), so later runs do not ask again. "
+        let saved = "The app saves it on this Mac in \(answersFile), so later runs do not ask again. "
         if request.defaultIsSaved { return saved + "SKIP keeps the saved answer." }
         return saved + "SKIP leaves it unanswered, and the items that need it wait for the next run."
     }

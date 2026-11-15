@@ -166,11 +166,11 @@ private struct ResultBanner: View {
 
     private var advice: String? {
         if model.runIsDryRun {
-            // Nothing was done, so there is nothing for a second dry run to skip.
+            // A dry run does nothing, so a second one has nothing to skip.
             switch outcome {
-            case .success: return "Nothing on this Mac was changed. The log shows what each item would do; RUN FOR REAL… goes back to START with DRY RUN off."
-            case .failures: return "Nothing was changed. Fix what you can and DRY RUN AGAIN, or RUN FOR REAL… to go back to START with DRY RUN off."
-            case .stopped: return "Nothing was changed. DRY RUN AGAIN starts it over; RUN FOR REAL… goes back to START with DRY RUN off."
+            case .success: return "This dry run changed nothing on this Mac. The log shows what each item would do. RUN FOR REAL… goes back to START with DRY RUN off."
+            case .failures: return "This dry run changed nothing. Fix what you can and DRY RUN AGAIN, or RUN FOR REAL… to go back to START with DRY RUN off."
+            case .stopped: return "This dry run changed nothing. DRY RUN AGAIN starts it over, and RUN FOR REAL… goes back to START with DRY RUN off."
             }
         }
         switch outcome {
