@@ -1,0 +1,4 @@
+# actionlint does not know the label of GitHub's Xcode 27 runner image yet.
+self-hosted-runner:
+  labels:
+    - xcode-27

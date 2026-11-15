@@ -27,13 +27,13 @@ concurrency:
 jobs:
   build-test-validate:
     name: Build, test, validate config
-    # Newest generally available macOS image (arm64). The xcode-27 image, which matches the
-    # Swift 6.4 toolchain used locally, is still in preview.
-    runs-on: macos-26
+    # GitHub's Xcode 27 image (arm64, macOS 27), so CI builds with the Xcode 27.2 and Swift 6.4
+    # that the installer puts on a new Mac. The macos-26 image only carries Xcode 26.
+    runs-on: xcode-27
     timeout-minutes: 30
     env:
-      # Pin the toolchain rather than following the image's default Xcode.
-      DEVELOPER_DIR: /Applications/Xcode_26.6.app/Contents/Developer
+      # Name the Xcode rather than following the image's default, which is an older 27.x.
+      DEVELOPER_DIR: /Applications/Xcode_27.2.app/Contents/Developer
       # The built CLI must never try to update itself in CI.
       SHAWN_NO_SELF_UPDATE: "1"
       SHAWN_NO_UPDATE: "1"

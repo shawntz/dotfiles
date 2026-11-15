@@ -437,7 +437,7 @@ scripts/tests/      tests for those scripts, with fake signing tools in scripts/
 Resources/          Info.plist template and the app icon
 ```
 
-`swift build` and `swift test` (or `make build`, `make test`) need Xcode or the Swift 6 toolchain on macOS 14 or later. The only package dependency is Yams.
+`swift build` and `swift test` (or `make build`, `make test`) are run with Xcode 27.2 (Swift 6.4), here and in CI. That is the Xcode the installer puts on a new Mac. The package asks for Swift 6.0 tools and macOS 14, so an older Swift 6 toolchain may build it, but nothing tests that. The only package dependency is Yams.
 
 Tests never change your home folder or /Applications. Each one builds a throwaway tree with `SystemEnvironment.sandbox(root:)` and puts fake `brew`, `mas`, `gh` and other tools in the sandbox's `homebrew/bin`, which is first on every child process's `PATH`. The fakes record their arguments and print canned output. Some tests run the real `git`, `hdiutil` and `codesign`, on temporary folders only. Some CLI tests send a real SIGINT to their own test process, so run `swift test` without `--parallel`. The build scripts' tests in `scripts/tests/` work the same way. Each runs a copy of the scripts in a temporary folder with fakes from `scripts/tests/fakes/`.
 
@@ -460,7 +460,7 @@ The installer app takes these flags, for example `swift run ShawnsDotfiles --dry
 
 The CLI has the same safety valves: `shawn install --dry-run`, `shawn doctor`, and `shawn --config DIR` for another config.
 
-CI is `.github/workflows/installer.yml` at the repository root. It runs on pull requests and pushes to `master` that touch `installer/`, the workflow or the root `.gitignore`. On a macOS runner it builds, runs the Swift tests, validates the config with the built `shawn`, checks that git keeps every config file (as a Mac's case-insensitive git sees it) and runs the build scripts' tests. It has no secrets and signs nothing but ad hoc test builds.
+CI is `.github/workflows/installer.yml` at the repository root. It runs on pull requests and pushes to `master` that touch `installer/`, the workflow or the root `.gitignore`. On GitHub's `xcode-27` runner image, with Xcode 27.2 selected, it builds, runs the Swift tests, validates the config with the built `shawn`, checks that git keeps every config file (as a Mac's case-insensitive git sees it) and runs the build scripts' tests. It has no secrets and signs nothing but ad hoc test builds.
 
 ## Fan art
 
