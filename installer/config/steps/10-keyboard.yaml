@@ -1,0 +1,105 @@
+# Keyboard superpowers: Karabiner-Elements remaps keys, Hammerspoon acts on
+# them. Both apps come from the packages step; this step writes their config
+# before they first start, starts them, and lists the switches only you can
+# turn on in System Settings.
+#
+#   Caps Lock          Escape when tapped, Control when held
+#   Right Option       Hyper (⇧⌃⌥⌘); Hyper + key opens an app
+#   S+D held together  h/j/k/l arrows, a = Option, f = Command, space = Shift
+#   Control+S, key     move and resize the front window
+#
+# To put another app on Hyper + key, add a line to
+# config/files/hammerspoon/keyboard/hyper-apps.lua. To change a Karabiner
+# rule, edit config/files/karabiner/karabiner.json (Karabiner's own settings
+# window edits the installed copy, so copy changes you want to keep back here).
+
+id: keyboard
+title: Keyboard
+subtitle: Karabiner-Elements and Hammerspoon
+mascot: ice-king
+
+items:
+  # ── Karabiner-Elements ─────────────────────────────────────────────────
+  # Private to you, like Karabiner makes it itself.
+  - mkdir: ~/.config/karabiner
+    mode: "0700"
+  - mkdir: ~/.config/karabiner/assets/complex_modifications
+    mode: "0700"
+  - copy: karabiner/karabiner.json
+    to: ~/.config/karabiner/karabiner.json
+    mode: "0600"
+
+  # ── Hammerspoon ────────────────────────────────────────────────────────
+  # Jason Rudolph's keyboard modules (MIT, LICENSE included) with Herdr as the
+  # terminal and an app list for Hyper + key.
+  - copy: hammerspoon
+    to: ~/.hammerspoon
+
+  # Menu bar icon, no Dock icon, automatic updates, no system profile sent with
+  # update checks. Written before Hammerspoon's first start.
+  - defaults: org.hammerspoon.Hammerspoon
+    set:
+      MJShowDockIconKey: false
+      MJShowMenuIconKey: true
+      SUEnableAutomaticChecks: true
+      SUAutomaticallyUpdate: true
+      SUSendProfileInfo: false
+
+  # ── Start them ─────────────────────────────────────────────────────────
+  # Opened in the background. On a new Mac, Karabiner's window lists the
+  # permissions below as it asks for them, and Hammerspoon asks for
+  # Accessibility from the menu bar.
+  - open: Karabiner-Elements
+  - open: Hammerspoon
+
+  # ── Only you can do these ──────────────────────────────────────────────
+  - manual: Allow Karabiner's background services
+    detail: >-
+      System Settings → General → Login Items & Extensions. Under App
+      Background Activity, turn on "Karabiner-Elements Non-Privileged Agents
+      v2" and "Karabiner-Elements Privileged Daemons v2".
+    url: x-apple.systempreferences:com.apple.LoginItems-Settings.extension
+    check: |
+      guidance=$("/Library/Application Support/org.pqrs/Karabiner-Elements/bin/karabiner_cli" --show-settings-window-guidance 2>/dev/null) &&
+        printf '%s\n' "$guidance" | grep '"core_agents_enabled": *true' >/dev/null &&
+        printf '%s\n' "$guidance" | grep '"core_daemons_enabled": *true' >/dev/null
+
+  - manual: Allow Karabiner's keyboard driver
+    detail: >-
+      Same pane, further down: Extensions → By App →
+      .Karabiner-VirtualHIDDevice-Manager → ⓘ, then turn on
+      org.pqrs.Karabiner-DriverKit-VirtualHIDDevice. macOS asks for your
+      password.
+    url: x-apple.systempreferences:com.apple.LoginItems-Settings.extension
+    check: >-
+      systemextensionsctl list 2>/dev/null |
+      grep 'org.pqrs.Karabiner-DriverKit-VirtualHIDDevice.*activated enabled' >/dev/null
+
+  - manual: Give Karabiner Accessibility access
+    detail: >-
+      System Settings → Privacy & Security → Accessibility: turn on
+      Karabiner-Core-Service.
+    url: x-apple.systempreferences:com.apple.preference.security?Privacy_Accessibility
+    check: >-
+      "/Library/Application Support/org.pqrs/Karabiner-Elements/bin/karabiner_cli"
+      --show-settings-window-guidance 2>/dev/null |
+      grep '"accessibility_process_trusted": *true' >/dev/null
+
+  - manual: Check Karabiner's Input Monitoring access
+    detail: >-
+      Karabiner-Elements 16 gets this together with Accessibility. If its
+      window still says keyboard input is blocked, turn on
+      Karabiner-Core-Service under Privacy & Security → Input Monitoring.
+    url: x-apple.systempreferences:com.apple.preference.security?Privacy_ListenEvent
+    check: >-
+      "/Library/Application Support/org.pqrs/Karabiner-Elements/bin/karabiner_cli"
+      --show-settings-window-guidance 2>/dev/null |
+      grep '"iohid_listen_event_allowed": *true' >/dev/null
+
+  - manual: Give Hammerspoon Accessibility access
+    detail: >-
+      System Settings → Privacy & Security → Accessibility: turn on
+      Hammerspoon, then quit Hammerspoon from its menu bar icon and open it
+      again so its key handlers start. Window moves, Markdown mode and word
+      deletion need this; Hyper + key works without it.
+    url: x-apple.systempreferences:com.apple.preference.security?Privacy_Accessibility

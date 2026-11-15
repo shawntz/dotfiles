@@ -1,0 +1,145 @@
+# Homebrew packages: the brews from the old laptop.
+#
+# One line per package: `- brew: <formula>` for a command-line tool,
+# `- cask: <token>` for an app, `- tap: <user/repo>` for a third-party tap.
+# Packages from a third-party tap use their full name, for example:
+#
+#   - brew: supabase/tap/supabase
+#
+# Check a name with `brew info <name>` (or `brew info --cask <token>`) first,
+# or let `shawn add brew <name>` install it and add the line for you. Keep
+# each group in alphabetical order of package name (ignoring any tap prefix).
+#
+# Homebrew trusts a third-party package installed by its full name, so only
+# the buildkite tap (trusted as a whole on the old laptop) needs
+# `trusted: true`.
+#
+# Elsewhere: mas is in 01-bootstrap, codex and chatgpt in 05-ai, herdr-app in
+# 11-terminal, and apps that were not installed with Homebrew in 04-apps.
+# Claude Code uses its own installer (05-ai), not the claude-code cask.
+
+id: packages
+title: Homebrew Packages
+subtitle: Formulae and casks from the old laptop
+mascot: jake
+
+items:
+  # ── Taps ───────────────────────────────────────────────────────────────
+  - tap: buildkite/buildkite
+    trusted: true
+  - tap: jurplel/tap
+    optional: true
+    note: only instant-space-switcher (also optional) comes from this tap
+  - tap: mikker/tap
+  - tap: nikitabobko/tap
+  - tap: supabase/tap
+  - tap: withgraphite/tap
+
+  # ── Needed by the configs in this repo ─────────────────────────────────
+  # Not on the old laptop, but files written by later steps use them.
+  - brew: bat              # preview in the zsh `ff` alias
+  - brew: fd               # LazyVim file search
+  - brew: git-lfs          # the old git config turned on the LFS filter
+  - brew: ripgrep          # LazyVim text search
+
+  # ── Shell and editor ───────────────────────────────────────────────────
+  - brew: eza
+  - brew: fzf
+  - brew: herdr            # Herdr's terminal UI; the Herdr app is in 11-terminal
+  - brew: neovim
+  - brew: starship
+  - brew: thefuck
+  - brew: tree
+  - brew: zoxide
+  - brew: zsh-autosuggestions
+  - brew: zsh-completions
+  - brew: zsh-syntax-highlighting
+
+  # ── Git, GitHub and GitLab ─────────────────────────────────────────────
+  - brew: actionlint
+  - brew: gh
+  - brew: glab
+  - brew: withgraphite/tap/graphite
+  - brew: lazygit
+
+  # ── Languages and package managers ─────────────────────────────────────
+  - brew: deno
+  - brew: mise
+  - brew: node
+  - brew: openjdk@17
+  - brew: pipx
+  - brew: pnpm
+  - brew: rustup           # keg-only: run `rustup-init` once to install a Rust toolchain
+  - brew: uv
+
+  # ── Data science ───────────────────────────────────────────────────────
+  - brew: air              # R formatter
+  - brew: apache-arrow
+  - brew: jupyterlab
+  - brew: python-matplotlib
+  - brew: r
+
+  # ── Documents ──────────────────────────────────────────────────────────
+  - brew: pandoc
+  - brew: poppler
+
+  # ── Apple platforms ────────────────────────────────────────────────────
+  - brew: cocoapods
+  - brew: xcodegen
+
+  # ── Cloud, CI and deploys ──────────────────────────────────────────────
+  - brew: awscli
+  - brew: buildkite/buildkite/buildkite-agent@3
+  - brew: cloudflared
+  - brew: supabase/tap/supabase
+
+  # ── Build tools and libraries ──────────────────────────────────────────
+  - brew: cmake
+  - brew: pkgconf
+  - brew: wimlib
+  - brew: zlib
+
+  # ── Global npm packages (need node, above) ─────────────────────────────
+  - npm: ghostty-config-cli
+
+  # ── Apps ───────────────────────────────────────────────────────────────
+  - cask: nikitabobko/tap/aerospace
+    note: installed but not running on the old laptop
+  - cask: mikker/tap/dinky
+    note: installed but not running on the old laptop
+  - cask: ghostty
+    note: the old terminal; Herdr is the default now
+  - cask: hammerspoon
+  - cask: karabiner-elements
+  - cask: localsend
+  - cask: rstudio
+
+  # ── Command-line tools shipped as casks ────────────────────────────────
+  - cask: android-commandlinetools
+  - cask: ngrok
+  - cask: quarto
+  # vercel used to be a formula. While that old formula is installed it owns
+  # bin/vercel and bin/vc, so Homebrew installs the cask without linking them
+  # (a warning, not an error) and the old version keeps running. Remove the
+  # formula first; a cask installed while it was there is reinstalled to link.
+  - script: Retire the old vercel formula
+    check: '! test -d "{{brew_prefix}}/Cellar/vercel"'
+    run: |
+      brew uninstall --formula --ignore-dependencies vercel
+      if [ -d "{{brew_prefix}}/Caskroom/vercel" ]; then brew reinstall --cask vercel; fi
+    env:
+      HOMEBREW_NO_AUTO_UPDATE: "1"
+  - cask: vercel
+    note: a formula on the old laptop; Homebrew now ships it as a cask
+
+  # ── Gone from the old laptop ───────────────────────────────────────────
+  # Homebrew still listed these, but their apps had been deleted.
+  - cask: caffeine
+    optional: true
+    note: app was deleted on the old laptop; only its Homebrew record was left
+  - cask: jurplel/tap/instant-space-switcher
+    optional: true
+    note: app was deleted on the old laptop; only its Homebrew record was left
+  - cask: warp
+    optional: true
+    note: app was deleted on the old laptop; only its Homebrew record was left

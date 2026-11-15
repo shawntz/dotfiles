@@ -1,0 +1,12 @@
+#!/bin/bash
+# Stands in for hdiutil: `create … <image>` writes a placeholder image file, `verify` succeeds.
+set -eu
+printf 'hdiutil %s\n' "$*" >>"$FAKE_LOG"
+case "${1:-}" in
+    create)
+        image=""
+        for argument in "$@"; do image="$argument"; done
+        printf 'placeholder disk image\n' >"$image" ;;
+    verify) ;;
+    *) echo "fake hdiutil: unexpected arguments: $*" >&2; exit 1 ;;
+esac

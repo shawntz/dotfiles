@@ -1,0 +1,21 @@
+# Bootstrap: the tools every later step needs.
+#
+# The Command Line Tools and Homebrew go first. mas comes straight after
+# Homebrew so the multi-gigabyte Xcode download can start in the background
+# while the rest of the install carries on; 17-finish.yaml waits for it and
+# finishes the setup.
+#
+# Items here run in order, so add new ones at the end. For example:
+#
+#   - rosetta: install
+
+id: bootstrap
+title: Bootstrap
+subtitle: Command Line Tools, Homebrew and Xcode
+mascot: finn
+
+items:
+  - xcode-clt: install
+  - homebrew: install
+  - brew: mas            # App Store command line, used for Xcode and the App Store apps
+  - xcode: download      # keeps going in the background; see 17-finish.yaml

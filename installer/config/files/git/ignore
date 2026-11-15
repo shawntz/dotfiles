@@ -1,0 +1,9 @@
+# Global gitignore: git reads ~/.config/git/ignore in every repository.
+# One pattern per line. Project-specific patterns belong in that project's
+# own .gitignore instead.
+
+# Finder's per-folder view settings
+.DS_Store
+
+# Claude Code's personal, per-project settings (never meant to be shared)
+**/.claude/settings.local.json

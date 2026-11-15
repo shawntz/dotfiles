@@ -1,0 +1,473 @@
+# The `shawn` command line tool: its own settings, and every command defined in YAML.
+#
+# Built-in commands (install, doctor, drift, add, pr, update, upgrade, config, statusline, …) are
+# written in Swift. Everything under `commands:` is defined here: add one, merge the PR, and every
+# Mac picks it up on its next `shawn …` call. Before each command shawn fast-forwards a clean dotfiles
+# checkout, or refreshes the cached config on a Mac without one.
+#
+# A command:
+#   section, summary   where and how it shows up in `shawn help`
+#   usage, help        argument synopsis and longer text for `shawn help <name>` and `shawn <name> -h`
+#   update             runs first, its output summed up in one line; a failing or slow update never
+#                      stops the launch. --no-update (before or right after the command name) or
+#                      SHAWN_NO_UPDATE=1 skips it and shawn's own update; SHAWN_NO_SELF_UPDATE=1
+#                      skips only shawn's own update. Ctrl-C during the update stops it and launches nothing.
+#   update_timeout     seconds to wait for `update` before launching anyway (default 45)
+#   exec               replace shawn with this program (the terminal and Ctrl-C go straight to it);
+#                      a `json:` element becomes ONE argument of compact JSON; your arguments follow
+#   run                a bash script (macOS bash 3.2): your arguments are "$@", $0 is "shawn <name>"
+#   env                extra environment variables
+#
+# Variables: {{shawn_bin}} (the running shawn), {{home}}, {{github_user}} and every var in
+# installer.yaml. Scripts also get $SHAWN_BIN, $SHAWN_CONFIG (this directory), $SHAWN_CONFIG_EXPLICIT
+# (the same directory, set only when you named it with --config), $SHAWN_COMMAND and
+# $SHAWN_USER_PATH (PATH as you had it).
+
+self_update:
+  mode: always              # always | daily | off: look for new shawn code and config on GitHub first
+  skip: [statusline, shell-init, completions, __askpass]
+
+add:                        # where `shawn add <kind> <name>` and `shawn drift --write` put new lines
+  tap: steps/03-packages.yaml
+  brew: steps/03-packages.yaml
+  npm: steps/03-packages.yaml
+  cask: steps/04-apps.yaml
+  mas: steps/04-apps.yaml
+  webapp: steps/13-webapps.yaml
+
+upgrade:                    # `shawn upgrade` runs these in order, in your terminal
+  - name: Homebrew
+    run: brew update && brew upgrade && brew cleanup
+    if: command -v brew >/dev/null
+  - name: App Store
+    run: mas upgrade
+    if: command -v mas >/dev/null
+  - name: Claude Code
+    run: claude update
+    if: command -v claude >/dev/null
+  - name: Claude plugins
+    run: claude plugin marketplace update
+    if: command -v claude >/dev/null
+  - name: Codex
+    run: codex update
+    if: command -v codex >/dev/null
+  - name: Grok
+    run: grok update
+    if: command -v grok >/dev/null
+  - name: Agent skills
+    run: DISABLE_TELEMETRY=1 npx --yes skills@latest update -g -y
+    if: command -v npx >/dev/null && [ -f "$HOME/.agents/.skill-lock.json" ]
+  - name: npm globals
+    run: npm update -g
+    if: command -v npm >/dev/null
+  - name: uv tools
+    run: uv tool upgrade --all
+    if: command -v uv >/dev/null
+  - name: Herdr integrations
+    run: herdr integration install claude && herdr integration install codex && herdr integration install grok
+    if: command -v herdr >/dev/null
+
+statusline:                 # short lines for `shawn statusline`; one per prompt, so it never flickers
+  quips:
+    - lumping along
+    - what the lump
+    - so lumpy rn
+    - oh my glob, a diff
+    - princess-grade code
+    - ugh, fine, I'll help
+    - this repo has drama
+    - not even mad, just lumpy
+    - shipping it, obviously
+    - too lumpy to care
+    - smell ya later, bugs
+
+commands:
+
+  # ── AI ────────────────────────────────────────────────────────────────────────────────────────
+
+  claude:
+    section: AI
+    summary: Claude Code with the shawn status line (updates first)
+    usage: "[claude arguments…]"
+    help: |
+      Runs `claude update`, then starts Claude Code with one extra settings layer for this
+      session only (--settings): the shawn status line and a few tips in the spinner.
+      Everything else, including your own spinner phrases, still comes from ~/.claude/settings.json.
+    update: claude update
+    update_timeout: 60
+    exec:
+      - claude
+      - --settings
+      - json:
+          statusLine:
+            type: command
+            command: '"{{shawn_bin}}" statusline'
+            padding: 0
+          spinnerTipsOverride:
+            label: LSP says
+            tips:
+              - "Oh my glob: shawn drift lists what you installed but never put in the config."
+              - "shawn add cask <name> installs it AND writes the YAML line. You're welcome."
+              - "shawn pr turns your config edits into a pull request. So responsible, ugh."
+              - "Lumps up: shawn ports shows what is hogging localhost, shawn killport <port> fixes it."
+              - "shawn doctor checks this Mac against the config without touching a thing."
+              - "Type sd to jump to any repo in ~/Developer. Way less lumpy than cd."
+              - "In a hurry? shawn --no-update claude skips the update check."
+
+  codex:
+    section: AI
+    summary: Codex with a fuller status line and title (updates first)
+    usage: "[codex arguments…]"
+    help: |
+      Runs `codex update` (Homebrew installs upgrade through brew), then starts Codex with
+      session-only -c overrides for the TUI status line and terminal title. Your own -c flags come
+      later on the command line, so they win. No -p or -m is added, so yours never clash.
+    update: codex update
+    update_timeout: 120
+    exec:
+      - codex
+      - -c
+      - 'tui.status_line=["model-with-reasoning","run-state","project-name","git-branch","branch-changes","context-remaining","five-hour-limit","weekly-limit"]'
+      - -c
+      - 'tui.terminal_title=["activity","project-name","thread-title"]'
+
+  grok:
+    section: AI
+    summary: Grok CLI in your terminal's own colours (updates first)
+    usage: "[grok arguments…]"
+    help: |
+      Runs `grok update`, then starts grok with its "terminal" theme, so it wears the same colours
+      as Ghostty and Herdr. (Grok's status line can only be set in ~/.grok/config.toml.)
+    update: grok update
+    update_timeout: 60
+    env:
+      GROK_THEME: terminal
+      GROK_TERMINAL_THEME: "1"
+      # shawn just checked for updates; grok need not check again on launch.
+      GROK_DISABLE_AUTOUPDATER: "1"
+    exec: [grok]
+
+  # ── Network ───────────────────────────────────────────────────────────────────────────────────
+
+  ports:
+    section: Network
+    summary: What is listening on which TCP port
+    usage: "[port or program]"
+    help: Lists your processes listening on TCP ports, optionally only those matching a port number or program name.
+    run: |
+      set -uo pipefail
+      filter="${1:-}"
+      if (( $# > 1 )); then echo "usage: $0 [port or program]" >&2; exit 64; fi
+      rows=$(lsof -nP -iTCP -sTCP:LISTEN -Fpcn 2>/dev/null | awk '
+        /^p/ { pid = substr($0, 2) }
+        /^c/ { cmd = substr($0, 2) }
+        /^n/ {
+          name = substr($0, 2); port = name; sub(/.*:/, "", port); addr = name; sub(/:[^:]*$/, "", addr)
+          key = port "/" pid; if (!(key in seen)) { seen[key] = 1; printf "%s\t%s\t%s\t%s\n", port, pid, cmd, addr }
+        }' | sort -t "$(printf '\t')" -k1,1n -k3,3)
+      if [[ -n "$filter" ]]; then
+        lower=$(printf '%s' "$filter" | tr '[:upper:]' '[:lower:]')
+        rows=$(printf '%s\n' "$rows" | awk -F '\t' -v f="$lower" '$1 == f || index(tolower($3), f) > 0')
+      fi
+      if [[ -z "$rows" ]]; then
+        echo "Nothing${filter:+ matching '$filter'} is listening on a TCP port."
+        exit 0
+      fi
+      printf '%-7s %-7s %-22s %s\n' PORT PID PROGRAM ADDRESS
+      printf '%s\n' "$rows" | awk -F '\t' '{ printf "%-7s %-7s %-22s %s\n", $1, $2, substr($3, 1, 22), $4 }'
+      echo "(your processes only; sudo lsof -nP -iTCP -sTCP:LISTEN shows everyone's)"
+
+  killport:
+    section: Network
+    summary: Stop whatever is listening on a port
+    usage: "<port> [--force]"
+    help: Sends SIGTERM to every process of yours listening on the port and waits up to 3 seconds; --force follows up with SIGKILL.
+    run: |
+      set -uo pipefail
+      port="${1:-}"
+      force="${2:-}"
+      if [[ ! "$port" =~ ^[0-9]{1,5}$ ]] || (( 10#$port < 1 || 10#$port > 65535 )) || (( $# > 2 )) || [[ -n "$force" && "$force" != "--force" ]]; then
+        echo "usage: $0 <port> [--force]   (port: a number from 1 to 65535)" >&2
+        exit 64
+      fi
+      port=$((10#$port))
+      pids=$(lsof -nP -t -iTCP:"$port" -sTCP:LISTEN 2>/dev/null | sort -u | tr '\n' ' ')
+      if [[ -z "${pids// /}" ]]; then
+        echo "Nothing of yours is listening on port $port."
+        exit 0
+      fi
+      for pid in $pids; do
+        printf 'stopping %-7s %s\n' "$pid" "$(ps -o command= -p "$pid" | cut -c1-70)"
+      done
+      kill $pids 2>/dev/null
+      alive=""
+      for _ in 1 2 3 4 5 6 7 8 9 10; do
+        sleep 0.3
+        alive=""
+        for pid in $pids; do kill -0 "$pid" 2>/dev/null && alive="$alive $pid"; done
+        [[ -z "$alive" ]] && break
+      done
+      if [[ -n "$alive" ]]; then
+        if [[ "$force" == "--force" ]]; then
+          kill -9 $alive 2>/dev/null
+          echo "force-stopped:$alive"
+        else
+          echo "still running:$alive. Run again with --force to send SIGKILL" >&2
+          exit 1
+        fi
+      fi
+      echo "Port $port is free."
+
+  ip:
+    section: Network
+    summary: Local and public IP addresses
+    usage: "[--local]"
+    help: Shows the address of every active network interface, and your public address (unless --local).
+    run: |
+      set -uo pipefail
+      case "${1:-}" in
+        "") public=1 ;;
+        --local) public=0 ;;
+        *) echo "usage: $0 [--local]" >&2; exit 64 ;;
+      esac
+      found=0
+      for iface in $(ifconfig -l); do
+        [[ "$iface" == lo* ]] && continue
+        addr=$(ipconfig getifaddr "$iface" 2>/dev/null) || continue
+        printf 'local   %-8s %s\n' "$iface" "$addr"
+        found=1
+      done
+      (( found )) || echo "local   (no active network interface)"
+      if (( public )); then
+        if addr=$(curl -fsS --max-time 4 https://api.ipify.org 2>/dev/null) && [[ -n "$addr" ]]; then
+          printf 'public           %s\n' "$addr"
+        else
+          echo "public           (could not reach api.ipify.org, offline?)"
+        fi
+      fi
+
+  # ── Dev ───────────────────────────────────────────────────────────────────────────────────────
+
+  keys:
+    section: Dev
+    summary: Show your SSH public keys and copy one to the clipboard
+    usage: "[key name]"
+    help: Prints every public key in ~/.ssh with its fingerprint and copies one (id_ed25519 by default), ready to paste into GitHub or a server.
+    run: |
+      set -uo pipefail
+      if (( $# > 1 )); then echo "usage: $0 [key name]" >&2; exit 64; fi
+      shopt -s nullglob
+      keys=("$HOME"/.ssh/*.pub)
+      if (( ${#keys[@]} == 0 )); then
+        echo "No SSH public keys in ~/.ssh yet. 'shawn install' makes one (or: ssh-keygen -t ed25519)." >&2
+        exit 1
+      fi
+      want="${1:-}"
+      want="${want%.pub}"
+      pick=""
+      for key in "${keys[@]}"; do
+        name=$(basename "$key" .pub)
+        echo "$name  $(ssh-keygen -lf "$key" 2>/dev/null | awk '{print $2, $NF}')"
+        echo "  $(cat "$key")"
+        if [[ -n "$want" ]]; then
+          [[ "$name" == "$want" ]] && pick="$key"
+        elif [[ -z "$pick" || "$name" == id_ed25519 ]]; then
+          pick="$key"
+        fi
+      done
+      if [[ -z "$pick" ]]; then
+        echo "$0: no key named '$want' in ~/.ssh" >&2
+        exit 1
+      fi
+      if tr -d '\n' < "$pick" | pbcopy 2>/dev/null; then
+        echo "copied $(basename "$pick") to the clipboard"
+      fi
+
+  clean:
+    section: Dev
+    summary: Reclaimable space in developer caches (--yes to clean)
+    usage: "[--yes]"
+    help: |
+      Measures the Homebrew download cache, Xcode DerivedData and the npm, pnpm and uv caches.
+      With --yes it empties them through each tool's own clean command (DerivedData is removed).
+      Everything there is re-downloaded or rebuilt on demand.
+    run: |
+      set -uo pipefail
+      case "${1:-}" in
+        "") yes=0 ;;
+        --yes|-y) yes=1 ;;
+        *) echo "usage: $0 [--yes]" >&2; exit 64 ;;
+      esac
+      export HOMEBREW_NO_AUTO_UPDATE=1
+      kb() { du -sk "$1" 2>/dev/null | awk '{print $1}'; }
+      human() { awk -v k="$1" 'BEGIN { if (k >= 1048576) printf "%.1f GB", k / 1048576; else if (k >= 1024) printf "%.0f MB", k / 1024; else printf "%d KB", k }'; }
+      tidy() { case "$1" in "$HOME"*) printf '~%s' "${1#"$HOME"}" ;; *) printf '%s' "$1" ;; esac; }
+      names=(); paths=(); total=0
+      add() { [[ -n "$2" && -d "$2" ]] || return 0; names+=("$1"); paths+=("$2"); }
+      command -v brew >/dev/null && add "Homebrew downloads" "$(brew --cache 2>/dev/null)"
+      add "Xcode DerivedData" "$HOME/Library/Developer/Xcode/DerivedData"
+      add "npm cache" "$HOME/.npm/_cacache"
+      command -v pnpm >/dev/null && add "pnpm store" "$(pnpm store path 2>/dev/null)"
+      command -v uv >/dev/null && add "uv cache" "$(uv cache dir 2>/dev/null)"
+      if (( ${#names[@]} == 0 )); then echo "No caches found."; exit 0; fi
+      for i in "${!names[@]}"; do
+        size=$(kb "${paths[$i]}"); size=${size:-0}; total=$((total + size))
+        printf '  %-20s %10s  %s\n' "${names[$i]}" "$(human "$size")" "$(tidy "${paths[$i]}")"
+      done
+      printf '  %-20s %10s\n' "total" "$(human "$total")"
+      if (( ! yes )); then
+        echo "Run 'shawn clean --yes' to empty them."
+        exit 0
+      fi
+      status=0
+      for i in "${!names[@]}"; do
+        echo "cleaning ${names[$i]}…"
+        case "${names[$i]}" in
+          "Homebrew downloads") brew cleanup --prune=all -s || status=1 ;;
+          "Xcode DerivedData") find "${paths[$i]}" -mindepth 1 -maxdepth 1 -exec rm -rf {} + || status=1 ;;
+          "npm cache") npm cache clean --force || status=1 ;;
+          "pnpm store") pnpm store prune || status=1 ;;
+          "uv cache") uv cache clean || status=1 ;;
+        esac
+      done
+      exit $status
+
+  brewfile:
+    section: Dev
+    summary: Print a Brewfile generated from the config
+    help: Every tap, formula, cask, App Store app and npm package the config declares, in `brew bundle` format.
+    run: |
+      if (( $# > 0 )); then echo "usage: $0" >&2; exit 64; fi
+      # A config you named (shawn --config DIR brewfile) is the one used. Otherwise `config brewfile` finds the
+      # config itself, the same one this command came from, and skips it when it no longer loads with this shawn.
+      SHAWN_NO_SELF_UPDATE=1 exec "$SHAWN_BIN" ${SHAWN_CONFIG_EXPLICIT:+--config "$SHAWN_CONFIG_EXPLICIT"} config brewfile
+
+  serve:
+    section: Dev
+    summary: Serve the current directory over HTTP on localhost
+    usage: "[port]"
+    help: Static file server for the current directory, on 127.0.0.1 only (port 8000 unless given).
+    run: |
+      set -uo pipefail
+      port="${1:-8000}"
+      if (( $# > 1 )) || [[ ! "$port" =~ ^[0-9]{1,5}$ ]] || (( 10#$port < 1024 || 10#$port > 65535 )); then
+        echo "usage: $0 [port]   (1024-65535, default 8000)" >&2
+        exit 64
+      fi
+      port=$((10#$port))
+      if lsof -nP -t -iTCP:"$port" -sTCP:LISTEN >/dev/null 2>&1; then
+        echo "$0: port $port is already taken (shawn ports $port shows by what)" >&2
+        exit 1
+      fi
+      if ! command -v python3 >/dev/null; then
+        echo "$0: needs python3 (it comes with the command line developer tools)" >&2
+        exit 69
+      fi
+      echo "Serving $(pwd) at http://localhost:$port (Ctrl-C to stop)"
+      exec python3 -m http.server "$port" --bind 127.0.0.1
+
+  path:
+    section: Dev
+    summary: Your PATH, one entry per line (flags missing and duplicates)
+    run: |
+      if (( $# > 0 )); then echo "usage: $0" >&2; exit 64; fi
+      IFS=: read -r -a dirs <<< "${SHAWN_USER_PATH:-$PATH}"
+      seen=":"
+      i=0
+      for dir in "${dirs[@]}"; do
+        i=$((i + 1))
+        note=""
+        if [[ -z "$dir" ]]; then note="  ← empty entry (means the current directory)"
+        elif [[ "$seen" == *":$dir:"* ]]; then note="  ← duplicate"
+        elif [[ ! -d "$dir" ]]; then note="  ← does not exist"
+        fi
+        seen="$seen$dir:"
+        case "$dir" in "$HOME"*) shown="~${dir#"$HOME"}" ;; *) shown="$dir" ;; esac
+        printf '%2d  %s%s\n' "$i" "$shown" "$note"
+      done
+
+  whatsup:
+    section: Dev
+    summary: Repos in ~/Developer with uncommitted or unpushed work
+    help: Only lists repositories with something going on; 'shawn projects' lists them all.
+    run: |
+      set -uo pipefail
+      if (( $# > 0 )); then echo "usage: $0" >&2; exit 64; fi
+      root="${SHAWN_DEVELOPER_DIR:-$HOME/Developer}"
+      if [[ ! -d "$root" ]]; then echo "There is no $root yet."; exit 0; fi
+      quiet=1
+      for gitdir in "$root"/*/.git "$root"/*/*/.git; do
+        [[ -e "$gitdir" ]] || continue
+        repo="${gitdir%/.git}"
+        status=$(git -C "$repo" --no-optional-locks status --porcelain=v2 --branch 2>/dev/null) || continue
+        branch=$(printf '%s\n' "$status" | sed -n 's/^# branch.head //p')
+        ab=$(printf '%s\n' "$status" | sed -n 's/^# branch.ab //p')
+        ahead=0; behind=0
+        if [[ -n "$ab" ]]; then ahead=${ab%% *}; ahead=${ahead#+}; behind=${ab##* }; behind=${behind#-}; fi
+        changes=$(printf '%s\n' "$status" | grep -vc '^#')
+        stashes=$(git -C "$repo" stash list 2>/dev/null | wc -l | tr -d ' ')
+        if (( changes > 0 || ahead > 0 || behind > 0 || stashes > 0 )); then
+          quiet=0
+          what=""
+          (( changes > 0 )) && what="$what  $changes changed"
+          (( ahead > 0 )) && what="$what  ↑$ahead to push"
+          (( behind > 0 )) && what="$what  ↓$behind to pull"
+          (( stashes > 0 )) && what="$what  $stashes stashed"
+          printf '%-32s %-20s%s\n' "${repo#"$root"/}" "$branch" "$what"
+        fi
+      done
+      case "$root" in "$HOME"*) shown="~${root#"$HOME"}" ;; *) shown="$root" ;; esac
+      (( quiet )) && echo "All quiet: nothing uncommitted, unpushed or stashed in $shown."
+      exit 0
+
+  today:
+    section: Dev
+    summary: Commits you made today, across ~/Developer
+    usage: "[--since WHEN]"
+    help: Uses your git user.email. WHEN is anything git understands, e.g. yesterday or "3 days ago" (default midnight).
+    run: |
+      set -uo pipefail
+      since="midnight"
+      if (( $# == 2 )) && [[ "$1" == "--since" && -n "$2" ]]; then
+        since="$2"
+      elif (( $# != 0 )); then
+        echo "usage: $0 [--since WHEN]" >&2
+        exit 64
+      fi
+      email=$(git config --global user.email 2>/dev/null)
+      if [[ -z "$email" ]]; then echo "$0: set your email first: git config --global user.email you@example.com" >&2; exit 1; fi
+      root="${SHAWN_DEVELOPER_DIR:-$HOME/Developer}"
+      total=0
+      for gitdir in "$root"/*/.git "$root"/*/*/.git; do
+        [[ -e "$gitdir" ]] || continue
+        repo="${gitdir%/.git}"
+        log=$(git -C "$repo" log --all --no-merges --since="$since" --author="$email" --format='  %h %ad  %s' --date=format:%H:%M 2>/dev/null)
+        [[ -n "$log" ]] || continue
+        count=$(printf '%s\n' "$log" | wc -l | tr -d ' ')
+        total=$((total + count))
+        echo "${repo#"$root"/} ($count)"
+        printf '%s\n' "$log"
+      done
+      if (( total == 0 )); then echo "No commits by $email since $since. Fresh start!"; else echo "$total commit(s) since $since."; fi
+
+  awake:
+    section: Mac
+    summary: Keep this Mac awake for a while
+    usage: "<duration>"
+    help: "Durations: 45m, 2h, 1h30m, 90s, or a plain number of minutes. Ctrl-C ends it early."
+    run: |
+      set -uo pipefail
+      spec="${1:-}"
+      seconds=0
+      # 10# reads 010 and 08 as decimal (bash takes a leading 0 for octal); 7 digits at most can't overflow.
+      if [[ "$spec" =~ ^[0-9]{1,7}$ ]]; then
+        seconds=$((10#$spec * 60))
+      elif [[ -n "$spec" && "$spec" =~ ^(([0-9]{1,7})h)?(([0-9]{1,7})m)?(([0-9]{1,7})s)?$ ]]; then
+        seconds=$(( 10#${BASH_REMATCH[2]:-0} * 3600 + 10#${BASH_REMATCH[4]:-0} * 60 + 10#${BASH_REMATCH[6]:-0} ))
+      fi
+      if (( $# != 1 || seconds <= 0 || seconds > 604800 )); then
+        echo "usage: $0 <duration>   e.g. 45m, 2h, 1h30m, 90s, or minutes (up to a week)" >&2
+        exit 64
+      fi
+      echo "Keeping this Mac awake until $(date -v+"${seconds}"S '+%a %H:%M'). Ctrl-C to stop early."
+      exec caffeinate -dims -t "$seconds"

@@ -1,0 +1,9 @@
+#!/bin/bash
+# Stands in for `xcrun notarytool` and `xcrun stapler`: Apple accepts every submission.
+set -eu
+printf 'xcrun %s\n' "$*" >>"$FAKE_LOG"
+case "${1:-} ${2:-}" in
+    "notarytool submit") printf '{"id": "fake-submission", "status": "Accepted"}\n' ;;
+    "stapler staple" | "stapler validate") ;;
+    *) echo "fake xcrun: unexpected arguments: $*" >&2; exit 1 ;;
+esac

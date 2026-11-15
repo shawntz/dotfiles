@@ -1,0 +1,24 @@
+# Shawn's Dotfiles
+#
+# The installer's name, where newer config comes from, and the variables every
+# step file can use as {{name}}. The steps themselves live in steps/, one file
+# per step, and run in filename order.
+#
+# Built-in variables (no need to declare them): {{home}}, {{user}},
+# {{hostname}}, {{arch}}, {{brew_prefix}}, {{applications}}, {{state_dir}},
+# {{config_dir}}.
+
+schema: 1
+name: "Shawn's Dotfiles"
+tagline: one Mac, zero lumps
+
+remote:                      # where newer config comes from (public repo)
+  repo: shawntz/dotfiles
+  branch: master
+  path: installer/config
+
+vars:                        # available everywhere as {{name}}
+  full_name: Shawn Schwartz
+  email: shawn@schwartz.so
+  github_user: shawntz
+  dotfiles_repo: shawntz/dotfiles

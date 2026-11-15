@@ -1,0 +1,5 @@
+#!/bin/bash
+# Stands in for security: a keychain with no signing identities, so nothing reads the real one.
+set -eu
+printf 'security %s\n' "$*" >>"$FAKE_LOG"
+printf '     0 valid identities found\n'

@@ -1,0 +1,20 @@
+# The Developer folder, where every project lives, with this dotfiles repo
+# checked out in it. `shawn` uses that checkout to update itself and to turn
+# config changes into pull requests.
+#
+# To clone another repo on every new Mac, add:
+#
+#     - clone: owner/repo
+#       to: ~/Developer/repo
+
+id: developer
+title: Developer Folder
+subtitle: ~/Developer and the dotfiles checkout
+mascot: jake
+
+items:
+  - mkdir: ~/Developer
+
+  # Over SSH once the GitHub step has signed in; over HTTPS otherwise.
+  - clone: "{{dotfiles_repo}}"
+    to: ~/Developer/dotfiles

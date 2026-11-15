@@ -1,0 +1,56 @@
+# AI tools: Claude Code, Codex, ChatGPT and the Grok CLI.
+#
+# Claude Code and Grok use their vendors' own installers, which keep them
+# updated. Each installer script has `creates:`, so it runs only when the tool
+# is missing. Installers here must never edit ~/.zshrc or ~/.zprofile: the
+# shell step (09-shell) owns those files and already puts ~/.local/bin and
+# ~/.grok/bin on PATH.
+#
+# Add a tool with a cask when one exists, for example:
+#
+#   - cask: google-gemini
+#     app: Gemini.app
+#
+# The Claude desktop app is in 04-apps; the Herdr hooks for these tools are
+# installed by 11-terminal.
+
+id: ai
+title: AI Tools
+subtitle: Claude Code, Codex, ChatGPT and Grok
+mascot: bmo
+
+items:
+  # ── Anthropic ──────────────────────────────────────────────────────────
+  # The native installer updates itself. Not the claude-code cask: two copies
+  # on PATH fight over which one runs.
+  - script: Claude Code
+    creates: ~/.local/bin/claude
+    run: curl -fsSL https://claude.ai/install.sh | bash
+
+  # ── OpenAI ─────────────────────────────────────────────────────────────
+  - cask: codex            # the Codex CLI
+  - cask: chatgpt          # the ChatGPT desktop app, which is also the Codex app
+    app: ChatGPT.app
+
+  # ── xAI ────────────────────────────────────────────────────────────────
+  # SHELL=/bin/sh stops the installer appending to ~/.zshrc. Leaving
+  # ~/.grok/bin off its PATH makes it link grok into ~/.local/bin, as on the
+  # old laptop.
+  - script: Grok CLI
+    creates: ~/.grok/bin/grok
+    run: |
+      mkdir -p "$HOME/.local/bin"
+      curl -fsSL https://x.ai/cli/install.sh |
+        SHELL=/bin/sh PATH="$HOME/.local/bin:{{brew_prefix}}/bin:/usr/bin:/bin:/usr/sbin:/sbin" bash
+
+  # ── Sign in (only you can do these) ────────────────────────────────────
+  - manual: Sign in to Claude Code
+    detail: Run `shawn claude` (or plain `claude`) and finish the sign-in in your browser.
+    check: claude auth status --json 2>/dev/null | grep -q '"loggedIn":[[:space:]]*true'
+  - manual: Sign in to Codex
+    detail: Run `codex login` and choose Sign in with ChatGPT.
+    check: codex login status 2>&1 | grep -q '^Logged in'
+  - manual: Sign in to ChatGPT
+    detail: Open the ChatGPT app and sign in. The same app is the Codex desktop app.
+  - manual: Sign in to Grok
+    detail: Run `grok login`; it opens your browser. Grok sign-ins last 7 days.

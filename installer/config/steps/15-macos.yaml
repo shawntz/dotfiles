@@ -1,0 +1,94 @@
+# macOS settings: the preferences carried over from the old laptop. Dock
+# settings are in 16-dock.yaml.
+#
+# One `defaults:` item per preference domain; each key under `set:` is one
+# setting, written with the type you give it (true/false, whole number,
+# decimal like 0.0, or text). To add a setting, find its domain and key with
+# `defaults read <domain>` after changing it in System Settings, then add a
+# line to the matching item, or a new item for a new domain:
+#
+#   - defaults: com.apple.screencapture
+#     set:
+#       disable-shadow: true                # screenshots of windows without the shadow
+#     restart: [SystemUIServer]
+#
+# `restart:` names the processes to restart after a change. Keyboard and
+# trackpad settings only take effect after you log out (17-finish reminds you).
+
+id: macos
+title: macOS Settings
+subtitle: Keyboard, Finder, trackpad, menu bar and windows
+mascot: bubblegum
+
+items:
+  # ── Keyboard (and the other system-wide settings) ──────────────────────
+  - defaults: NSGlobalDomain
+    name: Keyboard and system-wide settings
+    set:
+      KeyRepeat: 1                          # repeat faster than System Settings allows
+      InitialKeyRepeat: 10                  # and start repeating sooner than it allows
+      ApplePressAndHoldEnabled: false       # holding a key repeats it instead of showing accents
+      AppleShowAllExtensions: true          # show every file extension in Finder
+      AppleMiniaturizeOnDoubleClick: false  # double-clicking a title bar never minimises the window
+      com.apple.sound.beep.volume: 0.0      # mute the alert sound
+      com.apple.sound.beep.feedback: false  # no click sound when changing the volume
+    restart: [Finder]
+
+  # ── Finder ─────────────────────────────────────────────────────────────
+  - defaults: com.apple.finder
+    name: Finder
+    set:
+      FXPreferredViewStyle: Nlsv            # new windows use list view
+      NewWindowTarget: PfHm                 # new windows open your home folder
+      ShowPathbar: true                     # path bar along the bottom of windows
+      ShowStatusBar: true                   # status bar with item count and free space
+      _FXShowPosixPathInTitle: true         # full path in the window title
+      _FXSortFoldersFirst: true             # folders before files in windows
+      _FXSortFoldersFirstOnDesktop: true    # folders before files on the desktop
+      FXEnableExtensionChangeWarning: false # no warning when renaming a file's extension
+      QuitMenuItem: true                    # adds Finder > Quit Finder (⌘Q)
+      ShowHardDrivesOnDesktop: true         # internal disk on the desktop
+      ShowExternalHardDrivesOnDesktop: true # external disks on the desktop
+      ShowRemovableMediaOnDesktop: true     # CDs, DVDs and iPods on the desktop
+      ShowMountedServersOnDesktop: true     # connected servers on the desktop
+    restart: [Finder]
+
+  - defaults: com.apple.finder
+    name: Hide desktop icons
+    optional: true
+    note: the old laptop showed nothing on the desktop, though screenshots still save there
+    set:
+      CreateDesktop: false                  # the desktop shows no icons at all
+    restart: [Finder]
+
+  # ── Trackpad ───────────────────────────────────────────────────────────
+  - defaults: com.apple.AppleMultitouchTrackpad
+    name: Trackpad
+    set:
+      Clicking: true                        # tap to click
+      TrackpadRightClick: true              # click with two fingers to right-click
+      FirstClickThreshold: 2                # firm click: more pressure than the default
+
+  # ── Menu bar ───────────────────────────────────────────────────────────
+  - defaults: com.apple.menuextra.clock
+    name: Menu bar clock
+    set:
+      Show24Hour: true                      # 24-hour time
+      ShowSeconds: true                     # with seconds
+      ShowDayOfWeek: true                   # with the day of the week
+      ShowDate: 0                           # the date only when there is room
+      FlashDateSeparators: true             # the colons blink every second
+    restart: [ControlCenter]
+
+  - defaults: com.apple.controlcenter
+    name: Battery percentage
+    set:
+      BatteryShowPercentage: true           # battery percentage next to the icon
+    restart: [ControlCenter]
+
+  # ── Windows ────────────────────────────────────────────────────────────
+  - defaults: com.apple.WindowManager
+    name: Window tiling
+    set:
+      EnableTiledWindowMargins: false       # tiled windows sit edge to edge, with no gaps
+      AppWindowGroupingBehavior: 1          # Stage Manager shows all of an app's windows at once

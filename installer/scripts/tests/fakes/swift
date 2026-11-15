@@ -1,0 +1,30 @@
+#!/bin/bash
+# Stands in for `swift build -c <configuration> --arch <arch> [--show-bin-path]`: the "build"
+# copies a tiny real binary for that architecture under $FAKE_BUILD_DIR as each product.
+# $FAKE_SWIFT_HOOK, when set, is run after a build (to change files while a build runs).
+set -eu
+printf 'swift %s\n' "$*" >>"$FAKE_LOG"
+[ "${1:-}" = build ] || { echo "fake swift: only 'swift build' is faked, not: $*" >&2; exit 1; }
+shift
+configuration=debug arch="" show=0
+while [ $# -gt 0 ]; do
+    case "$1" in
+        -c) configuration="$2"; shift 2 ;;
+        --arch) arch="$2"; shift 2 ;;
+        --show-bin-path) show=1; shift ;;
+        *) shift ;;
+    esac
+done
+[ -n "$arch" ] || { echo "fake swift: --arch is required" >&2; exit 1; }
+dir="$FAKE_BUILD_DIR/$configuration/$arch"
+if [ "$show" = 1 ]; then
+    printf '%s\n' "$dir"
+    exit 0
+fi
+mkdir -p "$dir"
+for product in ShawnsDotfiles shawn WebAppShell; do
+    cp "$FAKE_BINARIES/$arch" "$dir/$product"
+done
+if [ -n "${FAKE_SWIFT_HOOK:-}" ]; then
+    eval "$FAKE_SWIFT_HOOK"
+fi

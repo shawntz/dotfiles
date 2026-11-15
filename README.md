@@ -15,6 +15,16 @@ Now using **GNU Stow** for robust symlink management that eliminates circular sy
 
 ---
 
+## macOS: the installer app
+
+One app now sets up a new Mac. Shawn's Dotfiles is a native Swift installer that lives in [`installer/`](installer/). It installs Homebrew, Xcode, apps, AI tools and skills, sets up Git and SSH, the shell, Karabiner and Hammerspoon, web apps, macOS settings and the Dock, and installs the `shawn` command line tool. Everything it does is declared in the YAML files under [`installer/config`](installer/config). Most changes are one line in a step file, and `shawn add <kind> <name> --pr` writes that line and opens the pull request.
+
+See [`installer/README.md`](installer/README.md) for how to run it, change it, and build it.
+
+The stow-based setup described below is unchanged.
+
+---
+
 ## 🚀 First-Time Setup
 
 ### One-liner setup for macOS

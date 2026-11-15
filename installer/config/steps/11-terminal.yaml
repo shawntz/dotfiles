@@ -1,0 +1,61 @@
+# Herdr, the terminal: the Herdr app, Herdr core (the server that runs every
+# terminal and agent), settings for the `herdr` terminal UI, and Herdr's hooks
+# for Claude Code, Codex and Grok.
+#
+# Herdr becomes the everyday terminal through the Dock (16-dock), Hyper+Return
+# (10-keyboard) and, if you tick it, launch at login below. The Herdr app keeps
+# its own settings in ~/.config/herdr-app/; they are left to the app.
+#
+# To hook up another agent Herdr supports (`herdr integration install --help`
+# lists them), copy one of the hook items and change the name.
+
+id: terminal
+title: Herdr Terminal
+subtitle: The Herdr app, Herdr core and agent hooks
+mascot: marceline
+
+items:
+  - cask: herdr-app
+    app: Herdr.app
+
+  # The cask doesn't include Herdr core, and the app would otherwise stop to
+  # ask for it on first start.
+  - script: Herdr core
+    creates: ~/.local/bin/herdr-core
+    run: curl -fsSL https://releases.herdr.dev/core/install.sh | sh
+
+  - copy: herdr/config.toml
+    to: ~/.config/herdr/config.toml
+
+  # ── Agent hooks ────────────────────────────────────────────────────────
+  # Let the `herdr` terminal UI (from the packages step) show what each agent
+  # is doing. Herdr writes and versions these hooks itself (re-running updates
+  # an outdated one), so they are installed by Herdr rather than copied. Herdr
+  # refuses until the agent's folder exists, which a fresh install may not have
+  # made yet. For Codex it also turns on [features] hooks in config.toml.
+  - script: Herdr hooks for Claude Code
+    check: |
+      herdr integration status 2>/dev/null | grep '^claude: current' >/dev/null
+    run: |
+      mkdir -p "$HOME/.claude"
+      herdr integration install claude
+    timeout: 120
+  - script: Herdr hooks for Codex
+    check: |
+      herdr integration status 2>/dev/null | grep '^codex: current' >/dev/null
+    run: |
+      mkdir -p "$HOME/.codex"
+      herdr integration install codex
+    timeout: 120
+  - script: Herdr hooks for Grok
+    check: |
+      herdr integration status 2>/dev/null | grep '^grok: current' >/dev/null
+    run: |
+      mkdir -p "$HOME/.grok"
+      herdr integration install grok
+    timeout: 120
+
+  # ── Launch at login ────────────────────────────────────────────────────
+  - login-item: Herdr
+    bundle_id: dev.herdr.app
+    optional: true

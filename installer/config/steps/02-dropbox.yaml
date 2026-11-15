@@ -1,0 +1,27 @@
+# Dropbox, installed early so it can start syncing while everything else
+# installs.
+#
+# Signing in is the one part only you can do. To install another app that
+# should start syncing early, add it the same way, for example:
+#
+#   - cask: google-drive
+#     app: Google Drive.app
+#     launch: true
+
+id: dropbox
+title: Dropbox
+subtitle: Install it, open it, sign in
+mascot: bmo
+
+items:
+  - cask: dropbox
+    app: Dropbox.app
+    launch: true
+
+  - manual: Sign in to Dropbox
+    detail: >-
+      Dropbox is open in the menu bar. Sign in, pick the folders to keep on
+      this Mac, and allow the Dropbox items under Login Items & Extensions
+      when macOS asks.
+    url: x-apple.systempreferences:com.apple.LoginItems-Settings.extension
+    check: ls -d "$HOME"/Library/CloudStorage/Dropbox* >/dev/null 2>&1

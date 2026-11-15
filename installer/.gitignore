@@ -1,0 +1,9 @@
+# SwiftPM build products and caches
+.build/
+.swiftpm/
+
+# scripts/build-app.sh, make-dmg.sh and release.sh output
+build/
+*.dmg
+
+.DS_Store

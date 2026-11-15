@@ -1,0 +1,123 @@
+# Apps: everything on the old laptop that was not installed with Homebrew.
+#
+# Each cask names its app with `app:`, so a copy already in /Applications
+# (installed by hand or by an IT department) counts as done instead of being
+# installed twice. Add an app like this, checking the token and the app name
+# with `brew info --cask <token>` first:
+#
+#   - cask: notion
+#     app: Notion.app
+#
+# `optional: true` leaves an item unticked until you switch it on in
+# Customize. App Store apps (`mas:`) need the App Store id and the app's exact
+# name, and you must be signed in to the App Store; the installer asks once.
+# Keep each group in alphabetical order.
+
+id: apps
+title: Apps
+subtitle: The everyday apps, plus a few you can tick
+mascot: bubblegum
+
+items:
+  # ── Everyday apps ──────────────────────────────────────────────────────
+  - cask: 1password
+    app: 1Password.app
+  - cask: claude
+    app: Claude.app
+  - cask: cursor
+    app: Cursor.app
+  - cask: docker-desktop
+    app: Docker.app
+  - cask: google-chrome
+    app: Google Chrome.app
+  - cask: granola
+    app: Granola.app
+  - cask: middle
+    app: Middle.app
+    note: paid; needs your licence
+  - cask: slack
+    app: Slack.app
+  - cask: spotify
+    app: Spotify.app
+  - cask: superkey
+    app: Superkey.app
+    note: paid; needs your licence
+  - cask: wispr-flow
+    app: Wispr Flow.app
+
+  # ── Mac App Store ──────────────────────────────────────────────────────
+  - mas: 937984704
+    name: Amphetamine
+
+  # ── Direct downloads ───────────────────────────────────────────────────
+  - download: https://dl.aeromail.ai/desktop/dogfood/Aero-Dogfood-latest-mac-universal.dmg
+    name: Aero Dogfood
+    app: Aero Dogfood.app
+    team_id: ZL4K35VM2L
+
+  # ── Optional ───────────────────────────────────────────────────────────
+  - cask: balenaetcher
+    app: balenaEtcher.app
+    optional: true
+  - cask: daisydisk
+    app: DaisyDisk.app
+    optional: true
+    note: paid; needs your licence
+  - cask: firefox
+    app: Firefox.app
+    optional: true
+  - cask: framer
+    app: Framer.app
+    optional: true
+  - cask: github
+    app: GitHub Desktop.app
+    optional: true
+  - cask: google-drive
+    app: Google Drive.app
+    optional: true
+  - cask: google-gemini
+    app: Gemini.app
+    optional: true
+  - cask: grok-bot
+    app: Grok Bot.app
+    optional: true
+    note: xAI's Grok Bot app; the Grok CLI is in the AI step
+  - cask: linear
+    app: Linear.app
+    optional: true
+  - cask: macs-fan-control
+    app: Macs Fan Control.app
+    optional: true
+    note: needs a privileged helper to control the fans
+  - cask: ollama-app
+    app: Ollama.app
+    optional: true
+  - cask: raycast
+    app: Raycast.app
+    optional: true
+  - cask: screen-studio
+    app: Screen Studio.app
+    optional: true
+    note: paid; needs your licence
+  - cask: sf-symbols
+    app: SF Symbols.app
+    optional: true
+  - cask: t3-code
+    app: T3 Code (Beta).app
+    optional: true
+  - cask: tailscale-app
+    app: Tailscale.app
+    optional: true
+    note: macOS asks you to approve its system extension
+  - cask: zoom
+    app: zoom.us.app
+    optional: true
+
+  - mas: 6448461551
+    name: Command X
+    optional: true
+    note: paid; needs the Apple Account that bought it
+  - mas: 1289583905
+    name: Pixelmator Pro
+    optional: true
+    note: paid; needs the Apple Account that bought it
