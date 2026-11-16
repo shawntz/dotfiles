@@ -224,7 +224,7 @@ steps:
     - "Cleaning up your Dock. Ugh, who put all this stuff here?"
     - "Dock is tidy. So clean. So nice. I deserve a nap."
     - "Out with the default apps. In with the cool ones."
-    - "Hiding the Dock until you need it. Mysterious. Like me."
+    - "Your Dock stays right where everyone can see it. Like me."
   finish:
     - "Waiting on Xcode. It's the biggest app ever and it knows it."
     - "Last bits. Then a few things only a human can do."
