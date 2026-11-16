@@ -18,7 +18,7 @@ Lumpy Space Princess (LSP) from Adventure Time narrates, and each step puts one 
   <a href="LICENSE"><img src="https://img.shields.io/badge/license-MIT-ff6fb5" alt="MIT license"></a>
 </p>
 
-Watch a dry run on your own Mac running macOS 27 or later. It changes nothing, and it needs Xcode to build:
+Watch a dry run on your own Mac running macOS 27 or later. It changes nothing, and it needs Xcode 27 or later to build:
 
 ```sh
 git clone https://github.com/shawntz/dotfiles.git shawns-dotfiles
@@ -256,7 +256,7 @@ In the order the GIF shows them:
 
 ## Try it
 
-There is no release to download yet, so you build it yourself. It runs on macOS 27 or later. CI builds and tests it on macOS 27 with Xcode 27.2 and Swift 6.4. The safe first step is a dry run:
+There is no release to download yet, so you build it yourself with Xcode 27 or later. It runs on macOS 27 or later. CI builds and tests it on macOS 27 with Xcode 27.2 and Swift 6.4. The safe first step is a dry run:
 
 ```sh
 git clone https://github.com/shawntz/dotfiles.git shawns-dotfiles
@@ -363,7 +363,7 @@ Fork the repository. The steps below change only the config, so you never edit S
 2. In `installer/config/installer.yaml`, point `remote.repo` at your fork. The app and `shawn` look there for new config and new versions of `shawn`. Set `vars.dotfiles_repo` to your fork too, and `vars.github_user` to your GitHub username.
 3. Change `name:` and `tagline:`. The tagline shows under the banner in the app and in `shawn help`. The banner itself is `fun/header.txt`.
 4. Go through `steps/` and delete what you do not want. `enabled: false` leaves a whole step unchecked, and `optional: true` does the same for one item. To leave out a step file without deleting it, rename it to start with `_`.
-5. If the Mac you use now runs macOS 27 or later, run `swift build` in `installer/`, then `.build/debug/shawn drift --repo ~/Developer/dotfiles`. It prints a YAML line for each Homebrew, App Store and npm package you have that the config lacks. Add `--write` and it puts those lines in the step files.
+5. If the Mac you use now runs macOS 27 or later and has Xcode 27 or later, run `swift build` in `installer/`, then `.build/debug/shawn drift --repo ~/Developer/dotfiles`. It prints a YAML line for each Homebrew, App Store and npm package you have that the config lacks. Add `--write` and it puts those lines in the step files.
 6. Replace the dotfiles in `installer/config/files/` with yours: zsh, Starship, Ghostty, Neovim, Karabiner, Hammerspoon, Herdr, Git's ignore file and Claude Code's settings. Do the same with the agent skills in `installer/config/skills/`.
 7. In `installer/`, run `make validate`. It checks the config the way CI does and lists every problem. For a misspelled key such as `ap:` on a cask, it suggests `app:`. Then `make run` shows your config in a dry run.
 8. Commit and push to `master` on your fork. A new Mac's app fetches its config from there, and `shawn` pulls it into each Mac's checkout.

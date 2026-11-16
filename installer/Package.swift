@@ -1,4 +1,4 @@
-// swift-tools-version: 6.0
+// swift-tools-version: 6.4
 import PackageDescription
 
 // Shawn's Dotfiles — a native installer app, the `shawn` CLI, and the web-app shell.
@@ -14,7 +14,8 @@ let swift5: [SwiftSetting] = [.swiftLanguageMode(.v5)]
 
 let package = Package(
     name: "ShawnsDotfiles",
-    platforms: [.macOS(.v14)],
+    // Resources/Info.plist and WebAppBundle.swift name the same minimum as LSMinimumSystemVersion.
+    platforms: [.macOS(.v27)],
     products: [
         .executable(name: "ShawnsDotfiles", targets: ["ShawnsDotfiles"]),
         .executable(name: "shawn", targets: ["shawn"]),

@@ -44,7 +44,7 @@ final class WebAppActionTests: XCTestCase {
         XCTAssertEqual(info["CFBundleExecutable"] as? String, "X")
         XCTAssertEqual(info["CFBundlePackageType"] as? String, "APPL")
         XCTAssertEqual(info["CFBundleIconFile"] as? String, "AppIcon")
-        XCTAssertEqual(info["LSMinimumSystemVersion"] as? String, "14.0")
+        XCTAssertEqual(info["LSMinimumSystemVersion"] as? String, "27.0")
         XCTAssertEqual(info["NSHighResolutionCapable"] as? Bool, true)
         XCTAssertNotNil(info["NSCameraUsageDescription"] as? String)
         XCTAssertNotNil(info["NSMicrophoneUsageDescription"] as? String)

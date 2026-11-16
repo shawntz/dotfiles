@@ -168,11 +168,7 @@ public enum ProcessRunner {
         posix_spawn_file_actions_adddup2(&fileActions, outPipe.write, STDOUT_FILENO)
         posix_spawn_file_actions_adddup2(&fileActions, errPipe.write, STDERR_FILENO)
         if let currentDirectory {
-            if #available(macOS 26.0, *) {
-                posix_spawn_file_actions_addchdir(&fileActions, currentDirectory)
-            } else {
-                posix_spawn_file_actions_addchdir_np(&fileActions, currentDirectory)
-            }
+            posix_spawn_file_actions_addchdir(&fileActions, currentDirectory)
         }
 
         var attributes: posix_spawnattr_t?

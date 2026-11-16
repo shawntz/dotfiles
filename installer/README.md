@@ -15,9 +15,9 @@ A Mac app that sets up a brand-new Mac the way Shawn's laptop is set up. It inst
 
 ### Download and open
 
-The app and `shawn` run on macOS 27 or later.
+The app and `shawn` run on macOS 27 or later. An older macOS refuses to open the app.
 
-There is no release yet. Until there is one, build the app from a checkout with `make app SIGN_IDENTITY=-` (see [Build, sign, notarize, release](#build-sign-notarize-release)), copy `build/Shawn's Dotfiles.app` to the new Mac and open it there. [If macOS won't open it](#if-macos-wont-open-it) has the fix. Once a release exists:
+There is no release yet. Until there is one, build the app from a checkout with Xcode 27 or later, using `make app SIGN_IDENTITY=-` (see [Build, sign, notarize, release](#build-sign-notarize-release)), copy `build/Shawn's Dotfiles.app` to the new Mac and open it there. [If macOS won't open it](#if-macos-wont-open-it) has the fix. Once a release exists:
 
 1. On the new Mac, open the [releases page](https://github.com/shawntz/dotfiles/releases) and download `ShawnsDotfiles-<version>.dmg` from the newest `shawn-v…` release.
 2. Open the disk image and drag Shawn's Dotfiles onto the Applications shortcut.
@@ -62,7 +62,7 @@ STOP ends a run cleanly. The app marks the item that was running as stopped, not
 
 Release builds carry a Developer ID signature and Apple's notarization ticket, so they open normally. Gatekeeper blocks a build signed ad hoc (see [signing](#signing)) that another Mac downloaded or received by AirDrop. To open one anyway, try to open it once, then go to System Settings, Privacy & Security, and click Open Anyway.
 
-On a Mac that already has Xcode you can also build and run it from a checkout:
+On a Mac running macOS 27 or later with Xcode 27 or later, you can also build and run it from a checkout:
 
 ```sh
 git clone https://github.com/shawntz/dotfiles.git ~/Developer/dotfiles
@@ -462,7 +462,7 @@ scripts/tests/      tests for those scripts, with fake signing tools in scripts/
 Resources/          Info.plist template and the app icon
 ```
 
-Shawn's laptop and CI run `swift build` and `swift test` (or `make build` and `make test`) with Xcode 27.2 (Swift 6.4) on macOS 27. That is the Xcode the installer puts on a new Mac. The package needs Swift 6.0 tools or newer, so an older Swift 6 toolchain may build it, but nothing tests that. The only package dependency is Yams.
+Shawn's laptop and CI run `swift build` and `swift test` (or `make build` and `make test`) with Xcode 27.2 (Swift 6.4) on macOS 27. That is the Xcode the installer puts on a new Mac. The package needs Swift 6.4 tools, which arrived with Xcode 27. SwiftPM in an older Xcode refuses the package. The only package dependency is Yams.
 
 Tests never change your home folder or /Applications. Each one builds a throwaway tree with `SystemEnvironment.sandbox(root:)` and puts fake `brew`, `mas`, `gh` and other tools in the sandbox's `homebrew/bin`, which is first on every child process's `PATH`. The fakes record their arguments and print canned output. Some tests run the real `git`, `hdiutil` and `codesign`, on temporary folders only. Some CLI tests send a real SIGINT to their own test process, so run `swift test` without `--parallel`. The build scripts' tests in `scripts/tests/` work the same way. Each runs a copy of the scripts in a temporary folder with fakes from `scripts/tests/fakes/`.
 

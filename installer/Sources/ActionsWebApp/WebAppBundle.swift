@@ -113,7 +113,7 @@ enum WebAppInfoPlist {
             "CFBundlePackageType": "APPL",
             "CFBundleShortVersionString": ShawnCore.version,
             "CFBundleVersion": ShawnCore.version,
-            "LSMinimumSystemVersion": "14.0",
+            "LSMinimumSystemVersion": "27.0",
             // Files the app downloads get the same Gatekeeper check as a browser's downloads.
             "LSFileQuarantineEnabled": true,
             "NSHighResolutionCapable": true,
