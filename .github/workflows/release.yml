@@ -1,0 +1,266 @@
+# Builds a release when master holds a version that has none yet, and publishes it when the
+# repository allows: the disk image, the shawn CLI tarball, its checksum and shawn-cli.json, as
+# shawn-v<version>. A new release starts with a version bump in
+# installer/Sources/ShawnCore/ShawnCore.swift and a push to master.
+#
+# With the secrets DEVELOPER_ID_P12 and DEVELOPER_ID_P12_PASSWORD, the workflow signs the app with
+# that Developer ID. With NOTARY_APPLE_ID, NOTARY_TEAM_ID and NOTARY_PASSWORD too, it notarizes the
+# disk image and publishes. Without the certificate it signs ad hoc. It publishes a build that
+# Apple has not notarized only when the repository variable RELEASE_UNNOTARIZED is 1.
+# installer/README.md says how to set these up.
+#
+# A pull request that touches what a release is made of builds one too, signed ad hoc, and keeps
+# the files as an artifact of the run. It publishes nothing, and none of its steps gets a secret.
+name: release
+
+on:
+  push:
+    branches: [master]
+    paths:
+      - "installer/**"
+      - ".github/workflows/release.yml"
+  pull_request:
+    paths:
+      - "installer/scripts/**"
+      - "installer/Resources/**"
+      - "installer/Package.swift"
+      - "installer/Package.resolved"
+      - "installer/Sources/ShawnCore/ShawnCore.swift"
+      - ".github/workflows/release.yml"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  # One release run per branch at a time, and none is cut short. A second push waits, then sees
+  # the release the first one published.
+  group: release-${{ github.ref }}
+  cancel-in-progress: false
+
+env:
+  # The same Xcode as the installer workflow.
+  DEVELOPER_DIR: /Applications/Xcode_27.2.app/Contents/Developer
+  # The built CLI must never try to update itself in CI.
+  SHAWN_NO_SELF_UPDATE: "1"
+  SHAWN_NO_UPDATE: "1"
+  NO_COLOR: "1"
+  # A fork releases to itself, and its shawn-cli.json points at its own files.
+  RELEASE_REPO: ${{ github.repository }}
+
+jobs:
+  build:
+    name: Build the release
+    runs-on: xcode-27
+    timeout-minutes: 60
+    env:
+      HAS_CERTIFICATE: ${{ secrets.DEVELOPER_ID_P12 != '' && secrets.DEVELOPER_ID_P12_PASSWORD != '' }}
+      HAS_NOTARY_LOGIN: ${{ secrets.NOTARY_APPLE_ID != '' && secrets.NOTARY_TEAM_ID != '' && secrets.NOTARY_PASSWORD != '' }}
+      ALLOW_UNNOTARIZED: ${{ vars.RELEASE_UNNOTARIZED }}
+    outputs:
+      version: ${{ steps.plan.outputs.version }}
+      publish: ${{ steps.verdict.outputs.publish }}
+    defaults:
+      run:
+        working-directory: installer
+    steps:
+      - name: Check out
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+
+      - name: Decide what this run does
+        id: plan
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          # shellcheck disable=SC1091
+          . scripts/common.sh
+          version="$(read_version)"
+          tag="shawn-v$version"
+          build=true
+          wanted=false
+          if [ "$GITHUB_EVENT_NAME" != pull_request ] && [ "$GITHUB_REF" = refs/heads/master ]; then
+            # "false" means a published release. A draft, or none, still has to be published.
+            state="$(gh release view "$tag" --repo "$GITHUB_REPOSITORY" --json isDraft --jq .isDraft 2>/dev/null)" || state=none
+            if [ "$state" = false ]; then
+              echo "::notice::$tag is already released. To release again, bump the version in installer/Sources/ShawnCore/ShawnCore.swift."
+              # A push builds nothing then. A run started by hand still builds, as a rehearsal.
+              if [ "$GITHUB_EVENT_NAME" = push ]; then build=false; fi
+            else
+              wanted=true
+            fi
+          fi
+          {
+            echo "version=$version"
+            echo "tag=$tag"
+            echo "build=$build"
+            echo "wanted=$wanted"
+          } >>"$GITHUB_OUTPUT"
+
+      - name: Put the Developer ID certificate in a keychain
+        id: certificate
+        if: steps.plan.outputs.wanted == 'true' && env.HAS_CERTIFICATE == 'true'
+        env:
+          SIGNING_P12: ${{ secrets.DEVELOPER_ID_P12 }}
+          SIGNING_P12_PASSWORD: ${{ secrets.DEVELOPER_ID_P12_PASSWORD }}
+        run: |
+          scripts/ci-keychain.sh create >/dev/null
+          # release.sh signs with the first Developer ID Application identity it finds.
+          # shellcheck disable=SC1091
+          . scripts/common.sh
+          [ -n "$(find_developer_id)" ] || die "the certificate in DEVELOPER_ID_P12 is not a valid Developer ID Application identity"
+
+      - name: Store the notary login
+        id: notary
+        if: steps.certificate.outcome == 'success' && env.HAS_NOTARY_LOGIN == 'true'
+        env:
+          NOTARY_APPLE_ID: ${{ secrets.NOTARY_APPLE_ID }}
+          NOTARY_TEAM_ID: ${{ secrets.NOTARY_TEAM_ID }}
+          NOTARY_PASSWORD: ${{ secrets.NOTARY_PASSWORD }}
+        run: |
+          # It goes into the default keychain, which is the one made above.
+          xcrun notarytool store-credentials shawn-release \
+            --apple-id "$NOTARY_APPLE_ID" --team-id "$NOTARY_TEAM_ID" --password "$NOTARY_PASSWORD" >/dev/null
+          echo "profile=shawn-release" >>"$GITHUB_OUTPUT"
+
+      - name: Build, sign and pack
+        id: build
+        if: steps.plan.outputs.build == 'true'
+        env:
+          VERSION: ${{ steps.plan.outputs.version }}
+          TAG: ${{ steps.plan.outputs.tag }}
+          SIGNED: ${{ steps.certificate.outcome == 'success' }}
+          NOTARY_PROFILE: ${{ steps.notary.outputs.profile }}
+        run: |
+          # Without a certificate the build is ad hoc. With one, release.sh finds it in the keychain.
+          if [ "$SIGNED" != true ]; then export SIGN_IDENTITY=-; fi
+          # Its stdout is the gh command for a person to run. publish-release.sh does that here.
+          scripts/release.sh --output "$RUNNER_TEMP/release" >/dev/null
+          notarized=false
+          if xcrun stapler validate "$RUNNER_TEMP/release/ShawnsDotfiles-$VERSION.dmg" >/dev/null 2>&1; then notarized=true; fi
+          echo "notarized=$notarized" >>"$GITHUB_OUTPUT"
+          {
+            echo "### $TAG"
+            echo
+            echo "| file | size | sha256 |"
+            echo "|---|---:|---|"
+            for file in "$RUNNER_TEMP/release"/ShawnsDotfiles-*.dmg "$RUNNER_TEMP/release"/shawn-*.tar.gz "$RUNNER_TEMP/release"/shawn-cli.json; do
+              echo "| $(basename "$file") | $(stat -f %z "$file") | $(shasum -a 256 "$file" | awk '{print $1}') |"
+            done
+            echo
+            echo "Signed with a Developer ID: $SIGNED. Notarized: $notarized."
+          } >>"$GITHUB_STEP_SUMMARY"
+
+      - name: Keep the files with this run
+        if: steps.build.outcome == 'success'
+        uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
+        with:
+          name: release-${{ steps.plan.outputs.version }}
+          path: |
+            ${{ runner.temp }}/release/ShawnsDotfiles-*.dmg
+            ${{ runner.temp }}/release/shawn-*.tar.gz
+            ${{ runner.temp }}/release/shawn-*.tar.gz.sha256
+            ${{ runner.temp }}/release/shawn-cli.json
+          if-no-files-found: error
+          retention-days: 14
+
+      - name: Decide whether to publish
+        id: verdict
+        if: steps.build.outcome == 'success'
+        env:
+          WANTED: ${{ steps.plan.outputs.wanted }}
+          NOTARIZED: ${{ steps.build.outputs.notarized }}
+          TAG: ${{ steps.plan.outputs.tag }}
+        run: |
+          publish=false
+          if [ "$WANTED" = true ]; then
+            if [ "$NOTARIZED" = true ] || [ "$ALLOW_UNNOTARIZED" = 1 ]; then
+              publish=true
+            else
+              echo "::warning::$TAG was built but not published, because Apple has not notarized it. Add the signing secrets, or set the repository variable RELEASE_UNNOTARIZED to 1 to publish builds that Gatekeeper blocks until the person allows them. Then run this workflow again."
+            fi
+          fi
+          echo "publish=$publish" >>"$GITHUB_OUTPUT"
+
+      - name: Delete the keychain
+        if: always() && steps.certificate.outcome != 'skipped'
+        run: scripts/ci-keychain.sh delete
+
+  publish:
+    name: Publish the release
+    needs: build
+    if: needs.build.outputs.publish == 'true'
+    runs-on: xcode-27
+    timeout-minutes: 15
+    permissions:
+      # To create the release and its tag. Only this job can write, and it builds nothing.
+      contents: write
+    defaults:
+      run:
+        working-directory: installer
+    steps:
+      - name: Check out
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+
+      - name: Get the files the build job made
+        uses: actions/download-artifact@9000827ccba6bdab643e8b6fd33ac0654aef8333 # v8.0.2
+        with:
+          name: release-${{ needs.build.outputs.version }}
+          path: ${{ runner.temp }}/release
+
+      - name: Publish
+        env:
+          GH_TOKEN: ${{ github.token }}
+          ALLOW_UNNOTARIZED: ${{ vars.RELEASE_UNNOTARIZED }}
+        run: |
+          options=()
+          if [ "$ALLOW_UNNOTARIZED" = 1 ]; then options+=(--allow-unnotarized); fi
+          url="$(scripts/publish-release.sh ${options[@]+"${options[@]}"} "$RUNNER_TEMP/release")"
+          if [ -n "$url" ]; then echo "Published $url" >>"$GITHUB_STEP_SUMMARY"; fi
+
+  rehearse-signing:
+    # The steps that put a certificate in a keychain only run for a real release, so a pull request
+    # tries them with a certificate it makes itself and throws away.
+    name: Rehearse the keychain steps
+    if: github.event_name == 'pull_request'
+    runs-on: xcode-27
+    timeout-minutes: 10
+    defaults:
+      run:
+        working-directory: installer
+    steps:
+      - name: Check out
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+
+      - name: Import a throwaway certificate and sign with it
+        timeout-minutes: 5
+        run: |
+          work="$RUNNER_TEMP/rehearsal"
+          mkdir -p "$work"
+          printf '%s\n' '[req]' 'distinguished_name = dn' 'x509_extensions = ext' 'prompt = no' \
+            '[dn]' 'CN = Release rehearsal' \
+            '[ext]' 'keyUsage = critical, digitalSignature' 'extendedKeyUsage = critical, codeSigning' >"$work/openssl.cnf"
+          # macOS's own openssl, because the security tool reads the .p12 files it writes.
+          /usr/bin/openssl req -x509 -newkey rsa:2048 -nodes -days 1 -config "$work/openssl.cnf" \
+            -keyout "$work/key.pem" -out "$work/certificate.pem" 2>/dev/null
+          /usr/bin/openssl pkcs12 -export -inkey "$work/key.pem" -in "$work/certificate.pem" \
+            -name "Release rehearsal" -passout pass:rehearsal -out "$work/rehearsal.p12"
+          SIGNING_P12="$(base64 -i "$work/rehearsal.p12")"
+          export SIGNING_P12 SIGNING_P12_PASSWORD=rehearsal
+          keychain="$(scripts/ci-keychain.sh create)"
+          # release.sh names no keychain. It finds the identity through the search list, so this does too.
+          first="$(security list-keychains -d user | sed -n '1p' | tr -d ' "')"
+          [ "$first" = "$keychain" ] || { echo "::error::$keychain is not first in the search list"; exit 1; }
+          identity="$(security find-identity -p codesigning | awk '/Release rehearsal/ { print $2; exit }')"
+          [ -n "$identity" ] || { echo "::error::the imported certificate does not turn up through the search list"; exit 1; }
+          # The step that fails on a runner when the key needs someone to click Allow.
+          cp /usr/bin/true "$work/signed"
+          codesign --force --sign "$identity" "$work/signed"
+          codesign -dvv "$work/signed" 2>&1 | grep -q '^Authority=Release rehearsal$'
+          [ "$(security default-keychain -d user | tr -d ' "')" = "$keychain" ] || { echo "::error::$keychain is not the default keychain"; exit 1; }
+          scripts/ci-keychain.sh delete

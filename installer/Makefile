@@ -13,7 +13,7 @@ PACKAGE := --package-path "$(ROOT)"
 NO_SELF_UPDATE := SHAWN_NO_SELF_UPDATE=1 SHAWN_NO_UPDATE=1
 
 .DEFAULT_GOAL := help
-.PHONY: help build test test-scripts validate app dmg notarize release install-cli run icon media lint clean
+.PHONY: help build test test-scripts validate app dmg notarize release publish install-cli run icon media lint clean
 
 help: ## List the targets
 	@echo "Shawn's Dotfiles. Targets:"
@@ -47,6 +47,9 @@ notarize: ## Notarize and staple the 'make dmg' image (needs NOTARY_PROFILE; not
 release: ## App, disk image, CLI tarball and manifest; prints the gh command
 	"$(ROOT)/scripts/release.sh"
 
+publish: ## Publish what 'make release' built as a GitHub release (the release workflow runs both)
+	"$(ROOT)/scripts/publish-release.sh"
+
 install-cli: ## Build the CLI (release) and install it as ~/.local/bin/shawn
 	$(SWIFT) build $(PACKAGE) -c release --product shawn
 	install -d "$(BINDIR)"
@@ -62,12 +65,12 @@ icon: ## Redraw Resources/AppIcon.icns from scripts/make-icon.swift
 media: ## Draw the README's GIFs and stills of the app into build/media (needs Pillow)
 	"$(ROOT)/scripts/make-media.sh" "$(MEDIA_DIR)"
 
-lint: ## shellcheck the scripts and their tests; actionlint the CI workflow when installed
+lint: ## shellcheck the scripts and their tests; actionlint the workflows when installed
 	shellcheck -x "$(ROOT)"/scripts/*.sh "$(ROOT)"/scripts/tests/*.sh "$(ROOT)"/scripts/tests/fakes/*
-	@workflow="$(ROOT)/../.github/workflows/installer.yml"; \
-	if ! command -v actionlint >/dev/null 2>&1; then echo "actionlint is not installed; skipped the workflow"; \
-	elif [ -f "$$workflow" ]; then actionlint "$$workflow"; \
-	else echo "no $$workflow; skipped"; fi
+	@workflows="$(ROOT)/../.github/workflows"; \
+	if ! command -v actionlint >/dev/null 2>&1; then echo "actionlint is not installed; skipped the workflows"; \
+	elif [ -d "$$workflows" ]; then actionlint "$$workflows"/*.yml; \
+	else echo "no $$workflows; skipped"; fi
 
 clean: ## Remove build products (swift package clean, and build/)
 	$(SWIFT) package $(PACKAGE) clean

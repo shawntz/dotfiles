@@ -43,6 +43,9 @@ struct SelfUpdater: Sendable {
         var checkOnly = false
         /// `shawn update --rebuild`: rebuild from the checkout even when cli.json says these sources are installed.
         var rebuild = false
+        /// The macOS this Mac runs: its major version, and the whole version as people read it ("27.2").
+        var macOSMajor = ProcessInfo.processInfo.operatingSystemVersion.majorVersion
+        var macOSName = MinimumMacOS.describe(ProcessInfo.processInfo.operatingSystemVersion)
     }
 
     struct Timeouts: Sendable {
@@ -498,7 +501,28 @@ struct SelfUpdater: Sendable {
             state.lastResult = "\(release.version) available; not replaced: \(refusal)"
             return Report(outcome: .notReplaced(reason), configChanged: report.configChanged)
         }
+        // The new shawn checks the macOS version when it starts. Installed on an older macOS it would refuse every
+        // command, 'shawn update' among them, so the one that works stays. The reason lasts until macOS is updated:
+        // it is said once a day, and the manifest that gave it is not fetched again for the same release.
+        func tooNew(needs needed: Int) -> Report {
+            let reason = "shawn \(release.version) needs macOS \(needed) or later, and this Mac runs macOS \(request.macOSName)"
+            state.releaseTooNew = SelfUpdateState.ReleaseTooNew(tag: release.tag, minimumMacOS: needed)
+            state.lastResult = "\(release.version) is out; it needs macOS \(needed)"
+            noteDaily("release-needs-macos", "\(reason); keeping \(request.currentVersion)", about: reason, state: &state, request: request)
+            return Report(outcome: .skipped(reason), configChanged: report.configChanged)
+        }
+        if let known = state.releaseTooNew, known.tag == release.tag, request.macOSMajor < known.minimumMacOS {
+            return tooNew(needs: known.minimumMacOS)
+        }
+        // Another release came out, or macOS was updated.
+        state.releaseTooNew = nil
+
         if request.checkOnly {
+            // Only the manifest says which macOS the release needs. It is a few hundred bytes.
+            if let manifest = try? await releases.manifest(repo: remote.repo, tag: release.tag, timeout: timeouts.manifest),
+               let needed = manifest.minimumMacOS, request.macOSMajor < needed {
+                return tooNew(needs: needed)
+            }
             note("\(available). Run 'shawn update'")
             return Report(outcome: .updateAvailable("shawn \(release.version)"), configChanged: report.configChanged)
         }
@@ -515,17 +539,27 @@ struct SelfUpdater: Sendable {
             state.lastResult = result
         }
 
-        lock?.announce(.downloading)
-        note("\(available). Downloading…")
-        let manifest: ReleaseManifest
-        let data: Data
-        do {
-            manifest = try await releases.manifest(repo: remote.repo, tag: release.tag, timeout: timeouts.manifest)
-            data = try await releases.download(manifest.url, timeout: timeouts.download)
-        } catch {
+        func downloadFailed(_ error: Error) -> Report {
             note("couldn't download shawn \(release.version) (\(error)); keeping \(request.currentVersion)")
             failed("download failed: \(error)")
             return Report(outcome: .downloadFailed("\(error)"), configChanged: report.configChanged)
+        }
+        let manifest: ReleaseManifest
+        do {
+            manifest = try await releases.manifest(repo: remote.repo, tag: release.tag, timeout: timeouts.manifest)
+        } catch {
+            return downloadFailed(error)
+        }
+        if let needed = manifest.minimumMacOS, request.macOSMajor < needed {
+            return tooNew(needs: needed)
+        }
+        lock?.announce(.downloading)
+        note("\(available). Downloading…")
+        let data: Data
+        do {
+            data = try await releases.download(manifest.url, timeout: timeouts.download)
+        } catch {
+            return downloadFailed(error)
         }
         let actual = Checksum.sha256(data)
         guard actual == manifest.sha256.lowercased() else {

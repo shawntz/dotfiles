@@ -1,5 +1,5 @@
 # Builds and tests the installer and checks the YAML config on every change to installer/.
-# No signing, no secrets: release builds are made locally with installer/scripts/release.sh.
+# No signing and no secrets here. The release workflow, release.yml, builds and publishes releases.
 name: installer
 
 on:
