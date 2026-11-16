@@ -1,5 +1,16 @@
 #!/bin/bash
 # Stands in for security: a keychain with no signing identities, so nothing reads the real one.
+# `list-keychains -d user` without -s prints a search list the way the real tool does: one quoted
+# path per line. It lists $KEYCHAIN_PATH too when that is set, as after an earlier create.
 set -eu
 printf 'security %s\n' "$*" >>"$FAKE_LOG"
-printf '     0 valid identities found\n'
+case "${1:-}" in
+    find-identity) printf '     0 valid identities found\n' ;;
+    list-keychains)
+        case " $* " in
+            *" -s "*) ;;
+            *)
+                printf '    "/Users/test/Library/Keychains/login.keychain-db"\n'
+                [ -z "${KEYCHAIN_PATH:-}" ] || printf '    "%s"\n' "$KEYCHAIN_PATH" ;;
+        esac ;;
+esac

@@ -1,9 +1,25 @@
 #!/bin/bash
-# Stands in for the GitHub CLI's release commands. Every call goes to $FAKE_LOG.
-# FAKE_GH_RELEASE says what GitHub holds for the tag: none (the default), draft or published.
-# FAKE_GH_FAIL names a subcommand (create, edit, delete) that fails.
+# Stands in for the GitHub CLI's release commands and the one API call publish-release.sh makes.
+# Every call goes to $FAKE_LOG.
+# FAKE_GH_RELEASE says what GitHub holds for the tag: none (the default), draft, published, or
+#   error for a failure that is not "release not found".
+# FAKE_GH_TAG is the commit the tag already points at on GitHub. Unset means there is no such tag.
+# FAKE_GH_FAIL names a release subcommand (create, edit, delete) that fails.
 set -eu
 printf 'gh %s\n' "$*" >>"$FAKE_LOG"
+if [ "${1:-}" = api ]; then
+    case "${2:-}" in
+        repos/*/commits/tags/*)
+            if [ -n "${FAKE_GH_TAG:-}" ]; then
+                printf '%s\n' "$FAKE_GH_TAG"
+            else
+                echo "gh: No commit found for the ref (HTTP 422)" >&2
+                exit 1
+            fi ;;
+        *) echo "fake gh: unexpected arguments: $*" >&2; exit 1 ;;
+    esac
+    exit 0
+fi
 [ "${1:-}" = release ] || { echo "fake gh: unexpected arguments: $*" >&2; exit 1; }
 if [ "${FAKE_GH_FAIL:-}" = "${2:-}" ]; then
     echo "fake gh: release $2 failed" >&2
@@ -14,6 +30,7 @@ case "${2:-}" in
         case "${FAKE_GH_RELEASE:-none}" in
             draft) echo true ;;
             published) echo false ;;
+            error) echo "HTTP 502: Bad Gateway (https://api.github.com/graphql)" >&2; exit 1 ;;
             *) echo "release not found" >&2; exit 1 ;;
         esac ;;
     create)

@@ -34,12 +34,16 @@ test_keychain_create_imports_the_certificate_and_makes_the_keychain_the_default(
         "$(security_calls)" "security calls, in order"
     local log
     log="$(cat "$FAKE_LOG")"
-    assert_contains "$log" "-k $KEYCHAIN_PATH -f pkcs12 -P secret -T /usr/bin/codesign -T /usr/bin/security"
+    # Not extractable, and for codesign alone.
+    assert_contains "$log" "-k $KEYCHAIN_PATH -f pkcs12 -P secret -x -T /usr/bin/codesign"$'\n'
+    assert_not_contains "$log" "-T /usr/bin/security" "security import"
     assert_contains "$log" "security set-key-partition-list -S apple-tool:,apple:,codesign: -s -k "
-    assert_contains "$log" "security list-keychains -d user -s $KEYCHAIN_PATH"
+    # First in the search list, the login keychain after it, and not listed twice though the list had it already.
+    assert_contains "$log" "security list-keychains -d user -s $KEYCHAIN_PATH /Users/test/Library/Keychains/login.keychain-db"$'\n'
     assert_contains "$log" "security default-keychain -d user -s $KEYCHAIN_PATH"
     assert_eq "$KEYCHAIN_PATH" "$OUT" "stdout"
     assert_not_contains "$ERR$OUT" "secret" "what the script prints"
+    assert_eq "" "$(ls -A "$TMPDIR")" "what is left in the temp folder (the decoded certificate must not be)"
 }
 
 test_keychain_create_needs_the_certificate_and_its_password() {

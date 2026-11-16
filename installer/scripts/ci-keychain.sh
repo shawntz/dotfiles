@@ -11,9 +11,10 @@ usage() {
 Usage: scripts/ci-keychain.sh create
        scripts/ci-keychain.sh delete
 
-create  makes a new keychain, imports the certificate and its private key from SIGNING_P12,
-        lets codesign use the key without a prompt, puts the keychain first in the search list
-        and makes it the default keychain, so notarytool stores its profile there too.
+create  makes a new keychain and imports the certificate and its private key from SIGNING_P12.
+        The key cannot be exported again, and only codesign may use it, without a prompt. The
+        keychain goes first in the search list and becomes the default keychain, so notarytool
+        stores its profile there too.
 delete  removes that keychain. Run it at the end of the job, whatever happened before.
 
 Environment:
@@ -59,23 +60,24 @@ WORK="$(mktemp -d "$SCRATCH/ci-keychain.XXXXXX")"
 trap 'rm -rf "$WORK"' EXIT
 CERTIFICATE="$WORK/certificate.p12"
 printf '%s' "$SIGNING_P12" | base64 --decode >"$CERTIFICATE" 2>/dev/null || : >"$CERTIFICATE"
-# base64 skips what it cannot read, so look at the result: a .p12 file starts with the byte 0x30.
+# base64 skips what it cannot read, so the result is what gets checked. A .p12 file starts with the byte 0x30.
 [ "$(head -c 1 "$CERTIFICATE" | od -An -tx1 | tr -d ' \n')" = 30 ] ||
     die "SIGNING_P12 does not decode to a .p12 file" "Encode the file again: base64 -i certificate.p12"
 
-# Nobody needs this password again: the keychain stays unlocked for the job and is then deleted.
+# Nobody needs this password again. The keychain stays unlocked for the job, and the job deletes it.
 KEYCHAIN_PASSWORD="$(/usr/bin/openssl rand -hex 20)" || die "could not make a password for the keychain"
 [ "${#KEYCHAIN_PASSWORD}" -eq 40 ] || die "could not make a password for the keychain"
 
 step "Making $KEYCHAIN_PATH"
 security create-keychain -p "$KEYCHAIN_PASSWORD" "$KEYCHAIN_PATH" >&2 || die "could not create the keychain"
-# Six hours before it locks itself: a notarization can take a while, and no job runs that long.
+# Six hours before it locks itself. A notarization can take a while, and no job runs that long.
 security set-keychain-settings -lut 21600 "$KEYCHAIN_PATH" >&2 || die "could not change the keychain's settings"
 security unlock-keychain -p "$KEYCHAIN_PASSWORD" "$KEYCHAIN_PATH" >&2 || die "could not unlock the keychain"
 
 step "Importing the certificate"
-security import "$CERTIFICATE" -k "$KEYCHAIN_PATH" -f pkcs12 -P "$SIGNING_P12_PASSWORD" \
-    -T /usr/bin/codesign -T /usr/bin/security >/dev/null ||
+# -x: the key cannot be exported from this keychain. -T: codesign is the only program that may use it.
+security import "$CERTIFICATE" -k "$KEYCHAIN_PATH" -f pkcs12 -P "$SIGNING_P12_PASSWORD" -x \
+    -T /usr/bin/codesign >/dev/null ||
     die "could not import the certificate" "Check SIGNING_P12_PASSWORD, and that the .p12 holds the certificate and its private key."
 # Without this, codesign waits for someone to click Allow in a dialog that no runner shows.
 security set-key-partition-list -S apple-tool:,apple:,codesign: -s -k "$KEYCHAIN_PASSWORD" "$KEYCHAIN_PATH" >/dev/null ||

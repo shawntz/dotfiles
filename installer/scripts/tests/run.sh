@@ -146,6 +146,9 @@ for name in $(declare -F | awk '$3 ~ /^test_/ { print $3 }'); do
     (
         set -e
         export PATH="$T/bin:$BASE_PATH" FAKE_LOG="$T/fake.log" FAKE_BUILD_DIR="$T/swift-build"
+        # Each test gets its own temp folder, so a script that leaves a file behind shows up there.
+        export TMPDIR="$T/tmp"
+        mkdir -p "$TMPDIR"
         : >"$FAKE_LOG"
         cd "$T"
         "$name"

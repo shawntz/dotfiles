@@ -1,6 +1,6 @@
 #!/bin/bash
 # Publishes what release.sh built as the GitHub release shawn-v<version>. The release workflow runs
-# this on master; it also works by hand. Run with --help for the options.
+# this on master, and a person can run it too. Run with --help for the options.
 # shellcheck source-path=SCRIPTDIR
 set -euo pipefail
 
@@ -14,20 +14,22 @@ Publishes the files scripts/release.sh made in DIR as the release shawn-v<versio
 the disk image, the CLI tarball, its checksum and shawn-cli.json. DIR defaults to
 build/release/<version>.
 
-Everything is uploaded to a draft first and the draft is published last. The tag appears only
-then, with every file in place: shawn on other Macs looks for the tag, then for the files.
+It uploads everything to a draft and publishes the draft last. The tag appears only then, with
+every file in place, because shawn on other Macs looks for the tag first and then for the files.
 
   --allow-unnotarized   publish a disk image that Apple has not notarized. Gatekeeper blocks the
                         app on other Macs until the person allows it, and the release notes say so.
-  -n, --dry-run         check everything and print the gh commands; publish nothing
+  -n, --dry-run         check the files and print the gh commands. It asks GitHub nothing and
+                        publishes nothing.
   -h, --help            show this help
 
 Environment:
   RELEASE_REPO   GitHub repo the release goes to [default $RELEASE_REPO]
-  GH_TOKEN       as for gh; it needs write access to the repo's contents
+  GH_TOKEN       as for gh. It needs write access to the repo's contents.
 
-A release that is already published is left alone (exit status 0). A draft that a failed run left
-behind is deleted and made again.
+It leaves a published release alone (exit status 0). It deletes a draft of the same tag and makes
+it again, so do not run it while someone else is still uploading to that draft. It stops when the
+tag already exists on GitHub and points at another commit than the one the files were built from.
 EOF
 }
 
@@ -82,6 +84,11 @@ source_provenance
 if [ "$SOURCE_GIT" != 1 ] || [ -z "$SOURCE_COMMIT" ]; then
     die "this is not a git checkout with a commit" "Publish from the checkout the release was built in."
 fi
+if [ -n "$SOURCE_CHANGES" ]; then
+    printf '%s\n' "$SOURCE_CHANGES" >&2
+    die "Sources/ or Package.* have uncommitted changes (listed above), so HEAD does not say what this checkout holds" \
+        "Commit or stash them, then run this again."
+fi
 BUILT_TREE="$(manifest_value sourceTree)" || BUILT_TREE=""
 [ -n "$BUILT_TREE" ] || die "shawn-cli.json has no sourceTree, so nobody knows which sources the build holds" \
     "Build the release again from committed sources, without ALLOW_DIRTY: scripts/release.sh"
@@ -103,15 +110,17 @@ for asset in "${ASSETS[@]}"; do info "$(basename "$asset")  ($(file_size "$asset
 info "disk image signature: $AUTHORITY"
 info "notarized:            $([ "$NOTARIZED" = 1 ] && echo yes || echo no)"
 
+SCRATCH="${TMPDIR:-/tmp}"
+WORK="$(mktemp -d "${SCRATCH%/}/publish-release.XXXXXX")"
+trap 'rm -rf "$WORK"' EXIT
+
 NOTES=""
 if [ "$NOTARIZED" = 0 ]; then
     [ "$ALLOW_UNNOTARIZED" = 1 ] || die "Apple has not notarized $(basename "$DMG"), so Gatekeeper blocks the app on other Macs" \
         "Sign with a Developer ID and notarize it (see scripts/release.sh --help), then run this again." \
-        "To publish it as it is, add --allow-unnotarized. The release notes will then say how to open it."
+        "To publish it as it is, run scripts/publish-release.sh --allow-unnotarized. The release notes then say how to open it."
     warn "publishing a disk image that Apple has not notarized (--allow-unnotarized)"
-    NOTES_DIR="${TMPDIR:-/tmp}"
-    NOTES="$(mktemp "${NOTES_DIR%/}/release-notes.XXXXXX")"
-    trap 'rm -f "$NOTES"' EXIT
+    NOTES="$WORK/release-notes.md"
     cat >"$NOTES" <<EOF
 Apple has not notarized this build, so macOS blocks the app the first time you open it. [If macOS won't open it](https://github.com/$RELEASE_REPO/blob/HEAD/installer/README.md#if-macos-wont-open-it) says how to open it anyway.
 
@@ -132,16 +141,27 @@ print_command() {
 }
 
 if [ "$DRY_RUN" = 1 ]; then
-    note "Dry run: nothing is published. The commands would be:"
+    note "Dry run: nothing is published, and GitHub is not asked what it already holds. The commands would be:"
     print_command "${CREATE[@]}"
     print_command "${PUBLISH[@]}"
+    if [ -n "$NOTES" ]; then
+        note "The notes file lasts only while this script runs. It would hold:"
+        sed 's/^/    /' "$NOTES" >&2
+    fi
     exit 0
 fi
 
 command -v gh >/dev/null 2>&1 || die "gh (the GitHub CLI) is not installed" "Install it with: brew install gh"
 
-# isDraft is "true" for a draft and "false" for a published release. gh fails when there is neither.
-EXISTING="$(gh release view "$TAG" --repo "$RELEASE_REPO" --json isDraft --jq .isDraft 2>/dev/null)" || EXISTING=none
+# isDraft is "true" for a draft and "false" for a published release. With neither, gh says "release not found".
+if EXISTING="$(gh release view "$TAG" --repo "$RELEASE_REPO" --json isDraft --jq .isDraft 2>"$WORK/view.err")"; then
+    :
+elif grep -qi 'release not found' "$WORK/view.err"; then
+    EXISTING=none
+else
+    cat "$WORK/view.err" >&2
+    die "could not ask GitHub whether $TAG is released" "Check the network and GH_TOKEN, then run this again."
+fi
 case "$EXISTING" in
     false)
         note "$TAG is already published on $RELEASE_REPO. Nothing to do."
@@ -150,6 +170,14 @@ case "$EXISTING" in
         step "Deleting the draft of $TAG that an earlier run left"
         gh release delete "$TAG" --repo "$RELEASE_REPO" --yes >&2 || die "could not delete the draft of $TAG" ;;
 esac
+
+# gh leaves a tag that already exists where it is and ignores --target. Deleting a release keeps its tag, so a
+# release made again could put files from this commit under a tag that points at another one.
+if TAGGED="$(gh api "repos/$RELEASE_REPO/commits/tags/$TAG" --jq .sha 2>/dev/null)" && [ -n "$TAGGED" ] && [ "$TAGGED" != "$SOURCE_COMMIT" ]; then
+    die "the tag $TAG is already on $RELEASE_REPO and points at ${TAGGED:0:12}, not at ${SOURCE_COMMIT:0:12}" \
+        "The release would carry files from one commit under a tag for another." \
+        "Delete the tag (git push --delete origin $TAG), or bump the version, then run this again."
+fi
 
 step "Uploading to a draft of $TAG"
 "${CREATE[@]}" >&2 || die "gh could not create the draft of $TAG" \
