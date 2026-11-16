@@ -64,11 +64,18 @@ layout_places "$DMG_ART_DIR/DS_Store" "$APP_BUNDLE_NAME" ||
 
 mkdir -p "$OUTPUT_DIR"
 WORK="$(mktemp -d "$OUTPUT_DIR/.make-dmg.XXXXXX")"
-# The image is mounted at $WORK/volume for a moment, so it comes off before $WORK goes.
-MOUNTED=0
+# The image is mounted at $WORK/volume for a moment. A mount point is on another device than the
+# folder it is in, which says whether the image is mounted even when hdiutil was cut short.
+volume_mounted() {
+    [ -d "$WORK/volume" ] || return 1
+    [ "$(stat -f %d "$WORK/volume" 2>/dev/null)" != "$(stat -f %d "$WORK" 2>/dev/null)" ]
+}
 cleanup() {
-    [ "$MOUNTED" = 0 ] || hdiutil detach -quiet -force "$WORK/volume" >/dev/null 2>&1 || true
-    rm -rf "$WORK"
+    if volume_mounted; then
+        hdiutil detach -quiet -force "$WORK/volume" >/dev/null 2>&1 || true
+    fi
+    # -x keeps rm on one file system. Should the image still be mounted, rm stays out of it.
+    rm -rfx "$WORK" 2>/dev/null || true
 }
 trap cleanup EXIT
 
@@ -76,14 +83,10 @@ trap cleanup EXIT
 detach_volume() {
     local _
     for _ in 1 2 3 4 5; do
-        if hdiutil detach -quiet "$WORK/volume" 2>/dev/null; then
-            MOUNTED=0
-            return 0
-        fi
+        if hdiutil detach -quiet "$WORK/volume" 2>/dev/null; then return 0; fi
         sleep 1
     done
-    hdiutil detach -quiet -force "$WORK/volume" || return 1
-    MOUNTED=0
+    hdiutil detach -quiet -force "$WORK/volume"
 }
 
 # The image is signed with the identity that signed the app, unless SIGN_IDENTITY says otherwise.
@@ -120,13 +123,12 @@ hdiutil create -quiet -volname "$APP_NAME" -srcfolder "$WORK/root" -fs HFS+ -for
 mkdir -p "$WORK/volume"
 hdiutil attach -quiet -nobrowse -noautoopen -noverify -mountpoint "$WORK/volume" "$WORK/writable.dmg" ||
     die "hdiutil could not mount the new disk image"
-MOUNTED=1
 mv "$WORK/volume/$LAYOUT_STAND_IN" "$WORK/volume/.DS_Store" ||
     die "could not put Finder's layout file in the disk image"
 # macOS starts a log of changes on a volume it can write to. It is no part of the app's image.
 # macOS can write it once more as the volume unmounts, so the layout file has a place for it
 # under the window, as for the picture.
-rm -rf "$WORK/volume/.fseventsd"
+rm -rf "$WORK/volume/.fseventsd" 2>/dev/null || true
 # The app must come out of the image as it went in.
 codesign --verify --deep --strict "$WORK/volume/$APP_BUNDLE_NAME" 2>/dev/null ||
     die "the app's signature no longer verifies inside the disk image"

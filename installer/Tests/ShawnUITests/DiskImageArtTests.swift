@@ -1,6 +1,7 @@
 import AppKit
 import ShawnCore
 import ShawnFun
+import ShawnSync
 import XCTest
 @testable import ShawnUI
 
@@ -122,11 +123,15 @@ final class DiskImageArtTests: XCTestCase {
     func testTheCanvasIsLargerThanTheWindowAndTheCardsFitInside() {
         XCTAssertGreaterThan(DiskImageLayout.canvas.width, DiskImageLayout.window.width)
         XCTAssertGreaterThan(DiskImageLayout.canvas.height, DiskImageLayout.window.height)
-        for center in [DiskImageLayout.app, DiskImageLayout.applications] {
-            XCTAssertGreaterThan(center.x - DiskImageLayout.iconSize / 2, 0)
-            XCTAssertLessThan(center.x + DiskImageLayout.iconSize / 2, DiskImageLayout.window.width)
-            XCTAssertLessThan(center.y + DiskImageLayout.nameBand.upperBound, DiskImageLayout.window.height)
+        let window = CGRect(origin: .zero, size: DiskImageLayout.window)
+        let cards = [DiskImageLayout.app, DiskImageLayout.applications].map(DiskImageLayout.card(around:))
+        for (card, center) in zip(cards, [DiskImageLayout.app, DiskImageLayout.applications]) {
+            XCTAssertTrue(window.insetBy(dx: 8, dy: 8).contains(card), "the card at \(card) reaches the window's edge")
+            XCTAssertTrue(card.contains(CGRect(x: center.x - DiskImageLayout.iconSize / 2, y: center.y - DiskImageLayout.iconSize / 2,
+                                               width: DiskImageLayout.iconSize, height: DiskImageLayout.iconSize)), "the icon is on its card")
+            XCTAssertTrue(card.contains(DiskImageLayout.nameBand(under: center)))
         }
+        XCTAssertFalse(cards[0].insetBy(dx: -40, dy: 0).intersects(cards[1]), "the arrow needs room between the cards")
         XCTAssertEqual(DiskImageLayout.app.y, DiskImageLayout.applications.y, "the arrow between them is level")
     }
 
@@ -151,6 +156,24 @@ final class DiskImageArtTests: XCTestCase {
         return (Double(components[0]), Double(components[1]), Double(components[2]), Double(components[3]))
     }
 
+    /// Every row of the band under an icon holds the band's color, the rows where a scanline would fall
+    /// too: a darker row there would take the name below the contrast the color was picked for.
+    private func assertNameBand(in bitmap: NSBitmapImageRep, under center: CGPoint, file: StaticString = #filePath, line: UInt = #line) throws {
+        let band = DiskImageLayout.nameBand(under: center)
+        for x in [band.minX + 12, center.x, band.maxX - 12] {
+            for row in Int(band.minY) + 1..<Int(band.maxY) - 1 {
+                let color = try XCTUnwrap(bitmap.colorAt(x: Int(x), y: row), file: file, line: line)
+                var components = [CGFloat](repeating: 0, count: 4)
+                color.getComponents(&components)
+                let expected = DiskImageBackground.nameBand
+                guard abs(Double(components[0]) - expected.red) < 0.03, abs(Double(components[1]) - expected.green) < 0.03,
+                      abs(Double(components[2]) - expected.blue) < 0.03 else {
+                    return XCTFail("the pixel at \(Int(x)), \(row) is not the band's color: \(components)", file: file, line: line)
+                }
+            }
+        }
+    }
+
     private func assertDark(_ pixel: (red: Double, green: Double, blue: Double, alpha: Double), _ what: String,
                             file: StaticString = #filePath, line: UInt = #line) {
         XCTAssertLessThan(max(pixel.red, pixel.green, pixel.blue), 0.2, what, file: file, line: line)
@@ -165,12 +188,7 @@ final class DiskImageArtTests: XCTestCase {
             XCTAssertEqual((band.lowerBound + band.upperBound) / 2, DiskImageLayout.nameCenter)
             XCTAssertGreaterThanOrEqual(band.upperBound - band.lowerBound, 2 * DiskImageLayout.textSize)
             XCTAssertGreaterThanOrEqual(band.lowerBound, DiskImageLayout.iconSize / 2, "the band starts under the icon")
-            for offset in [band.lowerBound + 3, (band.lowerBound + band.upperBound) / 2, band.upperBound - 5] {
-                let found = try pixel(in: bitmap, x: center.x, y: center.y + offset)
-                XCTAssertEqual(found.red, DiskImageBackground.nameBand.red, accuracy: 0.03, "\(offset)")
-                XCTAssertEqual(found.green, DiskImageBackground.nameBand.green, accuracy: 0.03, "\(offset)")
-                XCTAssertEqual(found.blue, DiskImageBackground.nameBand.blue, accuracy: 0.03, "\(offset)")
-            }
+            try assertNameBand(in: bitmap, under: center)
             // Behind the icon the card is the dark panel.
             let panel = try pixel(in: bitmap, x: center.x, y: center.y)
             XCTAssertEqual(panel.red, Palette.standard.panel.red, accuracy: 0.03)
@@ -201,5 +219,42 @@ final class DiskImageArtTests: XCTestCase {
         let drawn = try SnapshotRenderer.png(of: DiskImageBackground(fun: model.fun, title: "Test"), size: DiskImageLayout.canvas, scale: 1)
         XCTAssertNotEqual(plain, drawn)
         XCTAssertGreaterThan(drawn.count, 20_000, "the picture has real content")
+
+        // The narrator's own sprite is drawn: the same config without its sprites differs where the sprite goes.
+        var withoutSprites = model.fun
+        withoutSprites.sprites = [:]
+        let with = try render(model.fun), without = try render(withoutSprites)
+        var different = 0
+        for x in 44..<116 {
+            for y in 364..<436 where with.colorAt(x: x, y: y) != without.colorAt(x: x, y: y) { different += 1 }
+        }
+        XCTAssertGreaterThan(different, 100, "the narrator's sprite is drawn in the bottom left corner")
+    }
+
+    func testAVeryLongLineIsCutShortAndStaysOffTheCards() throws {
+        let line = String(repeating: "Oh my glob, this line never ends. ", count: 30)
+        let fun = FunConfig(header: "TEST", sprites: [:], speaker: "lsp", showQuotes: [], moments: [.launch: [line]], stepQuips: [:])
+        let bitmap = try render(fun)
+        for center in [DiskImageLayout.app, DiskImageLayout.applications] {
+            try assertNameBand(in: bitmap, under: center)
+            // Right under the card is still the window's background, not the bubble.
+            let card = DiskImageLayout.card(around: center)
+            assertDark(try pixel(in: bitmap, x: center.x, y: card.maxY + 6), "under the card at \(card)")
+        }
+    }
+
+    func testTheArtCommandRefusesNarratorFilesWithErrors() throws {
+        let directory = makeTempDirectory()
+        let registry = Simulation.makeRegistry(timeScale: 0)
+        let environment = try Simulation.makeEnvironment(root: directory.url.appendingPathComponent("machine"))
+        let root = try SimulationConfig.write(into: directory.url)
+        let good = try ConfigResolver.load(directory: root, source: .local(root.path), registry: registry, environment: environment)
+        XCTAssertFalse(try DiskImageArtCommand.narrator(of: good.config).sprites.isEmpty)
+
+        try Data("moments: [not: closed\n".utf8).write(to: root.appendingPathComponent(FunConfig.quotesPath))
+        let broken = try ConfigResolver.load(directory: root, source: .local(root.path), registry: registry, environment: environment)
+        XCTAssertThrowsError(try DiskImageArtCommand.narrator(of: broken.config)) { error in
+            XCTAssertTrue("\(error)".contains(FunConfig.quotesPath), "names the file: \(error)")
+        }
     }
 }

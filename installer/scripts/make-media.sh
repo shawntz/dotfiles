@@ -83,6 +83,8 @@ done
 [ -n "$OUTPUT_DIR" ] || die "say where the files go" "Usage: scripts/make-media.sh [options] OUTPUT_DIR"
 OUTPUT_DIR="$(absolute_path "$OUTPUT_DIR")"
 CONFIG_DIR="$(absolute_path "$CONFIG_DIR")"
+# A PYTHON given as a path is relative to the caller's folder, and this script changes folder below.
+case "$PYTHON" in */*) PYTHON="$(absolute_path "$PYTHON")" ;; esac
 [ -f "$CONFIG_DIR/installer.yaml" ] || die "no installer.yaml in $CONFIG_DIR" "Point --config at a config folder."
 ICON="$INSTALLER_ROOT/Resources/AppIcon.icns"
 [ -f "$ICON" ] || die "cannot find $ICON"

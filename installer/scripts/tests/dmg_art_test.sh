@@ -28,10 +28,27 @@ test_dmg_art_without_the_packages_says_how_to_get_them_and_builds_nothing() {
     run "$T/pkg/scripts/make-dmg-art.sh"
     assert_status 1
     assert_contains "$ERR" "ds_store and mac_alias are not both installed for $T/bin/python3"
-    assert_contains "$ERR" "python3 -m pip install ds_store mac_alias"
+    # Homebrew's Python refuses a plain pip install, so the way in is a virtual environment.
+    assert_contains "$ERR" "python3 -m venv build/dmg-venv && build/dmg-venv/bin/pip install ds_store mac_alias"
+    assert_contains "$ERR" "PYTHON=build/dmg-venv/bin/python3 make dmg-art"
     assert_eq "" "$(cat "$FAKE_LOG")" "swift calls"
     cmp -s "$T/before" "$T/pkg/Resources/dmg/DS_Store" || fail "it changed Resources/dmg/DS_Store"
     [ -z "$(ls -A "$TMPDIR")" ] || fail "it left $(ls -A "$TMPDIR") in TMPDIR"
+}
+
+test_dmg_art_finds_a_python_named_by_a_path_from_the_callers_folder() {
+    use_fakes swift
+    make_package "$T/pkg"
+    mkdir -p "$T/pkg/build/dmg-venv/bin"
+    printf '#!/bin/sh\nexit 1\n' >"$T/pkg/build/dmg-venv/bin/python3"
+    chmod +x "$T/pkg/build/dmg-venv/bin/python3"
+    cd "$T/pkg" || fail "there is no $T/pkg"
+    run env PYTHON=build/dmg-venv/bin/python3 scripts/make-dmg-art.sh
+    assert_status 1
+    # It found that Python (and this one has no packages). The script works from a temporary folder,
+    # where the same path would name nothing.
+    assert_contains "$ERR" "ds_store and mac_alias are not both installed for $T/pkg/build/dmg-venv/bin/python3"
+    assert_not_contains "$ERR" "cannot find"
 }
 
 test_dmg_art_without_python_says_so() {

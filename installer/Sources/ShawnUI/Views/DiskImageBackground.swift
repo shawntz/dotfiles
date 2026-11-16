@@ -22,6 +22,22 @@ public enum DiskImageLayout {
     /// The center of the shortcut to the Applications folder.
     public static let applications = CGPoint(x: 500, y: 218)
 
+    /// The card each icon sits on: this wide, starting this far above the icon and ending with the name band.
+    static let cardWidth: CGFloat = iconSize + 40
+    static let cardTopInset: CGFloat = 14
+    /// The card for the icon centered at `center`.
+    static func card(around center: CGPoint) -> CGRect {
+        let top = center.y - iconSize / 2 - cardTopInset
+        return CGRect(x: center.x - cardWidth / 2, y: top, width: cardWidth, height: center.y + nameBand.upperBound - top)
+    }
+    /// The part of that card the icon's name is drawn on.
+    static func nameBand(under center: CGPoint) -> CGRect {
+        CGRect(x: center.x - cardWidth / 2, y: center.y + nameBand.lowerBound, width: cardWidth,
+               height: nameBand.upperBound - nameBand.lowerBound)
+    }
+    /// The most lines the narrator's bubble gets. More would grow it up over the cards.
+    static let bubbleLines = 3
+
     /// How far under an icon's center Finder draws the middle of its name, at this icon and text size.
     /// Measured in Finder on macOS 27.2.
     static let nameCenter: CGFloat = 82
@@ -38,7 +54,8 @@ public enum DiskImageLayout {
 }
 
 /// The picture behind the icons in the disk image's Finder window: the config's banner, a card for each icon,
-/// an arrow from the app to the Applications folder, and the narrator with the first line the app opens on.
+/// an arrow from the app to the Applications folder, and the narrator with the first `launch:` line in
+/// `fun/quotes.yaml`. (The app opens on one of those lines, picked at random.)
 struct DiskImageBackground: View {
     let fun: FunConfig
     /// The config's name, for the banner's accessibility label.
@@ -61,6 +78,17 @@ struct DiskImageBackground: View {
                 .frame(width: window.width, height: window.height)
             CRTOverlay(vignetteCenter: UnitPoint(x: window.width / 2 / canvas.width, y: window.height / 2 / canvas.height),
                        vignetteRadius: 620)
+                // Scanlines would darken a third of each name band's rows below what its color was picked
+                // for, so the overlay leaves the two bands out.
+                .mask {
+                    Path { path in
+                        path.addRect(CGRect(origin: .zero, size: canvas))
+                        for center in [DiskImageLayout.app, DiskImageLayout.applications] {
+                            path.addRect(DiskImageLayout.nameBand(under: center))
+                        }
+                    }
+                    .fill(style: FillStyle(eoFill: true))
+                }
         }
         .frame(width: canvas.width, height: canvas.height)
         // The offscreen window that renders this has a title bar. Without this the picture starts under it.
@@ -78,8 +106,6 @@ struct DiskImageBackground: View {
         let middle = window.width / 2
         let iconY = DiskImageLayout.app.y
         let band = DiskImageLayout.nameBand
-        let cardTop = iconY - DiskImageLayout.iconSize / 2 - 14
-        let cardBottom = iconY + band.upperBound
         return ZStack(alignment: .topLeading) {
             Color.clear
 
@@ -88,9 +114,10 @@ struct DiskImageBackground: View {
                 .position(x: middle, y: 64)
 
             ForEach([DiskImageLayout.app, DiskImageLayout.applications], id: \.x) { center in
+                let card = DiskImageLayout.card(around: center)
                 IconCard(bandHeight: band.upperBound - band.lowerBound)
-                    .frame(width: DiskImageLayout.iconSize + 40, height: cardBottom - cardTop)
-                    .position(x: center.x, y: (cardTop + cardBottom) / 2)
+                    .frame(width: card.width, height: card.height)
+                    .position(x: card.midX, y: card.midY)
             }
 
             PixelArrow()
@@ -104,7 +131,8 @@ struct DiskImageBackground: View {
             HStack(alignment: .bottom, spacing: Theme.Space.l) {
                 SpriteView(sprite: fun.sprite(nil))
                     .frame(width: 72, height: 72)
-                SpeechBubble(speaker: fun.sprite(nil)?.name, text: fun.line(for: .launch, seed: 0), fillsWidth: false)
+                SpeechBubble(speaker: fun.sprite(nil)?.name, text: fun.line(for: .launch, seed: 0), fillsWidth: false,
+                             lineLimit: DiskImageLayout.bubbleLines)
                     .padding(.bottom, 18)
             }
             .padding(.horizontal, 44)

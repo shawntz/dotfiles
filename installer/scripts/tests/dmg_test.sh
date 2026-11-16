@@ -101,6 +101,27 @@ test_dmg_refuses_window_art_drawn_for_another_app_name() {
     assert_not_contains "$(cat "$FAKE_LOG")" "hdiutil" "tool calls"
 }
 
+test_dmg_refuses_window_art_whose_app_name_only_ends_like_this_one() {
+    use_fakes codesign hdiutil security
+    make_package "$T/pkg"
+    # The layout file places Dotfiles.app, whose name ends in files.app.
+    sed -i '' 's/^APP_NAME="Dotfiles"$/APP_NAME="files"/' "$T/pkg/scripts/common.sh"
+    mkdir -p "$T/build/files.app/Contents/MacOS"
+    plutil -create xml1 "$T/build/files.app/Contents/Info.plist"
+    plutil -insert CFBundleShortVersionString -string 9.8.7 "$T/build/files.app/Contents/Info.plist"
+    run "$T/pkg/scripts/make-dmg.sh" --output "$T/build"
+    assert_status 1
+    assert_contains "$ERR" "$T/pkg/Resources/dmg/DS_Store has no place for files.app"
+}
+
+test_release_help_lines_up_the_app_with_the_other_files() {
+    make_package "$T/pkg"
+    run "$T/pkg/scripts/release.sh" --help
+    assert_status 0
+    assert_contains "$OUT" "  Dotfiles.app                              for Apple silicon (arm64), signed"
+    assert_contains "$OUT" "  ShawnsDotfiles-<version>.dmg              notarized when NOTARY_PROFILE is set"
+}
+
 test_dmg_that_cannot_be_mounted_leaves_nothing_behind() {
     use_fakes codesign hdiutil security
     export FAKE_SIGNATURE=adhoc FAKE_HDIUTIL_ATTACH_FAILS=1

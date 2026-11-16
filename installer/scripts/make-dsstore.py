@@ -18,12 +18,14 @@ name and the file's id. The picture is in the top folder, whose id is 2 on every
 its folder and name are enough. The file's own id differs from one image to the next, so the
 record holds none.
 
-Needs the ds_store and mac_alias packages (python3 -m pip install ds_store mac_alias).
+Needs the ds_store and mac_alias packages. scripts/make-dmg-art.sh prints a way to get them in a
+virtual environment.
 """
 
 import argparse
 import datetime
 import os
+import re
 import sys
 
 USAGE = __doc__.split("\n\n")[1]
@@ -45,11 +47,19 @@ def fail(message):
     sys.exit(1)
 
 
-def pair(text, separator, what):
+def number(text, what, least=0):
+    """A whole number of points. Five digits is more than any screen, and it keeps every value inside
+    the four bytes the layout file gives a position."""
+    if not re.fullmatch(r"[0-9]{1,5}", text) or int(text) < least:
+        fail(f"{what} must be a whole number from {least} to 99999, not {text!r}")
+    return int(text)
+
+
+def pair(text, separator, what, least=0):
     parts = text.lower().split(separator)
-    if len(parts) != 2 or not all(part.isdigit() for part in parts):
+    if len(parts) != 2:
         fail(f"{what} must be two whole numbers with {separator!r} between them, not {text!r}")
-    return int(parts[0]), int(parts[1])
+    return number(parts[0], what, least), number(parts[1], what, least)
 
 
 def color(text):
@@ -98,12 +108,12 @@ def main():
         from ds_store import DSStore
         import mac_alias  # noqa: F401
     except ImportError as error:
-        fail(f"{error}. Install both with: {os.path.basename(sys.executable)} -m pip install ds_store mac_alias")
+        fail(f"{error}. scripts/make-dmg-art.sh prints a way to get ds_store and mac_alias in a virtual environment.")
 
-    width, height = pair(options.window, "x", "--window")
-    for name in ("title_bar", "icon_size", "text_size"):
-        if not getattr(options, name).isdigit():
-            fail(f"--{name.replace('_', '-')} must be a whole number, not {getattr(options, name)!r}")
+    width, height = pair(options.window, "x", "--window", least=1)
+    title_bar = number(options.title_bar, "--title-bar")
+    icon_size = number(options.icon_size, "--icon-size", least=1)
+    text_size = number(options.text_size, "--text-size", least=1)
     app_at = pair(options.app_at, ",", "--app-at")
     applications_at = pair(options.applications_at, ",", "--applications-at")
     red, green, blue = color(options.background)
@@ -122,12 +132,13 @@ def main():
         "ShowTabView": False,
         "ShowToolbar": False,
         "SidebarWidth": 180,
-        "WindowBounds": "{{%d, %d}, {%d, %d}}" % (*WINDOW_ORIGIN, width, height + int(options.title_bar)),
+        "WindowBounds": "{{%d, %d}, {%d, %d}}" % (*WINDOW_ORIGIN, width, height + title_bar),
     }
     icons = {
         "viewOptionsVersion": 1,
         "arrangeBy": "none",
-        # Finder reads the picture, and keeps the color for a window whose picture it cannot find.
+        # 2 is a picture. The three color keys go with every background type, and here they hold the
+        # window's own background color.
         "backgroundType": 2,
         "backgroundImageAlias": picture_alias(options.volume.encode(), options.picture.encode()),
         "backgroundColorRed": red,
@@ -136,35 +147,43 @@ def main():
         "gridOffsetX": 0.0,
         "gridOffsetY": 0.0,
         "gridSpacing": 100.0,
-        "iconSize": float(options.icon_size),
+        "iconSize": float(icon_size),
         "labelOnBottom": True,
         "scrollPositionX": 0.0,
         "scrollPositionY": 0.0,
         "showIconPreview": False,
         "showItemInfo": False,
-        "textSize": float(options.text_size),
+        "textSize": float(text_size),
     }
 
-    if os.path.exists(options.output):
-        os.remove(options.output)
-    with DSStore.open(options.output, "w+") as store:
-        store["."]["vSrn"] = ("long", 1)
-        store["."]["bwsp"] = window
-        store["."]["icvp"] = icons
-        store["."]["icvl"] = (b"type", b"icnv")
-        store[options.app]["Iloc"] = app_at
-        store["Applications"]["Iloc"] = applications_at
-        store[options.picture]["Iloc"] = (app_at[0], height + HIDDEN_ICON_DROP)
-        store[CHANGE_LOG_FOLDER]["Iloc"] = (applications_at[0], height + HIDDEN_ICON_DROP)
+    # Written beside OUTPUT and moved onto it once it reads back right, so a run that fails leaves
+    # the file that was there.
+    draft = options.output + ".new"
+    try:
+        if os.path.exists(draft):
+            os.remove(draft)
+        with DSStore.open(draft, "w+") as store:
+            store["."]["vSrn"] = ("long", 1)
+            store["."]["bwsp"] = window
+            store["."]["icvp"] = icons
+            store["."]["icvl"] = (b"type", b"icnv")
+            store[options.app]["Iloc"] = app_at
+            store["Applications"]["Iloc"] = applications_at
+            store[options.picture]["Iloc"] = (app_at[0], height + HIDDEN_ICON_DROP)
+            store[CHANGE_LOG_FOLDER]["Iloc"] = (applications_at[0], height + HIDDEN_ICON_DROP)
 
-    # Read it back: a layout file that this cannot read is one Finder cannot read either.
-    with DSStore.open(options.output, "r") as store:
-        found = {(entry.filename, entry.code.decode()): entry.value for entry in store}
-    for name, at in ((options.app, app_at), ("Applications", applications_at)):
-        if tuple(found.get((name, "Iloc"), ())[:2]) != at:
-            fail(f"wrote {options.output}, and it does not place {name} at {at}")
-    if found.get((".", "bwsp"), {}).get("WindowBounds") != window["WindowBounds"]:
-        fail(f"wrote {options.output}, and it does not hold the window's size")
+        # Read it back: a layout file that this cannot read is one Finder cannot read either.
+        with DSStore.open(draft, "r") as store:
+            found = {(entry.filename, entry.code.decode()): entry.value for entry in store}
+        for name, at in ((options.app, app_at), ("Applications", applications_at)):
+            if tuple(found.get((name, "Iloc"), ())[:2]) != at:
+                fail(f"the layout file does not place {name} at {at}")
+        if found.get((".", "bwsp"), {}).get("WindowBounds") != window["WindowBounds"]:
+            fail("the layout file does not hold the window's size")
+        os.replace(draft, options.output)
+    finally:
+        if os.path.exists(draft):
+            os.remove(draft)
 
 
 if __name__ == "__main__":

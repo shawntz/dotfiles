@@ -186,13 +186,15 @@ EOF
     plutil -convert xml1 -o /dev/null "$1" 2>/dev/null || die "wrote an invalid $1"
 }
 
-# Succeeds when Finder's layout file places an icon for <file name>. The file stores each name as
-# UTF-16 with the code "Iloc" right behind it.
+# Succeeds when Finder's layout file places an icon for <file name>. The file stores each record as
+# the name's length in UTF-16 units, the name in UTF-16 and a four-letter code, "Iloc" for a place.
+# The length is part of the match, so a longer name that ends in this one does not pass for it.
 layout_places() { # <layout file> <file name>
-    local name
+    local name length
     name="$(printf '%s' "$2" | iconv -f UTF-8 -t UTF-16BE | xxd -p | tr -d '\n')" || return 1
     [ -n "$name" ] || return 1
-    xxd -p "$1" | tr -d '\n' | grep -q "${name}496c6f63"
+    length="$(printf '%08x' $((${#name} / 4)))"
+    xxd -p "$1" | tr -d '\n' | grep -q "${length}${name}496c6f63"
 }
 
 # Reads a key from an Info.plist (or a JSON file).

@@ -9,6 +9,8 @@ struct SpeechBubble: View {
     var size: CGFloat = Theme.Size.body
     /// Off, the bubble is as wide as its text needs and no wider.
     var fillsWidth = true
+    /// The most lines the text gets. Text that needs more ends in an ellipsis.
+    var lineLimit: Int?
 
     var body: some View {
         VStack(alignment: .leading, spacing: 6) {
@@ -21,6 +23,7 @@ struct SpeechBubble: View {
                 .font(Theme.mono(size))
                 .foregroundStyle(palette.text.color)
                 .lineSpacing(3)
+                .lineLimit(lineLimit)
                 .fixedSize(horizontal: false, vertical: true)
         }
         .padding(.horizontal, Theme.Space.m)

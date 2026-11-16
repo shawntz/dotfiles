@@ -13,7 +13,7 @@ usage() {
 Usage: scripts/release.sh [options]
 
 Builds release artifacts for ShawnCore.version into build/release/<version>/:
-  $APP_BUNDLE_NAME                      for Apple silicon (arm64), signed
+  $(printf '%-42s' "$APP_BUNDLE_NAME")for Apple silicon (arm64), signed
   ShawnsDotfiles-<version>.dmg              notarized when NOTARY_PROFILE is set
   shawn-<version>-macos-arm64.tar.gz        the shawn CLI, for self-update on other Macs
   shawn-<version>-macos-arm64.tar.gz.sha256

@@ -51,6 +51,16 @@ final class LaunchOptionsTests: XCTestCase {
         XCTAssertTrue(LaunchOptions.usage.contains("--disk-image-art PATH"))
     }
 
+    func testDiskImageArtCannotBeCombinedWithASnapshotOrTheSimulation() {
+        XCTAssertThrowsError(try LaunchOptions.parse(["--disk-image-art", "/tmp/a.png", "--snapshot", "/tmp/b.png"])) { error in
+            XCTAssertEqual(error as? LaunchOptionsError, .conflictingFlags("--disk-image-art", "--snapshot"))
+            XCTAssertEqual("\(error)", "--disk-image-art cannot be used with --snapshot")
+        }
+        XCTAssertThrowsError(try LaunchOptions.parse(["--simulate", "--disk-image-art", "/tmp/a.png"])) { error in
+            XCTAssertEqual(error as? LaunchOptionsError, .conflictingFlags("--disk-image-art", "--simulate"))
+        }
+    }
+
     func testEqualsFormAndDemo() throws {
         let options = try LaunchOptions.parse(["--config=/x", "--snapshot-state=running", "--demo"])
         XCTAssertEqual(options.configPath, "/x")

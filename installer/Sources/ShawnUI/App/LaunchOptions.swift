@@ -163,6 +163,11 @@ public struct LaunchOptions: Equatable, Sendable {
                 throw LaunchOptionsError.unexpectedValue(flag)
             }
         }
+        // The picture is drawn from a config on disk, and one run writes one file.
+        if options.diskImageArtPath != nil {
+            if options.snapshotPath != nil { throw LaunchOptionsError.conflictingFlags("--disk-image-art", "--snapshot") }
+            if options.simulate { throw LaunchOptionsError.conflictingFlags("--disk-image-art", "--simulate") }
+        }
         return options
     }
 
@@ -185,6 +190,7 @@ public enum LaunchOptionsError: Error, Equatable, CustomStringConvertible {
     case unexpectedValue(String)
     case unknownArgument(String)
     case invalidValue(flag: String, value: String, expected: String)
+    case conflictingFlags(String, String)
 
     public var description: String {
         switch self {
@@ -192,6 +198,7 @@ public enum LaunchOptionsError: Error, Equatable, CustomStringConvertible {
         case .unexpectedValue(let flag): return "\(flag) does not take a value"
         case .unknownArgument(let argument): return "unknown argument '\(argument)'"
         case .invalidValue(let flag, let value, let expected): return "\(flag): '\(value)' is not valid (expected \(expected))"
+        case .conflictingFlags(let first, let second): return "\(first) cannot be used with \(second)"
         }
     }
 }

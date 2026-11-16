@@ -13,12 +13,14 @@ Usage: scripts/make-dmg-art.sh [options]
 Makes these two files in Resources/dmg/, replacing the ones there:
 
   background.tiff   the picture behind the icons, at 1x and 2x: the config's banner, a card for
-                    each icon, an arrow between them and the narrator with their first line
+                    each icon, an arrow between them and the narrator with the first launch:
+                    line in fun/quotes.yaml
   DS_Store          Finder's layout file: the window's size, the icon size and where the icons sit
 
 scripts/make-dmg.sh copies both into every disk image, so commit them. Run this again after you
-change the banner or the narrator in the config, the app's name in scripts/common.sh, or the
-layout in Sources/ShawnUI/Views/DiskImageBackground.swift.
+change the banner or the narrator in the config, the app's colors in
+Sources/ShawnUI/Views/Theme.swift, the app's name in scripts/common.sh, or the layout in
+Sources/ShawnUI/Views/DiskImageBackground.swift.
 
 The app draws the picture with its own views, offscreen, with --no-remote and a throwaway
 --sandbox in a temporary folder. No window opens. scripts/make-dsstore.py writes the layout file
@@ -29,7 +31,7 @@ from the numbers the app prints, without Finder and without mounting anything.
   -h, --help     show this help
 
 Needs Python 3 with the ds_store and mac_alias packages. PYTHON names the interpreter (default
-python3).
+python3). Without them, the script prints a way to get them in a virtual environment.
 EOF
 }
 
@@ -47,6 +49,8 @@ while [ $# -gt 0 ]; do
 done
 
 CONFIG_DIR="$(absolute_path "$CONFIG_DIR")"
+# A PYTHON given as a path is relative to the caller's folder, and this script changes folder below.
+case "$PYTHON" in */*) PYTHON="$(absolute_path "$PYTHON")" ;; esac
 [ -f "$CONFIG_DIR/installer.yaml" ] || die "no installer.yaml in $CONFIG_DIR" "Point --config at a config folder."
 OUTPUT_DIR="$DMG_ART_DIR"
 
@@ -61,8 +65,9 @@ PYTHON_PATH="$(command -v "$PYTHON")" ||
     die "cannot find $PYTHON" "Install Python 3 with ds_store and mac_alias, or set PYTHON to one that has them."
 "$PYTHON" -c 'import ds_store, mac_alias' 2>/dev/null ||
     die "ds_store and mac_alias are not both installed for $PYTHON_PATH" \
-        "Install them with: $PYTHON -m pip install ds_store mac_alias" \
-        "Or set PYTHON to a Python 3 that has them."
+        "Put them in a virtual environment and name its Python. From installer/:" \
+        "  python3 -m venv build/dmg-venv && build/dmg-venv/bin/pip install ds_store mac_alias" \
+        "  PYTHON=build/dmg-venv/bin/python3 make dmg-art"
 
 if [ "$BUILD" = 1 ]; then
     step "Building the app"

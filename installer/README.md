@@ -376,7 +376,7 @@ All of this runs in `installer/`. Each script takes `--help`.
 | `make install-cli` | Builds `shawn` in release mode and installs it to `~/.local/bin`. It leaves `~/.shawn/state/cli.json` as it was. |
 | `make run` | Opens the installer in demo mode, a dry run that starts by itself. |
 | `make icon` | Redraws `Resources/AppIcon.icns`. |
-| `make dmg-art` | Redraws the two files in `Resources/dmg/` that give the disk image's window its look. It needs Python 3 with the `ds_store` and `mac_alias` packages (`PYTHON` names it). |
+| `make dmg-art` | Redraws the two files in `Resources/dmg/` that give the disk image's window its look. It needs Python 3 with the `ds_store` and `mac_alias` packages (`PYTHON` names it). Without them, it prints a way to get them in a virtual environment. |
 | `make media` | Draws the GIFs, stills and icon that the two READMEs show. They go into `build/media`, or into `MEDIA_DIR` when you set it, and the READMEs read them from `.github/media`. Each frame is a `--snapshot`, so no window opens. It needs Python 3 with Pillow (`PYTHON` names it). |
 | `make lint` | shellcheck on the scripts and their tests, and actionlint on the workflows when it is installed. |
 | `make clean` | Removes build products. |
@@ -400,12 +400,12 @@ Dotfiles.app/Contents/
 
 ### The disk image's window
 
-The disk image opens in a window that looks like the app. It shows the config's banner, a card under each of the two icons, an arrow from the app to the Applications shortcut, and the narrator with the first line the app opens on. Two committed files in `Resources/dmg/` make it:
+The disk image opens in a window that looks like the app. It shows the config's banner, a card under each of the two icons, an arrow from the app to the Applications shortcut, and the narrator with the first `launch:` line in `fun/quotes.yaml`. Two committed files in `Resources/dmg/` make it:
 
-- `background.tiff` is the picture behind the icons, at 1x and 2x. The app draws it with the views it puts on screen (`--disk-image-art`), so it follows the config's banner, narrator and colors.
+- `background.tiff` is the picture behind the icons, at 1x and 2x. The app draws it with the views it puts on screen (`--disk-image-art`), so it shows the config's banner and narrator in the app's own colors.
 - `DS_Store` is the file Finder reads a window's size, its icon size and its icons' places from. `scripts/make-dsstore.py` writes it from the layout in `Sources/ShawnUI/Views/DiskImageBackground.swift`.
 
-`make dmg-art` redraws both, without opening a window. Run it after you change the banner or the narrator, the app's name in `scripts/common.sh`, or that layout, and commit the result. The Swift tests compare both files with the layout in the code.
+`make dmg-art` redraws both, without opening a window. Run it after you change the banner or the narrator, the app's colors in `Sources/ShawnUI/Views/Theme.swift`, the app's name in `scripts/common.sh`, or that layout, and commit the result. The Swift tests compare both files with the layout in the code.
 
 `make dmg` needs neither Python nor those packages. It copies the two files into the image and stops when the layout file was drawn for an app with another name. `hdiutil create` leaves a file named `.DS_Store` out of an image, so the script mounts the new image for a moment, hidden from Finder, and gives the layout file its name there. Before it unmounts, it checks that the app's signature still verifies inside the image.
 
@@ -487,6 +487,8 @@ To release by hand, in a repo where the workflow publishes nothing (no notary se
 
 Where the workflow does publish, it gets there first, and step 4 then finds the version already published.
 
+In a fork, the workflow releases to the fork by itself. By hand, add `RELEASE_REPO=<you>/<repo>` to steps 3 and 4, because the scripts release to `shawntz/dotfiles` otherwise.
+
 `scripts/publish-release.sh` uploads everything to a draft and publishes the draft last, so the tag appears only when every file is in place. `shawn` on other Macs looks for the tag, then for the files. The script refuses:
 
 - a disk image that Apple has not notarized, unless you run it as `scripts/publish-release.sh --allow-unnotarized` (`make publish` passes no options)
@@ -525,7 +527,7 @@ Sources/
 Tests/              one XCTest target per module
 scripts/            build, icon, disk image, notarize, release, publish, CI keychain, the config's .gitignore check, README media
 scripts/tests/      tests for those scripts, with fake signing tools in scripts/tests/fakes/
-Resources/          Info.plist template and the app icon
+Resources/          Info.plist template, the app icon, and dmg/ (the disk image window's picture and layout file)
 ```
 
 Shawn's laptop and CI run `swift build` and `swift test` (or `make build` and `make test`) with Xcode 27.2 (Swift 6.4) on macOS 27. That is the Xcode the installer puts on a new Mac. The package needs Swift 6.4 tools, which arrived with Xcode 27. SwiftPM in an older Xcode refuses the package. The only package dependency is Yams.

@@ -94,7 +94,7 @@ This config has 176 items in 17 steps. The CUSTOMIZE… screen has a checkbox fo
 Fork the repo. You never edit Swift.
 
 1. Clone your fork to `~/Developer/dotfiles`. That is where `shawn` looks for the repo.
-2. In `installer/config/installer.yaml`, point `remote.repo` and `vars.dotfiles_repo` at your fork and set `vars.github_user` to your GitHub username. Change `name:` and `tagline:` while you're there.
+2. In `installer/config/installer.yaml`, point `remote.repo` and `vars.dotfiles_repo` at your fork and set `vars.github_user` to your GitHub username. Change `name:` and `tagline:` while you're there. The banner in the window is the ASCII art in `fun/header.txt`.
 3. Delete what you don't want from `steps/`, and put your own dotfiles in `files/`.
 4. If the Mac you use now runs macOS 27 or later and has Xcode 27 or later, copy its packages into the config. Run `swift build` in `installer/`, then `.build/debug/shawn drift --write --repo ~/Developer/dotfiles`. That adds a line to the step files for each Homebrew, App Store and npm package the config lacks.
 5. In `installer/`, run `make validate` to check the config, then `make run` to watch it in a dry run.
