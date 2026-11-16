@@ -102,7 +102,7 @@ shawn config validate        # or, in installer/: make validate
 
 ### Names git will not commit
 
-The repository's root `.gitignore` is older than the installer and applies inside `installer/config/` too. It hides a folder called `icons` (on a Mac its `Icon?` rule matches that name), files named `.zshrc`, `*.log` and `*.lock` files, and folders called `build`, `target` or `dist`, among others. git skips those files without any message, so a commit or `shawn pr` leaves them out and they never reach GitHub or your other Macs. That is why web-app icons go in `webapp-icons/` and the zsh config is `files/zsh/zshrc`.
+The repository's root `.gitignore` is older than the installer and applies inside `installer/config/` too. It hides a folder called `icons` (on a Mac its `Icon?` rule matches that name), `*.log` and `*.lock` files, and folders called `build`, `target` or `dist`, among others. git skips those files without any message, so a commit or `shawn pr` leaves them out and they never reach GitHub or your other Macs. That is why web-app icons go in `webapp-icons/`.
 
 `make validate` and CI fail when git would ignore a file in `config/`, and they name the rule that hides it. The test suite checks the same when it runs inside the git checkout. Rename the file, move it, or add a `!` exception for its folder to `installer/.gitignore`, such as `!config/files/**`. An exception for the file alone does not help when a rule hides a folder above it, because git never looks inside an ignored folder.
 
