@@ -126,13 +126,3 @@ test_build_info_outside_git_records_no_commit_or_source_tree() {
     assert_eq 9.8.7 "$INFO_VERSION" "version"
     assert_contains "$ERR" "not a git checkout"
 }
-
-test_build_info_of_a_universal_app() {
-    use_fakes swift security
-    new_checkout repo installer
-    run env SIGN_IDENTITY=- OUTPUT_DIR="$T/out" ARCHS="arm64 x86_64" "$PKG/scripts/build-app.sh"
-    assert_status 0
-    read_build_info
-    assert_eq "$(expected_content_id installer/)" "$INFO_TREE" "sourceTree"
-    assert_eq "x86_64 arm64" "$(lipo -archs "$T/out/$APP_NAME_IN_TESTS/Contents/Helpers/shawn")" "architectures"
-}

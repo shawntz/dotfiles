@@ -12,7 +12,7 @@ public struct SystemEnvironment: Sendable {
     public var applicationsDirectory: URL
     /// `~/Applications`.
     public var userApplicationsDirectory: URL
-    /// Homebrew prefix: `/opt/homebrew` on Apple Silicon, `/usr/local` on Intel.
+    /// Homebrew prefix: `/opt/homebrew`.
     public var brewPrefix: URL
     /// `~/.shawn`: backups, state, the CLI's installed config.
     public var stateDirectory: URL
@@ -22,8 +22,6 @@ public struct SystemEnvironment: Sendable {
     public var cacheDirectory: URL
     /// Scratch space for downloads and helper scripts.
     public var temporaryDirectory: URL
-    /// `arm64` or `x86_64` (of the hardware, not the process).
-    public var architecture: String
     public var userName: String
     /// The computer's friendly name ("Shawn's MacBook Pro").
     public var hostName: String
@@ -40,7 +38,7 @@ public struct SystemEnvironment: Sendable {
 
     public init(home: URL, applicationsDirectory: URL, userApplicationsDirectory: URL, brewPrefix: URL,
                 stateDirectory: URL, logsDirectory: URL, cacheDirectory: URL, temporaryDirectory: URL,
-                architecture: String, userName: String, hostName: String, baseEnvironment: [String: String],
+                userName: String, hostName: String, baseEnvironment: [String: String],
                 helpersDirectory: URL? = nil, isSandbox: Bool = false, runID: String = SystemEnvironment.makeRunID()) {
         self.home = home
         self.applicationsDirectory = applicationsDirectory
@@ -50,7 +48,6 @@ public struct SystemEnvironment: Sendable {
         self.logsDirectory = logsDirectory
         self.cacheDirectory = cacheDirectory
         self.temporaryDirectory = temporaryDirectory
-        self.architecture = architecture
         self.userName = userName
         self.hostName = hostName
         self.baseEnvironment = baseEnvironment
@@ -64,17 +61,15 @@ public struct SystemEnvironment: Sendable {
     /// The real machine.
     public static func live() -> SystemEnvironment {
         let home = FileManager.default.homeDirectoryForCurrentUser
-        let architecture = hardwareArchitecture()
         return SystemEnvironment(
             home: home,
             applicationsDirectory: URL(fileURLWithPath: "/Applications"),
             userApplicationsDirectory: home.appendingPathComponent("Applications"),
-            brewPrefix: URL(fileURLWithPath: architecture == "arm64" ? "/opt/homebrew" : "/usr/local"),
+            brewPrefix: URL(fileURLWithPath: "/opt/homebrew"),
             stateDirectory: home.appendingPathComponent(".shawn"),
             logsDirectory: home.appendingPathComponent("Library/Logs/ShawnsDotfiles"),
             cacheDirectory: home.appendingPathComponent("Library/Caches/ShawnsDotfiles"),
             temporaryDirectory: FileManager.default.temporaryDirectory,
-            architecture: architecture,
             userName: NSUserName(),
             hostName: computerName(),
             baseEnvironment: ProcessInfo.processInfo.environment
@@ -93,7 +88,6 @@ public struct SystemEnvironment: Sendable {
             logsDirectory: home.appendingPathComponent("Library/Logs/ShawnsDotfiles"),
             cacheDirectory: home.appendingPathComponent("Library/Caches/ShawnsDotfiles"),
             temporaryDirectory: root.appendingPathComponent("tmp"),
-            architecture: hardwareArchitecture(),
             userName: NSUserName(),
             hostName: "Sandbox Mac",
             baseEnvironment: baseEnvironment,
@@ -166,7 +160,8 @@ public struct SystemEnvironment: Sendable {
             "home": home.path,
             "user": userName,
             "hostname": hostName,
-            "arch": architecture,
+            // Every Mac that runs macOS 27 has Apple silicon. The variable stays for configs that use it.
+            "arch": "arm64",
             "brew_prefix": brewPrefix.path,
             "applications": applicationsDirectory.path,
             "state_dir": stateDirectory.path,
@@ -174,13 +169,6 @@ public struct SystemEnvironment: Sendable {
     }
 
     // MARK: Probes
-
-    static func hardwareArchitecture() -> String {
-        var isARM: Int32 = 0
-        var size = MemoryLayout<Int32>.size
-        if sysctlbyname("hw.optional.arm64", &isARM, &size, nil, 0) == 0, isARM == 1 { return "arm64" }
-        return "x86_64"
-    }
 
     static func computerName() -> String {
         if let name = SCDynamicStoreCopyComputerName(nil, nil) as String?, !name.isEmpty { return name }

@@ -16,12 +16,12 @@ public enum PackageActions {
             ) { CommandLineToolsAction.parse($0, system: system) },
             ActionDescriptor(
                 kind: "homebrew",
-                summary: "Homebrew itself, from the signed Homebrew.pkg on Apple silicon (install.sh on Intel or as a fallback), then brew update",
+                summary: "Homebrew itself, from the signed Homebrew.pkg (install.sh as a fallback), then brew update",
                 example: "- homebrew: install\n  method: pkg"
             ) { HomebrewAction.parse($0, system: system) },
             ActionDescriptor(
                 kind: "rosetta",
-                summary: "Rosetta 2 on Apple Silicon (skipped on Intel)",
+                summary: "Rosetta 2, which runs apps and tools built only for Intel",
                 example: "- rosetta: install"
             ) { RosettaAction.parse($0, system: system) },
             ActionDescriptor(

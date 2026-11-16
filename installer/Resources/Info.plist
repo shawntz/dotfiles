@@ -42,7 +42,5 @@
 	<string>© Shawn Schwartz. Fan-made Adventure Time art; not affiliated with Cartoon Network.</string>
 	<key>NSPrincipalClass</key>
 	<string>NSApplication</string>
-	<key>NSSupportsAutomaticGraphicsSwitching</key>
-	<true/>
 </dict>
 </plist>

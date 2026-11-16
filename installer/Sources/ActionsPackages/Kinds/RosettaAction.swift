@@ -1,7 +1,7 @@
 import Foundation
 import ShawnCore
 
-/// `- rosetta: install` installs Rosetta 2, for the occasional Intel-only tool on Apple Silicon.
+/// `- rosetta: install` installs Rosetta 2, for the occasional Intel-only tool.
 struct RosettaAction: Action {
     let system: MacSystem
 
@@ -14,21 +14,15 @@ struct RosettaAction: Action {
         return RosettaAction(system: system)
     }
 
-    private func isAppleSilicon(_ context: ActionContext) -> Bool {
-        context.environment.architecture == "arm64"
-    }
-
     private func isInstalled() -> Bool {
         FileManager.default.fileExists(atPath: system.rosettaRuntime.path)
     }
 
     func check(_ context: ActionContext) async -> CheckResult {
-        guard isAppleSilicon(context) else { return .needed("only applies to Apple Silicon") }
-        return isInstalled() ? .satisfied("installed") : .needed(nil)
+        isInstalled() ? .satisfied("installed") : .needed(nil)
     }
 
     func run(_ context: ActionContext) async throws -> ActionOutcome {
-        guard isAppleSilicon(context) else { return .skipped("this Mac has an Intel processor; Rosetta is not needed") }
         if !context.dryRun, isInstalled() { return .done("already installed") }
         if let refusal = Common.sandboxRefusal("installing Rosetta", context, system: system) { return refusal }
         try await context.runChecked(Command(system.softwareupdate, ["--install-rosetta", "--agree-to-license"]).asRoot())

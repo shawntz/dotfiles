@@ -372,7 +372,7 @@ final class Sandbox {
         system.spctl = shim("spctl", "echo accepted >&2").path
         shim("installer", packageInstalls
             ? "cp \"\(staged.path)\" \"\(brew.path)\"; echo 'installer: The install was successful.'"
-            : "echo 'installer: Error - the package is for arm64 only' >&2; exit 1")
+            : "echo 'installer: The install failed.' >&2; exit 1")
     }
 
     // MARK: Parsing and contexts

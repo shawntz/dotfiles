@@ -118,7 +118,6 @@ enum WebAppInfoPlist {
             "LSFileQuarantineEnabled": true,
             "NSHighResolutionCapable": true,
             "NSPrincipalClass": "NSApplication",
-            "NSSupportsAutomaticGraphicsSwitching": true,
             "NSAppTransportSecurity": ["NSAllowsArbitraryLoadsInWebContent": true],
             "NSCameraUsageDescription": "\(app.name) uses the camera when \(host) asks for it, for example in a video call.",
             "NSMicrophoneUsageDescription": "\(app.name) uses the microphone when \(host) asks for it, for example in a call.",

@@ -15,7 +15,7 @@ A Mac app that sets up a brand-new Mac the way Shawn's laptop is set up. It inst
 
 ### Download and open
 
-The app and `shawn` run on macOS 27 or later. An older macOS refuses to open the app.
+The app and `shawn` run on macOS 27 or later. An older macOS refuses to open the app. macOS 27 runs only on Apple silicon, so there is no Intel build.
 
 There is no release yet. Until there is one, build the app from a checkout with Xcode 27 or later, using `make app SIGN_IDENTITY=-` (see [Build, sign, notarize, release](#build-sign-notarize-release)), copy `build/Shawn's Dotfiles.app` to the new Mac and open it there. [If macOS won't open it](#if-macos-wont-open-it) has the fix. Once a release exists:
 
@@ -245,8 +245,8 @@ Everything that runs `brew` needs the `homebrew` item to have worked first.
 | kind | value | options | what it does |
 |---|---|---|---|
 | `xcode-clt` | `install` | none | Installs the Xcode Command Line Tools through `softwareupdate`, falling back to Apple's install dialog. Needs the admin password. |
-| `homebrew` | `install` | `method: pkg` (default) or `script` | On Apple silicon, installs Homebrew from its signed `Homebrew.pkg` after checking the signature. On Intel, or when the package fails, it runs the official `install.sh` instead. Then runs `brew update`. Needs the admin password. |
-| `rosetta` | `install` | none | Installs Rosetta 2 on Apple silicon. Skipped on Intel Macs. |
+| `homebrew` | `install` | `method: pkg` (default) or `script` | Installs Homebrew from its signed `Homebrew.pkg` after checking the signature. When the package fails, it runs the official `install.sh` instead. Then runs `brew update`. Needs the admin password. |
+| `rosetta` | `install` | none | Installs Rosetta 2, which runs apps and tools built only for Intel. Needs the admin password. |
 | `xcode` | `download` or `finish` | `timeout_minutes` (finish; default 180), `platforms: [iOS, watchOS, tvOS, visionOS]` (finish) | `download` asks the App Store question, keeps the Command Line Tools selected, starts Xcode downloading in the background with `mas` and moves on. It accepts the license as soon as Xcode lands. `finish` waits for Xcode, accepts the license, runs the first-launch setup, selects Xcode unless you selected another full Xcode, and installs any simulator `platforms`. If Xcode never arrives you get a checklist entry, not a failure. |
 | `tap` | `user/repo` | `trusted: true\|false` (default false), `url:` | `brew tap`, from `url:` when given. `trusted: true` also runs `brew trust`. |
 | `brew` | formula, `user/tap/name` for a third-party tap | `args: […]` | `brew install --formula`. |
@@ -392,7 +392,7 @@ Shawn's Dotfiles.app/Contents/
 
 `build-info.json` holds `{"version", "commit", "sourceTree"}`. `sourceTree` is the git object ids of `installer/Sources`, `installer/Package.swift` and `installer/Package.resolved` at `HEAD`, joined by commas, the same value `shawn` computes from its checkout. It is empty when those paths have uncommitted or untracked changes, when they changed during the build, or when the build is not from a git checkout, because then nobody can say which sources the binaries hold. When the installer puts a new `shawn` in place, it copies `sourceTree` and `commit` into `~/.shawn/state/cli.json`.
 
-`scripts/build-app.sh` builds for `arm64` by default. `ARCHS="arm64 x86_64"` builds each architecture and joins them with `lipo`. `CONFIGURATION=debug` makes a debug build, `OUTPUT_DIR` sets where the app goes (default `build/`), `CONFIG_DIR` bundles another config folder and `BUILD_NUMBER` sets `CFBundleVersion`.
+`scripts/build-app.sh` builds for Apple silicon (`arm64`) only. `CONFIGURATION=debug` makes a debug build, `OUTPUT_DIR` sets where the app goes (default `build/`), `CONFIG_DIR` bundles another config folder and `BUILD_NUMBER` sets `CFBundleVersion`.
 
 ### Signing
 
@@ -435,10 +435,10 @@ NOTARY_PROFILE=shawns-dotfiles make notarize      # only the 'make dmg' image, b
 
 | file | what it is |
 |---|---|
-| `Shawn's Dotfiles.app` | The universal app (arm64 and x86_64), signed. |
+| `Shawn's Dotfiles.app` | The app, built for Apple silicon and signed. |
 | `ShawnsDotfiles-<version>.dmg` | The disk image holding that app, signed and, with `NOTARY_PROFILE`, notarized. |
-| `shawn-<version>-macos-universal.tar.gz` | The `shawn` binary from inside the app. Self-update on Macs without a checkout installs this. |
-| `shawn-<version>-macos-universal.tar.gz.sha256` | Its checksum, in `shasum -c` format. |
+| `shawn-<version>-macos-arm64.tar.gz` | The `shawn` binary from inside the app. Self-update on Macs without a checkout installs this. |
+| `shawn-<version>-macos-arm64.tar.gz.sha256` | Its checksum, in `shasum -c` format. |
 | `shawn-cli.json` | `{"version", "tag", "url", "sha256", "sourceTree"}`. `shawn` reads this to find the tarball. `sourceTree` is the same value as in the app's `build-info.json`, and `release.sh` stops if the two differ. |
 
 ## Development
