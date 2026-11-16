@@ -102,7 +102,7 @@ func promptingRegistry(_ calls: ItemCalls) -> ActionRegistry {
 
 /// Holds `stop()` at the moment it answers `prompt` until the engine has acted on that answer (`acted` is
 /// signaled) or half a second has passed. The hook runs inside `stop()`, on the main thread, so whatever the
-/// engine does with the answer happens before `stop()` goes on: if the run were not cancelled by then, the
+/// engine does with the answer happens before `stop()` goes on: if the run were not canceled by then, the
 /// item would carry on as if nobody had pressed STOP. That is the race a real Stop & Quit loses only now and
 /// then; here it is lost every time. (The hook takes the place of the model's own "take the sheet down"
 /// callback, which `stop()` does not need: it clears the sheets itself.)
@@ -285,7 +285,7 @@ final class QuitDuringRunTests: XCTestCase {
 // MARK: - STOP while a sheet is up
 
 /// STOP answers the open sheet for the person ("no password", the question's default). The run must already
-/// be cancelled when the engine gets that answer, or it acts on it as if nobody had pressed STOP.
+/// be canceled when the engine gets that answer, or it acts on it as if nobody had pressed STOP.
 @MainActor
 final class StopAtAPromptTests: XCTestCase {
     func testStopAtTheUpFrontPasswordSheetStartsNoItem() async throws {

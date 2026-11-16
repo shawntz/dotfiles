@@ -1,5 +1,5 @@
 #!/bin/bash
-# Builds everything a release needs (universal app, disk image, CLI tarball and its manifest)
+# Builds everything a release needs (the app, disk image, CLI tarball and its manifest)
 # and prints the `gh release create` command to publish it. It never publishes, tags or pushes.
 # Run with --help for the options.
 # shellcheck source-path=SCRIPTDIR
@@ -12,10 +12,10 @@ usage() {
 Usage: scripts/release.sh [options]
 
 Builds release artifacts for ShawnCore.version into build/release/<version>/:
-  $APP_BUNDLE_NAME                    universal (arm64 + x86_64), signed
+  $APP_BUNDLE_NAME                      for Apple silicon (arm64), signed
   ShawnsDotfiles-<version>.dmg              notarized when NOTARY_PROFILE is set
-  shawn-<version>-macos-universal.tar.gz    the shawn CLI, for self-update on other Macs
-  shawn-<version>-macos-universal.tar.gz.sha256
+  shawn-<version>-macos-arm64.tar.gz        the shawn CLI, for self-update on other Macs
+  shawn-<version>-macos-arm64.tar.gz.sha256
   shawn-cli.json                            {version, tag, url, sha256, sourceTree}
 then prints the 'gh release create shawn-v<version> ...' command for you to run. It goes to
 stdout only when the release is ready to publish (Developer ID signed and notarized); otherwise
@@ -53,7 +53,7 @@ TAG="shawn-v$VERSION"
 OUTPUT_DIR="$(absolute_path "${OUTPUT_DIR:-$INSTALLER_ROOT/build/release/$VERSION}")"
 SCRIPTS="$INSTALLER_ROOT/scripts"
 APP="$OUTPUT_DIR/$APP_BUNDLE_NAME"
-TARBALL_NAME="shawn-$VERSION-macos-universal.tar.gz"
+TARBALL_NAME="shawn-$VERSION-macos-arm64.tar.gz"
 TARBALL="$OUTPUT_DIR/$TARBALL_NAME"
 MANIFEST="$OUTPUT_DIR/shawn-cli.json"
 DMG="$OUTPUT_DIR/ShawnsDotfiles-$VERSION.dmg"
@@ -101,7 +101,7 @@ export SIGN_IDENTITY="$SIGN_ID"
 step "Release $TAG, signed with $SIGN_LABEL ($SIGN_SOURCE)"
 mkdir -p "$OUTPUT_DIR"
 
-ARCHS="arm64 x86_64" CONFIGURATION=release OUTPUT_DIR="$OUTPUT_DIR" "$SCRIPTS/build-app.sh" >/dev/null
+CONFIGURATION=release OUTPUT_DIR="$OUTPUT_DIR" "$SCRIPTS/build-app.sh" >/dev/null
 
 # The tarball ships the app's own shawn, so the manifest must describe what the app says it was built from.
 BUILD_INFO="$APP/Contents/Resources/build-info.json"

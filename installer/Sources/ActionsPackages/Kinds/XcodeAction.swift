@@ -188,7 +188,7 @@ struct XcodeAction: Action {
         do {
             try await AppStore.install(id: Self.appStoreID, name: "Xcode", mas: mas, timeout: system.timing.xcodeDownloadTimeout, context)
         } catch {
-            if Common.isStop(error) { return .skipped("cancelled") }
+            if Common.isStop(error) { return .skipped("canceled") }
             let reason = AppStore.explain(error)
             context.warn(ActionError.sentences(reason, "opening Xcode in the App Store instead."))
             do {

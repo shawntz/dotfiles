@@ -15,7 +15,6 @@ final class EngineTests: XCTestCase {
 
     func testBootstrapStepRunsEndToEndAndIsANoOpTheSecondTime() async throws {
         let sandbox = Sandbox("engine")
-        sandbox.environment.architecture = "arm64"
         sandbox.installAskpassSudo()
         sandbox.installSoftwareUpdate()
         sandbox.installHomebrewInstallers()
@@ -75,7 +74,6 @@ final class EngineTests: XCTestCase {
 
     func testASandboxRunWithTheRealSystemToolsRefusesSystemWideChanges() async throws {
         let sandbox = Sandbox("engine")
-        sandbox.environment.architecture = "arm64"
         // Flagged as the real machine, but every tool points nowhere: if the guard failed, nothing could run anyway.
         var system = MacSystem()
         for keyPath: WritableKeyPath<MacSystem, String> in [\.softwareupdate, \.xcodeSelect, \.pkgutil, \.spctl, \.installer, \.codesign,
@@ -106,7 +104,6 @@ final class EngineTests: XCTestCase {
 
     func testADryRunOfEveryKindSucceedsAndChangesNothing() async throws {
         let sandbox = Sandbox("engine")
-        sandbox.environment.architecture = "arm64"
         let plan = try loadPlan(sandbox, step: """
         id: everything
         title: Everything

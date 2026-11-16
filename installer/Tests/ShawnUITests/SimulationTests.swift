@@ -114,7 +114,7 @@ final class SimulationTests: XCTestCase {
         XCTAssertEqual(status("Git email"), .done(nil), "nobody to ask, so the offered answer is taken")
         XCTAssertEqual(status("Xcode Command Line Tools"), .alreadyDone("already installed"))
         XCTAssertEqual(status("Package manager"), .done(nil), "the simulated password check accepts any password")
-        XCTAssertEqual(status("Intel helper"), .skipped("not needed on Apple silicon"))
+        XCTAssertEqual(status("Helper for older Macs"), .skipped("not needed on this Mac"))
         XCTAssertEqual(status("neovim"), .disabled, "optional items stay off")
         XCTAssertEqual(status("Screen saver"), .disabled, "the step that is off by default")
         XCTAssertEqual(status("Sign in to GitHub"), .done("signed in"))
@@ -339,7 +339,7 @@ final class SimulationTests: XCTestCase {
         let task = Task.detached {
             await engine.run(selection: .defaults(for: plan)) { event in
                 log.add(event)
-                // STOP while the third item runs: cancelled before its command starts, as a real STOP mid-command is.
+                // STOP while the third item runs: canceled before its command starts, as a real STOP mid-command is.
                 if case .itemStatus(_, .running) = event, runs.increment() == 3 { withUnsafeCurrentTask { $0?.cancel() } }
             }
         }

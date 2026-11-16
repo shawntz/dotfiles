@@ -15,7 +15,7 @@ struct HomebrewAction: Action {
     let system: MacSystem
 
     var title: String { "Homebrew" }
-    var subtitle: String? { method == .pkg ? "Homebrew.pkg on Apple silicon (install.sh on Intel or as a fallback)" : "install.sh" }
+    var subtitle: String? { method == .pkg ? "Homebrew.pkg (install.sh as a fallback)" : "install.sh" }
     var sudo: SudoNeed { .always }
 
     static func parse(_ parser: ItemParser, system: MacSystem) -> HomebrewAction {
@@ -39,8 +39,7 @@ struct HomebrewAction: Action {
         if let refusal = Common.sandboxRefusal("installing Homebrew", context, system: system) { return refusal }
 
         var installed = false
-        // The package is built for Apple Silicon only.
-        if method == .pkg && context.environment.architecture == "arm64" {
+        if method == .pkg {
             do {
                 try await installPackage(context)
                 installed = true

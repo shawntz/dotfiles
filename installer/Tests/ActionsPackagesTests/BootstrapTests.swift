@@ -252,7 +252,6 @@ final class CommandLineToolsTests: XCTestCase {
 final class HomebrewTests: XCTestCase {
     func testInstallsFromThePackageThenUpdatesAndRemembersIt() async throws {
         let sandbox = Sandbox()
-        sandbox.environment.architecture = "arm64"
         sandbox.installHomebrewInstallers()
 
         let result = try await sandbox.run("homebrew: install")
@@ -275,7 +274,6 @@ final class HomebrewTests: XCTestCase {
 
     func testFallsBackToTheScriptWhenThePackageFails() async throws {
         let sandbox = Sandbox()
-        sandbox.environment.architecture = "arm64"
         sandbox.installHomebrewInstallers(packageInstalls: false)
         let result = try await sandbox.run("homebrew: install")
         XCTAssertEqual(result.outcome, .done("installed"))
@@ -321,7 +319,6 @@ final class HomebrewTests: XCTestCase {
 
     func testDryRunTouchesNothing() async throws {
         let sandbox = Sandbox()
-        sandbox.environment.architecture = "arm64"
         sandbox.installHomebrewInstallers()
         let before = sandbox.snapshot()
         let result = try await sandbox.run("homebrew: install", dryRun: true)
@@ -336,9 +333,8 @@ final class HomebrewTests: XCTestCase {
 }
 
 final class RosettaTests: XCTestCase {
-    func testInstallsOnAppleSiliconThenIsSatisfied() async throws {
+    func testInstallsThenIsSatisfied() async throws {
         let sandbox = Sandbox()
-        sandbox.environment.architecture = "arm64"
         let runtime = sandbox.system.rosettaRuntime.path
         sandbox.shim("softwareupdate", "mkdir -p \"$(dirname \"\(runtime)\")\"; touch \"\(runtime)\"")
         let result = try await sandbox.run("rosetta: install")
@@ -348,17 +344,8 @@ final class RosettaTests: XCTestCase {
         XCTAssertEqual(second, .satisfied("installed"))
     }
 
-    func testSkippedOnIntel() async throws {
-        let sandbox = Sandbox()
-        sandbox.environment.architecture = "x86_64"
-        let result = try await sandbox.run("rosetta: install")
-        XCTAssertEqual(result.outcome, .skipped("this Mac has an Intel processor; Rosetta is not needed"))
-        XCTAssertEqual(sandbox.calls, [])
-    }
-
     func testMissingAfterInstallIsAnError() async throws {
         let sandbox = Sandbox()
-        sandbox.environment.architecture = "arm64"
         sandbox.shim("softwareupdate", "exit 0")
         do {
             _ = try await sandbox.run("rosetta: install")

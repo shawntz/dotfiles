@@ -184,7 +184,7 @@ final class BrowserWindowController: NSWindowController, NSWindowDelegate, NSMen
 
     func webView(_ webView: WKWebView, didFailProvisionalNavigation navigation: WKNavigation!, withError error: Error) {
         let error = error as NSError
-        // Cancelled loads, and loads that became downloads or went to another app, leave the page as it is.
+        // Canceled loads, and loads that became downloads or went to another app, leave the page as it is.
         guard !ErrorPage.isIgnorable(domain: error.domain, code: error.code) else { return }
         let failed = error.userInfo[NSURLErrorFailingURLErrorKey] as? URL ?? session.configuration.url
         // No base URL: the error page must not run with the failed site's origin.

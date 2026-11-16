@@ -78,7 +78,7 @@ public enum RemoteConfigError: Error, Equatable, Sendable, CustomStringConvertib
         case .insecureConnection:
             return "a secure connection to GitHub could not be made (a captive portal or network filter in the way?)"
         case .cancelled:
-            return "the download was cancelled"
+            return "the download was canceled"
         case .network(let message):
             return "network error: \(message)"
         case .cache(let message):

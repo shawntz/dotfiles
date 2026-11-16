@@ -3,13 +3,13 @@ import ShawnCore
 
 /// Small helpers shared by several kinds.
 enum Common {
-    /// Runs clean-up work to completion even when the item has been cancelled: a cancelled task
+    /// Runs clean-up work to completion even when the item has been canceled: a canceled task
     /// cannot start new processes, and a mounted disk image must still be detached.
     static func uncancellable<T: Sendable>(_ work: @escaping @Sendable () async -> T) async -> T {
         await Task { await work() }.value
     }
 
-    /// Sleeps, but wakes up (by throwing) as soon as the run is cancelled.
+    /// Sleeps, but wakes up (by throwing) as soon as the run is canceled.
     static func pause(_ seconds: TimeInterval) async throws {
         guard seconds > 0 else {
             try Task.checkCancellation()

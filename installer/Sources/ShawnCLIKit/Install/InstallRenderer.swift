@@ -243,7 +243,7 @@ final class InstallRenderer: @unchecked Sendable {
         if summary.needsAttention > 0 { counts.append("\(summary.needsAttention) need\(summary.needsAttention == 1 ? "s" : "") you") }
         counts.append("\(summary.failures.count) failed")
         permanent("  " + counts.joined(separator: " · ") + style.muted("  (\(Self.duration(summary.duration)))"))
-        if summary.wasCancelled { permanent("  " + style.warn("Cancelled before the end. Run it again to pick up where it stopped.")) }
+        if summary.wasCancelled { permanent("  " + style.warn("Canceled before the end. Run it again to pick up where it stopped.")) }
         if !summary.failures.isEmpty {
             permanent("")
             permanent(style.bad("Failed:"))

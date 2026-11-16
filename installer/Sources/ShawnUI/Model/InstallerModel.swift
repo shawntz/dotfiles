@@ -400,8 +400,8 @@ final class InstallerModel {
         let engine = InstallEngine(plan: plan, environment: environment, options: options, interaction: interaction)
         let selection = self.selection
         let pump = EventPump { [weak self] events in self?.apply(events) }
-        // `run` rather than `events(selection:)`: cancelling the run must still deliver the engine's own
-        // final `.runFinished` summary, and cancelling an `events` stream's consumer would drop it.
+        // `run` rather than `events(selection:)`: canceling the run must still deliver the engine's own
+        // final `.runFinished` summary, and canceling an `events` stream's consumer would drop it.
         runTask = Task.detached(priority: .userInitiated) {
             await engine.run(selection: selection) { event in pump.push(event) }
         }
@@ -411,7 +411,7 @@ final class InstallerModel {
     func stop() {
         guard phase == .running, !isStopping else { return }
         isStopping = true
-        // Cancel first. The engine resumes the moment a prompt is answered, and cancelling does not reach every
+        // Cancel first. The engine resumes the moment a prompt is answered, and canceling does not reach every
         // prompt (the password is asked from a task of its own), so an answer given before the cancel lets the
         // waiting item go on and run as if nobody had pressed STOP.
         runTask?.cancel()

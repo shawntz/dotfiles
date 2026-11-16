@@ -72,7 +72,7 @@ enum Downloader {
     }
 
     /// Detaches the image (forcing it if a plain detach fails) and removes the mount point.
-    /// Runs to completion even when the item has been cancelled.
+    /// Runs to completion even when the item has been canceled.
     static func detach(_ mountPoint: URL, _ context: ActionContext, system: MacSystem) async {
         await Common.uncancellable {
             do {

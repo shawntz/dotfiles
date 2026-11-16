@@ -24,20 +24,18 @@ export GIT_CONFIG_GLOBAL=/dev/null GIT_CONFIG_NOSYSTEM=1 GIT_CEILING_DIRECTORIES
 export GIT_AUTHOR_NAME=Test GIT_AUTHOR_EMAIL=test@example.com
 export GIT_COMMITTER_NAME=Test GIT_COMMITTER_EMAIL=test@example.com
 export HOME="$SUITE/home" XDG_CONFIG_HOME="$SUITE/home/.config" NO_COLOR=1
-unset SIGN_IDENTITY NOTARY_PROFILE ALLOW_DIRTY ARCHS CONFIGURATION OUTPUT_DIR CONFIG_DIR APP_PATH BUILD_NUMBER RELEASE_REPO
+unset SIGN_IDENTITY NOTARY_PROFILE ALLOW_DIRTY CONFIGURATION OUTPUT_DIR CONFIG_DIR APP_PATH BUILD_NUMBER RELEASE_REPO
 mkdir -p "$HOME"
 BASE_PATH="$PATH"
 
-# Tiny real executables, one per architecture, that the fake swift hands out as build products.
+# A tiny real executable that the fake swift hands out as every build product.
 export FAKE_BINARIES="$SUITE/binaries"
 mkdir -p "$FAKE_BINARIES"
-for arch in arm64 x86_64; do
-    if ! printf 'int main(void) { return 0; }\n' | cc -arch "$arch" -x c -o "$FAKE_BINARIES/$arch" - 2>"$SUITE/cc.log"; then
-        cat "$SUITE/cc.log" >&2
-        echo "error: cannot compile a test executable for $arch with cc; install the Command Line Tools" >&2
-        exit 1
-    fi
-done
+if ! printf 'int main(void) { return 0; }\n' | cc -arch arm64 -x c -o "$FAKE_BINARIES/arm64" - 2>"$SUITE/cc.log"; then
+    cat "$SUITE/cc.log" >&2
+    echo "error: cannot compile a test executable with cc; install the Command Line Tools" >&2
+    exit 1
+fi
 
 # The identity the fake codesign pretends is in the keychain twice.
 export FAKE_IDENTITY_NAME="Developer ID Application: Test Person (TEAM123456)"

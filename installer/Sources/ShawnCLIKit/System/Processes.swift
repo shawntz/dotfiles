@@ -117,7 +117,7 @@ struct SystemProcessLauncher: ProcessLaunching {
             }
             return ProcessResult(exitCode: 127, stdout: "", stderr: "", launchError: error.description)
         } catch {
-            return ProcessResult(exitCode: 130, stdout: "", stderr: "", launchError: "cancelled")
+            return ProcessResult(exitCode: 130, stdout: "", stderr: "", launchError: "canceled")
         }
     }
 
@@ -139,11 +139,7 @@ struct SystemProcessLauncher: ProcessLaunching {
             posix_spawn_file_actions_addinherit_np(&fileActions, descriptor)
         }
         if let directory = request.currentDirectory?.path {
-            if #available(macOS 26.0, *) {
-                posix_spawn_file_actions_addchdir(&fileActions, directory)
-            } else {
-                posix_spawn_file_actions_addchdir_np(&fileActions, directory)
-            }
+            posix_spawn_file_actions_addchdir(&fileActions, directory)
         }
 
         var attributes: posix_spawnattr_t?
@@ -205,11 +201,7 @@ enum BoundedProcess {
         posix_spawn_file_actions_adddup2(&fileActions, writeEnd, STDOUT_FILENO)
         posix_spawn_file_actions_addopen(&fileActions, STDERR_FILENO, "/dev/null", O_WRONLY, 0)
         if let currentDirectory {
-            if #available(macOS 26.0, *) {
-                posix_spawn_file_actions_addchdir(&fileActions, currentDirectory)
-            } else {
-                posix_spawn_file_actions_addchdir_np(&fileActions, currentDirectory)
-            }
+            posix_spawn_file_actions_addchdir(&fileActions, currentDirectory)
         }
         var attributes: posix_spawnattr_t?
         posix_spawnattr_init(&attributes)

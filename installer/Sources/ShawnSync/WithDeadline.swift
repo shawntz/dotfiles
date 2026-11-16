@@ -22,7 +22,7 @@ func withDeadline<T: Sendable>(seconds: TimeInterval,
                 do {
                     try await Task.sleep(nanoseconds: sleepNanoseconds(seconds))
                 } catch {
-                    // Cancelled because the operation already finished.
+                    // Canceled because the operation already finished.
                     return
                 }
                 race.finish(.failure(RemoteConfigError.timedOut(seconds: seconds)))
@@ -45,7 +45,7 @@ func sleepNanoseconds(_ seconds: TimeInterval) -> UInt64 {
 private final class DeadlineRace<T: Sendable>: @unchecked Sendable {
     private let lock = NSLock()
     private var continuation: CheckedContinuation<T, Error>?
-    /// A result that arrived before `begin` (the caller was cancelled before it started waiting).
+    /// A result that arrived before `begin` (the caller was canceled before it started waiting).
     private var early: Result<T, Error>?
     private var finished = false
     private var tasks: [Task<Void, Never>] = []

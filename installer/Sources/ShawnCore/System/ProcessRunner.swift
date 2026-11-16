@@ -34,7 +34,7 @@ public enum ProcessRunnerError: Error, Sendable, CustomStringConvertible {
 /// stdout/stderr, and each runs in a session of its own: it has no controlling
 /// terminal (so nothing can stop on `/dev/tty` waiting for a keyboard, even when
 /// the CLI is run from Terminal) and leads a process group named after its pid
-/// (so cancelling takes the whole tree down with it).
+/// (so canceling takes the whole tree down with it).
 public enum ProcessRunner {
     /// How long to keep draining output after the child exits. This is a hard limit: a grandchild that
     /// inherited the pipes (a daemon an installer started) would otherwise keep us waiting for as long as it lives.
@@ -168,11 +168,7 @@ public enum ProcessRunner {
         posix_spawn_file_actions_adddup2(&fileActions, outPipe.write, STDOUT_FILENO)
         posix_spawn_file_actions_adddup2(&fileActions, errPipe.write, STDERR_FILENO)
         if let currentDirectory {
-            if #available(macOS 26.0, *) {
-                posix_spawn_file_actions_addchdir(&fileActions, currentDirectory)
-            } else {
-                posix_spawn_file_actions_addchdir_np(&fileActions, currentDirectory)
-            }
+            posix_spawn_file_actions_addchdir(&fileActions, currentDirectory)
         }
 
         var attributes: posix_spawnattr_t?

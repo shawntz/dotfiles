@@ -236,7 +236,7 @@ final class InstallEngineTests: XCTestCase {
         XCTAssertTrue(summary.wasCancelled)
         XCTAssertFalse(summary.succeeded)
         XCTAssertLessThan(Date().timeIntervalSince(started), 4)
-        XCTAssertFalse(harness.log.all.contains("run:c:dryRun=false"), "nothing after the cancelled item may run")
+        XCTAssertFalse(harness.log.all.contains("run:c:dryRun=false"), "nothing after the canceled item may run")
     }
 
     func testStoppingMidItemIsNotAFailureAndTheStepIsNotCalledDone() async throws {
@@ -261,7 +261,7 @@ final class InstallEngineTests: XCTestCase {
     }
 
     func testStopNoticedBetweenItemsMarksTheStepStoppedOnlyIfSomethingWasLeft() async throws {
-        // 'present' items finish instantly; the run is cancelled before it starts, so nothing gets its turn.
+        // 'present' items finish instantly; the run is canceled before it starts, so nothing gets its turn.
         let harness = try harness(["01.yaml": "id: one\ntitle: One\nitems:\n  - present: a\n  - ok: b\n"])
         let events = Recorder<InstallEvent>()
         let task = Task { () -> InstallSummary in

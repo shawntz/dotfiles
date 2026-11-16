@@ -207,12 +207,12 @@ final class MasTests: XCTestCase {
         running.cancel()
         do {
             _ = try await running.value
-            XCTFail("expected the item to be cancelled")
+            XCTFail("expected the item to be canceled")
         } catch is CancellationError {
         }
         let withdrawn = await eventually { nobody.withdrawn == 1 }
         XCTAssertTrue(withdrawn)
-        XCTAssertTrue(sandbox.calls("root mas").isEmpty, "the default answer a cancelled sheet returns is not taken as 'signed in'")
+        XCTAssertTrue(sandbox.calls("root mas").isEmpty, "the default answer a canceled sheet returns is not taken as 'signed in'")
         let remembered = await sandbox.shared.value(AppStore.signInKey, as: AppStore.SignIn.self)
         XCTAssertNil(remembered, "a stopped run decides nothing")
     }
@@ -533,7 +533,7 @@ final class XcodeTests: XCTestCase {
         let started = Date()
         await sandbox.shared.cancelBackgroundWork()
         let outcome = try await task.value
-        XCTAssertEqual(outcome, .skipped("cancelled"))
+        XCTAssertEqual(outcome, .skipped("canceled"))
         XCTAssertLessThan(Date().timeIntervalSince(started), 10)
     }
 

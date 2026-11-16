@@ -22,7 +22,7 @@ enum Simulation {
             .present(reason: parser.options.string("reason", default: "already installed"))
         })
         registry.register(descriptor(kind: "sim-skip", summary: "does not apply on this Mac",
-                                     example: "- sim-skip: Rosetta\n  reason: not needed here", timeScale: timeScale) { parser in
+                                     example: "- sim-skip: Helper for older Macs\n  reason: not needed on this Mac", timeScale: timeScale) { parser in
             .skip(reason: parser.options.requiredString("reason"))
         })
         registry.register(descriptor(kind: "sim-fail", summary: "fails with a realistic error",

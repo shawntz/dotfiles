@@ -63,7 +63,7 @@ struct TerminalInteraction: UserInteraction {
         return prompt + ": "
     }
 
-    /// Reads one line from the terminal on its own thread. When the waiting task is cancelled (a question
+    /// Reads one line from the terminal on its own thread. When the waiting task is canceled (a question
     /// that timed out, a run that was stopped) the read ends within a moment and the answer is nil, so a
     /// withdrawn prompt never stays behind to swallow the next line typed or to compete with a later prompt.
     /// The same happens when the run's `PromptScope` is withdrawn, which also reaches a read that a task of
@@ -86,7 +86,7 @@ struct TerminalInteraction: UserInteraction {
 
 /// The prompts of one run, so that stopping the run withdraws them all.
 ///
-/// Cancelling the run's task is not enough: the administrator password is asked from a task of its own
+/// Canceling the run's task is not enough: the administrator password is asked from a task of its own
 /// (`SudoSession` shares one prompt between the items that need it), which that cancellation never reaches.
 /// The scope is bound as a task local around the run, and task locals are handed down to such tasks too.
 /// After `withdraw()`, the prompt that is open ends within a moment with no answer, and any prompt the run
@@ -108,7 +108,7 @@ final class PromptScope: @unchecked Sendable {
         for read in reads { read.cancel() }
     }
 
-    /// A read is starting; it is cancelled at once if the scope was already withdrawn.
+    /// A read is starting; it is canceled at once if the scope was already withdrawn.
     func enter(_ read: TTY.Cancellation) {
         let turnedAway = lock.withLock { () -> Bool in
             if !withdrawn { open[ObjectIdentifier(read)] = read }
@@ -142,7 +142,7 @@ enum TTY {
     /// How often a cancellable read looks at its `Cancellation` while no input is waiting.
     static let cancellationPollMilliseconds: Int32 = 100
 
-    /// Reads one line from `/dev/tty`; nil when there is no terminal, input ended, or the read was cancelled.
+    /// Reads one line from `/dev/tty`; nil when there is no terminal, input ended, or the read was canceled.
     static func readLine(prompt: String, secret: Bool, cancellation: Cancellation? = nil) -> String? {
         let descriptor = open("/dev/tty", O_RDWR | O_NOCTTY)
         guard descriptor >= 0 else { return nil }

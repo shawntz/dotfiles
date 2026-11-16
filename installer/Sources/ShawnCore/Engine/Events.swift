@@ -40,7 +40,7 @@ public enum ItemStatus: Equatable, Sendable {
     case done(String?)
     /// Nothing to do: already in the desired state.
     case alreadyDone(String?)
-    /// Not applicable here (wrong architecture, prerequisite deliberately absent).
+    /// Not applicable here (prerequisite deliberately absent).
     case skipped(String)
     /// Did what it could; a person has to finish it.
     case needsAttention(String)

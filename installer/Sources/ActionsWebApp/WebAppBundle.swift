@@ -113,12 +113,11 @@ enum WebAppInfoPlist {
             "CFBundlePackageType": "APPL",
             "CFBundleShortVersionString": ShawnCore.version,
             "CFBundleVersion": ShawnCore.version,
-            "LSMinimumSystemVersion": "14.0",
+            "LSMinimumSystemVersion": MinimumMacOS.infoPlistValue,
             // Files the app downloads get the same Gatekeeper check as a browser's downloads.
             "LSFileQuarantineEnabled": true,
             "NSHighResolutionCapable": true,
             "NSPrincipalClass": "NSApplication",
-            "NSSupportsAutomaticGraphicsSwitching": true,
             "NSAppTransportSecurity": ["NSAllowsArbitraryLoadsInWebContent": true],
             "NSCameraUsageDescription": "\(app.name) uses the camera when \(host) asks for it, for example in a video call.",
             "NSMicrophoneUsageDescription": "\(app.name) uses the microphone when \(host) asks for it, for example in a call.",

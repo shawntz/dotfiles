@@ -18,7 +18,7 @@ NO_SELF_UPDATE := SHAWN_NO_SELF_UPDATE=1 SHAWN_NO_UPDATE=1
 help: ## List the targets
 	@echo "Shawn's Dotfiles. Targets:"
 	@awk 'BEGIN { FS = ":.*## " } /^[a-z-]+:.*## / { printf "  make %-13s %s\n", $$1, $$2 }' $(MAKEFILE_LIST)
-	@echo "Variables: SIGN_IDENTITY, ARCHS, CONFIGURATION, NOTARY_PROFILE, MEDIA_DIR, PYTHON (see scripts/*.sh --help)."
+	@echo "Variables: SIGN_IDENTITY, CONFIGURATION, NOTARY_PROFILE, MEDIA_DIR, PYTHON (see scripts/*.sh --help)."
 
 build: ## Debug build of the app, the CLI and the web-app shell
 	$(SWIFT) build $(PACKAGE)
@@ -44,7 +44,7 @@ dmg: app ## Build the app, then build/ShawnsDotfiles-<version>.dmg
 notarize: ## Notarize and staple the 'make dmg' image (needs NOTARY_PROFILE; not the release image)
 	"$(ROOT)/scripts/notarize.sh"
 
-release: ## Universal app, disk image, CLI tarball and manifest; prints the gh command
+release: ## App, disk image, CLI tarball and manifest; prints the gh command
 	"$(ROOT)/scripts/release.sh"
 
 install-cli: ## Build the CLI (release) and install it as ~/.local/bin/shawn

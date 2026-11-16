@@ -76,7 +76,7 @@ final class ScriptedInteraction: UserInteraction, @unchecked Sendable {
 }
 
 /// Never answers on its own, like the app's question sheet with nobody at the Mac. Like the app, it gives up
-/// with the default option when its task is cancelled, and counts how often that happened.
+/// with the default option when its task is canceled, and counts how often that happened.
 final class SilentInteraction: UserInteraction, @unchecked Sendable {
     private let lock = NSLock()
     private var askedCount = 0
@@ -372,7 +372,7 @@ final class Sandbox {
         system.spctl = shim("spctl", "echo accepted >&2").path
         shim("installer", packageInstalls
             ? "cp \"\(staged.path)\" \"\(brew.path)\"; echo 'installer: The install was successful.'"
-            : "echo 'installer: Error - the package is for arm64 only' >&2; exit 1")
+            : "echo 'installer: The install failed.' >&2; exit 1")
     }
 
     // MARK: Parsing and contexts

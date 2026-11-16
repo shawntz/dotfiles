@@ -56,14 +56,6 @@ build/
 .gnupg/
 .aws/
 .config/rclone/
-.config/google-chrome/
-.config/chromium/
-.config/BraveSoftware/
-.config/Slack/
-.config/discord/
-.config/Code/
-.config/zoomus/
-.config/teams/
 
 # --------------------------------------------------------------------
 # Miscellaneous
@@ -74,7 +66,5 @@ build/
 *.crdownload
 *.download
 *.partial
-Tinyspeck.png
 
 **/.DS_Store
-.zshrc

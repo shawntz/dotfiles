@@ -5,7 +5,7 @@ enum ErrorPage {
     /// WKWebView reports policy interruptions in legacy WebKit's domain, not in `WKError.errorDomain`.
     static let webKitErrorDomain = "WebKitErrorDomain"
     /// `WebKitErrorFrameLoadInterruptedByPolicyChange`: the response became a download, or the navigation was
-    /// cancelled by the policy (sent to another app, asked about, refused).
+    /// canceled by the policy (sent to another app, asked about, refused).
     static let frameLoadInterruptedByPolicyChange = 102
     /// `WebKitErrorPlugInWillHandleLoad`: a plug-in (a PDF or media view) took the load over.
     static let plugInWillHandleLoad = 204

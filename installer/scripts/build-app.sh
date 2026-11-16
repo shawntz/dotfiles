@@ -10,12 +10,11 @@ usage() {
     cat <<EOF
 Usage: scripts/build-app.sh [options]
 
-Builds "$APP_BUNDLE_NAME" with swift build, bundles config/, signs it and checks the signature.
-Works from any directory. Every option can also be set with the environment variable shown.
+Builds "$APP_BUNDLE_NAME" for Apple silicon with swift build, bundles config/, signs it and
+checks the signature. Works from any directory. Every option can also be set with the
+environment variable shown.
 
   -c, --configuration NAME  release or debug                          [CONFIGURATION, default release]
-  -a, --archs "LIST"        arm64, x86_64, or "arm64 x86_64" for a universal app
-                                                                      [ARCHS, default arm64]
   -s, --sign IDENTITY       codesign identity (name or SHA-1); "-" signs ad hoc
                                                                       [SIGN_IDENTITY, default: auto]
   -o, --output DIR          where the app goes                        [OUTPUT_DIR, default build/]
@@ -37,14 +36,12 @@ by Gatekeeper on a Mac that downloads it or receives it by AirDrop. Helpers are 
 the app, all with the hardened runtime; a secure timestamp is added only for a real identity.
 
 Examples:
-  scripts/build-app.sh                              # release, arm64, auto identity
+  scripts/build-app.sh                              # release, auto identity
   SIGN_IDENTITY=- scripts/build-app.sh              # ad hoc
-  scripts/build-app.sh --archs "arm64 x86_64"       # universal
 EOF
 }
 
 CONFIGURATION="${CONFIGURATION:-release}"
-ARCHS="${ARCHS:-arm64}"
 OUTPUT_DIR="${OUTPUT_DIR:-$INSTALLER_ROOT/build}"
 CONFIG_DIR="${CONFIG_DIR:-$INSTALLER_ROOT/config}"
 PRINT_IDENTITY=0
@@ -52,7 +49,6 @@ PRINT_IDENTITY=0
 while [ $# -gt 0 ]; do
     case "$1" in
         -c|--configuration) [ $# -ge 2 ] || die "$1 needs a value"; CONFIGURATION="$2"; shift 2 ;;
-        -a|--archs) [ $# -ge 2 ] || die "$1 needs a value"; ARCHS="$2"; shift 2 ;;
         -s|--sign) [ $# -ge 2 ] || die "$1 needs a value"; SIGN_IDENTITY="$2"; shift 2 ;;
         -o|--output) [ $# -ge 2 ] || die "$1 needs a value"; OUTPUT_DIR="$2"; shift 2 ;;
         --config) [ $# -ge 2 ] || die "$1 needs a value"; CONFIG_DIR="$2"; shift 2 ;;
@@ -73,15 +69,6 @@ case "$CONFIGURATION" in
     *) die "configuration must be release or debug, not \"$CONFIGURATION\"" ;;
 esac
 
-ARCH_LIST=()
-for arch in $ARCHS; do
-    case "$arch" in
-        arm64|x86_64) ARCH_LIST+=("$arch") ;;
-        *) die "unsupported architecture \"$arch\"" "Use arm64, x86_64, or \"arm64 x86_64\"." ;;
-    esac
-done
-[ ${#ARCH_LIST[@]} -gt 0 ] || die "ARCHS is empty" "Use arm64, x86_64, or \"arm64 x86_64\"."
-
 OUTPUT_DIR="$(absolute_path "$OUTPUT_DIR")"
 CONFIG_DIR="$(absolute_path "$CONFIG_DIR")"
 [ -f "$CONFIG_DIR/installer.yaml" ] || die "no installer.yaml in $CONFIG_DIR" \
@@ -101,40 +88,29 @@ trap 'rm -rf "$STAGE"' EXIT
 # MARK: Provenance
 
 # Which committed sources the binaries come from, for build-info.json. Read before compiling and
-# again after, so an edit made while swift build runs leaves the record empty (unknown) rather than
-# naming sources the binary may not match.
+# again once the binaries are in the app, so an edit made in between leaves the record empty
+# (unknown) rather than naming sources the binaries may not match.
 source_provenance
 BUILT_FROM_TREE="$SOURCE_TREE"
 
 # MARK: Compile
 
-# SwiftPM's default build system writes every architecture to the same products folder, so each
-# architecture's binaries are copied aside before the next build replaces them.
-BIN_DIRS=()
-for arch in "${ARCH_LIST[@]}"; do
-    step "Building $CONFIGURATION for $arch"
-    # Progress and compiler errors go to stderr; stdout is only the finished app's path.
-    swift build -c "$CONFIGURATION" --arch "$arch" >&2
-    bin_dir="$(swift build -c "$CONFIGURATION" --arch "$arch" --show-bin-path)"
-    # SwiftPM resource bundles would be looked up next to the .app, which breaks signing; the
-    # package keeps its runtime files in config/ instead, so refuse rather than ship a broken app.
-    for bundle in "$bin_dir"/*.bundle; do
-        [ -e "$bundle" ] || continue
-        die "found the SwiftPM resource bundle $(basename "$bundle")" \
-            "build-app.sh does not package target resources. Keep runtime files under config/."
-    done
-    mkdir -p "$STAGE/products/$arch"
-    for product in "${PRODUCTS[@]}"; do
-        [ -x "$bin_dir/$product" ] || die "swift build finished but $bin_dir/$product is missing"
-        [ "$(lipo -archs "$bin_dir/$product")" = "$arch" ] ||
-            die "$bin_dir/$product is $(lipo -archs "$bin_dir/$product"), not $arch"
-        cp "$bin_dir/$product" "$STAGE/products/$arch/$product"
-    done
-    BIN_DIRS+=("$STAGE/products/$arch")
+# arm64 only: the package's minimum, macOS 27, does not run on Intel Macs.
+step "Building $CONFIGURATION for arm64"
+# Progress and compiler errors go to stderr; stdout is only the finished app's path.
+swift build -c "$CONFIGURATION" --arch arm64 >&2
+BIN_DIR="$(swift build -c "$CONFIGURATION" --arch arm64 --show-bin-path)"
+# SwiftPM resource bundles would be looked up next to the .app, which breaks signing; the
+# package keeps its runtime files in config/ instead, so refuse rather than ship a broken app.
+for bundle in "$BIN_DIR"/*.bundle; do
+    [ -e "$bundle" ] || continue
+    die "found the SwiftPM resource bundle $(basename "$bundle")" \
+        "build-app.sh does not package target resources. Keep runtime files under config/."
+done
+for product in "${PRODUCTS[@]}"; do
+    [ -x "$BIN_DIR/$product" ] || die "swift build finished but $BIN_DIR/$product is missing"
 done
 
-source_provenance
-[ "$SOURCE_TREE" = "$BUILT_FROM_TREE" ] || SOURCE_TREE=""
 # MARK: Icon
 
 ICON="$INSTALLER_ROOT/Resources/AppIcon.icns"
@@ -152,22 +128,15 @@ step "Assembling $APP_BUNDLE_NAME $VERSION"
 mkdir -p "$APP/Contents/MacOS" "$APP/Contents/Helpers" "$APP/Contents/Resources"
 
 place_binary() { # <product> <destination>
-    local product="$1" destination="$2" inputs=() dir
-    for dir in "${BIN_DIRS[@]}"; do inputs+=("$dir/$product"); done
-    if [ ${#inputs[@]} -eq 1 ]; then
-        cp "${inputs[0]}" "$destination"
-    else
-        lipo -create -output "$destination" "${inputs[@]}"
-    fi
-    chmod 0755 "$destination"
-    local have want
-    have="$(lipo -archs "$destination" | tr ' ' '\n' | sort | tr '\n' ' ')"
-    want="$(printf '%s\n' "${ARCH_LIST[@]}" | sort | tr '\n' ' ')"
-    [ "$have" = "$want" ] || die "$product has architectures \"$have\", expected \"$want\""
+    cp "$BIN_DIR/$1" "$2"
+    chmod 0755 "$2"
 }
 place_binary "$APP_EXECUTABLE" "$APP/Contents/MacOS/$APP_EXECUTABLE"
 place_binary shawn "$APP/Contents/Helpers/shawn"
 place_binary WebAppShell "$APP/Contents/Helpers/WebAppShell"
+# The second read of the sources (see Provenance), now that the app holds the binaries.
+source_provenance
+[ "$SOURCE_TREE" = "$BUILT_FROM_TREE" ] || SOURCE_TREE=""
 
 ditto --norsrc --noextattr --noacl "$CONFIG_DIR" "$APP/Contents/Resources/config"
 find "$APP/Contents/Resources/config" -name .DS_Store -delete

@@ -575,7 +575,7 @@ final class RemoteConfigTests: XCTestCase {
 
         let result = await task.value
 
-        assertFellBack(result, mentioning: ["cancelled"])
+        assertFellBack(result, mentioning: ["canceled"])
         hanging.release()
     }
 

@@ -82,7 +82,7 @@ struct InstallCommand: BuiltinCommand {
         return summary.failures.isEmpty ? ExitCode.ok : ExitCode.failure
     }
 
-    /// Runs the engine, turning the first Ctrl-C into a clean stop (the item in progress is cancelled, its
+    /// Runs the engine, turning the first Ctrl-C into a clean stop (the item in progress is canceled, its
     /// command terminated, an open question or password prompt withdrawn, and the summary still printed)
     /// and a second one into an immediate exit.
     static func run(engine: InstallEngine, selection: Selection, renderer: InstallRenderer, catchInterrupts: Bool, context: CLIContext) async -> InstallSummary {
@@ -165,7 +165,7 @@ final class InterruptHandler: @unchecked Sendable {
         }
         switch Self.action(press: press) {
         case .cancelRun:
-            err.write("\r\u{1B}[2K" + style.warn("■") + " stopping: cancelling the item in progress, then the summary… (Ctrl-C again to quit now)\n")
+            err.write("\r\u{1B}[2K" + style.warn("■") + " stopping: canceling the item in progress, then the summary… (Ctrl-C again to quit now)\n")
             // The run first, so that a withdrawn password prompt (no answer) finds the run already stopping.
             cancel()
             // Echo stays as it is: a password prompt keeps it off until its read has ended, and then puts it back.

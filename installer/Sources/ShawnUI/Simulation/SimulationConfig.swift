@@ -131,8 +131,8 @@ enum SimulationConfig {
             output:
               - "==> Downloading Amphetamine (5.3.2)"
               - "==> Installed Amphetamine (5.3.2)"
-          - sim-skip: Intel helper
-            reason: not needed on Apple silicon
+          - sim-skip: Helper for older Macs
+            reason: not needed on this Mac
           - sim-install: Spotify
             command: brew install --cask spotify
             progress: true

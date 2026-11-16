@@ -262,7 +262,7 @@ final class DownloadTests: XCTestCase {
             XCTFail("expected cancellation")
         } catch is CancellationError {
         }
-        XCTAssertFalse(try sandbox.hasMountedImage(), "the image must be detached after cancelling")
+        XCTAssertFalse(try sandbox.hasMountedImage(), "the image must be detached after canceling")
         XCTAssertEqual(sandbox.leftovers, [])
     }
 

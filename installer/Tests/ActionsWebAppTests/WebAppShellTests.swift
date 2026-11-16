@@ -280,7 +280,7 @@ final class WebAppShellTests: XCTestCase {
     }
 
     func testDownloadsAndCancelledLoadsDoNotReplaceThePageWithAnErrorPage() throws {
-        // What WKWebView reports when a response becomes a download or a navigation is cancelled by policy.
+        // What WKWebView reports when a response becomes a download or a navigation is canceled by policy.
         XCTAssertEqual(try errorDecision(["WebKitErrorDomain", "102"])["showsErrorPage"] as? Bool, false)
         XCTAssertEqual(try errorDecision(["WebKitErrorDomain", "204"])["showsErrorPage"] as? Bool, false)
         XCTAssertEqual(try errorDecision(["NSURLErrorDomain", "-999"])["showsErrorPage"] as? Bool, false)

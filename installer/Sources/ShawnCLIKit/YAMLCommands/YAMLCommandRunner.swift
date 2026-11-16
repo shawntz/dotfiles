@@ -200,7 +200,7 @@ enum YAMLCommandRunner {
     }
 }
 
-/// Ctrl-C during an update: cancelling the capture terminates the update's process group (SIGTERM, then
+/// Ctrl-C during an update: canceling the capture terminates the update's process group (SIGTERM, then
 /// SIGKILL). A Ctrl-C that comes before the capture task exists cancels it as soon as it does.
 private final class UpdateStop: @unchecked Sendable {
     private let lock = NSLock()
