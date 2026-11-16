@@ -1,11 +1,12 @@
 #!/bin/bash
 # Tests for the build scripts: build-app.sh, make-dmg.sh, notarize.sh, release.sh,
-# check-config-gitignore.sh and make-media.sh. Usage: scripts/tests/run.sh [part of a test name]
+# publish-release.sh, ci-keychain.sh, check-config-gitignore.sh and make-media.sh.
+# Usage: scripts/tests/run.sh [part of a test name]
 #
 # Each test runs a copy of the scripts in its own throwaway folder. Fakes from tests/fakes stand in
-# for swift, codesign, hdiutil, xcrun, spctl and security where a test asks for them, so nothing is
-# compiled by SwiftPM, signed with a real identity (only ad hoc), sent to Apple or read from the
-# keychain. git runs without your global config, so your hooks, signing and excludes stay out.
+# for swift, codesign, hdiutil, xcrun, spctl, security and gh where a test asks for them, so nothing
+# is compiled by SwiftPM, signed with a real identity (only ad hoc), sent to Apple or GitHub, or read
+# from the keychain. git runs without your global config, so your hooks, signing and excludes stay out.
 # shellcheck source-path=SCRIPTDIR
 # The globals set here are read by the *_test.sh files this sources.
 # shellcheck disable=SC2034
@@ -25,6 +26,7 @@ export GIT_AUTHOR_NAME=Test GIT_AUTHOR_EMAIL=test@example.com
 export GIT_COMMITTER_NAME=Test GIT_COMMITTER_EMAIL=test@example.com
 export HOME="$SUITE/home" XDG_CONFIG_HOME="$SUITE/home/.config" NO_COLOR=1
 unset SIGN_IDENTITY NOTARY_PROFILE ALLOW_DIRTY CONFIGURATION OUTPUT_DIR CONFIG_DIR APP_PATH BUILD_NUMBER RELEASE_REPO
+unset CI SIGNING_P12 SIGNING_P12_PASSWORD KEYCHAIN_PATH RUNNER_TEMP GH_TOKEN GITHUB_TOKEN
 mkdir -p "$HOME"
 BASE_PATH="$PATH"
 
