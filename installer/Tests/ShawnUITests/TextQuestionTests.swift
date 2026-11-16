@@ -124,7 +124,7 @@ final class TextQuestionTests: XCTestCase {
     }
 
     /// STOP sits behind the sheet's dimmed window, but ⌘. or a STOP pressed as the sheet appears still lands. The
-    /// run must be cancelled before the sheet's "no answer" reaches the engine. Otherwise the engine logs a skipped
+    /// run must be canceled before the sheet's "no answer" reaches the engine. Otherwise the engine logs a skipped
     /// question and goes on to check the next item, and the hold below waits for exactly that check.
     func testStopWhileTheSheetIsUpStopsTheRunAndNothingIsSaved() async throws {
         let calls = ItemCalls()

@@ -209,7 +209,7 @@ public final class InstallEngine: @unchecked Sendable {
         return summary
     }
 
-    /// Runs on a background task and exposes the events as a stream. Cancelling the consumer cancels the run.
+    /// Runs on a background task and exposes the events as a stream. Canceling the consumer cancels the run.
     public func events(selection: Selection) -> AsyncStream<InstallEvent> {
         AsyncStream { continuation in
             let task = Task {
@@ -229,7 +229,7 @@ public final class InstallEngine: @unchecked Sendable {
         case let error as FileOpsError: return error.description
         case let error as ConfigError: return error.description
         case let error as ProcessRunnerError: return error.description
-        case is CancellationError: return "cancelled"
+        case is CancellationError: return "canceled"
         default:
             let described = String(describing: error)
             let localized = error.localizedDescription

@@ -117,7 +117,7 @@ struct SystemProcessLauncher: ProcessLaunching {
             }
             return ProcessResult(exitCode: 127, stdout: "", stderr: "", launchError: error.description)
         } catch {
-            return ProcessResult(exitCode: 130, stdout: "", stderr: "", launchError: "cancelled")
+            return ProcessResult(exitCode: 130, stdout: "", stderr: "", launchError: "canceled")
         }
     }
 

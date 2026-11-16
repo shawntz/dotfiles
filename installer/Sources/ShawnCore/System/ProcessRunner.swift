@@ -34,7 +34,7 @@ public enum ProcessRunnerError: Error, Sendable, CustomStringConvertible {
 /// stdout/stderr, and each runs in a session of its own: it has no controlling
 /// terminal (so nothing can stop on `/dev/tty` waiting for a keyboard, even when
 /// the CLI is run from Terminal) and leads a process group named after its pid
-/// (so cancelling takes the whole tree down with it).
+/// (so canceling takes the whole tree down with it).
 public enum ProcessRunner {
     /// How long to keep draining output after the child exits. This is a hard limit: a grandchild that
     /// inherited the pipes (a daemon an installer started) would otherwise keep us waiting for as long as it lives.

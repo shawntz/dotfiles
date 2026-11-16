@@ -87,7 +87,7 @@ enum AppStore {
 
     /// Asks `question`, but stops waiting after `timeout` seconds and returns nil.
     ///
-    /// The question is then withdrawn by cancelling the task that asked it (the app takes its sheet off screen),
+    /// The question is then withdrawn by canceling the task that asked it (the app takes its sheet off screen),
     /// and whatever answer still comes is ignored. Nothing waits for that task, so even an interaction that
     /// cannot be interrupted (a blocking terminal read) never holds up the run. The answer a withdrawn sheet
     /// reports (its default option) is never taken for a real one.

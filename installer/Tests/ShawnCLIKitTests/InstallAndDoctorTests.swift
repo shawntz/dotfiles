@@ -130,7 +130,7 @@ final class InstallRendererTests: XCTestCase {
         XCTAssertTrue(text.contains("  → gamma\n  ■ gamma: stopped before it finished\n  ■ Second stopped: 1 item did not get its turn\n"), text)
         XCTAssertTrue(text.contains("1 done · 0 already done · 0 failed"), text)
         XCTAssertFalse(text.contains("Failed:"), "a stop is not a failure")
-        XCTAssertTrue(text.contains("Cancelled before the end. Run it again to pick up where it stopped."), text)
+        XCTAssertTrue(text.contains("Canceled before the end. Run it again to pick up where it stopped."), text)
     }
 
     func testAttentionCopiesTheCodeAndOpensTheURLOnce() throws {
@@ -250,14 +250,14 @@ final class InstallCommandTests: XCTestCase {
         let handler = InterruptHandler(err: err, style: .off, prompts: PromptScope(), cancel: { events.add("cancel") }, quit: { events.add("quit \($0)") })
         handler.handle()
         XCTAssertEqual(events.all, ["cancel"])
-        XCTAssertTrue(err.plain.contains("■ stopping: cancelling the item in progress, then the summary… (Ctrl-C again to quit now)"), err.plain)
+        XCTAssertTrue(err.plain.contains("■ stopping: canceling the item in progress, then the summary… (Ctrl-C again to quit now)"), err.plain)
         handler.handle()
         XCTAssertEqual(events.all, ["cancel", "quit 130"])
     }
 
     /// A read from the terminal that nobody answers must end when the run is stopped, also when it was asked
     /// from a task the run's cancellation does not reach (the administrator password: `SudoSession` asks it from
-    /// a task of its own). Before, only cancelling the task that waits for the read ended it: the first Ctrl-C at
+    /// a task of its own). Before, only canceling the task that waits for the read ended it: the first Ctrl-C at
     /// the install password prompt left the prompt waiting, and the run stuck, until Return or a second Ctrl-C.
     func testCtrlCAtAPromptWithdrawsThePromptAndStopsTheRun() async throws {
         var pipeEnds: [Int32] = [0, 0]
@@ -454,10 +454,10 @@ final class InstallCommandTests: XCTestCase {
         XCTAssertEqual(result.code, ExitCode.interrupted)
         XCTAssertEqual(result.log.all, [], "nothing ran after the Ctrl-C")
         let err = result.harness.err.plain, out = result.harness.out.plain
-        XCTAssertTrue(err.contains("■ stopping: cancelling the item in progress, then the summary… (Ctrl-C again to quit now)"), err)
+        XCTAssertTrue(err.contains("■ stopping: canceling the item in progress, then the summary… (Ctrl-C again to quit now)"), err)
         XCTAssertFalse(out.contains("Continuing without administrator rights"), "a stopped run is not told its steps will fail: \(out)")
         XCTAssertTrue(out.contains("== Summary =="), out)
-        XCTAssertTrue(out.contains("Cancelled before the end. Run it again to pick up where it stopped."), out)
+        XCTAssertTrue(out.contains("Canceled before the end. Run it again to pick up where it stopped."), out)
     }
 
     /// Before, the first Ctrl-C turned echo back on while the password prompt went on waiting, so a password

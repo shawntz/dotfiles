@@ -4,7 +4,7 @@ import ShawnCore
 /// The only network access remote config needs: an HTTP GET.
 ///
 /// Implementations hand back every HTTP status as a response (the caller decides what a 404 or a 403
-/// means) and throw only when no response arrived at all (offline, TLS failure, cancelled).
+/// means) and throw only when no response arrived at all (offline, TLS failure, canceled).
 /// Tests substitute an in-memory fake so they never touch the network.
 public protocol HTTPTransport: Sendable {
     /// `timeout` is the longest this one request may take.

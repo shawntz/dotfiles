@@ -2,7 +2,7 @@ import Foundation
 import ShawnCore
 
 /// Hands one answer to a suspended engine call, exactly once, whoever gets there first:
-/// the person (a button on the sheet), STOP, or the engine task being cancelled.
+/// the person (a button on the sheet), STOP, or the engine task being canceled.
 final class PromptGate<Answer: Sendable>: @unchecked Sendable {
     private let lock = NSLock()
     private var continuation: CheckedContinuation<Answer, Never>?
@@ -95,7 +95,7 @@ struct PendingPrompt: Identifiable {
 /// The engine's `UserInteraction`: suspends the calling item until the person answers a sheet in the window.
 ///
 /// Every prompt resolves exactly once: with the answer, with nil or the default when the person cancels or
-/// presses STOP, or when the engine task is cancelled. So the engine can never hang on a dismissed sheet.
+/// presses STOP, or when the engine task is canceled. So the engine can never hang on a dismissed sheet.
 final class InteractionBridge: UserInteraction, @unchecked Sendable {
     /// Receives prompts on the main actor. Set once, right after the model is created.
     @MainActor weak var presenter: InstallerModel?
@@ -118,7 +118,7 @@ final class InteractionBridge: UserInteraction, @unchecked Sendable {
     }
 
     /// The text sheet. Nil when the person presses SKIP, when STOP or quitting takes the sheet down, when the
-    /// engine task is cancelled, and when no run is on screen to show it. The engine saves an accepted answer;
+    /// engine task is canceled, and when no run is on screen to show it. The engine saves an accepted answer;
     /// the app never does.
     func askText(_ request: TextRequest) async -> String? {
         let gate = PromptGate<String?>()

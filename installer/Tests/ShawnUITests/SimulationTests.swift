@@ -339,7 +339,7 @@ final class SimulationTests: XCTestCase {
         let task = Task.detached {
             await engine.run(selection: .defaults(for: plan)) { event in
                 log.add(event)
-                // STOP while the third item runs: cancelled before its command starts, as a real STOP mid-command is.
+                // STOP while the third item runs: canceled before its command starts, as a real STOP mid-command is.
                 if case .itemStatus(_, .running) = event, runs.increment() == 3 { withUnsafeCurrentTask { $0?.cancel() } }
             }
         }

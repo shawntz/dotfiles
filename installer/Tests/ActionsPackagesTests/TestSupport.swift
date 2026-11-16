@@ -76,7 +76,7 @@ final class ScriptedInteraction: UserInteraction, @unchecked Sendable {
 }
 
 /// Never answers on its own, like the app's question sheet with nobody at the Mac. Like the app, it gives up
-/// with the default option when its task is cancelled, and counts how often that happened.
+/// with the default option when its task is canceled, and counts how often that happened.
 final class SilentInteraction: UserInteraction, @unchecked Sendable {
     private let lock = NSLock()
     private var askedCount = 0
