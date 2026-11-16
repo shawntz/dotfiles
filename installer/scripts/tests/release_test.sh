@@ -13,7 +13,7 @@ read_release() {
     [ -f "$manifest" ] || fail "there is no $manifest"
     MANIFEST_TREE="$(plutil -extract sourceTree raw -o - "$manifest")" || fail "shawn-cli.json has no sourceTree"
     MANIFEST_VERSION="$(plutil -extract version raw -o - "$manifest")" || fail "shawn-cli.json has no version"
-    read_info_file "$(release_dir)/Shawn's Dotfiles.app/Contents/Resources/build-info.json"
+    read_info_file "$(release_dir)/Dotfiles.app/Contents/Resources/build-info.json"
 }
 
 test_release_without_notarization_names_the_release_disk_image_and_keeps_stdout_empty() {

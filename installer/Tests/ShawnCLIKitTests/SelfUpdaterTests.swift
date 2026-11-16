@@ -78,7 +78,7 @@ final class UpdateFixture {
 
     /// cli.json the way the installer's `shawn-cli` item writes it: no sourceTree when the app had no build-info.json.
     func writeInstallerRecord(sourceTree: String?, commit: String?) {
-        var record = ["version": "1.0.0", "installedAt": "2026-01-01T00:00:00Z", "source": "/Volumes/Shawn/ShawnsDotfiles.app/Contents/Helpers/shawn"]
+        var record = ["version": "1.0.0", "installedAt": "2026-01-01T00:00:00Z", "source": "/Volumes/Dotfiles/Dotfiles.app/Contents/Helpers/shawn"]
         if let sourceTree { record["sourceTree"] = sourceTree }
         if let commit { record["commit"] = commit }
         let data = try! JSONSerialization.data(withJSONObject: record, options: [.prettyPrinted, .sortedKeys])

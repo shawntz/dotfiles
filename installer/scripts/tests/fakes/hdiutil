@@ -1,12 +1,48 @@
 #!/bin/bash
-# Stands in for hdiutil: `create … <image>` writes a placeholder image file, `verify` succeeds.
+# Stands in for hdiutil, with a folder next to each image for what the image holds:
+#   create … -srcfolder <folder> … <image>   keeps a copy of the folder, without a .DS_Store, as
+#                                            the real one does
+#   attach … -mountpoint <folder> <image>    puts those files at the mount point
+#   detach <folder>                          logs what the folder holds and takes them back
+#   convert <image> … -o <image>, verify     write a placeholder image, succeed
 set -eu
 printf 'hdiutil %s\n' "$*" >>"$FAKE_LOG"
+value_after() { # <option> <arguments…>: the value after the option
+    local option="$1"
+    shift
+    while [ $# -gt 0 ]; do
+        if [ "$1" = "$option" ]; then printf '%s\n' "$2"; return 0; fi
+        shift
+    done
+    echo "fake hdiutil: no $option in the arguments" >&2
+    exit 1
+}
+last=""
+for argument in "$@"; do last="$argument"; done
 case "${1:-}" in
     create)
-        image=""
-        for argument in "$@"; do image="$argument"; done
-        printf 'placeholder disk image\n' >"$image" ;;
+        folder="$(value_after -srcfolder "$@")"
+        rm -rf "$last.holds"
+        cp -Rp "$folder" "$last.holds"
+        rm -f "$last.holds/.DS_Store"
+        printf 'placeholder writable image\n' >"$last" ;;
+    attach)
+        mount="$(value_after -mountpoint "$@")"
+        [ -d "$last.holds" ] || { echo "fake hdiutil: no image at $last" >&2; exit 1; }
+        [ -z "${FAKE_HDIUTIL_ATTACH_FAILS:-}" ] || { echo "hdiutil: attach failed - Resource busy" >&2; exit 1; }
+        rmdir "$mount"
+        mv "$last.holds" "$mount"
+        printf '%s\n' "$last.holds" >"$mount.image" ;;
+    detach)
+        [ -f "$last.image" ] || { echo "hdiutil: detach failed - No such file or directory" >&2; exit 1; }
+        # shellcheck disable=SC2012
+        printf 'hdiutil holds: %s\n' "$(ls -A "$last" | LC_ALL=C sort | tr '\n' ' ')" >>"$FAKE_LOG"
+        mv "$last" "$(cat "$last.image")"
+        rm -f "$last.image"
+        mkdir "$last" ;;
+    convert)
+        [ -f "${2:-}" ] || { echo "fake hdiutil: no image to convert at ${2:-}" >&2; exit 1; }
+        printf 'placeholder disk image\n' >"$(value_after -o "$@")" ;;
     verify) ;;
     *) echo "fake hdiutil: unexpected arguments: $*" >&2; exit 1 ;;
 esac

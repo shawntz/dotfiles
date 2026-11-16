@@ -1,5 +1,5 @@
 #!/bin/bash
-# Tests for the build scripts: build-app.sh, make-dmg.sh, notarize.sh, release.sh,
+# Tests for the build scripts: build-app.sh, make-dmg.sh, make-dmg-art.sh, notarize.sh, release.sh,
 # publish-release.sh, ci-keychain.sh, check-config-gitignore.sh and make-media.sh.
 # Usage: scripts/tests/run.sh [part of a test name]
 #
@@ -89,8 +89,9 @@ use_fakes() {
 make_package() {
     local dir="$1"
     mkdir -p "$dir/scripts" "$dir/Resources" "$dir/Sources/ShawnCore" "$dir/Sources/App" "$dir/config/steps"
-    cp -p "$SCRIPTS_SOURCE"/*.sh "$SCRIPTS_SOURCE/make-icon.swift" "$dir/scripts/"
+    cp -p "$SCRIPTS_SOURCE"/*.sh "$SCRIPTS_SOURCE/make-icon.swift" "$SCRIPTS_SOURCE/make-dsstore.py" "$dir/scripts/"
     cp -p "$PACKAGE_SOURCE/Resources/Info.plist" "$PACKAGE_SOURCE/Resources/AppIcon.icns" "$dir/Resources/"
+    cp -Rp "$PACKAGE_SOURCE/Resources/dmg" "$dir/Resources/"
     # Newer than make-icon.swift, so build-app.sh does not redraw it.
     touch "$dir/Resources/AppIcon.icns"
     cp "$PACKAGE_SOURCE/.gitignore" "$dir/.gitignore"

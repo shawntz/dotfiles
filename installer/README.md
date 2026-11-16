@@ -20,10 +20,10 @@ The app and `shawn` run on macOS 27 or later. An older macOS refuses to open the
 A workflow builds a release for each new version on `master`. It publishes the release once the repository can sign and notarize it, or allows builds that are not notarized (see [Releasing](#releasing)). When the [releases page](https://github.com/shawntz/dotfiles/releases) has one:
 
 1. On the new Mac, open the releases page and download `ShawnsDotfiles-<version>.dmg` from the newest `shawn-v…` release.
-2. Open the disk image and drag Shawn's Dotfiles onto the Applications shortcut.
+2. Open the disk image and drag Dotfiles onto the Applications shortcut.
 3. Open it from Applications. macOS asks once whether to open an app downloaded from the internet. Choose Open. If macOS refuses to open it, the release is not notarized, and [If macOS won't open it](#if-macos-wont-open-it) has the fix.
 
-When the page has none, build the app from a checkout with Xcode 27 or later, using `make app SIGN_IDENTITY=-` (see [Build, sign, notarize, release](#build-sign-notarize-release)), copy `build/Shawn's Dotfiles.app` to the new Mac and open it there.
+When the page has none, build the app from a checkout with Xcode 27 or later, using `make app SIGN_IDENTITY=-` (see [Build, sign, notarize, release](#build-sign-notarize-release)), copy `build/Dotfiles.app` to the new Mac and open it there.
 
 ![The welcome screen, with the plan of 17 steps on the left, Lumpy Space Princess and her speech bubble on the right, and the DRY RUN, CUSTOMIZE… and START controls along the bottom](../.github/media/welcome.png)
 
@@ -70,7 +70,7 @@ On a Mac running macOS 27 or later with Xcode 27 or later, you can also build an
 git clone https://github.com/shawntz/dotfiles.git ~/Developer/dotfiles
 cd ~/Developer/dotfiles/installer
 make app SIGN_IDENTITY=-
-open "build/Shawn's Dotfiles.app"
+open build/Dotfiles.app
 ```
 
 After the first run, `shawn install` runs the same installer in the terminal.
@@ -368,14 +368,15 @@ All of this runs in `installer/`. Each script takes `--help`.
 | `make test` | The Swift package's tests, then the build scripts' tests. |
 | `make test-scripts` | Only the build scripts' tests. They use fake `swift`, `codesign`, `hdiutil`, `xcrun`, `spctl`, `security` and `gh`, so nothing is signed with your identity or sent to Apple or GitHub. |
 | `make validate` | Builds the CLI, runs `shawn config validate config` and checks that git keeps every file in `config/`, as CI does. Outside a git checkout it skips the git check. |
-| `make app` | `build/Shawn's Dotfiles.app`, signed (`SIGN_IDENTITY=-` for ad hoc). |
-| `make dmg` | The app, then `build/ShawnsDotfiles-<version>.dmg`. |
+| `make app` | `build/Dotfiles.app`, signed (`SIGN_IDENTITY=-` for ad hoc). |
+| `make dmg` | The app, then `build/ShawnsDotfiles-<version>.dmg`, which opens in [a window that looks like the app](#the-disk-images-window). |
 | `make notarize` | Notarizes and staples the `make dmg` disk image (not the release one; see [Notarizing](#notarizing)). |
 | `make release` | Everything a release needs, then prints the `gh release create` command. |
 | `make publish` | Publishes what `make release` built as the GitHub release `shawn-v<version>`. The release workflow runs both. |
 | `make install-cli` | Builds `shawn` in release mode and installs it to `~/.local/bin`. It leaves `~/.shawn/state/cli.json` as it was. |
 | `make run` | Opens the installer in demo mode, a dry run that starts by itself. |
 | `make icon` | Redraws `Resources/AppIcon.icns`. |
+| `make dmg-art` | Redraws the two files in `Resources/dmg/` that give the disk image's window its look. It needs Python 3 with the `ds_store` and `mac_alias` packages (`PYTHON` names it). Without them, it prints a way to get them in a virtual environment. |
 | `make media` | Draws the GIFs, stills and icon that the two READMEs show. They go into `build/media`, or into `MEDIA_DIR` when you set it, and the READMEs read them from `.github/media`. Each frame is a `--snapshot`, so no window opens. It needs Python 3 with Pillow (`PYTHON` names it). |
 | `make lint` | shellcheck on the scripts and their tests, and actionlint on the workflows when it is installed. |
 | `make clean` | Removes build products. |
@@ -383,7 +384,7 @@ All of this runs in `installer/`. Each script takes `--help`.
 The app bundle is laid out like this:
 
 ```
-Shawn's Dotfiles.app/Contents/
+Dotfiles.app/Contents/
   MacOS/ShawnsDotfiles        the installer
   Helpers/shawn               the CLI, which the installer copies to ~/.local/bin
   Helpers/WebAppShell         the browser every generated web app is built from
@@ -396,6 +397,19 @@ Shawn's Dotfiles.app/Contents/
 `build-info.json` holds `{"version", "commit", "sourceTree"}`. `sourceTree` is the git object ids of `installer/Sources`, `installer/Package.swift` and `installer/Package.resolved` at `HEAD`, joined by commas, the same value `shawn` computes from its checkout. It is empty when those paths have uncommitted or untracked changes, when they changed during the build, or when the build is not from a git checkout, because then nobody can say which sources the binaries hold. When the installer puts a new `shawn` in place, it copies `sourceTree` and `commit` into `~/.shawn/state/cli.json`.
 
 `scripts/build-app.sh` builds for Apple silicon (`arm64`) only. `CONFIGURATION=debug` makes a debug build, `OUTPUT_DIR` sets where the app goes (default `build/`), `CONFIG_DIR` bundles another config folder and `BUILD_NUMBER` sets `CFBundleVersion`.
+
+### The disk image's window
+
+The disk image opens in a window that looks like the app. It shows the config's banner, a card under each of the two icons, an arrow from the app to the Applications shortcut, and the narrator with the first `launch:` line in `fun/quotes.yaml`. Two committed files in `Resources/dmg/` make it:
+
+- `background.tiff` is the picture behind the icons, at 1x and 2x. The app draws it with the views it puts on screen (`--disk-image-art`), so it shows the config's banner and narrator in the app's own colors.
+- `DS_Store` is the file Finder reads a window's size, its icon size and its icons' places from. `scripts/make-dsstore.py` writes it from the layout in `Sources/ShawnUI/Views/DiskImageBackground.swift`.
+
+`make dmg-art` redraws both, without opening a window. Run it after you change the banner or the narrator, the app's colors in `Sources/ShawnUI/Views/Theme.swift`, the app's name in `scripts/common.sh`, or that layout, and commit the result. The Swift tests compare both files with the layout in the code.
+
+`make dmg` needs neither Python nor those packages. It copies the two files into the image and stops when the layout file was drawn for an app with another name. `hdiutil create` leaves a file named `.DS_Store` out of an image, so the script mounts the new image for a moment, hidden from Finder, and gives the layout file its name there. Before it unmounts, it checks that the app's signature still verifies inside the image.
+
+Finder draws the two icons and their names. Over a picture it draws the names in black, in the light and in the dark appearance, and black does not read on the window's dark background. So each card has a band under its icon in a purple that black reads on, and white too, should another version of Finder pick that.
 
 ### Signing
 
@@ -473,6 +487,8 @@ To release by hand, in a repo where the workflow publishes nothing (no notary se
 
 Where the workflow does publish, it gets there first, and step 4 then finds the version already published.
 
+In a fork, the workflow releases to the fork by itself. By hand, add `RELEASE_REPO=<you>/<repo>` to steps 3 and 4, because the scripts release to `shawntz/dotfiles` otherwise.
+
 `scripts/publish-release.sh` uploads everything to a draft and publishes the draft last, so the tag appears only when every file is in place. `shawn` on other Macs looks for the tag, then for the files. The script refuses:
 
 - a disk image that Apple has not notarized, unless you run it as `scripts/publish-release.sh --allow-unnotarized` (`make publish` passes no options)
@@ -487,7 +503,7 @@ It leaves a published release alone. It deletes a draft of the same tag and make
 
 | file | what it is |
 |---|---|
-| `Shawn's Dotfiles.app` | The app, built for Apple silicon and signed. |
+| `Dotfiles.app` | The app, built for Apple silicon and signed. |
 | `ShawnsDotfiles-<version>.dmg` | The disk image holding that app, signed and, with `NOTARY_PROFILE`, notarized. |
 | `shawn-<version>-macos-arm64.tar.gz` | The `shawn` binary from inside the app. Self-update on Macs without a checkout installs this. |
 | `shawn-<version>-macos-arm64.tar.gz.sha256` | Its checksum, in `shasum -c` format. |
@@ -511,7 +527,7 @@ Sources/
 Tests/              one XCTest target per module
 scripts/            build, icon, disk image, notarize, release, publish, CI keychain, the config's .gitignore check, README media
 scripts/tests/      tests for those scripts, with fake signing tools in scripts/tests/fakes/
-Resources/          Info.plist template and the app icon
+Resources/          Info.plist template, the app icon, and dmg/ (the disk image window's picture and layout file)
 ```
 
 Shawn's laptop and CI run `swift build` and `swift test` (or `make build` and `make test`) with Xcode 27.2 (Swift 6.4) on macOS 27. That is the Xcode the installer puts on a new Mac. The package needs Swift 6.4 tools, which arrived with Xcode 27. SwiftPM in an older Xcode refuses the package. The only package dependency is Yams.
@@ -534,6 +550,7 @@ The installer app takes these flags, for example `swift run ShawnsDotfiles --dry
 | `--config-ref REF` | Fetches config from this branch, tag or commit. |
 | `--simulate` | A built-in simulation config that goes through every screen. |
 | `--snapshot PATH` | Renders the window to a PNG and quits, without showing a window. Add `--snapshot-state` (`loading`, `welcome`, `customize`, `running`, `ask`, `ask-again`, `password`, `password-again`, `question`, `attention`, `finished`, `failed`, `stopped`, `dry-run-finished`, `config-error`), `--snapshot-size WxH` (each side 320 to 4000; default 1100x760), `--snapshot-scale 1\|2\|3` (default 2) and `--snapshot-contrast standard\|high`. `--snapshot-progress F` shows a run `F` of the way through (0 to 1), with no failures, and `--snapshot-at-kind K` shows it as the first item of kind `K` starts. Both work with the screens built on the running screen: `running`, `question` and `attention`. Use it to check the design without screen recording. |
+| `--disk-image-art PATH` | Draws the picture behind the disk image's Finder window to a PNG and quits, without showing a window. `--snapshot-scale` sets its pixels per point. `make dmg-art` uses it. |
 | `-h`, `--help` | Lists these flags. |
 
 The CLI has the same safety valves: `shawn install --dry-run`, `shawn doctor`, and `shawn --config DIR` for another config.

@@ -33,6 +33,19 @@ test_media_without_pillow_says_how_to_get_it_and_builds_nothing() {
     [ -z "$(ls -A "$T/tmp")" ] || fail "it left $(ls -A "$T/tmp") in TMPDIR"
 }
 
+test_media_finds_a_python_named_by_a_path_from_the_callers_folder() {
+    use_fakes swift
+    make_package "$T/pkg"
+    mkdir -p "$T/pkg/venv/bin"
+    printf '#!/bin/sh\nexit 1\n' >"$T/pkg/venv/bin/python3"
+    chmod +x "$T/pkg/venv/bin/python3"
+    cd "$T/pkg" || fail "there is no $T/pkg"
+    run env PYTHON=venv/bin/python3 scripts/make-media.sh "$T/media"
+    assert_status 1
+    assert_contains "$ERR" "Pillow is not installed for $T/pkg/venv/bin/python3"
+    assert_not_contains "$ERR" "cannot find"
+}
+
 test_media_without_python_says_so() {
     make_package "$T/pkg"
     run env PYTHON=no-such-python "$T/pkg/scripts/make-media.sh" "$T/media"

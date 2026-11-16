@@ -25,6 +25,9 @@ public enum ShawnUI {
             if options.snapshotPath != nil {
                 return SnapshotCommand.run(options: options, registry: registry)
             }
+            if options.diskImageArtPath != nil {
+                return DiskImageArtCommand.run(options: options, registry: registry)
+            }
             let app = NSApplication.shared
             let controller = AppController(options: options, registry: registry)
             app.delegate = controller

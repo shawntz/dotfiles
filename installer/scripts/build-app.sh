@@ -1,5 +1,5 @@
 #!/bin/bash
-# Builds "Shawn's Dotfiles.app": the installer app, with the shawn CLI and the web-app shell
+# Builds "Dotfiles.app": the installer app, with the shawn CLI and the web-app shell
 # inside it and the YAML config bundled. Run with --help for the options.
 # shellcheck source-path=SCRIPTDIR
 set -euo pipefail

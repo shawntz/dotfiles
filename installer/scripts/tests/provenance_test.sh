@@ -3,7 +3,7 @@
 # Real lipo, ditto, plutil and ad hoc codesign; the fake swift stands in for SwiftPM.
 # Helpers (run, assert_*, use_fakes, new_checkout, …) come from run.sh.
 
-APP_NAME_IN_TESTS="Shawn's Dotfiles.app"
+APP_NAME_IN_TESTS="Dotfiles.app"
 
 build_app() {
     run env SIGN_IDENTITY=- OUTPUT_DIR="$T/out" "$PKG/scripts/build-app.sh"
