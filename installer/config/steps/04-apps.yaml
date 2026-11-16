@@ -1,4 +1,5 @@
-# Apps: everything on the old laptop that was not installed with Homebrew.
+# Apps: everything on the old laptop that was not installed with Homebrew, plus
+# what was added since.
 #
 # Each cask names its app with `app:`, so a copy already in /Applications
 # (installed by hand or by an IT department) counts as done instead of being
@@ -37,6 +38,10 @@ items:
     note: paid; needs your license
   - cask: slack
     app: Slack.app
+  - cask: shawntz/tap/slick     # the tap had no slick cask on 2026-11-15; this item fails until it has one
+    app: Slick.app
+  - cask: shawntz/tap/splay
+    app: Splay.app
   - cask: spotify
     app: Spotify.app
   - cask: superkey
@@ -91,9 +96,6 @@ items:
     note: needs a privileged helper to control the fans
   - cask: ollama-app
     app: Ollama.app
-    optional: true
-  - cask: raycast
-    app: Raycast.app
     optional: true
   - cask: screen-studio
     app: Screen Studio.app
