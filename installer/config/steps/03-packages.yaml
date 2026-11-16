@@ -100,6 +100,8 @@ items:
   - npm: ghostty-config-cli
 
   # ── Apps ───────────────────────────────────────────────────────────────
+  - cask: caffeine
+    note: app was deleted on the old laptop; only its Homebrew record was left
   - cask: ghostty
     note: the old terminal; Herdr is the default now
   - cask: hammerspoon
@@ -124,9 +126,3 @@ items:
       HOMEBREW_NO_AUTO_UPDATE: "1"
   - cask: vercel
     note: a formula on the old laptop; Homebrew now ships it as a cask
-
-  # ── Gone from the old laptop ───────────────────────────────────────────
-  # Homebrew still listed this one, but its app had been deleted.
-  - cask: caffeine
-    optional: true
-    note: app was deleted on the old laptop; only its Homebrew record was left

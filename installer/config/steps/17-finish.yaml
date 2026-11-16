@@ -22,7 +22,6 @@ items:
   - xcode: finish
     name: iOS Simulator
     platforms: [iOS]
-    optional: true
     note: about 8 GB more to download
 
   # ── Only you can do these ──────────────────────────────────────────────
@@ -33,8 +32,8 @@ items:
   - manual: Sign in to your apps
     detail: >-
       1Password first, since it holds the other passwords; then Chrome, Slack,
-      Spotify, Granola, Cursor, Claude, Docker and Wispr Flow. Superkey and
-      Middle need their license keys.
+      Spotify, Granola, Cursor, Claude, Docker and Wispr Flow. Superkey,
+      Middle, DaisyDisk and Screen Studio need their license keys.
   - manual: Allow the helper apps to control your Mac
     detail: >-
       Open Superkey, Middle and Wispr Flow once. Each asks for Accessibility

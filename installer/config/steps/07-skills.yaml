@@ -55,7 +55,6 @@ items:
   # Framer's skills are generated per machine, so they can't be bundled.
   # Telemetry is switched off before the first run, unless you already chose.
   - script: Framer skills
-    optional: true
     note: needs a Framer account to be useful
     check: test -f "$HOME/.agents/skills/framer/SKILL.md" && test -f "$HOME/.claude/skills/framer/SKILL.md"
     run: |

@@ -16,26 +16,56 @@
 
 id: apps
 title: Apps
-subtitle: The everyday apps, plus a few you can add
+subtitle: Casks, App Store apps and a direct download
 mascot: bubblegum
 
 items:
-  # ── Everyday apps ──────────────────────────────────────────────────────
+  # ── Casks ──────────────────────────────────────────────────────────────
   - cask: 1password
     app: 1Password.app
+  - cask: balenaetcher
+    app: balenaEtcher.app
   - cask: claude
     app: Claude.app
   - cask: cursor
     app: Cursor.app
+  - cask: daisydisk
+    app: DaisyDisk.app
+    note: paid; needs your license
   - cask: docker-desktop
     app: Docker.app
+  - cask: firefox
+    app: Firefox.app
+  - cask: framer
+    app: Framer.app
+  - cask: github
+    app: GitHub Desktop.app
   - cask: google-chrome
     app: Google Chrome.app
+  - cask: google-drive
+    app: Google Drive.app
+  - cask: google-gemini
+    app: Gemini.app
   - cask: granola
     app: Granola.app
+  - cask: grok-bot
+    app: Grok Bot.app
+    note: xAI's Grok Bot app; the Grok CLI is in the AI step
+  - cask: linear
+    app: Linear.app
+  - cask: macs-fan-control
+    app: Macs Fan Control.app
+    note: needs a privileged helper to control the fans
   - cask: middle
     app: Middle.app
     note: paid; needs your license
+  - cask: ollama-app
+    app: Ollama.app
+  - cask: screen-studio
+    app: Screen Studio.app
+    note: paid; needs your license
+  - cask: sf-symbols
+    app: SF Symbols.app
   - cask: slack
     app: Slack.app
   - cask: shawntz/tap/slick     # the tap had no slick cask on 2026-11-15; this item fails until it has one
@@ -47,79 +77,28 @@ items:
   - cask: superkey
     app: Superkey.app
     note: paid; needs your license
+  - cask: t3-code
+    app: T3 Code (Beta).app
+  - cask: tailscale-app
+    app: Tailscale.app
+    note: macOS asks you to approve its system extension
   - cask: wispr-flow
     app: Wispr Flow.app
+  - cask: zoom
+    app: zoom.us.app
 
   # ── Mac App Store ──────────────────────────────────────────────────────
   - mas: 937984704
     name: Amphetamine
+  - mas: 6448461551
+    name: Command X
+    note: paid; needs the Apple Account that bought it
+  - mas: 1289583905
+    name: Pixelmator Pro
+    note: paid; needs the Apple Account that bought it
 
   # ── Direct downloads ───────────────────────────────────────────────────
   - download: https://dl.aeromail.ai/desktop/dogfood/Aero-Dogfood-latest-mac-universal.dmg
     name: Aero Dogfood
     app: Aero Dogfood.app
     team_id: ZL4K35VM2L
-
-  # ── Optional ───────────────────────────────────────────────────────────
-  - cask: balenaetcher
-    app: balenaEtcher.app
-    optional: true
-  - cask: daisydisk
-    app: DaisyDisk.app
-    optional: true
-    note: paid; needs your license
-  - cask: firefox
-    app: Firefox.app
-    optional: true
-  - cask: framer
-    app: Framer.app
-    optional: true
-  - cask: github
-    app: GitHub Desktop.app
-    optional: true
-  - cask: google-drive
-    app: Google Drive.app
-    optional: true
-  - cask: google-gemini
-    app: Gemini.app
-    optional: true
-  - cask: grok-bot
-    app: Grok Bot.app
-    optional: true
-    note: xAI's Grok Bot app; the Grok CLI is in the AI step
-  - cask: linear
-    app: Linear.app
-    optional: true
-  - cask: macs-fan-control
-    app: Macs Fan Control.app
-    optional: true
-    note: needs a privileged helper to control the fans
-  - cask: ollama-app
-    app: Ollama.app
-    optional: true
-  - cask: screen-studio
-    app: Screen Studio.app
-    optional: true
-    note: paid; needs your license
-  - cask: sf-symbols
-    app: SF Symbols.app
-    optional: true
-  - cask: t3-code
-    app: T3 Code (Beta).app
-    optional: true
-  - cask: tailscale-app
-    app: Tailscale.app
-    optional: true
-    note: macOS asks you to approve its system extension
-  - cask: zoom
-    app: zoom.us.app
-    optional: true
-
-  - mas: 6448461551
-    name: Command X
-    optional: true
-    note: paid; needs the Apple Account that bought it
-  - mas: 1289583905
-    name: Pixelmator Pro
-    optional: true
-    note: paid; needs the Apple Account that bought it
