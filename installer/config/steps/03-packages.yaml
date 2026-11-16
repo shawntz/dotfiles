@@ -1,4 +1,4 @@
-# Homebrew packages: the brews from the old laptop.
+# Homebrew packages: the brews from the old laptop, plus what was added since.
 #
 # One line per package: `- brew: <formula>` for a command-line tool,
 # `- cask: <token>` for an app, `- tap: <user/repo>` for a third-party tap.
@@ -27,11 +27,7 @@ items:
   # ── Taps ───────────────────────────────────────────────────────────────
   - tap: buildkite/buildkite
     trusted: true
-  - tap: jurplel/tap
-    optional: true
-    note: only instant-space-switcher (also optional) comes from this tap
-  - tap: mikker/tap
-  - tap: nikitabobko/tap
+  - tap: shawntz/tap
   - tap: supabase/tap
   - tap: withgraphite/tap
 
@@ -69,6 +65,7 @@ items:
   - brew: openjdk@17
   - brew: pipx
   - brew: pnpm
+  - brew: poetry
   - brew: rustup           # keg-only: run `rustup-init` once to install a Rust toolchain
   - brew: uv
 
@@ -103,10 +100,8 @@ items:
   - npm: ghostty-config-cli
 
   # ── Apps ───────────────────────────────────────────────────────────────
-  - cask: nikitabobko/tap/aerospace
-    note: installed but not running on the old laptop
-  - cask: mikker/tap/dinky
-    note: installed but not running on the old laptop
+  - cask: caffeine
+    note: app was deleted on the old laptop; only its Homebrew record was left
   - cask: ghostty
     note: the old terminal; Herdr is the default now
   - cask: hammerspoon
@@ -131,15 +126,3 @@ items:
       HOMEBREW_NO_AUTO_UPDATE: "1"
   - cask: vercel
     note: a formula on the old laptop; Homebrew now ships it as a cask
-
-  # ── Gone from the old laptop ───────────────────────────────────────────
-  # Homebrew still listed these, but their apps had been deleted.
-  - cask: caffeine
-    optional: true
-    note: app was deleted on the old laptop; only its Homebrew record was left
-  - cask: jurplel/tap/instant-space-switcher
-    optional: true
-    note: app was deleted on the old laptop; only its Homebrew record was left
-  - cask: warp
-    optional: true
-    note: app was deleted on the old laptop; only its Homebrew record was left

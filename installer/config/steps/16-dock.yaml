@@ -30,7 +30,7 @@ items:
       folders:
         - {path: ~/Developer, view: grid, display: folder, sort: name}
       settings:
-        autohide: true                 # hide the Dock until the pointer reaches it
+        autohide: false                # the Dock stays on screen
         launchanim: false              # no bouncing icons when an app opens
         mineffect: scale               # minimize with the plain scale effect, not the genie
         minimize-to-application: true  # minimized windows go into their app's icon

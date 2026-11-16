@@ -198,50 +198,73 @@ final class ConfigEditorTests: XCTestCase {
         XCTAssertEqual(item["retries"]?.int, 3)
     }
 
-    /// The shipped 04-apps.yaml: everyday apps (alphabetical), App Store, downloads, then optional apps and
-    /// optional App Store apps. A new app must not end up under "── Optional ──".
-    func testNewAppsGoWithTheEverydayAppsInTheShippedAppsFile() throws {
+    /// The shipped 04-apps.yaml: casks (alphabetical), App Store apps, then direct downloads. Nothing in it is
+    /// optional.
+    func testNewAppsGoInTheirPlaceInTheShippedAppsFile() throws {
         let apps = try shipped("04-apps.yaml")
 
         let (zed, zedResult) = try insert("cask", "zed", typed: [(key: "app", value: .string("Zed.app"))], into: apps)
         guard case .inserted(let zedLine) = zedResult else { return XCTFail("\(zedResult)") }
-        XCTAssertEqual(lines(zed, from: zedLine - 2, count: 5), ["  - cask: wispr-flow", "    app: Wispr Flow.app", "  - cask: zed", "    app: Zed.app", ""])
-        XCTAssertTrue(lines(zed, from: zedLine + 3, count: 1)[0].hasPrefix("  # ── Mac App Store"), "still before the App Store group")
+        XCTAssertEqual(lines(zed, from: zedLine - 2, count: 7),
+                       ["  - cask: wispr-flow", "    app: Wispr Flow.app", "  - cask: zed", "    app: Zed.app", "  - cask: zoom", "    app: zoom.us.app", ""],
+                       "in alphabetical order: after wispr-flow, before zoom")
+        XCTAssertTrue(lines(zed, from: zedLine + 5, count: 1)[0].hasPrefix("  # ── Mac App Store"), "still before the App Store group")
 
         let (notion, notionResult) = try insert("cask", "notion", typed: [(key: "app", value: .string("Notion.app"))], into: apps)
         guard case .inserted(let notionLine) = notionResult else { return XCTFail("\(notionResult)") }
-        XCTAssertEqual(lines(notion, from: notionLine - 1, count: 4), ["    note: paid; needs your license", "  - cask: notion", "    app: Notion.app", "  - cask: slack"],
-                       "in alphabetical order: after middle, before slack")
+        XCTAssertEqual(lines(notion, from: notionLine - 1, count: 4), ["    note: paid; needs your license", "  - cask: notion", "    app: Notion.app", "  - cask: ollama-app"],
+                       "in alphabetical order: after middle, before ollama-app")
 
-        let (optional, optionalResult) = try insert("cask", "zzz-tool", typed: [(key: "optional", value: .bool(true))], into: apps)
+        // "kitty" would sort between grok-bot and linear. It is optional and they are not, so it stays out of their run.
+        let (optional, optionalResult) = try insert("cask", "kitty", typed: [(key: "optional", value: .bool(true))], into: apps)
         guard case .inserted(let optionalLine) = optionalResult else { return XCTFail("\(optionalResult)") }
-        XCTAssertEqual(lines(optional, from: optionalLine - 3, count: 6), ["  - cask: zoom", "    app: zoom.us.app", "    optional: true", "  - cask: zzz-tool", "    optional: true", ""],
-                       "an optional app joins the optional ones")
+        XCTAssertEqual(lines(optional, from: optionalLine - 2, count: 5), ["  - cask: zoom", "    app: zoom.us.app", "  - cask: kitty", "    optional: true", ""],
+                       "with no optional apps to join, an optional app goes after the last app")
 
         let (store, storeResult) = try insert("mas", "409183694", [("name", "Keynote")], into: apps)
         guard case .inserted(let storeLine) = storeResult else { return XCTFail("\(storeResult)") }
-        XCTAssertEqual(lines(store, from: storeLine - 2, count: 4), ["  - mas: 937984704", "    name: Amphetamine", "  - mas: 409183694", "    name: Keynote"],
-                       "a switched-on App Store app joins Amphetamine, not the optional ones at the end")
+        XCTAssertEqual(lines(store, from: storeLine - 3, count: 6),
+                       ["  - mas: 1289583905", "    name: Pixelmator Pro", "    note: paid; needs the Apple Account that bought it", "  - mas: 409183694", "    name: Keynote", ""],
+                       "an App Store app joins the App Store apps")
 
         let (web, webResult) = try insert("webapp", "Carbon", [("url", "https://my.carbonapp.co")], into: apps)
         guard case .inserted(let webLine) = webResult else { return XCTFail("\(webResult)") }
         XCTAssertEqual(lines(web, from: webLine - 1, count: 4), ["    team_id: ZL4K35VM2L", "  - webapp: Carbon", "    url: \"https://my.carbonapp.co\"", ""],
-                       "a kind the file does not have yet stays above the trailing optional groups")
+                       "a kind the file does not have yet goes after the last item")
 
         for text in [zed, notion, optional, store, web] {
             XCTAssertNotNil(try YAML.parse(text)?.map?["items"]?.list)
         }
     }
 
-    func testNewCasksStayOutOfTheShippedPackagesFileGoneGroup() throws {
+    /// The shipped 03-packages.yaml ends with its casks, the command-line tools last.
+    func testNewCasksAndFormulaeGoInTheirPlaceInTheShippedPackagesFile() throws {
         let packages = try shipped("03-packages.yaml")
         let (text, result) = try insert("cask", "zed", into: packages)
         guard case .inserted(let line) = result else { return XCTFail("\(result)") }
         XCTAssertEqual(lines(text, from: line - 2, count: 4), ["  - cask: vercel", "    note: a formula on the old laptop; Homebrew now ships it as a cask", "  - cask: zed", ""])
         let (brew, brewResult) = try insert("brew", "aaa-first", into: packages)
         guard case .inserted(let brewLine) = brewResult else { return XCTFail("\(brewResult)") }
-        XCTAssertTrue(lines(brew, from: brewLine, count: 1)[0].hasPrefix("  - brew: aaa-first"), brew)
-        XCTAssertFalse(lines(brew, from: brewLine - 1, count: 1)[0].contains("optional"))
+        // The last formulae are the build tools, in alphabetical order, so it goes first among them.
+        let around = lines(brew, from: brewLine - 1, count: 3)
+        XCTAssertTrue(around[0].hasPrefix("  # ── Build tools and libraries "), around[0])
+        XCTAssertEqual(Array(around.dropFirst()), ["  - brew: aaa-first", "  - brew: cmake"])
+    }
+
+    /// Rule 1 of `insertionPoint` matches on `optional` as well as on the kind. Neither shipped file has an optional
+    /// item, so two small files check it: a switched-on item stays out of the optional group of its kind, and an
+    /// optional item joins that group wherever it is.
+    func testSwitchedOnAndOptionalItemsOfOneKindKeepToTheirOwnGroups() throws {
+        let optionalLast = "id: apps\ntitle: Apps\nitems:\n  - cask: alpha\n  - cask: delta\n\n  # optional\n  - cask: beta\n    optional: true\n  - cask: gamma\n    optional: true\n"
+        let (on, onResult) = try insert("cask", "zeta", into: optionalLast)
+        guard case .inserted(let onLine) = onResult else { return XCTFail("\(onResult)") }
+        XCTAssertEqual(lines(on, from: onLine - 1, count: 3), ["  - cask: delta", "  - cask: zeta", ""], "after delta, not after gamma")
+
+        let optionalFirst = "id: apps\ntitle: Apps\nitems:\n  # optional\n  - cask: beta\n    optional: true\n  - cask: gamma\n    optional: true\n\n  - cask: alpha\n  - cask: delta\n"
+        let (off, offResult) = try insert("cask", "carrot", typed: [(key: "optional", value: .bool(true))], into: optionalFirst)
+        guard case .inserted(let offLine) = offResult else { return XCTFail("\(offResult)") }
+        XCTAssertEqual(lines(off, from: offLine - 1, count: 4), ["    optional: true", "  - cask: carrot", "    optional: true", "  - cask: gamma"],
+                       "between beta and gamma, not between alpha and delta")
     }
 
     func testGroupsAndOptionalItemsAreRecognized() {

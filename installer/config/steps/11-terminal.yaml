@@ -3,8 +3,8 @@
 # for Claude Code, Codex and Grok.
 #
 # Herdr becomes the everyday terminal through the Dock (16-dock), Hyper+Return
-# (10-keyboard) and, if you check it, launch at login below. The Herdr app keeps
-# its own settings in ~/.config/herdr-app/; they are left to the app.
+# (10-keyboard) and launch at login below. The Herdr app keeps its own settings
+# in ~/.config/herdr-app/; they are left to the app.
 #
 # To hook up another agent Herdr supports (`herdr integration install --help`
 # lists them), copy one of the hook items and change the name.
@@ -58,4 +58,3 @@ items:
   # ── Launch at login ────────────────────────────────────────────────────
   - login-item: Herdr
     bundle_id: dev.herdr.app
-    optional: true

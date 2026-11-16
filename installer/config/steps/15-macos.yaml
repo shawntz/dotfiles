@@ -55,7 +55,6 @@ items:
 
   - defaults: com.apple.finder
     name: Hide desktop icons
-    optional: true
     note: the old laptop showed nothing on the desktop, though screenshots still save there
     set:
       CreateDesktop: false                  # the desktop shows no icons at all

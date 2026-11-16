@@ -41,30 +41,30 @@ The parts worth copying:
 - Nobody else's name on your commits. It asks for your name and email for Git instead of shipping Shawn's.
 - It keeps itself current. Before most commands, `shawn` checks GitHub, pulls new config and rebuilds itself from the checkout when its Swift sources change. `self_update.mode` in `cli.yaml` can make that `daily` or `off`.
 
-The config in this repo has 180 items in 17 steps. That is 46 Homebrew formulae, 46 casks, 3 App Store apps besides Xcode, 2 web apps and 17 checklist reminders, plus 66 items for jobs such as copying dotfiles, writing macOS settings and setting up git and GitHub. Of the 180, 153 run by default. The other 27, such as Firefox and Zoom, wait in CUSTOMIZE… for a check mark.
+The config in this repo has 176 items in 17 steps. That is 47 Homebrew formulae, 43 casks, 3 App Store apps besides Xcode, 2 web apps and 17 checklist reminders, plus 64 items for jobs such as copying dotfiles, writing macOS settings and setting up git and GitHub. All 176 run by default, and CUSTOMIZE… has a checkbox for each one.
 
 <details>
 <summary>The 17 steps</summary>
 
-| Step | Title | What it covers | On by default | Optional |
-|---|---|---|---:|---:|
-| 01 | Bootstrap | Command Line Tools, Homebrew and Xcode | 4 | |
-| 02 | Dropbox | Install it, open it, sign in | 2 | |
-| 03 | Homebrew Packages | Formulae and casks from the old laptop | 63 | 4 |
-| 04 | Apps | The everyday apps, plus a few you can add | 13 | 19 |
-| 05 | AI Tools | Claude Code, Codex, ChatGPT and Grok | 8 | |
-| 06 | Git & GitHub | Identity, SSH key, GitHub sign-in, signed commits | 8 | |
-| 07 | Agent Skills | Shared skills for Claude Code, Codex and Grok | 7 | 1 |
-| 08 | Developer Folder | ~/Developer and the dotfiles checkout | 2 | |
-| 09 | Shell & Editor | zsh, Starship, Ghostty and Neovim | 6 | |
-| 10 | Keyboard | Karabiner-Elements and Hammerspoon | 12 | |
-| 11 | Herdr Terminal | The Herdr app, Herdr core and agent hooks | 6 | 1 |
-| 12 | Claude Code | Settings, spinner phrases and plugins | 6 | |
-| 13 | Web Apps | Websites as standalone apps | 2 | |
-| 14 | The shawn CLI | shawn claude, shawn update and friends | 1 | |
-| 15 | macOS Settings | Keyboard, Finder, trackpad, menu bar and windows | 6 | 1 |
-| 16 | Dock | Cleared out, then set up for work | 1 | |
-| 17 | Finishing Up | Xcode, then the to-do list | 6 | 1 |
+| Step | Title | What it covers | Items |
+|---|---|---|---:|
+| 01 | Bootstrap | Command Line Tools, Homebrew and Xcode | 4 |
+| 02 | Dropbox | Install it, open it, sign in | 2 |
+| 03 | Homebrew Packages | Formulae and casks from the old laptop | 62 |
+| 04 | Apps | Casks, App Store apps and a direct download | 33 |
+| 05 | AI Tools | Claude Code, Codex, ChatGPT and Grok | 8 |
+| 06 | Git & GitHub | Identity, SSH key, GitHub sign-in, signed commits | 8 |
+| 07 | Agent Skills | Shared skills for Claude Code, Codex and Grok | 8 |
+| 08 | Developer Folder | ~/Developer and the dotfiles checkout | 2 |
+| 09 | Shell & Editor | zsh, Starship, Ghostty and Neovim | 6 |
+| 10 | Keyboard | Karabiner-Elements and Hammerspoon | 12 |
+| 11 | Herdr Terminal | The Herdr app, Herdr core and agent hooks | 7 |
+| 12 | Claude Code | Settings, spinner phrases and plugins | 6 |
+| 13 | Web Apps | Websites as standalone apps | 2 |
+| 14 | The shawn CLI | shawn claude, shawn update and friends | 1 |
+| 15 | macOS Settings | Keyboard, Finder, trackpad, menu bar and windows | 7 |
+| 16 | Dock | Cleared out, then set up for work | 1 |
+| 17 | Finishing Up | Xcode, then the to-do list | 7 |
 
 Each row is one file in [`installer/config/steps`](installer/config/steps). `shawn config show` prints every item in every step.
 
@@ -247,7 +247,7 @@ A new command in `cli.yaml` works on the same call that pulls it. A new package 
 
 In the order the GIF shows them:
 
-1. CUSTOMIZE… lists every step and item with a checkbox. Optional items start unchecked.
+1. CUSTOMIZE… lists every step and item with a checkbox. An item marked `optional: true` starts unchecked. This config has none, so every box starts checked.
 2. Your name and email for Git. The installer asks once per Mac and keeps the answers.
 3. Your admin password, once per run. Only the commands of these items can use it, and only while they run: the Command Line Tools, Rosetta, Homebrew, casks, App Store apps, Xcode, `.pkg` downloads and items marked `sudo: true`.
 4. The App Store. macOS has no way to sign in to it from a script, so the app asks you to sign in yourself or skip App Store apps. Each skipped app lands on the checklist with a link to its store page.
