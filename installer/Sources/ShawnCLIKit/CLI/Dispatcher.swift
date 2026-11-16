@@ -63,7 +63,7 @@ enum Dispatcher {
 
     static func run(arguments: [String], context: CLIContext) async -> Int32 {
         // macOS checks an app's minimum before it opens the app. Nothing checks a command line tool's, so
-        // shawn does, before it reads a flag or fetches an update.
+        // shawn does, before it runs a command or looks for an update.
         let running = context.services.operatingSystem()
         guard MinimumMacOS.allows(running) else {
             context.fail("shawn needs macOS \(MinimumMacOS.major) or later. This Mac runs macOS \(MinimumMacOS.describe(running)).")

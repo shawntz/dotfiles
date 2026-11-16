@@ -103,8 +103,22 @@ final class DispatcherTests: XCTestCase {
             XCTAssertEqual(code, 69, "\(arguments)")
             XCTAssertEqual(harness.err.plain, "✗ shawn needs macOS 27 or later. This Mac runs macOS 26.7.2.\n", "\(arguments)")
             XCTAssertEqual(harness.out.text, "", "\(arguments)")
-            XCTAssertTrue(harness.events.all.isEmpty, "no command, update or restart: \(harness.events.all)")
+            XCTAssertTrue(harness.events.all.isEmpty, "no command and no restart: \(harness.events.all)")
         }
+    }
+
+    /// The update check asks git, and the fake git keeps every call, so it shows whether the check ran.
+    func testAnOlderMacOSDoesNotLookForAnUpdate() async {
+        let (control, controlGit) = selfUpdatingHarness()
+        do { let code = await control.run(["hello"]); XCTAssertEqual(code, 0) }
+        XCTAssertFalse(controlGit.calls.isEmpty, "on a macOS that is new enough, the update check asks git")
+
+        let (harness, git) = selfUpdatingHarness(macOS: (26, 7, 2))
+        let code = await harness.run(["hello"])
+        XCTAssertEqual(code, 69)
+        XCTAssertEqual(git.commandLines, [], "no update check")
+        XCTAssertTrue(harness.events.all.isEmpty, "and no command: \(harness.events.all)")
+        XCTAssertEqual(harness.err.plain, "✗ shawn needs macOS 27 or later. This Mac runs macOS 26.7.2.\n")
     }
 
     func testTheMinimumMacOSAndNewerRunAsUsual() async {
@@ -190,7 +204,7 @@ final class DispatcherTests: XCTestCase {
     }
 
     /// A harness whose self-update would run against a checkout (fake git records every call).
-    private func selfUpdatingHarness(environment: [String: String] = [:]) -> (Harness, FakeGit) {
+    private func selfUpdatingHarness(environment: [String: String] = [:], macOS: (Int, Int, Int)? = nil) -> (Harness, FakeGit) {
         var sandbox = Sandbox()
         for (key, value) in environment { sandbox.environment.baseEnvironment[key] = value }
         let checkout = sandbox.directory.url.appendingPathComponent("dotfiles")
@@ -201,7 +215,12 @@ final class DispatcherTests: XCTestCase {
         sandbox.shim("mytool", "exit 0")
         let git = FakeGit()
         git.answer(["symbolic-ref"], stdout: "master")
-        let harness = Harness(sandbox: sandbox, config: config) { $0.git = git }
+        let harness = Harness(sandbox: sandbox, config: config) {
+            $0.git = git
+            if let (major, minor, patch) = macOS {
+                $0.operatingSystem = { OperatingSystemVersion(majorVersion: major, minorVersion: minor, patchVersion: patch) }
+            }
+        }
         return (harness, git)
     }
 
