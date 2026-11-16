@@ -1,0 +1,18 @@
+# The `shawn` command: installs it to ~/.local/bin, keeps a copy of this
+# config in ~/.shawn so it works without the repo checkout, and sets up zsh
+# completion.
+#
+# Its own commands live in ../cli.yaml. To install somewhere else, or to point
+# it at a checkout in another place:
+#
+#   - shawn-cli: install
+#     to: ~/bin
+#     repo: ~/code/dotfiles
+
+id: cli
+title: The shawn CLI
+subtitle: shawn claude, shawn update and friends
+mascot: lsp
+
+items:
+  - shawn-cli: install

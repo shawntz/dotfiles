@@ -1,0 +1,38 @@
+# ~/.zprofile: PATH for login shells. Installed by Shawn's Dotfiles.
+#
+# Herdr and Ghostty start login shells, and so do apps that ask a login shell
+# for your PATH, so this is the one place PATH is built. ~/.zshrc sources this
+# file for the occasional non-login shell.
+#
+# PATH lives here rather than in ~/.zshenv because /etc/zprofile runs
+# path_helper after ~/.zshenv, which would push anything added there behind
+# /usr/bin.
+#
+# Machine-specific additions go in ~/.zshrc.local, not here.
+
+# Keep PATH and fpath free of duplicates, even when this file is sourced twice.
+typeset -gU path fpath
+
+# Homebrew: sets HOMEBREW_PREFIX, puts its bin and sbin first on PATH and its
+# completions on fpath. Apple Silicon location first, then Intel. Nothing
+# happens until Homebrew is installed.
+for _brew in /opt/homebrew/bin/brew /usr/local/bin/brew; do
+  if [[ -x "$_brew" ]]; then
+    eval "$("$_brew" shellenv zsh)"
+    break
+  fi
+done
+unset _brew
+
+# Tools installed outside Homebrew: Claude Code, Herdr core, shawn and your own
+# scripts live in ~/.local/bin; the Grok CLI lives in ~/.grok/bin. Grok goes
+# first because the Cursor CLI also installs a command called `agent`.
+path=("$HOME/.local/bin" $path)
+if [[ -d "$HOME/.grok/bin" ]]; then
+  path=("$HOME/.grok/bin" $path)
+fi
+
+# Docker Desktop's command-line tools, once Docker Desktop has created them.
+if [[ -d "$HOME/.docker/bin" ]]; then
+  path+=("$HOME/.docker/bin")
+fi

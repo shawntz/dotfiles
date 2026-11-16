@@ -1,7 +1,0 @@
-[Desktop Entry]
-Name=Open URL in Chromium Web App
-Exec=/home/sts/Developer/scripts/open-url.sh %f
-MimeType=applications/x-mswinurl;
-Terminal=false
-Type=Application
-NoDisplay=true

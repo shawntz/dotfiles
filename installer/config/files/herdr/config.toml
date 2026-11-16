@@ -1,0 +1,20 @@
+# Herdr settings (the `herdr` terminal UI and its server). Installed by Shawn's
+# Dotfiles to ~/.config/herdr/config.toml.
+#
+# `herdr --default-config` prints every option with its default; `herdr config
+# check` validates this file. The Herdr desktop app keeps its own settings in
+# ~/.config/herdr-app/, which this installer leaves alone.
+
+# Notifications are already chosen below, so skip the first-run setup.
+onboarding = false
+
+[ui.toast]
+# When an agent in a background workspace needs you, ask the outer terminal
+# to show a desktop notification.
+delivery = "terminal"
+
+[theme]
+# Catppuccin, like Ghostty and Neovim, with no light/dark switching. Both are
+# the defaults today; they are spelled out so the look survives a new default.
+name = "catppuccin"
+auto_switch = false

@@ -1,0 +1,26 @@
+# Web apps: websites wrapped as their own Mac apps, with a Dock icon, their
+# own window and their own sign-in.
+#
+# Each one is built into /Applications from the tiny web-app shell. Links to
+# other sites open in your default browser. Add one like this (`icon:` is
+# optional; without it the site's own icon is used):
+#
+#   - webapp: Linear
+#     url: https://linear.app
+#     icon: webapp-icons/linear.png
+#
+# Icons you supply go in config/webapp-icons/ (png, jpg or icns), or `icon:`
+# can be the https address of such an image (not an SVG). Don't use a folder
+# named "icons": the repo's .gitignore pattern `Icon?` hides it, so the images
+# would never be committed.
+
+id: webapps
+title: Web Apps
+subtitle: Websites as standalone apps
+mascot: bubblegum
+
+items:
+  - webapp: Carbon
+    url: https://my.carbonapp.co
+  - webapp: X
+    url: https://x.com

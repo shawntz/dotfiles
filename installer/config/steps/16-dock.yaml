@@ -1,0 +1,41 @@
+# The Dock: Apple's default apps come out, then these go in, in this order.
+#
+# Apps are listed by name as they appear in /Applications (a full path works
+# too). An app that is not installed is skipped with a warning, so listing one
+# you only sometimes have is fine. To add one, put its name where you want it
+# in the row:
+#
+#   - Cursor
+#
+# Anything not listed here is removed from the Dock; add `clear: false` under
+# `dock:` to keep what is already there. Before the Dock is changed, its old
+# layout is saved to ~/.shawn/backups/<run>/Library/Preferences/com.apple.dock.plist
+# (to go back: defaults import com.apple.dock <that file>, then killall Dock).
+
+id: dock
+title: Dock
+subtitle: Cleared out, then set up for work
+mascot: gunter
+
+items:
+  - dock:
+      apps:
+        - Google Chrome
+        - Spotify
+        - Slack
+        - {app: Aero Dogfood, fallback: Aero}   # whichever Aero build is installed (with both, the one in the Dock stays)
+        - Herdr
+        - Granola
+        # - Cursor                               # another app: its name in /Applications
+      folders:
+        - {path: ~/Developer, view: grid, display: folder, sort: name}
+      settings:
+        autohide: true                 # hide the Dock until the pointer reaches it
+        launchanim: false              # no bouncing icons when an app opens
+        mineffect: scale               # minimize with the plain scale effect, not the genie
+        minimize-to-application: true  # minimized windows go into their app's icon
+        mru-spaces: false              # keep Spaces in a fixed order
+        orientation: bottom            # Dock along the bottom of the screen
+        show-recents: false            # no section for recent apps
+        tilesize: 128.0                # biggest icons (a decimal, as macOS stores it)
+        workspaces-auto-swoosh: false  # switching apps never jumps to another Space

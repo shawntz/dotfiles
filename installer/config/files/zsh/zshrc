@@ -1,0 +1,198 @@
+# ~/.zshrc: interactive zsh. Installed by Shawn's Dotfiles.
+#
+# Every tool below is optional: each integration checks that its tool is
+# installed first, so a brand-new Mac with nothing but /bin/zsh starts cleanly
+# and each piece lights up once its tool arrives. Checks use `if` blocks rather
+# than `cmd && ...` so a missing tool never leaves a failed status behind for
+# the first prompt to show.
+#
+# Machine-specific settings (work proxies, employer tools, secrets fetched from
+# a password manager) go in ~/.zshrc.local, which is sourced near the end and
+# is never part of the dotfiles repo.
+#
+# Order: PATH, environment, history, options, completion (one compinit),
+# tool hooks, aliases and functions, ~/.zshrc.local, then the zsh plugins,
+# which must come last.
+
+# ── PATH ─────────────────────────────────────────────────────────────────────
+typeset -gU path fpath
+
+# Login shells already read ~/.zprofile; other shells (some editor terminals)
+# read it here so PATH is the same everywhere.
+if [[ ! -o login && -r "$HOME/.zprofile" ]]; then
+  source "$HOME/.zprofile"
+fi
+
+# Project-local ./bin (binstubs, repo scripts) goes LAST, so a cloned repo can
+# never shadow git, ls or ssh.
+path+=(./bin)
+
+# ── Environment ──────────────────────────────────────────────────────────────
+# One UTF-8 locale for everything (R and others complain without it).
+export LANG=en_US.UTF-8
+export LC_ALL=en_US.UTF-8
+export LC_CTYPE=en_US.UTF-8
+
+# Skip Homebrew's "hide these hints with HOMEBREW_NO_ENV_HINTS" messages.
+export HOMEBREW_NO_ENV_HINTS=1
+
+# Neovim edits commit messages, crontabs and anything else that asks for an editor.
+if (( $+commands[nvim] )); then
+  export EDITOR=nvim
+  export VISUAL=nvim
+fi
+
+# ── History ──────────────────────────────────────────────────────────────────
+HISTFILE="$HOME/.zsh_history"
+HISTSIZE=32768
+SAVEHIST=$HISTSIZE
+
+setopt APPEND_HISTORY           # append, don't overwrite
+setopt INC_APPEND_HISTORY       # write each command as it runs
+setopt EXTENDED_HISTORY         # save timestamps and durations
+setopt HIST_IGNORE_DUPS         # skip consecutive duplicates
+setopt HIST_IGNORE_ALL_DUPS     # drop older duplicates too
+setopt HIST_FIND_NO_DUPS        # no duplicate matches when searching
+setopt HIST_REDUCE_BLANKS       # trim extra whitespace
+setopt HIST_IGNORE_SPACE        # a leading space keeps a command out of history
+
+# ── Options ──────────────────────────────────────────────────────────────────
+# Don't cache command locations, so a script just added to ./bin or
+# ~/.local/bin runs right away.
+setopt NO_HASH_CMDS
+
+# ── Completion ───────────────────────────────────────────────────────────────
+# Every completion directory goes on fpath BEFORE the single compinit below.
+# Homebrew's share/zsh/site-functions is already there (from `brew shellenv`).
+if [[ -d "$HOME/.local/share/zsh/site-functions" ]]; then
+  fpath=("$HOME/.local/share/zsh/site-functions" $fpath)    # shawn
+fi
+if [[ -d "$HOME/.grok/completions/zsh" ]]; then
+  fpath=("$HOME/.grok/completions/zsh" $fpath)              # grok
+fi
+if [[ -n "${HOMEBREW_PREFIX:-}" && -d "$HOMEBREW_PREFIX/share/zsh-completions" ]]; then
+  fpath=("$HOMEBREW_PREFIX/share/zsh-completions" $fpath)   # brew install zsh-completions
+fi
+
+autoload -Uz compinit
+_zcompdump_dir="${XDG_CACHE_HOME:-$HOME/.cache}/zsh"
+if [[ ! -d "$_zcompdump_dir" ]]; then
+  mkdir -p "$_zcompdump_dir"
+fi
+# -i skips insecure completion directories instead of stopping at a y/n
+# prompt. Homebrew leaves its share/ directory group-writable, and compaudit
+# flags it as the parent of zsh-completions; with -i the completions still load.
+compinit -i -d "$_zcompdump_dir/zcompdump-$ZSH_VERSION"
+unset _zcompdump_dir
+
+zstyle ':completion:*' menu select
+zstyle ':completion:*' matcher-list 'm:{a-z}={A-Za-z}' 'r:|[._-]=* r:|=*'
+
+# ── Tool hooks ───────────────────────────────────────────────────────────────
+# mise: per-project runtime versions (node, python, java, ...)
+if (( $+commands[mise] )); then
+  eval "$(mise activate zsh)"
+fi
+
+# starship: the prompt (configured in ~/.config/starship.toml)
+if (( $+commands[starship] )); then
+  eval "$(starship init zsh)"
+fi
+
+# zoxide: `z <part of a path>` jumps to a directory you have visited
+if (( $+commands[zoxide] )); then
+  eval "$(zoxide init zsh)"
+fi
+
+# thefuck: loaded on first use rather than at startup, which saves about 100 ms
+# per shell. The first `fuck` swaps this stub for the real function.
+if (( $+commands[thefuck] )); then
+  fuck() {
+    unfunction fuck
+    eval "$(thefuck --alias)"
+    fuck "$@"
+  }
+fi
+
+# shawn: completions, `sd` (cd to a project picked with fzf) and the wrappers
+# that let `shawn clone` and `shawn new` change directory.
+command -v shawn >/dev/null && eval "$(shawn shell-init zsh)"
+
+# ── Aliases and functions ────────────────────────────────────────────────────
+# Navigation
+alias b='cd ..'                     # back one directory
+alias bb='cd ../..'                 # back two
+alias bbb='cd ../../..'             # back three
+alias bbbb='cd ../../../..'         # back four
+alias bbbbb='cd ../../../../..'     # back five
+alias ..='cd ..'
+alias ...='cd ../..'
+alias ....='cd ../../..'
+
+# Shell
+alias s='source ~/.zshrc'           # reload this file
+
+# Git
+alias g='git'
+alias gs='git status'
+if (( $+commands[lazygit] )); then
+  alias lg='lazygit'
+fi
+
+# Listings with eza (the icons need a Nerd Font; Ghostty has one built in)
+if (( $+commands[eza] )); then
+  alias ls='eza -lh --group-directories-first --icons=auto'
+  alias lsa='ls -a'
+  alias lt='eza --tree --level=2 --long --icons --git'
+  alias lta='lt -a'
+fi
+
+# ff: fuzzy-find a file with a preview (bat when installed, plain head otherwise)
+if (( $+commands[fzf] )); then
+  if (( $+commands[bat] )); then
+    alias ff="fzf --preview 'bat --style=numbers --color=always {}'"
+  else
+    alias ff="fzf --preview 'head -200 {}'"
+  fi
+fi
+
+# cd: a real directory uses the builtin; anything else is a zoxide jump that
+# prints where it landed. Needs zoxide for the `z` fallback.
+if (( $+commands[zoxide] )); then
+  zd() {
+    if (( $# == 0 )); then
+      builtin cd ~
+    elif [[ -d "$1" ]]; then
+      builtin cd "$1"
+    else
+      z "$@" && printf "\U000F17A9 " && pwd || echo "Error: Directory not found"
+    fi
+  }
+  alias cd='zd'
+fi
+
+# n: Neovim, on the current directory when given no arguments
+if (( $+commands[nvim] )); then
+  n() { if (( $# == 0 )); then nvim .; else nvim "$@"; fi; }
+fi
+
+# take: make a directory and cd into it
+take() { mkdir -p -- "$1" && builtin cd -- "$1"; }
+
+# ── Machine-local settings ───────────────────────────────────────────────────
+if [[ -r "$HOME/.zshrc.local" ]]; then
+  source "$HOME/.zshrc.local"
+fi
+
+# ── zsh plugins from Homebrew (keep these last) ──────────────────────────────
+if [[ -n "${HOMEBREW_PREFIX:-}" ]]; then
+  # Autosuggestions: grey ghost text from your history; → accepts it
+  if [[ -r "$HOMEBREW_PREFIX/share/zsh-autosuggestions/zsh-autosuggestions.zsh" ]]; then
+    source "$HOMEBREW_PREFIX/share/zsh-autosuggestions/zsh-autosuggestions.zsh"
+  fi
+
+  # Syntax highlighting: must load after every other plugin and widget
+  if [[ -r "$HOMEBREW_PREFIX/share/zsh-syntax-highlighting/zsh-syntax-highlighting.zsh" ]]; then
+    source "$HOMEBREW_PREFIX/share/zsh-syntax-highlighting/zsh-syntax-highlighting.zsh"
+  fi
+fi

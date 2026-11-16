@@ -66,11 +66,6 @@ build/
 .config/teams/
 
 # --------------------------------------------------------------------
-# Backup artifacts (from install.sh pre-checkout backup)
-# --------------------------------------------------------------------
-.dotfiles-backup-*/
-
-# --------------------------------------------------------------------
 # Miscellaneous
 # --------------------------------------------------------------------
 *.iso
@@ -81,6 +76,5 @@ build/
 *.partial
 Tinyspeck.png
 
-install/config/rstudio/rstudio/**
 **/.DS_Store
 .zshrc

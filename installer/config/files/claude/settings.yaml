@@ -1,0 +1,62 @@
+# Claude Code's base settings. steps/12-claude.yaml merges this file into
+# ~/.claude/settings.json: the keys below are set, every other key already in
+# that file is kept, and permissions.allow gains any missing entries without
+# losing yours. Same format as settings.json, written as YAML.
+#
+# To add a setting, add its key here with the value you want. Anything that
+# only makes sense on one Mac (absolute paths, work-only hooks) belongs in that
+# Mac's ~/.claude/settings.json, not here.
+
+# ── Model ────────────────────────────────────────────────────────────────────
+model: fable
+effortLevel: high
+modelSettings:
+  claude-opus-5-5:
+    effortLevel: xhigh
+
+# ── Interface ────────────────────────────────────────────────────────────────
+tui: fullscreen
+theme: auto
+teammateMode: auto
+crossSessionInbound: accept
+defaultMode: auto
+inputNeededNotifEnabled: true
+agentPushNotifEnabled: true
+skipWorkflowUsageWarning: true
+
+# ── Environment for every session ───────────────────────────────────────────
+env:
+  CLAUDE_CODE_EXPERIMENTAL_AGENT_TEAMS: "1"
+  CLAUDE_CODE_SUBAGENT_MODEL: opus
+
+# ── Tools Claude may use without asking ─────────────────────────────────────
+permissions:
+  allow:
+    - "Bash(npm test:*)"
+    - "Bash(git diff:*)"
+    - "Bash(git log:*)"
+    - Read
+    - Edit
+
+# ── Status line ──────────────────────────────────────────────────────────────
+# Repo (or shortened path), git branch, a starship-style status summary and
+# the model name, in cyan. Needs jq and git. `shawn claude` swaps in its own
+# status line for the sessions it starts.
+statusLine:
+  type: command
+  command: |-
+    input=$(cat); cwd=$(printf '%s' "$input" | jq -r '.workspace.current_dir // .cwd'); model=$(printf '%s' "$input" | jq -r '.model.display_name'); cd "$cwd" 2>/dev/null || exit 0; C=$(printf '\033[36m'); B=$(printf '\033[1;36m'); I=$(printf '\033[3;36m'); D=$(printf '\033[2;36m'); N=$(printf '\033[0m'); root=$(git --no-optional-locks rev-parse --show-toplevel 2>/dev/null); if [ -n "$root" ]; then rel=${cwd#"$root"}; dir="$B$(basename "$root")$N$C$rel$N"; else p=$cwd; case "$p" in "$HOME"*) p="~${p#"$HOME"}";; esac; p=$(printf '%s' "$p" | awk -F/ 'NF>2{printf "…/%s/%s", $(NF-1), $NF; next} {print}'); dir="$C$p$N"; fi; g=""; br=$(git --no-optional-locks branch --show-current 2>/dev/null); [ -z "$br" ] && br=$(git --no-optional-locks rev-parse --short HEAD 2>/dev/null); if [ -n "$br" ]; then st=$(git --no-optional-locks status --porcelain 2>/dev/null); s=""; printf '%s' "$st" | grep -qE '^(DD|AU|UD|UA|DU|AA|UU)' && s="$s="; git --no-optional-locks stash list 2>/dev/null | grep -q . && s="$s\$"; printf '%s' "$st" | grep -qE '^(.D|D.)' && s="$s✘"; printf '%s' "$st" | grep -qE '^R' && s="$s»"; printf '%s' "$st" | grep -qE '^.M' && s="$s!"; printf '%s' "$st" | grep -qE '^[MARC]' && s="$s+"; printf '%s' "$st" | grep -qE '^\?\?' && s="$s?"; g="$I$br$N"; [ -n "$s" ] && g="$g $C$s$N"; fi; out="$dir"; [ -n "$g" ] && out="$out $g"; printf '%s  %s%s%s' "$out" "$D" "$model" "$N"
+
+# ── Plugins ──────────────────────────────────────────────────────────────────
+# The claude-plugin items in steps/12-claude.yaml install these. Declaring
+# them here too means Claude Code fetches any that failed to install the next
+# time it starts.
+enabledPlugins:
+  stripe@claude-plugins-official: true
+  swift-lsp@claude-plugins-official: true
+  warp@claude-code-warp: true
+extraKnownMarketplaces:
+  claude-code-warp:
+    source:
+      source: github
+      repo: warpdotdev/claude-code-warp

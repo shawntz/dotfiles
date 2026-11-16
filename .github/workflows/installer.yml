@@ -1,0 +1,77 @@
+# Builds and tests the installer and checks the YAML config on every change to installer/.
+# No signing, no secrets: release builds are made locally with installer/scripts/release.sh.
+name: installer
+
+on:
+  pull_request:
+    paths:
+      - "installer/**"
+      - ".github/workflows/installer.yml"
+      # The root .gitignore decides which config files can be committed at all.
+      - ".gitignore"
+  push:
+    # Pull requests are covered above; this catches what lands on master.
+    branches: [master]
+    paths:
+      - "installer/**"
+      - ".github/workflows/installer.yml"
+      - ".gitignore"
+
+permissions:
+  contents: read
+
+concurrency:
+  group: installer-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  build-test-validate:
+    name: Build, test, validate config
+    # GitHub's Xcode 27 image (arm64, macOS 27), so CI builds with the Xcode 27.2 and Swift 6.4
+    # that the installer puts on a new Mac. The macos-26 image only carries Xcode 26.
+    runs-on: xcode-27
+    timeout-minutes: 30
+    env:
+      # Name the Xcode rather than following the image's default, which is an older 27.x.
+      DEVELOPER_DIR: /Applications/Xcode_27.2.app/Contents/Developer
+      # The built CLI must never try to update itself in CI.
+      SHAWN_NO_SELF_UPDATE: "1"
+      SHAWN_NO_UPDATE: "1"
+      NO_COLOR: "1"
+    defaults:
+      run:
+        working-directory: installer
+    steps:
+      - name: Check out
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+
+      - name: Show the toolchain
+        run: |
+          xcodebuild -version
+          swift --version
+
+      - name: Build
+        id: build
+        run: swift build --build-tests
+
+      # The steps below each report on their own once the build worked, so one failing check
+      # does not hide the others.
+      - name: Test the Swift package
+        if: ${{ !cancelled() && steps.build.outcome == 'success' }}
+        run: swift test --skip-build
+
+      - name: Validate the config with the built CLI
+        if: ${{ !cancelled() && steps.build.outcome == 'success' }}
+        run: .build/debug/shawn config validate config
+
+      - name: Check that git keeps every config file
+        # Runs git with core.ignorecase=true, as on a Mac, where the root .gitignore's 'Icon?'
+        # also matches a folder named "icons".
+        if: ${{ !cancelled() && steps.build.outcome == 'success' }}
+        run: scripts/check-config-gitignore.sh config
+
+      - name: Test the build scripts
+        if: ${{ !cancelled() && steps.build.outcome == 'success' }}
+        run: scripts/tests/run.sh

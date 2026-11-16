@@ -1,0 +1,4 @@
+#!/bin/bash
+# Stands in for spctl: Gatekeeper accepts everything.
+set -eu
+printf 'spctl %s\n' "$*" >>"$FAKE_LOG"

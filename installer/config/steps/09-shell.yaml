@@ -1,0 +1,41 @@
+# The shell and the tools around it: zsh, the Starship prompt, Ghostty and
+# Neovim. Every file comes from config/files/ in this repo; a file already on
+# the Mac is backed up to ~/.shawn/backups before it is replaced.
+#
+# The zsh files work on a bare Mac: each tool they mention is used only once it
+# is installed. Settings for one Mac only go in ~/.zshrc.local, which is never
+# overwritten.
+#
+# To install another config file, put it under config/files/ and add:
+#
+#     - copy: lazygit/config.yml
+#       to: ~/.config/lazygit/config.yml
+
+id: shell
+title: Shell & Editor
+subtitle: zsh, Starship, Ghostty and Neovim
+mascot: gunter
+
+items:
+  # ── zsh ────────────────────────────────────────────────────────────────
+  - copy: zsh/zprofile          # PATH: Homebrew, ~/.local/bin, ~/.grok/bin
+    to: ~/.zprofile
+  - copy: zsh/zshrc             # history, completion, prompt, aliases
+    to: ~/.zshrc
+  - copy: zsh/hushlogin         # empty: hides "Last login: ..." in new terminals
+    to: ~/.hushlogin
+
+  # ── Prompt and terminal ────────────────────────────────────────────────
+  - copy: starship/starship.toml
+    to: ~/.config/starship.toml
+  - copy: ghostty/config
+    to: ~/.config/ghostty/config
+
+  # ── Neovim ─────────────────────────────────────────────────────────────
+  # The LazyVim starter with a Catppuccin Latte theme. Written only when
+  # ~/.config/nvim doesn't exist yet, so an existing Neovim setup is left
+  # alone. Plugins download on the first `nvim`, at the versions pinned in
+  # lazy-lock.json.
+  - copy: nvim
+    to: ~/.config/nvim
+    if_missing: true

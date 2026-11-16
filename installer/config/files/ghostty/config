@@ -1,0 +1,42 @@
+# Ghostty, the backup terminal (Herdr is the main one). Installed by Shawn's
+# Dotfiles to ~/.config/ghostty/config.
+#
+# One `key = value` per line. To list every option, or to check this file:
+#   /Applications/Ghostty.app/Contents/MacOS/ghostty +show-config --default --docs
+#   /Applications/Ghostty.app/Contents/MacOS/ghostty +validate-config
+
+# ── Look ─────────────────────────────────────────────────────────────────────
+theme = Catppuccin Latte
+window-theme = auto
+background-opacity = 0.85
+background-blur = 20
+font-size = 16
+window-padding-x = 20
+window-padding-y = 5
+window-decoration = true
+window-colorspace = display-p3
+window-vsync = true
+mouse-hide-while-typing = true
+
+# ── Shell ────────────────────────────────────────────────────────────────────
+# A login shell, so ~/.zprofile sets up PATH.
+command = /bin/zsh -l
+scrollback-limit = 10_000
+window-save-state = always
+
+# ── Keyboard and mouse ───────────────────────────────────────────────────────
+# Option types special characters instead of acting as Alt.
+macos-option-as-alt = false
+# Turn on Secure Keyboard Entry while a password prompt is showing.
+macos-auto-secure-input = true
+copy-on-select = true
+click-repeat-interval = 500
+# Programs may read the clipboard, and pasting is never interrupted by a
+# "this paste looks unsafe" confirmation.
+clipboard-read = allow
+clipboard-paste-protection = false
+
+# Ctrl+K sends Ctrl+C (interrupt).
+keybind = ctrl+k=text:\x03
+# Shift+Return sends Esc+Return: a new line without submitting, e.g. in Claude Code.
+keybind = shift+enter=text:\x1b\r

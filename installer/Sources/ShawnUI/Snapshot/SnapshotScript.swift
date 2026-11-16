@@ -1,0 +1,246 @@
+import Foundation
+import ShawnCore
+
+/// Puts a model into a given screen with a fixed set of events, so snapshots are the same every time.
+///
+/// Everything is derived from the loaded plan by position (first steps finished, a middle step running,
+/// the rest pending), never from particular step ids, so it works with any config.
+@MainActor
+enum SnapshotScript {
+    static let fixedRunStart = Date(timeIntervalSinceReferenceDate: 800_000_000)
+    /// "Now" for running screens: 3m 12s into the run.
+    static let fixedNow = fixedRunStart.addingTimeInterval(192)
+
+    static func apply(_ state: SnapshotState, to model: InstallerModel) {
+        // The run "starts" at fixedRunStart; the screen is looked at 3m 12s later. A run asks its questions and
+        // then for the password before its first step, so those four screens are looked at with the clock still
+        // at zero, and a tour that goes from one to the next never runs its clock backward.
+        model.now = { fixedRunStart }
+        let beforeTheFirstStep = [SnapshotState.ask, .askAgain, .password, .passwordAgain].contains(state)
+        defer { model.now = { beforeTheFirstStep ? fixedRunStart : fixedNow } }
+        switch state {
+        case .loading:
+            break
+        case .configError:
+            if model.loadFailure == nil { model.showLoadFailure(sampleFailure) }
+        case .welcome:
+            break
+        case .customize:
+            model.showCustomize()
+        case .running:
+            playRunning(model)
+        case .ask, .askAgain:
+            // A real run asks its questions as soon as it starts, before the password and before any item.
+            model.apply(.runStarted(totalItems: model.enabledItemCount))
+            model.enqueue(.text(sampleTextRequest(for: model, again: state == .askAgain), PromptGate<String?>()))
+        case .password, .passwordAgain:
+            // A real run asks once, before its first step starts, with this reason (see InstallEngine.run).
+            model.apply(.runStarted(totalItems: model.enabledItemCount))
+            let again = state == .passwordAgain
+            let request = PasswordRequest(reason: "Some steps need administrator rights (Homebrew, system installers).",
+                                          attempt: again ? 2 : 1, lastError: again ? "That password was not accepted." : nil,
+                                          maxAttempts: SudoSession.maxAttempts)
+            model.enqueue(.password(request, PromptGate<String?>()))
+        case .question:
+            playRunning(model)
+            model.enqueue(.question(sampleQuestion, PromptGate<String>()))
+        case .attention:
+            playRunning(model)
+            if let itemID = model.currentItemID {
+                model.apply(.attention(itemID: itemID, attention: sampleAttention))
+            }
+        case .finished:
+            playFinished(model, failures: 0, stopped: false)
+        case .failed:
+            playFinished(model, failures: 2, stopped: false)
+        case .stopped:
+            playFinished(model, failures: 0, stopped: true)
+        case .dryRunFinished:
+            model.dryRun = true
+            playFinished(model, failures: 0, stopped: false)
+        }
+    }
+
+    static let sampleFailure = InstallerModel.LoadFailure(
+        message: "The config at ~/Developer/dotfiles/installer/config has problems.",
+        issues: [
+            .error("item 3 (cask): unknown key 'ap'. Did you mean 'app'?", at: SourceRef(file: "steps/04-apps.yaml", line: 18)),
+            .error("item 12 (brew): 'brew' needs a value, e.g. 'brew: something'", at: SourceRef(file: "steps/03-packages.yaml", line: 41)),
+            .error("item 1: unknown item kind 'cask_app'. Did you mean 'cask'? (known kinds: brew, cask, copy, …)", at: SourceRef(file: "steps/02-dropbox.yaml", line: 7)),
+            .warning("mascot 'gunter' has no sprite in fun/sprites/", at: SourceRef(file: "steps/16-dock.yaml")),
+        ]
+    )
+
+    static let sampleQuestion = Question(
+        title: "Sign in to the App Store",
+        message: "Open the App Store, sign in with your Apple Account, then come back. The installer cannot install App Store apps until you do.",
+        options: [
+            Question.Option(id: "signed-in", label: "I'm signed in", isDefault: true),
+            Question.Option(id: "skip", label: "Skip App Store apps"),
+        ],
+        // Xcode's page: its download is the first App Store install of a run, so that is when the app asks.
+        url: URL(string: "macappstore://apps.apple.com/app/id497799835")
+    )
+
+    /// The config's first question on its first try, with an offered answer. With `again`, the email question on its
+    /// second try: the config's own prompt when it asks for an email, and the engine's reason for turning down the
+    /// first reply.
+    static func sampleTextRequest(for model: InstallerModel, again: Bool = false) -> TextRequest {
+        let questions = model.plan?.config.meta.ask ?? []
+        if again {
+            let question = questions.first { $0.format == .email }
+            return TextRequest(id: question?.name ?? "email", prompt: question?.prompt ?? "Your email address for Git commits",
+                               defaultValue: "you@example.com", format: .email, attempt: 2,
+                               lastError: AnswerFormat.email.problem(with: "you at example dot com"))
+        }
+        let question = questions.first
+        let format = question?.format ?? .text
+        return TextRequest(id: question?.name ?? "full_name",
+                           prompt: question?.prompt ?? "Your name, as Git should record it on your commits",
+                           defaultValue: format == .email ? "lsp@example.com" : "Lumpy Space Princess", format: format)
+    }
+
+    static let sampleAttention = Attention(
+        title: "Sign in to GitHub",
+        message: "Enter this code in the browser window that just opened, then approve the sign-in.",
+        code: "LUMP-5PCE",
+        url: URL(string: "https://github.com/login/device")
+    )
+
+    // MARK: Scripts
+
+    static func enabledSteps(_ model: InstallerModel) -> [PlannedStep] {
+        model.steps.filter { model.isEnabled($0) && model.selectedItemCount(in: $0) > 0 }
+    }
+
+    static func enabledItems(_ model: InstallerModel, in step: PlannedStep) -> [PlannedItem] {
+        step.items.filter { model.isEnabled($0) }
+    }
+
+    /// Finishes one item with a varied outcome and a little output, the way the engine reports it (a dry
+    /// run only narrates the command). A reminder (`manual:`) that the run does not find already done ends as
+    /// the engine ends it: on the checklist, needing you. Returns the item's final status.
+    @discardableResult
+    static func finish(_ item: PlannedItem, index: Int, failing: Bool, in step: PlannedStep? = nil,
+                       model: InstallerModel) -> ItemStatus {
+        let status: ItemStatus
+        model.apply(.itemStatus(itemID: item.id, status: .checking))
+        if !failing, SnapshotOutput.endsAlreadyDone(item, index: index) {
+            status = .alreadyDone(SnapshotOutput.alreadyDoneReason(for: item))
+            model.apply(.itemStatus(itemID: item.id, status: status))
+            return status
+        }
+        model.apply(.itemStatus(itemID: item.id, status: .running))
+        model.apply(SnapshotOutput.start(item, model: model))
+        if failing {
+            let message = "\(SnapshotOutput.command(item, model: model)) failed (exit 1): Error: the download was interrupted (curl: (56) Recv failure: Connection reset by peer)"
+            model.apply(.log(LogLine("curl: (56) Recv failure: Connection reset by peer", style: .stderr, itemID: item.id)))
+            model.apply(.log(LogLine("✗ \(item.title): \(message)", style: .error, itemID: item.id)))
+            status = .failed(message)
+        } else if let followUp = SnapshotOutput.followUp(for: item, in: step) {
+            model.apply(.followUp(followUp))
+            status = .needsAttention(followUp.title)
+        } else {
+            model.apply(SnapshotOutput.end(item, model: model))
+            status = .done(nil)
+        }
+        model.apply(.itemStatus(itemID: item.id, status: status))
+        return status
+    }
+
+    /// STOP lands while `item` runs: the model's own STOP, then exactly the events InstallEngine sends for an
+    /// item interrupted mid-command (`.cancelled`, then the step `.stopped`).
+    private static func interrupt(_ item: PlannedItem, in step: PlannedStep, model: InstallerModel) {
+        model.apply(.itemStatus(itemID: item.id, status: .checking))
+        model.apply(.itemStatus(itemID: item.id, status: .running))
+        model.apply(SnapshotOutput.inProgress(item, progress: 0.5, model: model))
+        model.stop()
+        model.apply(.attention(itemID: item.id, attention: nil))
+        model.apply(.itemStatus(itemID: item.id, status: .cancelled))
+        model.apply(.stepStatus(stepID: step.id, status: .stopped))
+    }
+
+    /// About 40% through: earlier steps finished (one item failed), the middle step mid-item with live output.
+    static func playRunning(_ model: InstallerModel) {
+        if let fraction = SnapshotProgress.takePending() { return SnapshotProgress.play(fraction, on: model) }
+        let steps = enabledSteps(model)
+        guard !steps.isEmpty else { return }
+        model.apply(.runStarted(totalItems: model.enabledItemCount))
+
+        let currentIndex = min(steps.count - 1, max(1, steps.count * 2 / 5))
+        for (stepIndex, step) in steps.enumerated() where stepIndex < currentIndex {
+            model.apply(.stepStatus(stepID: step.id, status: .running))
+            var failures = 0
+            for (index, item) in enabledItems(model, in: step).enumerated() {
+                let failing = stepIndex == currentIndex - 1 && index == enabledItems(model, in: step).count - 1 && stepIndex > 0
+                finish(item, index: index, failing: failing, in: step, model: model)
+                if failing { failures += 1 }
+            }
+            model.apply(.stepStatus(stepID: step.id, status: failures == 0 ? .done : .finishedWithFailures(failures)))
+        }
+
+        let current = steps[currentIndex]
+        model.apply(.stepStatus(stepID: current.id, status: .running))
+        let items = enabledItems(model, in: current)
+        let runningIndex = min(items.count - 1, items.count / 2)
+        for (index, item) in items.enumerated() where index < runningIndex {
+            finish(item, index: index, failing: false, in: current, model: model)
+        }
+        let item = items[runningIndex]
+        model.apply(.itemStatus(itemID: item.id, status: .checking))
+        model.apply(.itemStatus(itemID: item.id, status: .running))
+        model.apply(SnapshotOutput.inProgress(item, progress: 0.524, model: model))
+        // Show the step's own line rather than the reaction to the earlier failure.
+        model.advanceQuip()
+    }
+
+    /// A whole run, ended by `.runFinished`: a real run, or a dry run when `model.dryRun` is on. With `stopped`,
+    /// STOP lands halfway through, while an item runs, and the steps after it are never reached.
+    static func playFinished(_ model: InstallerModel, failures: Int, stopped: Bool) {
+        let steps = enabledSteps(model)
+        model.apply(.runStarted(totalItems: model.enabledItemCount))
+        let dryRun = model.runIsDryRun
+        if dryRun { model.apply(.log(LogLine("Dry run: nothing on this Mac will be changed.", style: .info))) }
+        var summary = InstallSummary()
+        summary.wasDryRun = dryRun
+        let allItems = steps.flatMap { enabledItems(model, in: $0) }
+        let stopIndex = stopped ? allItems.count / 2 : allItems.count
+        var failingIndices = Set<Int>()
+        if failures > 0 {
+            for index in stride(from: 1, to: allItems.count, by: max(1, allItems.count / failures)) where failingIndices.count < failures {
+                failingIndices.insert(index)
+            }
+        }
+        var position = 0
+        run: for step in steps {
+            model.apply(.stepStatus(stepID: step.id, status: .running))
+            var stepFailures = 0
+            for item in enabledItems(model, in: step) {
+                if position == stopIndex {
+                    interrupt(item, in: step, model: model)
+                    break run
+                }
+                let status = finish(item, index: position, failing: failingIndices.contains(position), in: step, model: model)
+                switch status {
+                case .done: summary.done += 1
+                case .alreadyDone: summary.alreadyDone += 1
+                case .needsAttention: summary.needsAttention += 1
+                case .failed(let message):
+                    stepFailures += 1
+                    summary.failures.append(InstallSummary.Failure(itemID: item.id, title: item.title, message: message))
+                default: break
+                }
+                position += 1
+            }
+            model.apply(.stepStatus(stepID: step.id, status: stepFailures == 0 ? .done : .finishedWithFailures(stepFailures)))
+        }
+
+        // The checklist is what the run's reminders put on it, in the order they ran.
+        summary.followUps = model.followUps
+        summary.wasCancelled = stopped
+        summary.duration = stopped ? SnapshotProgress.elapsed(atItem: stopIndex, model: model) : SnapshotProgress.runDuration
+        // The engine writes no log file for a dry run.
+        summary.logFile = dryRun ? nil : model.environment.logsDirectory.appendingPathComponent("install-20261114-221530.log")
+        model.apply(.runFinished(summary))
+    }
+}

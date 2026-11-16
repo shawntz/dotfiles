@@ -1,0 +1,4 @@
+interface:
+  display_name: "Product Launch Video"
+  short_description: "Create crisp product demos and reusable launch assets"
+  default_prompt: "Use $product-launch-video to make a short sample-data demo of this product, preserve versions, and show me a reviewable preview before a longer cut."

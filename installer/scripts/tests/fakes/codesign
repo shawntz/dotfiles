@@ -1,0 +1,42 @@
+#!/bin/bash
+# Stands in for codesign with a keychain that holds two "Developer ID Application" certificates of
+# the same name ($FAKE_IDENTITY_NAME), as after a renewal: like the real codesign, it refuses to
+# sign with that name ("ambiguous") and accepts a 40-digit SHA-1. Every call goes to $FAKE_LOG.
+# FAKE_SIGNATURE=adhoc makes everything look signed ad hoc instead.
+set -eu
+printf 'codesign %s\n' "$*" >>"$FAKE_LOG"
+
+last="" identity="" previous="" prefix=""
+for argument in "$@"; do
+    [ "$previous" != --sign ] || identity="$argument"
+    case "$argument" in --extract-certificates=*) prefix="${argument#--extract-certificates=}" ;; esac
+    previous="$argument"
+    last="$argument"
+done
+
+case " $* " in
+    *" --verify "*)
+        exit 0 ;;
+    *" --extract-certificates="*)
+        [ "${FAKE_SIGNATURE:-}" != adhoc ] || exit 0
+        printf 'leaf certificate of %s\n' "$FAKE_IDENTITY_NAME" >"${prefix}0"
+        printf 'Developer ID Certification Authority\n' >"${prefix}1"
+        exit 0 ;;
+    *" -dvv "*)
+        if [ "${FAKE_SIGNATURE:-}" = adhoc ]; then
+            printf 'Executable=%s\nSignature=adhoc\nTeamIdentifier=not set\n' "$last" >&2
+        else
+            printf 'Executable=%s\nAuthority=%s\nAuthority=Developer ID Certification Authority\nAuthority=Apple Root CA\nTeamIdentifier=TEAM123456\n' \
+                "$last" "$FAKE_IDENTITY_NAME" >&2
+        fi
+        exit 0 ;;
+    *" --sign "*)
+        if [ "$identity" = - ] || printf '%s' "$identity" | grep -Eq '^[0-9A-Fa-f]{40}$'; then
+            exit 0
+        fi
+        printf '%s: ambiguous (matches "%s" and "%s" in /Users/test/Library/Keychains/login.keychain-db)\n' \
+            "$identity" "$identity" "$identity" >&2
+        exit 1 ;;
+esac
+echo "fake codesign: unexpected arguments: $*" >&2
+exit 1

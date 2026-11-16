@@ -1,0 +1,49 @@
+# Finish: wait for the Xcode download started in 01-bootstrap, set it up,
+# then list what only you can do.
+#
+# `manual:` items end up on the checklist shown when the install finishes.
+# `url:` adds an Open button, and `check:` (a shell command that succeeds when
+# the job is already done) keeps a finished one off the list. For example:
+#
+#   - manual: Turn on FileVault
+#     detail: System Settings > Privacy & Security > FileVault.
+#     check: fdesetup isactive
+
+id: finish
+title: Finishing Up
+subtitle: Xcode, then the to-do list
+mascot: lsp
+
+items:
+  # ── Xcode ──────────────────────────────────────────────────────────────
+  # Accepts Xcode's license, runs its first-launch setup, then selects it. A different
+  # full Xcode you selected yourself, such as a beta, stays selected.
+  - xcode: finish
+  - xcode: finish
+    name: iOS Simulator
+    platforms: [iOS]
+    optional: true
+    note: about 8 GB more to download
+
+  # ── Only you can do these ──────────────────────────────────────────────
+  - manual: Log out and back in
+    detail: >-
+      Key repeat, trackpad and menu bar settings take effect after you log
+      out (Apple menu > Log Out).
+  - manual: Sign in to your apps
+    detail: >-
+      1Password first, since it holds the other passwords; then Chrome, Slack,
+      Spotify, Granola, Cursor, Claude, Docker and Wispr Flow. Superkey and
+      Middle need their license keys.
+  - manual: Allow the helper apps to control your Mac
+    detail: >-
+      Open Superkey, Middle and Wispr Flow once. Each asks for Accessibility
+      access; switch it on in Privacy & Security > Accessibility.
+    url: x-apple.systempreferences:com.apple.preference.security?Privacy_Accessibility
+  - manual: Check background items
+    detail: >-
+      Apps installed today may have added login items or background helpers.
+      Make sure the ones you want are switched on.
+    url: x-apple.systempreferences:com.apple.LoginItems-Settings.extension
+  - manual: Make Google Chrome the default browser
+    detail: Chrome asks the first time it opens; say yes.

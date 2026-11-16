@@ -1,0 +1,68 @@
+# Agent skills for Claude Code, Codex and Grok.
+#
+# Bundled skills live in config/skills/<name>/ in this repo. Each one is copied
+# to ~/.agents/skills/<name> (Codex reads that folder) and linked from
+# ~/.claude/skills and ~/.grok/skills, so all three agents see the same copy.
+# If one of those already holds your own copy of the skill (a different one, or
+# a git checkout), it is left alone and the item puts a note on the checklist.
+# Add `replace_existing: true` to the item to have it moved to the backups
+# instead. A copy that is not a git checkout and whose files all match the
+# bundle, such as an older one, is moved to the backups and replaced by the link.
+# Upstream skills are installed from their GitHub repos with the `skills` CLI.
+#
+# To add a skill you wrote: put its folder (with SKILL.md) in config/skills/
+# and add a line:
+#
+#     - skill: my-skill
+#
+# To add one from GitHub:
+#
+#     - skill: some-skill
+#       source: owner/repo
+
+id: skills
+title: Agent Skills
+subtitle: Shared skills for Claude Code, Codex and Grok
+mascot: finn
+
+items:
+  # ── Bundled (in this repo) ─────────────────────────────────────────────
+  - skill: unslop                        # from pstack by Lauren Tan (MIT; see its LICENSE)
+  - skill: manuscript-consistency-audit
+  - skill: psychopy-task-video
+  - skill: product-launch-video
+
+  # ── From GitHub ────────────────────────────────────────────────────────
+  - skill: find-skills
+    source: vercel-labs/skills
+  - skill: marimo-pair
+    source: marimo-team/marimo-pair
+
+  # ── Vendor installers ──────────────────────────────────────────────────
+  # The WorkOS CLI copies its skills into ~/.claude/skills and ~/.codex/skills,
+  # but only for agents whose folder already exists, hence the mkdir.
+  - script: WorkOS skills
+    check: |
+      for dir in "$HOME/.claude/skills" "$HOME/.codex/skills"; do
+        test -f "$dir/workos/SKILL.md" && test -f "$dir/workos-widgets/SKILL.md" || exit 1
+      done
+    run: |
+      mkdir -p "$HOME/.claude" "$HOME/.codex"
+      npx --yes workos@latest skills install -a claude-code -a codex
+    env:
+      WORKOS_TELEMETRY: "false"
+
+  # Framer's skills are generated per machine, so they can't be bundled.
+  # Telemetry is switched off before the first run, unless you already chose.
+  - script: Framer skills
+    optional: true
+    note: needs a Framer account to be useful
+    check: test -f "$HOME/.agents/skills/framer/SKILL.md" && test -f "$HOME/.claude/skills/framer/SKILL.md"
+    run: |
+      settings="$HOME/.config/framer/settings.json"
+      if [ ! -e "$settings" ]; then
+        mkdir -p -m 700 "$HOME/.config/framer"
+        printf '{\n\t"telemetryEnabled": false,\n\t"telemetryNoticeShown": true\n}\n' > "$settings"
+        chmod 600 "$settings"
+      fi
+      npx --yes @framer/agent@latest setup

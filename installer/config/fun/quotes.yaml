@@ -1,0 +1,232 @@
+# Lumpy Space Princess narrates the installer and the shawn CLI.
+#
+# show_quotes: a few short lines from Adventure Time, each checked word for word against the fandom
+#   wiki's Lumpy_Space_Princess/Quotes page ("quotes page") or that episode's /Transcript page.
+# moments and steps: ORIGINAL lines written in her voice for this project, not quotes from the show.
+#   Keep each one under 90 characters, sassy but never mean to the person installing.
+speaker: lsp
+about: "Fan-made and not affiliated with Cartoon Network. Adventure Time and its characters are © Cartoon Network."
+
+show_quotes:
+  - text: "Oh, my Glob, you guys, drama bomb!"
+    episode: "It Came from the Nightosphere"
+    source: quotes page
+  - text: "WHATEVERS 2009!"
+    episode: "Trouble in Lumpy Space"
+    source: quotes page
+  - text: "What?! No way! It's super easy!"
+    episode: "Trouble in Lumpy Space"
+    source: transcript
+  - text: "We've been here for, like, five minutes."
+    episode: "Trouble in Lumpy Space"
+    source: transcript
+  - text: "You're welcome a lot."
+    episode: "Trouble in Lumpy Space"
+    source: transcript
+  - text: "I'm bored. And I'm not having any fun!"
+    episode: "Prisoners of Love"
+    source: quotes page
+  - text: "Get in touch with your feelings, babe!"
+    episode: "To Cut a Woman's Hair"
+    source: quotes page
+  - text: "And that's how I saved the village!"
+    episode: "The Monster"
+    source: transcript
+  - text: "Oh... I'm working on it! I've been doing so much research!"
+    episode: "Gotcha!"
+    source: transcript
+  - text: "Everybody get ready to pay attention to me!"
+    episode: "Apple Wedding"
+    source: quotes page
+  - text: "Poor Finn. Don't you know? Every party is my party."
+    episode: "Apple Wedding"
+    source: transcript
+  - text: "This place is so clean and nice!"
+    episode: "Be Sweet"
+    source: transcript
+
+moments:
+  launch:
+    - "Oh my glob, it's setup day! Try to keep up, okay?"
+    - "Welcome to Lumpy Space. It's super exclusive, but you're on the list."
+    - "Ugh, fine. I'll make this Mac lumpin' fabulous. You're welcome in advance."
+    - "A brand-new Mac? So smooth. Let's give it some lumps."
+    - "I cleared my whole schedule for this. Well, I moved Brad to Thursday."
+    - "Royalty has arrived. This Mac can stop being so basic now."
+    - "New Mac, who dis? Kidding. Let's make it yours."
+  password:
+    - "Password time. I'm totally not looking. I'm looking at my phone."
+    - "Royalty needs the keys to the castle. Admin password, please. Obvi."
+    - "Type your secret word. I won't tell anyone. Not even Melissa."
+    - "macOS wants your password. It has, like, serious trust issues."
+    - "Just the admin password, babe. I promise I'm not writing it in my diary."
+    - "One password and I can stop asking permission for every little thing."
+  question:
+    - "Quick question, and then I do literally everything else."
+    - "Who even are you? Type it in. I'm a princess, not a mind reader."
+    - "Tell me who you are. I need to know whose Mac I'm making fabulous."
+    - "Your name, not mine. Putting mine on your commits would be so awkward."
+    - "One little answer and I never ask again. Royal promise."
+    - "Spell it right, babe. This is going on every commit you ever make."
+  idle:
+    - "Press START, babe. This Mac isn't going to lump itself."
+    - "I've checked my phone, like, eleven times. Are we starting or what?"
+    - "You can customize stuff, or you can trust my amazing taste. Just saying."
+    - "Waiting is so lame. Let's go, let's go, let's go."
+    - "Take your time. I'll just float here. Majestically."
+    - "Tick tock. My lumps aren't getting any younger."
+    - "Ready when you are. I was born ready. Well, born lumpy. Same thing."
+  working:
+    - "Working on it. Don't rush me, I'm an artist."
+    - "Look at me, being productive. Somebody take a picture."
+    - "Installing stuff. It's like a shopping spree, but everything's free."
+    - "Lumping along nicely, thanks for asking."
+    - "Busy, busy, busy. This is what peak royalty looks like."
+    - "Hold my beans. I've got this."
+    - "Shh. The computer and I are having a moment."
+    - "Making your Mac less smooth, one lump at a time."
+  waiting:
+    - "We've been waiting, like, forever. I could've grown three new lumps by now."
+    - "Still going. Ugh, this is SUCH a drama bomb."
+    - "Apple's servers are being so slow right now. Rude much?"
+    - "I'm not bored. I'm just emotionally downloading."
+    - "Your turn, babe. Do the thing, then I'll do my thing."
+    - "Good things come to those who wait. Great things come to princesses."
+    - "If this takes any longer, I'm starting a podcast about it."
+  success:
+    - "Nailed it. Obviously."
+    - "Done, and it looks lumpin' good."
+    - "Another one done. I'm basically a professional."
+    - "Ta-da! Hold your applause. No, actually, applaud."
+    - "Smooth. And I mean that as a compliment, for once."
+    - "That went great. Like, suspiciously great."
+    - "Installed. Write that in your diary."
+  failure:
+    - "Ugh. That one didn't work. It's not you, it's the computer."
+    - "Okay, that broke. Don't freak out. I'm freaking out enough for both of us."
+    - "Lumps happen. Peek at the log and we'll try again."
+    - "Oh my glob, what the junk? That was supposed to work."
+    - "That one is being SO dramatic. And I would know."
+    - "Well, that was lame. The log knows what happened."
+    - "Not your fault. Probably the internet's. It's always the internet."
+  skipped:
+    - "Already done. You were, like, ahead of me. Rude, but cute."
+    - "Skipping this one. Been there, lumped that."
+    - "Already here. Nobody needs two of anything. Except beans."
+    - "Nothing to do. My favorite kind of job."
+    - "Done before I even got here. Show-off."
+    - "This one's handled. Next!"
+  dry_run:
+    - "Dry run! I'm just pretending. Like drama class, but nothing breaks."
+    - "This is only a rehearsal. No changes, all drama."
+    - "Pretend mode. Nothing gets installed, but I still look amazing."
+    - "Just practicing. Your Mac won't feel a thing."
+    - "It's a dress rehearsal, babe. The real show is later."
+    - "Fake installing. Real attitude."
+  finished:
+    - "Oh my glob, we did it! Your Mac is lumpin' gorgeous!"
+    - "All done! You're welcome. No, really. Say it."
+    - "Everything's installed. Now go make something cool."
+    - "Setup complete. Finn, Jake, BMO and me are SO proud of you."
+    - "Done! This Mac is officially fabulous."
+    - "That's a wrap. I need a nap and a can of beans."
+    - "A whole Mac, set up by royalty. Somebody frame this."
+  finished_with_failures:
+    - "Mostly done! A few things threw tantrums. Check the list."
+    - "Almost perfect. Which is still, like, really good."
+    - "We did most of it. The rest is being dramatic. Try those again?"
+    - "Nobody's perfect. Except me. A few things need another try."
+    - "A couple of lumps in the road. The log says why."
+    - "So close! Fix what failed and give it another go, babe."
+  cancelled:
+    - "Stopped? Fine. Whatever. I wasn't even into it."
+    - "Okay, we're stopping. Everything done so far stays done."
+    - "Leaving already? We were just getting to the good part."
+    - "Cancelled. I'm not mad. I'm just... lumpy about it."
+    - "Take a break. Run it again later and I'll skip what's already done."
+    - "Ugh, drama bomb. Okay, stopped. We can pick this up anytime."
+
+steps:
+  bootstrap:
+    - "Command Line Tools first. They're the tools that make the other tools."
+    - "Pouring Homebrew. Relax, it's not that kind of brew."
+    - "Xcode is huge, so it downloads in the background. One diva per install."
+    - "Apple says we need these before anything fun happens. Whatever. Allowed."
+  dropbox:
+    - "Dropbox is moving your stuff in. Even the stuff you forgot you had."
+    - "Syncing your files. It's like moving into the woods, but with Wi-Fi."
+    - "Sign in to Dropbox when it pops up, babe. I can't do everything."
+  packages:
+    - "So many packages. This is basically my birthday."
+    - "Brewing all your old favorites. It's like you never left."
+    - "Formulae, casks, taps. No idea what half of these do, but they sound important."
+    - "Copying your old laptop's taste. It had good taste. Like me."
+  apps:
+    - "New apps! They're not as cute as me, but they're trying."
+    - "Your Applications folder is about to be so popular."
+    - "Chrome, Slack, Spotify... all the cool kids are moving in."
+    - "Already have an app? I'll leave it alone. I'm polite like that."
+    - "App Store apps need you signed in. Even royalty has to log in."
+  ai:
+    - "Claude, Codex AND Grok? You have so many friends. I'm still your main one."
+    - "Adding the AI helpers. If anybody gets sassy, that's MY job, okay?"
+    - "Installing robots that write code. I write drama. We all have gifts."
+    - "Your AI pals need to sign in. Tell them the Princess sent you."
+  git:
+    - "Teaching git your name. It should know who it's dealing with."
+    - "Making your SSH key. It's a secret. Like, seriously, don't share it."
+    - "Signing your commits, so everyone knows they're the real you."
+    - "GitHub wants a code. Copy it, paste it, be fabulous."
+    - "Finally, someone around here who actually commits."
+  skills:
+    - "Installing skills. You've got skills now. I've always had skills."
+    - "Skills are in. Your AI pals just got lumpin' smarter."
+    - "Teaching Claude, Codex and Grok new tricks. They learn faster than Brad."
+    - "Copying your custom skills. Very exclusive. Very you."
+  developer:
+    - "Making your Developer folder. Every princess needs a castle for her code."
+    - "~/Developer is ready. It's, like, so spacious."
+    - "Cloning your dotfiles. It's a family reunion, but for config files."
+  shell:
+    - "Doing your zsh. Your prompt is about to be gorgeous."
+    - "Copying your shell config. Your terminal will feel right at home."
+    - "Starship prompt going in. It's not Lumpy Space, but it's close."
+    - "Setting up Neovim. I don't get it, but you seem to love it."
+  keyboard:
+    - "Karabiner time. Your keys are getting a total makeover."
+    - "Hammerspoon is in. Your keyboard can do magic now. Like me."
+    - "macOS is gonna ask about keyboard permissions. Just say yes, babe."
+    - "Making a Hyper key. It's like Caps Lock, but with ambition."
+  terminal:
+    - "Setting up Herdr. Your terminal is about to be way less lame."
+    - "Terminal glow-up in progress. Very hacker. Very me."
+    - "Herdr is your default terminal now. The old one can sit in the back."
+    - "Hooking Herdr up to Claude, Codex and Grok. Group chat!"
+  claude:
+    - "Giving Claude your settings and your status line. Very chic."
+    - "Installing your custom spinner words. Claude talks fancy now."
+    - "Adding Claude plugins. Accessorizing is, like, my whole thing."
+    - "Claude's getting your exact setup. No smooth defaults here."
+  webapps:
+    - "Making web apps. They're websites that think they're apps. Relatable."
+    - "Turning X and Carbon into real apps. It's a makeover, but for websites."
+    - "Wrapping websites in app costumes. So cute."
+  cli:
+    - "Installing the shawn command. Now you can boss your Mac around too."
+    - "Type 'shawn' in a terminal anytime. I'll be there. Obvi."
+    - "The shawn command updates itself, so all your Macs stay in sync. Teamwork!"
+  macos:
+    - "Changing your Mac settings. Trust me, I have amazing taste."
+    - "Some of this needs a logout to kick in. Whatever, it'll be worth it."
+    - "Faster key repeat, better Finder. Your Mac is getting a personality."
+    - "Fixing the defaults. Defaults are so smooth."
+  dock:
+    - "Cleaning up your Dock. Ugh, who put all this stuff here?"
+    - "Dock is tidy. So clean. So nice. I deserve a nap."
+    - "Out with the default apps. In with the cool ones."
+    - "Hiding the Dock until you need it. Mysterious. Like me."
+  finish:
+    - "Waiting on Xcode. It's the biggest app ever and it knows it."
+    - "Last bits. Then a few things only a human can do."
+    - "Almost done. Don't leave now, this is the best part."
+    - "Wrapping up. Get ready to be impressed."

@@ -1,0 +1,67 @@
+# Git and GitHub: who you are, an SSH key for pushing and signing, the GitHub
+# sign-in, and signed commits.
+#
+# The SSH key is made once per Mac and uploaded to GitHub twice: as an
+# authentication key (push and pull over SSH) and as a signing key (the
+# Verified badge). Credential helpers, enterprise hosts and work-only includes
+# are never set here; put those in ~/.gitconfig.local on the Mac that needs
+# them. That file is included last, so it can override anything this step
+# sets, signing included.
+#
+# To add a git setting, add a line under git-config, for example:
+#
+#     pull.rebase: true
+
+id: git
+title: Git & GitHub
+subtitle: Identity, SSH key, GitHub sign-in, signed commits
+mascot: marceline
+
+items:
+  # ── Identity and defaults ──────────────────────────────────────────────
+  - git-config:
+      user.name: "{{full_name}}"
+      user.email: "{{email}}"
+      init.defaultBranch: main
+
+  # Large-file storage for repos that use it (git-lfs comes from the packages
+  # step). This writes the global [filter "lfs"] settings.
+  - script: Git LFS
+    check: >-
+      command -v git-lfs >/dev/null &&
+      [ "$(git config --global --get filter.lfs.process)" = "git-lfs filter-process" ]
+    run: git lfs install --skip-repo
+
+  # A small global ignore list (.DS_Store and Claude Code's local settings).
+  - copy: git/ignore
+    to: ~/.config/git/ignore
+
+  # ── SSH key ────────────────────────────────────────────────────────────
+  # Made only if it doesn't exist yet. ~/.ssh/config gets a marked block that
+  # loads it into the agent and uses it for github.com.
+  - ssh-key: ~/.ssh/id_ed25519
+    hosts: [github.com]
+
+  # ── GitHub ─────────────────────────────────────────────────────────────
+  # Opens github.com/login/device and shows the one-time code to type there.
+  - github: github.com
+    protocol: ssh
+    key: ~/.ssh/id_ed25519.pub
+    upload: [authentication, signing]
+
+  # Sign every commit and tag with the same key.
+  - git-signing: ~/.ssh/id_ed25519.pub
+
+  - manual: Check your email on GitHub
+    detail: >-
+      Signed commits show as Verified only when the commit email
+      ({{email}}) is a verified address on your GitHub account.
+    url: https://github.com/settings/emails
+
+  # ── Machine-local overrides ────────────────────────────────────────────
+  # Keep this item last: the include has to come after everything the items
+  # above write (LFS, gh's credential helper, signing) for ~/.gitconfig.local
+  # to override them. A missing file is ignored.
+  - git-config:
+      include.path: ~/.gitconfig.local
+    name: Include ~/.gitconfig.local

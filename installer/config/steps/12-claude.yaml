@@ -1,0 +1,44 @@
+# Claude Code: settings, spinner phrases and plugins.
+#
+# The two files under config/files/claude/ are merged into
+# ~/.claude/settings.json: keys they list are set, everything else already in
+# that file is kept (hooks other tools added, such as Herdr's from 11-terminal,
+# and settings only one Mac needs). Edit those files to change a setting; to
+# add a plugin, add a line:
+#
+#     - claude-plugin: name@claude-plugins-official
+#       marketplace: anthropics/claude-plugins-official
+
+id: claude
+title: Claude Code
+subtitle: Settings, spinner phrases and plugins
+mascot: lsp
+
+items:
+  # ── Settings ───────────────────────────────────────────────────────────
+  # `arrays: union` adds missing entries to permissions.allow and keeps yours.
+  - json-merge: ~/.claude/settings.json
+    from: claude/settings.yaml
+    arrays: union
+    name: Claude Code settings
+
+  # The phrase list is replaced as a whole, so a phrase deleted from the file
+  # disappears from Claude Code too.
+  - json-merge: ~/.claude/settings.json
+    from: claude/spinner-verbs.yaml
+    name: Spinner phrases
+
+  # ── Plugins ────────────────────────────────────────────────────────────
+  # A Mac that has never opened Claude Code doesn't know the official
+  # marketplace yet, so each plugin names its marketplace.
+  - claude-plugin: stripe@claude-plugins-official
+    marketplace: anthropics/claude-plugins-official
+  - claude-plugin: swift-lsp@claude-plugins-official
+    marketplace: anthropics/claude-plugins-official
+  - claude-plugin: warp@claude-code-warp
+    marketplace: warpdotdev/claude-code-warp
+
+  - manual: Connect the Stripe plugin
+    detail: >-
+      The Stripe plugin talks to Stripe through an MCP server that needs its
+      own sign-in. In Claude Code, run /mcp, choose stripe and sign in.

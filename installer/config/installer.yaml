@@ -1,0 +1,48 @@
+# Shawn's Dotfiles
+#
+# The installer's name, where newer config comes from, the variables every
+# step file can use as {{name}}, and the questions it asks the person setting
+# up the Mac. The steps themselves live in steps/, one file per step, and run
+# in filename order.
+#
+# Built-in variables (no need to declare them): {{home}}, {{user}},
+# {{hostname}}, {{arch}}, {{brew_prefix}}, {{applications}}, {{state_dir}},
+# {{config_dir}}.
+
+schema: 1
+name: "Shawn's Dotfiles"
+tagline: one Mac, zero lumps
+
+remote:                      # where newer config comes from (public repo)
+  repo: shawntz/dotfiles
+  branch: master
+  path: installer/config
+
+vars:                        # available everywhere as {{name}}
+  github_user: shawntz
+  dotfiles_repo: shawntz/dotfiles
+
+# Questions for the person at the keyboard, so this config sets up anyone's
+# Mac. A run asks each one the first time a step it runs needs the answer,
+# before the admin password, and keeps the answer in ~/.shawn/answers.json.
+# Later runs reuse it; 'shawn install --ask' asks again. Steps use an answer
+# like any variable: {{full_name}}.
+#
+# default_command runs before asking (it must only read). Its first line of
+# output is offered as the answer, so pressing Return keeps the name and
+# email this Mac's git already has. It calls git only when the developer
+# tools are installed. On a new Mac, git is Apple's stub, and running it
+# opens an install dialog. format: email rejects a reply that does not look
+# like an address.
+ask:
+  - var: full_name
+    prompt: Your name, as Git should record it on your commits
+    default_command: >-
+      tools=$(xcode-select -p 2>/dev/null) && [ -x "$tools/usr/bin/git" ]
+      && git config --global --get user.name || id -F
+  - var: email
+    prompt: Your email address for Git commits
+    default_command: >-
+      tools=$(xcode-select -p 2>/dev/null) && [ -x "$tools/usr/bin/git" ]
+      && git config --global --get user.email
+    format: email
