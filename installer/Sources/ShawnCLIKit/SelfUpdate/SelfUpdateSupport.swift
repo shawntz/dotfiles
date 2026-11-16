@@ -37,6 +37,9 @@ struct SelfUpdateState: Codable, Equatable, Sendable {
     /// A release tag whose download failed or was rejected, and when: automatic runs leave it alone for a day.
     var failedRelease: String?
     var failedReleaseAt: Date?
+    /// The newest release when this Mac's macOS is too old for it: its tag and the macOS it needs, as its
+    /// manifest said. Later runs then neither fetch the manifest again nor take it for a failed download.
+    var releaseTooNew: ReleaseTooNew?
     /// The once-a-day notes by topic, with the reason each one gave and when it was said. Only the topics the last
     /// finished check raised are kept, so a reason that went away and came back is said again at once.
     var noted: [String: Noted]?
@@ -47,6 +50,11 @@ struct SelfUpdateState: Codable, Equatable, Sendable {
     /// The topics the run in progress raised. They are not saved.
     var raised: Set<String> = []
 
+    struct ReleaseTooNew: Codable, Equatable, Sendable {
+        var tag: String
+        var minimumMacOS: Int
+    }
+
     struct Noted: Codable, Equatable, Sendable {
         /// What tells this reason apart from another of the same topic. It is the note's text, or a shorter form of
         /// it (the kind of reason, or a git failure without its numbers).
@@ -55,7 +63,7 @@ struct SelfUpdateState: Codable, Equatable, Sendable {
     }
 
     private enum CodingKeys: String, CodingKey {
-        case lastCheck, lastRemoteCommit, latestTag, failedBuildTree, failedRelease, failedReleaseAt, noted, remoteConfigRoot, lastResult
+        case lastCheck, lastRemoteCommit, latestTag, failedBuildTree, failedRelease, failedReleaseAt, releaseTooNew, noted, remoteConfigRoot, lastResult
     }
 
     /// The state to save after a check that got an answer from the remote. It forgets the notes on topics this run

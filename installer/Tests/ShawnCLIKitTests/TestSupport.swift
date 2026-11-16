@@ -364,8 +364,10 @@ final class FakeReleases: ReleaseSource, @unchecked Sendable {
     var manifest: ReleaseManifest?
     var payload = Data()
     private(set) var downloads: [URL] = []
+    private(set) var manifestRequests = 0
 
     func manifest(repo: String, tag: String, timeout: TimeInterval) async throws -> ReleaseManifest {
+        manifestRequests += 1
         guard let manifest else { throw BuildFailure(message: "no manifest") }
         return manifest
     }

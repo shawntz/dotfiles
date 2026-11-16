@@ -687,30 +687,93 @@ final class SelfUpdaterTests: XCTestCase {
         XCTAssertTrue(fixture.notes.all.last?.hasPrefix("rejected shawn 1.2.0: checksum mismatch") ?? false, "\(fixture.notes.all)")
     }
 
-    func testAReleaseThatNeedsANewerMacOSIsLeftAlone() async {
-        func run(onMacOS major: Int, _ name: String) async -> (SelfUpdater.Report, UpdateFixture) {
-            let fixture = UpdateFixture()
-            let binary = Data("#!/bin/sh\necho released\n".utf8)
-            fixture.releases.payload = binary
-            fixture.releases.manifest = ReleaseManifest(version: "1.2.0", sha256: Checksum.sha256(binary), url: URL(string: "https://example.com/shawn.tar.gz")!,
-                                                        minimumMacOS: 28)
-            var request = fixture.request(withCheckout: false)
+    /// A release whose manifest asks for macOS 28, seen from a Mac that runs the given macOS.
+    private func releaseForMacOS28(onMacOS major: Int, _ name: String) -> (UpdateFixture, (Bool, Bool) -> SelfUpdater.Request) {
+        let fixture = UpdateFixture()
+        let binary = Data("#!/bin/sh\necho released\n".utf8)
+        fixture.releases.payload = binary
+        fixture.releases.manifest = ReleaseManifest(version: "1.2.0", sha256: Checksum.sha256(binary), url: URL(string: "https://example.com/shawn.tar.gz")!,
+                                                    minimumMacOS: 28)
+        return (fixture, { force, checkOnly in
+            var request = fixture.request(force: force, checkOnly: checkOnly, withCheckout: false)
             request.macOSMajor = major
             request.macOSName = name
-            return (await fixture.updater(git: releaseGit()).run(request), fixture)
-        }
+            return request
+        })
+    }
 
-        let (older, olderFixture) = await run(onMacOS: 27, "27.2")
-        XCTAssertEqual(older.outcome, .skipped("shawn 1.2.0 needs macOS 28 or later, and this Mac runs macOS 27.2"))
-        XCTAssertNil(older.restartWith)
-        XCTAssertEqual(olderFixture.installedContents, "old shawn", "the shawn that works stays")
-        XCTAssertTrue(olderFixture.releases.downloads.isEmpty, "the manifest says enough; the tarball is not fetched")
-        XCTAssertEqual(olderFixture.notes.all.last, "shawn 1.2.0 needs macOS 28 or later, and this Mac runs macOS 27.2; keeping 1.0.0")
-        XCTAssertEqual(UpdateCommand.summary(of: older).text, "skipped: shawn 1.2.0 needs macOS 28 or later, and this Mac runs macOS 27.2")
+    func testAReleaseThatNeedsANewerMacOSIsLeftAlone() async {
+        let reason = "shawn 1.2.0 needs macOS 28 or later, and this Mac runs macOS 27.2"
+        let (fixture, request) = releaseForMacOS28(onMacOS: 27, "27.2")
 
-        let (same, sameFixture) = await run(onMacOS: 28, "28.0")
-        XCTAssertEqual(same.outcome, .releaseInstalled("1.2.0"), "the minimum itself is new enough")
-        XCTAssertEqual(sameFixture.installedContents, "#!/bin/sh\necho released\n")
+        let first = await fixture.updater(git: releaseGit()).run(request(false, false))
+        XCTAssertEqual(first.outcome, .skipped(reason))
+        XCTAssertNil(first.restartWith)
+        XCTAssertEqual(fixture.installedContents, "old shawn", "the shawn that works stays")
+        XCTAssertTrue(fixture.releases.downloads.isEmpty, "the manifest says enough; the tarball is not fetched")
+        XCTAssertEqual(fixture.notes.all, ["\(reason); keeping 1.0.0"], "and nothing says it is downloading")
+        XCTAssertEqual(UpdateCommand.summary(of: first).text, "skipped: \(reason)")
+        var state = fixture.store.load()
+        XCTAssertEqual(state.releaseTooNew, SelfUpdateState.ReleaseTooNew(tag: "shawn-v1.2.0", minimumMacOS: 28))
+        XCTAssertEqual(state.lastResult, "1.2.0 is out; it needs macOS 28", "what 'shawn version' shows")
+        XCTAssertNil(state.failedRelease, "it is not a failed download")
+
+        // Later the same day: the same answer from what the first run remembered, said in the details only.
+        let second = await fixture.updater(git: releaseGit()).run(request(false, false))
+        XCTAssertEqual(second.outcome, .skipped(reason))
+        XCTAssertEqual(fixture.releases.manifestRequests, 1, "the manifest is not fetched again for the same release")
+        XCTAssertEqual(fixture.notes.all.count, 1, "said once a day")
+        XCTAssertEqual(fixture.details.all.last, "\(reason); keeping 1.0.0")
+        XCTAssertEqual(fixture.store.load().lastResult, "1.2.0 is out; it needs macOS 28")
+
+        // 'shawn update' says it again, and 'shawn update --check' agrees with it.
+        let forced = await fixture.updater(git: releaseGit()).run(request(true, false))
+        XCTAssertEqual(forced.outcome, .skipped(reason))
+        XCTAssertEqual(fixture.notes.all.count, 2)
+        let checked = await fixture.updater(git: releaseGit()).run(request(false, true))
+        XCTAssertEqual(checked.outcome, .skipped(reason))
+        XCTAssertEqual(UpdateCommand.summary(of: checked).exitCode, ExitCode.failure, "the update cannot go ahead as things stand")
+        XCTAssertTrue(fixture.releases.downloads.isEmpty)
+
+        // The next day it is said again.
+        fixture.clock.date = fixture.clock.date.addingTimeInterval(25 * 3600)
+        let tomorrow = await fixture.updater(git: releaseGit()).run(request(false, false))
+        XCTAssertEqual(tomorrow.outcome, .skipped(reason))
+        XCTAssertEqual(fixture.notes.all.count, 3)
+
+        // macOS is updated: the release goes in, and nothing is remembered against it.
+        var updated = request(false, false)
+        updated.macOSMajor = 28
+        updated.macOSName = "28.0"
+        let installed = await fixture.updater(git: releaseGit()).run(updated)
+        XCTAssertEqual(installed.outcome, .releaseInstalled("1.2.0"), "the minimum itself is new enough")
+        XCTAssertEqual(fixture.installedContents, "#!/bin/sh\necho released\n")
+        state = fixture.store.load()
+        XCTAssertNil(state.releaseTooNew)
+        XCTAssertEqual(state.lastResult, "updated to 1.2.0")
+    }
+
+    /// `--check` on a Mac that has not seen the release yet reads the manifest, so it does not promise an update
+    /// that `shawn update` would then refuse.
+    func testCheckOnlyReadsTheManifestForTheMacOSItNeeds() async {
+        let (fixture, request) = releaseForMacOS28(onMacOS: 27, "27.2")
+        let checked = await fixture.updater(git: releaseGit()).run(request(false, true))
+        XCTAssertEqual(checked.outcome, .skipped("shawn 1.2.0 needs macOS 28 or later, and this Mac runs macOS 27.2"))
+        XCTAssertEqual(fixture.releases.manifestRequests, 1)
+        XCTAssertTrue(fixture.releases.downloads.isEmpty)
+        XCTAssertNil(fixture.store.load().releaseTooNew, "--check writes nothing")
+
+        let (newer, newerRequest) = releaseForMacOS28(onMacOS: 28, "28.1")
+        let available = await newer.updater(git: releaseGit()).run(newerRequest(false, true))
+        XCTAssertEqual(available.outcome, .updateAvailable("shawn 1.2.0"))
+        XCTAssertEqual(newer.notes.all, ["version 1.2.0 is out (you have 1.0.0). Run 'shawn update'"])
+    }
+
+    func testTheUpdateRequestCarriesTheMacOSThisMacRuns() {
+        let harness = Harness { $0.operatingSystem = { OperatingSystemVersion(majorVersion: 26, minorVersion: 7, patchVersion: 2) } }
+        let request = SelfUpdateRunner.request(context: harness.context, force: false, checkOnly: false)
+        XCTAssertEqual(request.macOSMajor, 26)
+        XCTAssertEqual(request.macOSName, "26.7.2")
     }
 
     func testTheManifestMayNameTheMacOSItNeeds() throws {
