@@ -87,6 +87,36 @@ final class DispatcherTests: XCTestCase {
         XCTAssertEqual(harness.out.text, "shawn \(ShawnCore.version)\n")
     }
 
+    /// A harness on a Mac that runs the given macOS.
+    private func harness(onMacOS major: Int, _ minor: Int, _ patch: Int) -> Harness {
+        let sandbox = Sandbox()
+        let config = makeConfig(in: sandbox.directory, steps: ["01-a.yaml": "id: a\ntitle: A\nitems:\n  - ok: one\n"], cli: cli)
+        return Harness(sandbox: sandbox, config: config) {
+            $0.operatingSystem = { OperatingSystemVersion(majorVersion: major, minorVersion: minor, patchVersion: patch) }
+        }
+    }
+
+    func testAnOlderMacOSGetsOneLineAndNothingRuns() async {
+        for arguments in [["hello"], ["--version"], ["--bogus"], ["install", "--dry-run"], []] {
+            let harness = harness(onMacOS: 26, 7, 2)
+            let code = await harness.run(arguments)
+            XCTAssertEqual(code, 69, "\(arguments)")
+            XCTAssertEqual(harness.err.plain, "✗ shawn needs macOS 27 or later. This Mac runs macOS 26.7.2.\n", "\(arguments)")
+            XCTAssertEqual(harness.out.text, "", "\(arguments)")
+            XCTAssertTrue(harness.events.all.isEmpty, "no command, update or restart: \(harness.events.all)")
+        }
+    }
+
+    func testTheMinimumMacOSAndNewerRunAsUsual() async {
+        for (major, minor) in [(27, 0), (28, 3)] {
+            let harness = harness(onMacOS: major, minor, 0)
+            let code = await harness.run(["--version"])
+            XCTAssertEqual(code, 0, "macOS \(major).\(minor)")
+            XCTAssertEqual(harness.out.text, "shawn \(ShawnCore.version)\n")
+            XCTAssertEqual(harness.err.plain, "")
+        }
+    }
+
     func testHelpListsYAMLSectionsFirstThenBuiltins() async {
         let harness = makeHarness()
         let code = await harness.run([])

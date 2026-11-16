@@ -3,8 +3,8 @@ import ShawnCore
 
 /// Turns `shawn [global flags] <command> [arguments]` into a running command.
 ///
-/// Order of business: global flags → self-update (unless the command is one that must stay fast or
-/// the user opted out) → built-in command → YAML command → "did you mean".
+/// Order of business: macOS version → global flags → self-update (unless the command is one that must
+/// stay fast or the user opted out) → built-in command → YAML command → "did you mean".
 /// The self-update runs BEFORE the command is looked up, so a command added to `cli.yaml` on another
 /// Mac is found on the very call that pulled it in.
 enum Dispatcher {
@@ -62,6 +62,14 @@ enum Dispatcher {
     }
 
     static func run(arguments: [String], context: CLIContext) async -> Int32 {
+        // macOS checks an app's minimum before it opens the app. Nothing checks a command line tool's, so
+        // shawn does, before it reads a flag or fetches an update.
+        let running = context.services.operatingSystem()
+        guard MinimumMacOS.allows(running) else {
+            context.fail("shawn needs macOS \(MinimumMacOS.major) or later. This Mac runs macOS \(MinimumMacOS.describe(running)).")
+            return ExitCode.unavailable
+        }
+
         let invocation: Invocation
         do {
             invocation = try parseGlobals(arguments, environment: context.environment.baseEnvironment)

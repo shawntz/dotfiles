@@ -18,6 +18,8 @@ struct CLIServices: Sendable {
     var replacer: any ProcessReplacing = SystemProcessReplacer()
     var readStdin: @Sendable () -> Data = { FileHandle.standardInput.readDataToEndOfFile() }
     var clock: any Clock = SystemClock()
+    /// The macOS this Mac runs. Tests name an older one.
+    var operatingSystem: @Sendable () -> OperatingSystemVersion = { ProcessInfo.processInfo.operatingSystemVersion }
     var desktop: any DesktopActions = SystemDesktop()
     /// nil → the real implementation for the context's environment.
     var inventory: (any Inventory)?

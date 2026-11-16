@@ -14,7 +14,8 @@ let swift5: [SwiftSetting] = [.swiftLanguageMode(.v5)]
 
 let package = Package(
     name: "ShawnsDotfiles",
-    // Resources/Info.plist and WebAppBundle.swift name the same minimum as LSMinimumSystemVersion.
+    // Resources/Info.plist names the same minimum, and so does MinimumMacOS in ShawnCore, which shawn
+    // and the web apps read. MinimumMacOSTests fails when the three disagree.
     platforms: [.macOS(.v27)],
     products: [
         .executable(name: "ShawnsDotfiles", targets: ["ShawnsDotfiles"]),

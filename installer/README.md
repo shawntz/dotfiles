@@ -15,7 +15,7 @@ A Mac app that sets up a brand-new Mac the way Shawn's laptop is set up. It inst
 
 ### Download and open
 
-The app and `shawn` run on macOS 27 or later. An older macOS refuses to open the app. macOS 27 runs only on Apple silicon, so there is no Intel build.
+The app and `shawn` run on macOS 27 or later. An older macOS refuses to open the app. `shawn` checks the macOS version itself, and on an older one it prints `shawn needs macOS 27 or later` and exits with status 69. macOS 27 runs only on Apple silicon, so there is no Intel build.
 
 There is no release yet. Until there is one, build the app from a checkout with Xcode 27 or later, using `make app SIGN_IDENTITY=-` (see [Build, sign, notarize, release](#build-sign-notarize-release)), copy `build/Shawn's Dotfiles.app` to the new Mac and open it there. [If macOS won't open it](#if-macos-wont-open-it) has the fix. Once a release exists:
 
