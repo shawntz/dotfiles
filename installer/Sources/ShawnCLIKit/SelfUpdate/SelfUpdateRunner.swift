@@ -33,6 +33,7 @@ enum SelfUpdateRunner {
         let settings = context.settings
         // `installer/config` → `installer`: the Swift package sits next to its config.
         let package = (settings.configPath as NSString).deletingLastPathComponent
+        let running = context.services.operatingSystem()
         return SelfUpdater.Request(
             checkout: context.checkout,
             packagePath: package,
@@ -45,7 +46,9 @@ enum SelfUpdateRunner {
             temporaryDirectory: context.environment.temporaryDirectory,
             mode: context.cli.selfUpdate.mode,
             force: force,
-            checkOnly: checkOnly
+            checkOnly: checkOnly,
+            macOSMajor: running.majorVersion,
+            macOSName: MinimumMacOS.describe(running)
         )
     }
 

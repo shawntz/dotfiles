@@ -687,6 +687,39 @@ final class SelfUpdaterTests: XCTestCase {
         XCTAssertTrue(fixture.notes.all.last?.hasPrefix("rejected shawn 1.2.0: checksum mismatch") ?? false, "\(fixture.notes.all)")
     }
 
+    func testAReleaseThatNeedsANewerMacOSIsLeftAlone() async {
+        func run(onMacOS major: Int, _ name: String) async -> (SelfUpdater.Report, UpdateFixture) {
+            let fixture = UpdateFixture()
+            let binary = Data("#!/bin/sh\necho released\n".utf8)
+            fixture.releases.payload = binary
+            fixture.releases.manifest = ReleaseManifest(version: "1.2.0", sha256: Checksum.sha256(binary), url: URL(string: "https://example.com/shawn.tar.gz")!,
+                                                        minimumMacOS: 28)
+            var request = fixture.request(withCheckout: false)
+            request.macOSMajor = major
+            request.macOSName = name
+            return (await fixture.updater(git: releaseGit()).run(request), fixture)
+        }
+
+        let (older, olderFixture) = await run(onMacOS: 27, "27.2")
+        XCTAssertEqual(older.outcome, .skipped("shawn 1.2.0 needs macOS 28 or later, and this Mac runs macOS 27.2"))
+        XCTAssertNil(older.restartWith)
+        XCTAssertEqual(olderFixture.installedContents, "old shawn", "the shawn that works stays")
+        XCTAssertTrue(olderFixture.releases.downloads.isEmpty, "the manifest says enough; the tarball is not fetched")
+        XCTAssertEqual(olderFixture.notes.all.last, "shawn 1.2.0 needs macOS 28 or later, and this Mac runs macOS 27.2; keeping 1.0.0")
+        XCTAssertEqual(UpdateCommand.summary(of: older).text, "skipped: shawn 1.2.0 needs macOS 28 or later, and this Mac runs macOS 27.2")
+
+        let (same, sameFixture) = await run(onMacOS: 28, "28.0")
+        XCTAssertEqual(same.outcome, .releaseInstalled("1.2.0"), "the minimum itself is new enough")
+        XCTAssertEqual(sameFixture.installedContents, "#!/bin/sh\necho released\n")
+    }
+
+    func testTheManifestMayNameTheMacOSItNeeds() throws {
+        let with = try ReleaseManifest.parse(Data(#"{"version": "1.2.0", "sha256": "AB", "url": "https://example.com/x", "minimumMacOS": 27}"#.utf8))
+        XCTAssertEqual(with.minimumMacOS, 27)
+        let without = try ReleaseManifest.parse(Data(#"{"version": "1.2.0", "sha256": "AB", "url": "https://example.com/x"}"#.utf8))
+        XCTAssertNil(without.minimumMacOS, "a release made before the field existed is installed as before")
+    }
+
     func testReleaseCheckOnlyAndNotNewer() async {
         let fixture = UpdateFixture()
         let check = await fixture.updater(git: releaseGit()).run(fixture.request(checkOnly: true, withCheckout: false))

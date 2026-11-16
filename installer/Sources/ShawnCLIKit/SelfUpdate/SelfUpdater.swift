@@ -43,6 +43,9 @@ struct SelfUpdater: Sendable {
         var checkOnly = false
         /// `shawn update --rebuild`: rebuild from the checkout even when cli.json says these sources are installed.
         var rebuild = false
+        /// The macOS this Mac runs: its major version, and the whole version as people read it ("27.2").
+        var macOSMajor = ProcessInfo.processInfo.operatingSystemVersion.majorVersion
+        var macOSName = MinimumMacOS.describe(ProcessInfo.processInfo.operatingSystemVersion)
     }
 
     struct Timeouts: Sendable {
@@ -517,15 +520,30 @@ struct SelfUpdater: Sendable {
 
         lock?.announce(.downloading)
         note("\(available). Downloading…")
-        let manifest: ReleaseManifest
-        let data: Data
-        do {
-            manifest = try await releases.manifest(repo: remote.repo, tag: release.tag, timeout: timeouts.manifest)
-            data = try await releases.download(manifest.url, timeout: timeouts.download)
-        } catch {
+        func downloadFailed(_ error: Error) -> Report {
             note("couldn't download shawn \(release.version) (\(error)); keeping \(request.currentVersion)")
             failed("download failed: \(error)")
             return Report(outcome: .downloadFailed("\(error)"), configChanged: report.configChanged)
+        }
+        let manifest: ReleaseManifest
+        do {
+            manifest = try await releases.manifest(repo: remote.repo, tag: release.tag, timeout: timeouts.manifest)
+        } catch {
+            return downloadFailed(error)
+        }
+        // The new shawn checks the macOS version when it starts. Installed on an older macOS, it would refuse every
+        // command, 'shawn update' among them, so the one that works stays.
+        if let needed = manifest.minimumMacOS, request.macOSMajor < needed {
+            let reason = "shawn \(manifest.version) needs macOS \(needed) or later, and this Mac runs macOS \(request.macOSName)"
+            note("\(reason); keeping \(request.currentVersion)")
+            failed("\(manifest.version) not installed: it needs macOS \(needed)")
+            return Report(outcome: .skipped(reason), configChanged: report.configChanged)
+        }
+        let data: Data
+        do {
+            data = try await releases.download(manifest.url, timeout: timeouts.download)
+        } catch {
+            return downloadFailed(error)
         }
         let actual = Checksum.sha256(data)
         guard actual == manifest.sha256.lowercased() else {

@@ -344,7 +344,7 @@ On a Mac with the checkout (normally `~/Developer/dotfiles`, recorded in `~/.con
 - It then compares the checkout's `installer/Sources`, `Package.swift` and `Package.resolved` with the sources recorded in `~/.shawn/state/cli.json`. It rebuilds `shawn` with `swift build` when they differ. It also rebuilds when nothing records which sources the binary came from and the checkout has no `shawn-v<version>` tag to go by. Then it swaps the new binary in and reruns your command with it. A checkout with unpushed commits gets the same rebuild when those commits leave the Swift sources alone. `shawn` never builds unpushed changes to the Swift sources. It waits until you push them, and only `shawn update` says so.
 - It leaves the checkout alone, with a one-line note, when it has uncommitted changes, is on another branch, or has untracked files under `installer/Sources` or `installer/Package*`. After a failed rebuild, it does not try the same sources again until you run `shawn update`. It never replaces a binary inside an app bundle, in a `.build` folder or in a folder it cannot write to.
 
-On a Mac without a checkout, it refreshes the cached remote config, which the YAML commands come from. It also installs a newer `shawn-v…` release after checking its sha256. After a failed download it waits a day before trying that release again, unless you run `shawn update`.
+On a Mac without a checkout, it refreshes the cached remote config, which the YAML commands come from. It also installs a newer `shawn-v…` release after checking its sha256. It leaves a release alone when `shawn-cli.json` says that the release needs a newer macOS than this Mac runs, and says so. After a failed download it waits a day before trying that release again, unless you run `shawn update`.
 
 Only one `shawn` updates at a time. It holds a lock on `~/.shawn/state/self-update.lock`, and a second `shawn` started meanwhile skips its own update and runs your command with the current version.
 
@@ -439,7 +439,7 @@ NOTARY_PROFILE=shawns-dotfiles make notarize      # only the 'make dmg' image, b
 | `ShawnsDotfiles-<version>.dmg` | The disk image holding that app, signed and, with `NOTARY_PROFILE`, notarized. |
 | `shawn-<version>-macos-arm64.tar.gz` | The `shawn` binary from inside the app. Self-update on Macs without a checkout installs this. |
 | `shawn-<version>-macos-arm64.tar.gz.sha256` | Its checksum, in `shasum -c` format. |
-| `shawn-cli.json` | `{"version", "tag", "url", "sha256", "sourceTree"}`. `shawn` reads this to find the tarball. `sourceTree` is the same value as in the app's `build-info.json`, and `release.sh` stops if the two differ. |
+| `shawn-cli.json` | `{"version", "tag", "url", "sha256", "sourceTree", "minimumMacOS"}`. `shawn` reads this to find the tarball. `sourceTree` is the same value as in the app's `build-info.json`, and `release.sh` stops if the two differ. `minimumMacOS` is the major version from the app's `LSMinimumSystemVersion`. `shawn` leaves a release alone when the Mac runs an older macOS. |
 
 ## Development
 

@@ -305,13 +305,17 @@ struct ReleaseManifest: Equatable, Sendable {
     /// The content id (`GitRepo.contentID`) of the sources the release was built from, when it recorded one.
     var sourceTree: String?
     var commit: String?
+    /// The major version of the oldest macOS the binary runs on, when the release says. The binary checks it
+    /// itself when it starts (`MinimumMacOS`), so one installed on an older macOS would refuse every command.
+    var minimumMacOS: Int?
 
-    init(version: String, sha256: String, url: URL, sourceTree: String? = nil, commit: String? = nil) {
+    init(version: String, sha256: String, url: URL, sourceTree: String? = nil, commit: String? = nil, minimumMacOS: Int? = nil) {
         self.version = version
         self.sha256 = sha256
         self.url = url
         self.sourceTree = sourceTree
         self.commit = commit
+        self.minimumMacOS = minimumMacOS
     }
 
     static func parse(_ data: Data) throws -> ReleaseManifest {
@@ -322,7 +326,8 @@ struct ReleaseManifest: Equatable, Sendable {
             throw BuildFailure(message: "shawn-cli.json is missing version, sha256 or url")
         }
         func text(_ key: String) -> String? { (object[key] as? String).flatMap { $0.isEmpty ? nil : $0 } }
-        return ReleaseManifest(version: version, sha256: sha.lowercased(), url: url, sourceTree: text("sourceTree"), commit: text("commit"))
+        return ReleaseManifest(version: version, sha256: sha.lowercased(), url: url, sourceTree: text("sourceTree"), commit: text("commit"),
+                               minimumMacOS: object["minimumMacOS"] as? Int)
     }
 
     var provenance: BuildProvenance {

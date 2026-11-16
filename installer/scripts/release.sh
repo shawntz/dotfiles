@@ -16,7 +16,7 @@ Builds release artifacts for ShawnCore.version into build/release/<version>/:
   ShawnsDotfiles-<version>.dmg              notarized when NOTARY_PROFILE is set
   shawn-<version>-macos-arm64.tar.gz        the shawn CLI, for self-update on other Macs
   shawn-<version>-macos-arm64.tar.gz.sha256
-  shawn-cli.json                            {version, tag, url, sha256, sourceTree}
+  shawn-cli.json                            {version, tag, url, sha256, sourceTree, minimumMacOS}
 then prints the 'gh release create shawn-v<version> ...' command for you to run. It goes to
 stdout only when the release is ready to publish (Developer ID signed and notarized); otherwise
 the summary says what to do first. Nothing is uploaded, tagged or pushed.
@@ -136,18 +136,25 @@ COPYFILE_DISABLE=1 tar -czf "$TARBALL" --uid 0 --gid 0 --uname root --gname whee
 SHA256="$(shasum -a 256 "$TARBALL" | awk '{print $1}')"
 printf '%s  %s\n' "$SHA256" "$TARBALL_NAME" >"$TARBALL.sha256"
 
+# The macOS the binaries need, as the app's Info.plist declares it. shawn compares it with the Mac it runs on
+# before it replaces itself with this release.
+MINIMUM_MACOS="$(plist_value "$APP/Contents/Info.plist" LSMinimumSystemVersion)" || die "the app's Info.plist has no LSMinimumSystemVersion"
+MINIMUM_MACOS="${MINIMUM_MACOS%%.*}"
+printf '%s' "$MINIMUM_MACOS" | grep -Eq '^[0-9]+$' || die "the app's LSMinimumSystemVersion does not start with a number"
+
 cat >"$MANIFEST" <<EOF
 {
   "version": "$VERSION",
   "tag": "$TAG",
   "url": "$URL",
   "sha256": "$SHA256",
-  "sourceTree": "$SOURCE_TREE"
+  "sourceTree": "$SOURCE_TREE",
+  "minimumMacOS": $MINIMUM_MACOS
 }
 EOF
 # Read the manifest back the way a JSON parser sees it.
 plutil -convert xml1 -o /dev/null "$MANIFEST" || die "wrote an invalid $MANIFEST"
-for pair in "version=$VERSION" "tag=$TAG" "url=$URL" "sha256=$SHA256" "sourceTree=$SOURCE_TREE"; do
+for pair in "version=$VERSION" "tag=$TAG" "url=$URL" "sha256=$SHA256" "sourceTree=$SOURCE_TREE" "minimumMacOS=$MINIMUM_MACOS"; do
     key="${pair%%=*}"
     [ "$(plutil -extract "$key" raw -o - "$MANIFEST")" = "${pair#*=}" ] || die "shawn-cli.json has the wrong $key"
 done

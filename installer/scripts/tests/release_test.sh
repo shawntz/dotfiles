@@ -42,6 +42,8 @@ test_release_manifest_and_app_record_the_same_content_id() {
     assert_eq "$expected" "$INFO_TREE" "build-info.json sourceTree"
     assert_eq "$(git -C "$REPO" rev-parse HEAD)" "$INFO_COMMIT" "build-info.json commit"
     assert_eq 9.8.7 "$MANIFEST_VERSION" "shawn-cli.json version"
+    # The number, not a string: shawn reads it as one.
+    assert_contains "$(cat "$(release_dir)/shawn-cli.json")" '"minimumMacOS": 27' "shawn-cli.json"
 }
 
 test_release_with_a_notary_profile_notarizes_the_release_image_and_prints_the_command() {
