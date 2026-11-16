@@ -1,6 +1,7 @@
 #!/bin/bash
 # Builds everything a release needs (the app, disk image, CLI tarball and its manifest)
-# and prints the `gh release create` command to publish it. It never publishes, tags or pushes.
+# and prints the `gh release create` command to publish it. It never publishes, tags or pushes:
+# publish-release.sh does that.
 # Run with --help for the options.
 # shellcheck source-path=SCRIPTDIR
 set -euo pipefail
@@ -34,8 +35,9 @@ Environment:
   RELEASE_REPO    GitHub repo the release lives in [default $RELEASE_REPO]
   CONFIG_DIR      config directory to bundle       [default config/]
 
-To cut a release: bump 'version' in Sources/ShawnCore/ShawnCore.swift, commit, push, then run
-this and the command it prints.
+To cut a release by hand: bump 'version' in Sources/ShawnCore/ShawnCore.swift, commit, push, then
+run this and scripts/publish-release.sh, or the command this prints. On GitHub, the release
+workflow does the same for each new version on master.
 EOF
 }
 

@@ -13,7 +13,7 @@ PACKAGE := --package-path "$(ROOT)"
 NO_SELF_UPDATE := SHAWN_NO_SELF_UPDATE=1 SHAWN_NO_UPDATE=1
 
 .DEFAULT_GOAL := help
-.PHONY: help build test test-scripts validate app dmg notarize release install-cli run icon media lint clean
+.PHONY: help build test test-scripts validate app dmg notarize release publish install-cli run icon media lint clean
 
 help: ## List the targets
 	@echo "Shawn's Dotfiles. Targets:"
@@ -46,6 +46,9 @@ notarize: ## Notarize and staple the 'make dmg' image (needs NOTARY_PROFILE; not
 
 release: ## App, disk image, CLI tarball and manifest; prints the gh command
 	"$(ROOT)/scripts/release.sh"
+
+publish: ## Publish what 'make release' built as a GitHub release (CI does both on a version bump)
+	"$(ROOT)/scripts/publish-release.sh"
 
 install-cli: ## Build the CLI (release) and install it as ~/.local/bin/shawn
 	$(SWIFT) build $(PACKAGE) -c release --product shawn

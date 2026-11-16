@@ -1,9 +1,15 @@
 #!/bin/bash
 # Stands in for `xcrun notarytool` and `xcrun stapler`: Apple accepts every submission.
+# FAKE_TICKET=none makes `stapler validate` fail, as it does for an image with no stapled ticket.
 set -eu
 printf 'xcrun %s\n' "$*" >>"$FAKE_LOG"
 case "${1:-} ${2:-}" in
     "notarytool submit") printf '{"id": "fake-submission", "status": "Accepted"}\n' ;;
-    "stapler staple" | "stapler validate") ;;
+    "stapler staple") ;;
+    "stapler validate")
+        if [ "${FAKE_TICKET:-}" = none ]; then
+            echo "$3 does not have a ticket stapled to it." >&2
+            exit 65
+        fi ;;
     *) echo "fake xcrun: unexpected arguments: $*" >&2; exit 1 ;;
 esac
