@@ -20,10 +20,10 @@ The app and `shawn` run on macOS 27 or later. An older macOS refuses to open the
 A workflow builds a release for each new version on `master`. It publishes the release once the repository can sign and notarize it, or allows builds that are not notarized (see [Releasing](#releasing)). When the [releases page](https://github.com/shawntz/dotfiles/releases) has one:
 
 1. On the new Mac, open the releases page and download `ShawnsDotfiles-<version>.dmg` from the newest `shawn-v…` release.
-2. Open the disk image and drag Shawn's Dotfiles onto the Applications shortcut.
+2. Open the disk image and drag Dotfiles onto the Applications shortcut.
 3. Open it from Applications. macOS asks once whether to open an app downloaded from the internet. Choose Open. If macOS refuses to open it, the release is not notarized, and [If macOS won't open it](#if-macos-wont-open-it) has the fix.
 
-When the page has none, build the app from a checkout with Xcode 27 or later, using `make app SIGN_IDENTITY=-` (see [Build, sign, notarize, release](#build-sign-notarize-release)), copy `build/Shawn's Dotfiles.app` to the new Mac and open it there.
+When the page has none, build the app from a checkout with Xcode 27 or later, using `make app SIGN_IDENTITY=-` (see [Build, sign, notarize, release](#build-sign-notarize-release)), copy `build/Dotfiles.app` to the new Mac and open it there.
 
 ![The welcome screen, with the plan of 17 steps on the left, Lumpy Space Princess and her speech bubble on the right, and the DRY RUN, CUSTOMIZE… and START controls along the bottom](../.github/media/welcome.png)
 
@@ -70,7 +70,7 @@ On a Mac running macOS 27 or later with Xcode 27 or later, you can also build an
 git clone https://github.com/shawntz/dotfiles.git ~/Developer/dotfiles
 cd ~/Developer/dotfiles/installer
 make app SIGN_IDENTITY=-
-open "build/Shawn's Dotfiles.app"
+open build/Dotfiles.app
 ```
 
 After the first run, `shawn install` runs the same installer in the terminal.
@@ -368,7 +368,7 @@ All of this runs in `installer/`. Each script takes `--help`.
 | `make test` | The Swift package's tests, then the build scripts' tests. |
 | `make test-scripts` | Only the build scripts' tests. They use fake `swift`, `codesign`, `hdiutil`, `xcrun`, `spctl`, `security` and `gh`, so nothing is signed with your identity or sent to Apple or GitHub. |
 | `make validate` | Builds the CLI, runs `shawn config validate config` and checks that git keeps every file in `config/`, as CI does. Outside a git checkout it skips the git check. |
-| `make app` | `build/Shawn's Dotfiles.app`, signed (`SIGN_IDENTITY=-` for ad hoc). |
+| `make app` | `build/Dotfiles.app`, signed (`SIGN_IDENTITY=-` for ad hoc). |
 | `make dmg` | The app, then `build/ShawnsDotfiles-<version>.dmg`. |
 | `make notarize` | Notarizes and staples the `make dmg` disk image (not the release one; see [Notarizing](#notarizing)). |
 | `make release` | Everything a release needs, then prints the `gh release create` command. |
@@ -383,7 +383,7 @@ All of this runs in `installer/`. Each script takes `--help`.
 The app bundle is laid out like this:
 
 ```
-Shawn's Dotfiles.app/Contents/
+Dotfiles.app/Contents/
   MacOS/ShawnsDotfiles        the installer
   Helpers/shawn               the CLI, which the installer copies to ~/.local/bin
   Helpers/WebAppShell         the browser every generated web app is built from
@@ -487,7 +487,7 @@ It leaves a published release alone. It deletes a draft of the same tag and make
 
 | file | what it is |
 |---|---|
-| `Shawn's Dotfiles.app` | The app, built for Apple silicon and signed. |
+| `Dotfiles.app` | The app, built for Apple silicon and signed. |
 | `ShawnsDotfiles-<version>.dmg` | The disk image holding that app, signed and, with `NOTARY_PROFILE`, notarized. |
 | `shawn-<version>-macos-arm64.tar.gz` | The `shawn` binary from inside the app. Self-update on Macs without a checkout installs this. |
 | `shawn-<version>-macos-arm64.tar.gz.sha256` | Its checksum, in `shasum -c` format. |

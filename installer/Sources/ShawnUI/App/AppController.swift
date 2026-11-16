@@ -30,14 +30,14 @@ final class AppController: NSObject, NSApplicationDelegate, NSWindowDelegate {
         } catch {
             let alert = NSAlert()
             alert.alertStyle = .critical
-            alert.messageText = "Shawn's Dotfiles could not start"
+            alert.messageText = "\(ShawnCore.appName) could not start"
             alert.informativeText = "\(error)"
             alert.runModal()
             NSApp.terminate(nil)
             return
         }
         self.model = model
-        NSApp.mainMenu = Self.makeMainMenu(appName: "Shawn's Dotfiles")
+        NSApp.mainMenu = Self.makeMainMenu(appName: ShawnCore.appName)
 
         let window = Self.makeWindow(rootView: RootView(model: model))
         window.delegate = self
@@ -135,7 +135,7 @@ final class AppController: NSObject, NSApplicationDelegate, NSWindowDelegate {
         let window = NSWindow(contentRect: NSRect(origin: .zero, size: Theme.defaultWindowSize),
                               styleMask: [.titled, .closable, .miniaturizable, .resizable, .fullSizeContentView],
                               backing: .buffered, defer: false)
-        window.title = "Shawn's Dotfiles"
+        window.title = ShawnCore.appName
         window.titlebarAppearsTransparent = true
         window.titleVisibility = .hidden
         window.appearance = NSAppearance(named: .darkAqua)

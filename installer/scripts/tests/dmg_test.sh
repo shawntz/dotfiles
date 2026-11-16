@@ -5,7 +5,7 @@
 
 # A stand-in for a built app at $T/build: only its Info.plist matters to make-dmg.sh.
 fake_built_app() {
-    local app="$T/build/Shawn's Dotfiles.app"
+    local app="$T/build/Dotfiles.app"
     mkdir -p "$app/Contents/MacOS"
     plutil -create xml1 "$app/Contents/Info.plist"
     plutil -insert CFBundleShortVersionString -string 9.8.7 "$app/Contents/Info.plist"

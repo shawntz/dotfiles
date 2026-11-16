@@ -190,7 +190,7 @@ publish_command() {
     printf 'gh release create %s \\\n' "$TAG"
     printf '  --repo %s \\\n' "$RELEASE_REPO"
     [ -z "$COMMIT" ] || printf '  --target %s \\\n' "$COMMIT"
-    printf '  --title "%s %s" \\\n' "$APP_NAME" "$VERSION"
+    printf '  --title "%s %s" \\\n' "$PROJECT_NAME" "$VERSION"
     printf '  --generate-notes \\\n'
     local last=$((${#ASSETS[@]} - 1)) index
     for index in "${!ASSETS[@]}"; do

@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
 <!--
-  Info.plist template for "Shawn's Dotfiles.app". scripts/build-app.sh fills in every @NAME@
+  Info.plist template for "Dotfiles.app". scripts/build-app.sh fills in every @NAME@
   token and refuses to build if one is left over:
     @VERSION@   ShawnCore.version from Sources/ShawnCore/ShawnCore.swift
     @BUILD@     the bundle build number (defaults to the version)
@@ -11,7 +11,7 @@
 	<key>CFBundleDevelopmentRegion</key>
 	<string>en</string>
 	<key>CFBundleDisplayName</key>
-	<string>Shawn's Dotfiles</string>
+	<string>Dotfiles</string>
 	<key>CFBundleExecutable</key>
 	<string>ShawnsDotfiles</string>
 	<key>CFBundleIconFile</key>
@@ -21,7 +21,7 @@
 	<key>CFBundleInfoDictionaryVersion</key>
 	<string>6.0</string>
 	<key>CFBundleName</key>
-	<string>Shawn's Dotfiles</string>
+	<string>Dotfiles</string>
 	<key>CFBundlePackageType</key>
 	<string>APPL</string>
 	<key>CFBundleShortVersionString</key>

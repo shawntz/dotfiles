@@ -35,7 +35,7 @@ validate: ## Check config/ with the built CLI, and that git keeps every file in 
 	cd "$(ROOT)" && $(NO_SELF_UPDATE) .build/debug/shawn config validate $(CONFIG)
 	cd "$(ROOT)" && scripts/check-config-gitignore.sh $(CONFIG)
 
-app: ## Build and sign build/Shawn's Dotfiles.app (SIGN_IDENTITY=- for ad hoc)
+app: ## Build and sign build/Dotfiles.app (SIGN_IDENTITY=- for ad hoc)
 	"$(ROOT)/scripts/build-app.sh"
 
 dmg: app ## Build the app, then build/ShawnsDotfiles-<version>.dmg

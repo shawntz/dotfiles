@@ -129,7 +129,7 @@ fi
 
 # MARK: Publish
 
-CREATE=(gh release create "$TAG" --repo "$RELEASE_REPO" --target "$SOURCE_COMMIT" --title "$APP_NAME $VERSION" --draft --generate-notes)
+CREATE=(gh release create "$TAG" --repo "$RELEASE_REPO" --target "$SOURCE_COMMIT" --title "$PROJECT_NAME $VERSION" --draft --generate-notes)
 [ -z "$NOTES" ] || CREATE+=(--notes-file "$NOTES")
 CREATE+=("${ASSETS[@]}")
 PUBLISH=(gh release edit "$TAG" --repo "$RELEASE_REPO" --draft=false)

@@ -9,7 +9,9 @@
 
 # The installer package root (the directory holding Package.swift), whatever the caller's cwd.
 INSTALLER_ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd -P)"
-APP_NAME="Shawn's Dotfiles"
+# The app is Dotfiles.app. The project it belongs to keeps its own name, which titles the releases.
+APP_NAME="Dotfiles"
+PROJECT_NAME="Shawn's Dotfiles"
 APP_BUNDLE_NAME="$APP_NAME.app"
 APP_BUNDLE_ID="com.shawnschwartz.dotfiles"
 APP_EXECUTABLE="ShawnsDotfiles"
