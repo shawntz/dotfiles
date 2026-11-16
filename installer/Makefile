@@ -65,12 +65,12 @@ icon: ## Redraw Resources/AppIcon.icns from scripts/make-icon.swift
 media: ## Draw the README's GIFs and stills of the app into build/media (needs Pillow)
 	"$(ROOT)/scripts/make-media.sh" "$(MEDIA_DIR)"
 
-lint: ## shellcheck the scripts and their tests; actionlint the CI workflow when installed
+lint: ## shellcheck the scripts and their tests; actionlint the workflows when installed
 	shellcheck -x "$(ROOT)"/scripts/*.sh "$(ROOT)"/scripts/tests/*.sh "$(ROOT)"/scripts/tests/fakes/*
-	@workflow="$(ROOT)/../.github/workflows/installer.yml"; \
-	if ! command -v actionlint >/dev/null 2>&1; then echo "actionlint is not installed; skipped the workflow"; \
-	elif [ -f "$$workflow" ]; then actionlint "$$workflow"; \
-	else echo "no $$workflow; skipped"; fi
+	@workflows="$(ROOT)/../.github/workflows"; \
+	if ! command -v actionlint >/dev/null 2>&1; then echo "actionlint is not installed; skipped the workflows"; \
+	elif [ -d "$$workflows" ]; then actionlint "$$workflows"/*.yml; \
+	else echo "no $$workflows; skipped"; fi
 
 clean: ## Remove build products (swift package clean, and build/)
 	$(SWIFT) package $(PACKAGE) clean

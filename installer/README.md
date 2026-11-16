@@ -17,11 +17,13 @@ A Mac app that sets up a brand-new Mac the way Shawn's laptop is set up. It inst
 
 The app and `shawn` run on macOS 27 or later. An older macOS refuses to open the app. `shawn` checks the macOS version itself, and on an older one it prints `shawn needs macOS 27 or later` and exits with status 69. macOS 27 runs only on Apple silicon, so there is no Intel build.
 
-There is no release yet. Until there is one, build the app from a checkout with Xcode 27 or later, using `make app SIGN_IDENTITY=-` (see [Build, sign, notarize, release](#build-sign-notarize-release)), copy `build/Shawn's Dotfiles.app` to the new Mac and open it there. [If macOS won't open it](#if-macos-wont-open-it) has the fix. Once a release exists:
+A workflow publishes a release each time the version on `master` goes up (see [Releasing](#releasing)). When the [releases page](https://github.com/shawntz/dotfiles/releases) has one:
 
-1. On the new Mac, open the [releases page](https://github.com/shawntz/dotfiles/releases) and download `ShawnsDotfiles-<version>.dmg` from the newest `shawn-v…` release.
+1. On the new Mac, open the releases page and download `ShawnsDotfiles-<version>.dmg` from the newest `shawn-v…` release.
 2. Open the disk image and drag Shawn's Dotfiles onto the Applications shortcut.
-3. Open it from Applications. macOS asks once whether to open an app downloaded from the internet. Choose Open.
+3. Open it from Applications. macOS asks once whether to open an app downloaded from the internet. Choose Open. If macOS refuses to open it, the release is not notarized, and [If macOS won't open it](#if-macos-wont-open-it) has the fix.
+
+When the page has none, build the app from a checkout with Xcode 27 or later, using `make app SIGN_IDENTITY=-` (see [Build, sign, notarize, release](#build-sign-notarize-release)), copy `build/Shawn's Dotfiles.app` to the new Mac and open it there.
 
 ![The welcome screen, with the plan of 17 steps on the left, Lumpy Space Princess and her speech bubble on the right, and the DRY RUN, CUSTOMIZE… and START controls along the bottom](../.github/media/welcome.png)
 
@@ -60,7 +62,7 @@ STOP ends a run cleanly. The app marks the item that was running as stopped, not
 
 ### If macOS won't open it
 
-Release builds carry a Developer ID signature and Apple's notarization ticket, so they open normally. Gatekeeper blocks a build signed ad hoc (see [signing](#signing)) that another Mac downloaded or received by AirDrop. To open one anyway, try to open it once, then go to System Settings, Privacy & Security, and click Open Anyway.
+A release that carries a Developer ID signature and Apple's notarization ticket opens normally. Gatekeeper blocks every other build that another Mac downloaded or received by AirDrop. That is a build signed ad hoc (see [signing](#signing)) and a release whose notes say that Apple has not notarized it. To open one anyway, try to open it once, then go to System Settings, Privacy & Security, and click Open Anyway.
 
 On a Mac running macOS 27 or later with Xcode 27 or later, you can also build and run it from a checkout:
 
@@ -364,17 +366,18 @@ All of this runs in `installer/`. Each script takes `--help`.
 |---|---|
 | `make build` | Debug build of the app, the CLI and the web-app shell. |
 | `make test` | The Swift package's tests, then the build scripts' tests. |
-| `make test-scripts` | Only the build scripts' tests. They use fake `swift`, `codesign`, `hdiutil`, `xcrun`, `spctl` and `security`, so nothing is signed with your identity or sent to Apple. |
+| `make test-scripts` | Only the build scripts' tests. They use fake `swift`, `codesign`, `hdiutil`, `xcrun`, `spctl`, `security` and `gh`, so nothing is signed with your identity or sent to Apple or GitHub. |
 | `make validate` | Builds the CLI, runs `shawn config validate config` and checks that git keeps every file in `config/`, as CI does. Outside a git checkout it skips the git check. |
 | `make app` | `build/Shawn's Dotfiles.app`, signed (`SIGN_IDENTITY=-` for ad hoc). |
 | `make dmg` | The app, then `build/ShawnsDotfiles-<version>.dmg`. |
 | `make notarize` | Notarizes and staples the `make dmg` disk image (not the release one; see [Notarizing](#notarizing)). |
 | `make release` | Everything a release needs, then prints the `gh release create` command. |
+| `make publish` | Publishes what `make release` built as the GitHub release `shawn-v<version>`. The release workflow runs both. |
 | `make install-cli` | Builds `shawn` in release mode and installs it to `~/.local/bin`. It leaves `~/.shawn/state/cli.json` as it was. |
 | `make run` | Opens the installer in demo mode, a dry run that starts by itself. |
 | `make icon` | Redraws `Resources/AppIcon.icns`. |
 | `make media` | Draws the GIFs, stills and icon that the two READMEs show. They go into `build/media`, or into `MEDIA_DIR` when you set it, and the READMEs read them from `.github/media`. Each frame is a `--snapshot`, so no window opens. It needs Python 3 with Pillow (`PYTHON` names it). |
-| `make lint` | shellcheck on the scripts and their tests, and actionlint on the workflow when it is installed. |
+| `make lint` | shellcheck on the scripts and their tests, and actionlint on the workflows when it is installed. |
 | `make clean` | Removes build products. |
 
 The app bundle is laid out like this:
@@ -426,10 +429,46 @@ NOTARY_PROFILE=shawns-dotfiles make notarize      # only the 'make dmg' image, b
 
 ### Releasing
 
-1. Bump `version` in `Sources/ShawnCore/ShawnCore.swift`. It is the only place the version lives.
+Bump `version` in `Sources/ShawnCore/ShawnCore.swift`, the only place the version lives, and push to `master`. The `release` workflow (`.github/workflows/release.yml`) does the rest. On each push to `master` that touches `installer/`, it asks GitHub whether `shawn-v<version>` is published. When it is not, it builds the files with `scripts/release.sh` and publishes them with `scripts/publish-release.sh`.
+
+What it publishes depends on what the repository holds under Settings, Secrets and variables, Actions:
+
+| name | kind | what it holds |
+|---|---|---|
+| `DEVELOPER_ID_P12` | secret | Your Developer ID Application certificate and its private key as a `.p12` file, base64-encoded. |
+| `DEVELOPER_ID_P12_PASSWORD` | secret | The password you gave that `.p12` file. |
+| `NOTARY_APPLE_ID` | secret | The Apple ID that notarizes. |
+| `NOTARY_TEAM_ID` | secret | Your 10-character team ID. |
+| `NOTARY_PASSWORD` | secret | An app-specific password for that Apple ID, made at account.apple.com. |
+| `RELEASE_UNNOTARIZED` | variable | `1` lets the workflow publish a build that Apple has not notarized. |
+
+- With the five secrets, the workflow signs the app with your Developer ID and notarizes the disk image. The release opens normally on other Macs.
+- Without them, it signs the build ad hoc. It builds the files, keeps them with the run for 14 days and publishes nothing, unless `RELEASE_UNNOTARIZED` is `1`. Then it publishes them, and the release notes say that macOS blocks the app until the person allows it.
+
+To make the certificate secret, open Keychain Access, pick your Developer ID Application certificate under My Certificates, choose File, Export Items and save it as a `.p12` file with a password. Then:
+
+```sh
+base64 -i DeveloperID.p12 | gh secret set DEVELOPER_ID_P12 --repo shawntz/dotfiles
+gh secret set DEVELOPER_ID_P12_PASSWORD --repo shawntz/dotfiles    # asks for the value
+gh secret set NOTARY_APPLE_ID --repo shawntz/dotfiles
+gh secret set NOTARY_TEAM_ID --repo shawntz/dotfiles
+gh secret set NOTARY_PASSWORD --repo shawntz/dotfiles
+```
+
+For releases that are not notarized, set the variable instead: `gh variable set RELEASE_UNNOTARIZED --body 1 --repo shawntz/dotfiles`.
+
+A version that was built but not published is published by the next run. Start one by hand under Actions, release, Run workflow, or with `gh workflow run release.yml --repo shawntz/dotfiles`.
+
+A pull request that changes `installer/scripts`, `installer/Resources`, the package manifest, the version or the workflow builds a release too, signed ad hoc. It publishes nothing and reads no secret. The files stay with the run for 14 days as the artifact `release-<version>`. The same run tries the keychain steps with a certificate it makes for itself and throws away.
+
+To release by hand, without the workflow:
+
+1. Bump `version` in `Sources/ShawnCore/ShawnCore.swift`.
 2. Commit and push to `master`.
 3. Run `NOTARY_PROFILE=shawns-dotfiles make release`.
-4. Run the `gh release create shawn-v<version> …` command it prints.
+4. Run `make publish`, or the `gh release create shawn-v<version> …` command that step 3 prints.
+
+`scripts/publish-release.sh` uploads everything to a draft and publishes the draft last, so the tag appears only when every file is in place. `shawn` on other Macs looks for the tag, then for the files. It refuses a disk image that Apple has not notarized unless you pass `--allow-unnotarized`. It also refuses files built for another repo, files built from other sources than the checkout holds at `HEAD`, and a tarball that does not match its checksum. A release that is already published is left alone. `--dry-run` prints the `gh` commands and runs none.
 
 `scripts/release.sh` never creates the release, tags or pushes. It stops if `Sources/` or `Package.*` have uncommitted or untracked changes, because the release must match what is at `HEAD`. `ALLOW_DIRTY=1` overrides that, and the release then records an empty `sourceTree`. The `gh` command goes to stdout only when the disk image is signed with a Developer ID and notarized, so `scripts/release.sh > publish.sh` never captures a command that would publish an image Gatekeeper blocks. Otherwise the summary says what to do first, with the exact `scripts/notarize.sh` command for the release image. It writes these to `build/release/<version>/`:
 
@@ -457,7 +496,7 @@ Sources/
   ShawnUI/          the installer window; ShawnsDotfiles/ starts it
   ShawnCLIKit/      the shawn command; shawn/ starts it
 Tests/              one XCTest target per module
-scripts/            build, icon, disk image, notarize, release, the config's .gitignore check, README media
+scripts/            build, icon, disk image, notarize, release, publish, the config's .gitignore check, README media
 scripts/tests/      tests for those scripts, with fake signing tools in scripts/tests/fakes/
 Resources/          Info.plist template and the app icon
 ```

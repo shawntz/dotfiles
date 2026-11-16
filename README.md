@@ -256,7 +256,7 @@ In the order the GIF shows them:
 
 ## Try it
 
-There is no release to download yet, so you build it yourself with Xcode 27 or later. It runs on macOS 27 or later. CI builds and tests it on macOS 27 with Xcode 27.2 and Swift 6.4. The safe first step is a dry run:
+It runs on macOS 27 or later. When a release is out, the [releases page](https://github.com/shawntz/dotfiles/releases) has the app as a disk image, and a new Mac needs nothing else. From a checkout, you build it yourself with Xcode 27 or later. CI builds and tests it on macOS 27 with Xcode 27.2 and Swift 6.4. The safe first step is a dry run from a checkout:
 
 ```sh
 git clone https://github.com/shawntz/dotfiles.git shawns-dotfiles
@@ -341,7 +341,7 @@ open "build/Shawn's Dotfiles.app"
 
 To set up another Mac, copy `build/Shawn's Dotfiles.app` to it. Online, the app uses the newest config from the `remote:` repo in `installer.yaml`, so push your changes to your fork first. The copy inside the app is the fallback when GitHub is out of reach.
 
-macOS blocks an ad hoc build that reached another Mac as a download or by AirDrop. Try to open it once, then click Open Anyway in System Settings, under Privacy & Security.
+macOS blocks an ad hoc build that reached another Mac as a download or by AirDrop, and a release that Apple has not notarized. Try to open it once, then click Open Anyway in System Settings, under Privacy & Security.
 
 <details>
 <summary>If something goes wrong</summary>
