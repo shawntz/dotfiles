@@ -1,14 +1,16 @@
-# Publishes a release when master holds a version that has none yet: the disk image, the shawn CLI
-# tarball, its checksum and shawn-cli.json, as shawn-v<version>. To release, bump the version in
-# installer/Sources/ShawnCore/ShawnCore.swift and push to master.
+# Builds a release when master holds a version that has none yet, and publishes it when the
+# repository allows: the disk image, the shawn CLI tarball, its checksum and shawn-cli.json, as
+# shawn-v<version>. A new release starts with a version bump in
+# installer/Sources/ShawnCore/ShawnCore.swift and a push to master.
 #
-# Signing: with the secrets DEVELOPER_ID_P12 and DEVELOPER_ID_P12_PASSWORD the app is signed with
-# that Developer ID, and with NOTARY_APPLE_ID, NOTARY_TEAM_ID and NOTARY_PASSWORD too the disk image
-# is notarized. Without them the build is signed ad hoc, and it is published only when the
-# repository variable RELEASE_UNNOTARIZED is 1. installer/README.md says how to set these up.
+# With the secrets DEVELOPER_ID_P12 and DEVELOPER_ID_P12_PASSWORD, the workflow signs the app with
+# that Developer ID. With NOTARY_APPLE_ID, NOTARY_TEAM_ID and NOTARY_PASSWORD too, it notarizes the
+# disk image and publishes. Without the certificate it signs ad hoc. It publishes a build that
+# Apple has not notarized only when the repository variable RELEASE_UNNOTARIZED is 1.
+# installer/README.md says how to set these up.
 #
 # A pull request that touches what a release is made of builds one too, signed ad hoc, and keeps
-# the files as an artifact of the run. It publishes nothing and reads no secret.
+# the files as an artifact of the run. It publishes nothing, and none of its steps gets a secret.
 name: release
 
 on:
@@ -31,7 +33,7 @@ permissions:
   contents: read
 
 concurrency:
-  # One release run per branch at a time, and none is cut short: a second push waits, then sees
+  # One release run per branch at a time, and none is cut short. A second push waits, then sees
   # the release the first one published.
   group: release-${{ github.ref }}
   cancel-in-progress: false
@@ -243,7 +245,7 @@ jobs:
           printf '%s\n' '[req]' 'distinguished_name = dn' 'x509_extensions = ext' 'prompt = no' \
             '[dn]' 'CN = Release rehearsal' \
             '[ext]' 'keyUsage = critical, digitalSignature' 'extendedKeyUsage = critical, codeSigning' >"$work/openssl.cnf"
-          # macOS's own openssl: the security tool reads the .p12 files it writes.
+          # macOS's own openssl, because the security tool reads the .p12 files it writes.
           /usr/bin/openssl req -x509 -newkey rsa:2048 -nodes -days 1 -config "$work/openssl.cnf" \
             -keyout "$work/key.pem" -out "$work/certificate.pem" 2>/dev/null
           /usr/bin/openssl pkcs12 -export -inkey "$work/key.pem" -in "$work/certificate.pem" \
@@ -251,11 +253,14 @@ jobs:
           SIGNING_P12="$(base64 -i "$work/rehearsal.p12")"
           export SIGNING_P12 SIGNING_P12_PASSWORD=rehearsal
           keychain="$(scripts/ci-keychain.sh create)"
-          identity="$(security find-identity -p codesigning "$keychain" | awk '/Release rehearsal/ { print $2; exit }')"
-          [ -n "$identity" ] || { echo "::error::the imported certificate is not in $keychain"; exit 1; }
+          # release.sh names no keychain. It finds the identity through the search list, so this does too.
+          first="$(security list-keychains -d user | sed -n '1p' | tr -d ' "')"
+          [ "$first" = "$keychain" ] || { echo "::error::$keychain is not first in the search list"; exit 1; }
+          identity="$(security find-identity -p codesigning | awk '/Release rehearsal/ { print $2; exit }')"
+          [ -n "$identity" ] || { echo "::error::the imported certificate does not turn up through the search list"; exit 1; }
           # The step that fails on a runner when the key needs someone to click Allow.
           cp /usr/bin/true "$work/signed"
-          codesign --force --sign "$identity" --keychain "$keychain" "$work/signed"
+          codesign --force --sign "$identity" "$work/signed"
           codesign -dvv "$work/signed" 2>&1 | grep -q '^Authority=Release rehearsal$'
           [ "$(security default-keychain -d user | tr -d ' "')" = "$keychain" ] || { echo "::error::$keychain is not the default keychain"; exit 1; }
           scripts/ci-keychain.sh delete

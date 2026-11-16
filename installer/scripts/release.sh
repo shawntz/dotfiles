@@ -35,9 +35,10 @@ Environment:
   RELEASE_REPO    GitHub repo the release lives in [default $RELEASE_REPO]
   CONFIG_DIR      config directory to bundle       [default config/]
 
-To cut a release by hand: bump 'version' in Sources/ShawnCore/ShawnCore.swift, commit, push, then
-run this and scripts/publish-release.sh, or the command this prints. On GitHub, the release
-workflow does the same for each new version on master.
+On GitHub, the release workflow runs this for each new version on master and publishes the result
+when the repository allows it (see installer/README.md, Releasing). To cut a release by hand in a
+repo where that workflow publishes nothing: bump 'version' in Sources/ShawnCore/ShawnCore.swift,
+commit, push, then run this and scripts/publish-release.sh, or the command this prints.
 EOF
 }
 

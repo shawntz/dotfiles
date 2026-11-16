@@ -17,7 +17,7 @@ A Mac app that sets up a brand-new Mac the way Shawn's laptop is set up. It inst
 
 The app and `shawn` run on macOS 27 or later. An older macOS refuses to open the app. `shawn` checks the macOS version itself, and on an older one it prints `shawn needs macOS 27 or later` and exits with status 69. macOS 27 runs only on Apple silicon, so there is no Intel build.
 
-A workflow publishes a release each time the version on `master` goes up (see [Releasing](#releasing)). When the [releases page](https://github.com/shawntz/dotfiles/releases) has one:
+A workflow builds a release for each new version on `master`. It publishes the release once the repository can sign and notarize it, or allows builds that are not notarized (see [Releasing](#releasing)). When the [releases page](https://github.com/shawntz/dotfiles/releases) has one:
 
 1. On the new Mac, open the releases page and download `ShawnsDotfiles-<version>.dmg` from the newest `shawn-v…` release.
 2. Open the disk image and drag Shawn's Dotfiles onto the Applications shortcut.
@@ -429,23 +429,26 @@ NOTARY_PROFILE=shawns-dotfiles make notarize      # only the 'make dmg' image, b
 
 ### Releasing
 
-Bump `version` in `Sources/ShawnCore/ShawnCore.swift`, the only place the version lives, and push to `master`. The `release` workflow (`.github/workflows/release.yml`) does the rest. On each push to `master` that touches `installer/`, it asks GitHub whether `shawn-v<version>` is published. When it is not, it builds the files with `scripts/release.sh` and publishes them with `scripts/publish-release.sh`.
+The `release` workflow (`.github/workflows/release.yml`) runs on each push to `master` that touches `installer/`. It asks GitHub whether `shawn-v<version>` is published. When it is not, it builds the files with `scripts/release.sh`, and it publishes them with `scripts/publish-release.sh` when the repository allows that. So a new release starts with a bump of `version` in `Sources/ShawnCore/ShawnCore.swift`, the only place the version lives, and a push to `master`. The current version counts too while it has no release.
 
-What it publishes depends on what the repository holds under Settings, Secrets and variables, Actions:
+What the workflow publishes depends on what the repository holds under Settings, Secrets and variables, Actions:
 
 | name | kind | what it holds |
 |---|---|---|
-| `DEVELOPER_ID_P12` | secret | Your Developer ID Application certificate and its private key as a `.p12` file, base64-encoded. |
+| `DEVELOPER_ID_P12` | secret | A Developer ID Application certificate and its private key as a `.p12` file, base64-encoded. |
 | `DEVELOPER_ID_P12_PASSWORD` | secret | The password you gave that `.p12` file. |
 | `NOTARY_APPLE_ID` | secret | The Apple ID that notarizes. |
-| `NOTARY_TEAM_ID` | secret | Your 10-character team ID. |
+| `NOTARY_TEAM_ID` | secret | The 10-character team ID of that certificate. |
 | `NOTARY_PASSWORD` | secret | An app-specific password for that Apple ID, made at account.apple.com. |
 | `RELEASE_UNNOTARIZED` | variable | `1` lets the workflow publish a build that Apple has not notarized. |
 
-- With the five secrets, the workflow signs the app with your Developer ID and notarizes the disk image. The release opens normally on other Macs.
-- Without them, it signs the build ad hoc. It builds the files, keeps them with the run for 14 days and publishes nothing, unless `RELEASE_UNNOTARIZED` is `1`. Then it publishes them, and the release notes say that macOS blocks the app until the person allows it.
+- With all five secrets, the workflow signs the app with the Developer ID, notarizes the disk image and publishes. The release opens normally on other Macs.
+- With only the two certificate secrets, it signs with the Developer ID and does not notarize.
+- With neither, it signs the build ad hoc.
 
-To make the certificate secret, open Keychain Access, pick your Developer ID Application certificate under My Certificates, choose File, Export Items and save it as a `.p12` file with a password. Then:
+In the last two cases Apple has not notarized the build. The workflow then keeps the files with the run for 14 days and publishes nothing, unless `RELEASE_UNNOTARIZED` is `1`. With the variable it publishes them, and the release notes say that macOS blocks the app until the person allows it. A version stays the way it was published. To replace a release that is not notarized with one that is, bump the version.
+
+Use a certificate that is yours to publish this project with. Whoever has the secret can sign software as that developer, so a certificate that belongs to an employer does not go into this repo's secrets. To make the certificate secret, open Keychain Access (Spotlight finds it), pick the Developer ID Application certificate under My Certificates, choose File, Export Items and save it as `DeveloperID.p12` with a password. In the folder where you saved it, run:
 
 ```sh
 base64 -i DeveloperID.p12 | gh secret set DEVELOPER_ID_P12 --repo shawntz/dotfiles
@@ -455,20 +458,30 @@ gh secret set NOTARY_TEAM_ID --repo shawntz/dotfiles
 gh secret set NOTARY_PASSWORD --repo shawntz/dotfiles
 ```
 
-For releases that are not notarized, set the variable instead: `gh variable set RELEASE_UNNOTARIZED --body 1 --repo shawntz/dotfiles`.
+Then delete `DeveloperID.p12`. For releases that are not notarized, set the variable instead: `gh variable set RELEASE_UNNOTARIZED --body 1 --repo shawntz/dotfiles`.
 
-A version that was built but not published is published by the next run. Start one by hand under Actions, release, Run workflow, or with `gh workflow run release.yml --repo shawntz/dotfiles`.
+The next run publishes a version that an earlier run built but did not publish. Start one by hand under Actions, release, Run workflow, or with `gh workflow run release.yml --repo shawntz/dotfiles`. That works once the workflow is on `master`.
 
-A pull request that changes `installer/scripts`, `installer/Resources`, the package manifest, the version or the workflow builds a release too, signed ad hoc. It publishes nothing and reads no secret. The files stay with the run for 14 days as the artifact `release-<version>`. The same run tries the keychain steps with a certificate it makes for itself and throws away.
+A pull request that changes `installer/scripts`, `installer/Resources`, the package manifest, the version or the workflow builds a release too, signed ad hoc. It publishes nothing, and none of its steps gets a secret. The files stay with the run for 14 days as the artifact `release-<version>`. The same run tries the keychain steps with a certificate it makes for itself and throws away.
 
-To release by hand, without the workflow:
+To release by hand, in a repo where the workflow publishes nothing (no notary secrets and no `RELEASE_UNNOTARIZED`):
 
 1. Bump `version` in `Sources/ShawnCore/ShawnCore.swift`.
-2. Commit and push to `master`.
+2. Commit and push to `master`. The push starts the workflow, which builds the version and stops there.
 3. Run `NOTARY_PROFILE=shawns-dotfiles make release`.
 4. Run `make publish`, or the `gh release create shawn-v<version> …` command that step 3 prints.
 
-`scripts/publish-release.sh` uploads everything to a draft and publishes the draft last, so the tag appears only when every file is in place. `shawn` on other Macs looks for the tag, then for the files. It refuses a disk image that Apple has not notarized unless you pass `--allow-unnotarized`. It also refuses files built for another repo, files built from other sources than the checkout holds at `HEAD`, and a tarball that does not match its checksum. A release that is already published is left alone. `--dry-run` prints the `gh` commands and runs none.
+Where the workflow does publish, it gets there first, and step 4 then finds the version already published.
+
+`scripts/publish-release.sh` uploads everything to a draft and publishes the draft last, so the tag appears only when every file is in place. `shawn` on other Macs looks for the tag, then for the files. The script refuses:
+
+- a disk image that Apple has not notarized, unless you run it as `scripts/publish-release.sh --allow-unnotarized` (`make publish` passes no options)
+- files built for another repo
+- files built from other sources than the checkout holds at `HEAD`, which includes a build made with `ALLOW_DIRTY=1`
+- a tarball that does not match its checksum
+- a `shawn-v<version>` tag that already exists on GitHub and points at another commit, as it does after someone deletes a release and keeps its tag
+
+It leaves a published release alone. It deletes a draft of the same tag and makes it again. `--dry-run` checks the files and prints the `gh` commands without asking GitHub anything.
 
 `scripts/release.sh` never creates the release, tags or pushes. It stops if `Sources/` or `Package.*` have uncommitted or untracked changes, because the release must match what is at `HEAD`. `ALLOW_DIRTY=1` overrides that, and the release then records an empty `sourceTree`. The `gh` command goes to stdout only when the disk image is signed with a Developer ID and notarized, so `scripts/release.sh > publish.sh` never captures a command that would publish an image Gatekeeper blocks. Otherwise the summary says what to do first, with the exact `scripts/notarize.sh` command for the release image. It writes these to `build/release/<version>/`:
 
@@ -496,7 +509,7 @@ Sources/
   ShawnUI/          the installer window; ShawnsDotfiles/ starts it
   ShawnCLIKit/      the shawn command; shawn/ starts it
 Tests/              one XCTest target per module
-scripts/            build, icon, disk image, notarize, release, publish, the config's .gitignore check, README media
+scripts/            build, icon, disk image, notarize, release, publish, CI keychain, the config's .gitignore check, README media
 scripts/tests/      tests for those scripts, with fake signing tools in scripts/tests/fakes/
 Resources/          Info.plist template and the app icon
 ```

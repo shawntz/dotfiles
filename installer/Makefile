@@ -47,7 +47,7 @@ notarize: ## Notarize and staple the 'make dmg' image (needs NOTARY_PROFILE; not
 release: ## App, disk image, CLI tarball and manifest; prints the gh command
 	"$(ROOT)/scripts/release.sh"
 
-publish: ## Publish what 'make release' built as a GitHub release (CI does both on a version bump)
+publish: ## Publish what 'make release' built as a GitHub release (the release workflow runs both)
 	"$(ROOT)/scripts/publish-release.sh"
 
 install-cli: ## Build the CLI (release) and install it as ~/.local/bin/shawn
