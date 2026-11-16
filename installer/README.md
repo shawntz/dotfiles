@@ -369,13 +369,14 @@ All of this runs in `installer/`. Each script takes `--help`.
 | `make test-scripts` | Only the build scripts' tests. They use fake `swift`, `codesign`, `hdiutil`, `xcrun`, `spctl`, `security` and `gh`, so nothing is signed with your identity or sent to Apple or GitHub. |
 | `make validate` | Builds the CLI, runs `shawn config validate config` and checks that git keeps every file in `config/`, as CI does. Outside a git checkout it skips the git check. |
 | `make app` | `build/Dotfiles.app`, signed (`SIGN_IDENTITY=-` for ad hoc). |
-| `make dmg` | The app, then `build/ShawnsDotfiles-<version>.dmg`. |
+| `make dmg` | The app, then `build/ShawnsDotfiles-<version>.dmg`, which opens in [a window that looks like the app](#the-disk-images-window). |
 | `make notarize` | Notarizes and staples the `make dmg` disk image (not the release one; see [Notarizing](#notarizing)). |
 | `make release` | Everything a release needs, then prints the `gh release create` command. |
 | `make publish` | Publishes what `make release` built as the GitHub release `shawn-v<version>`. The release workflow runs both. |
 | `make install-cli` | Builds `shawn` in release mode and installs it to `~/.local/bin`. It leaves `~/.shawn/state/cli.json` as it was. |
 | `make run` | Opens the installer in demo mode, a dry run that starts by itself. |
 | `make icon` | Redraws `Resources/AppIcon.icns`. |
+| `make dmg-art` | Redraws the two files in `Resources/dmg/` that give the disk image's window its look. It needs Python 3 with the `ds_store` and `mac_alias` packages (`PYTHON` names it). |
 | `make media` | Draws the GIFs, stills and icon that the two READMEs show. They go into `build/media`, or into `MEDIA_DIR` when you set it, and the READMEs read them from `.github/media`. Each frame is a `--snapshot`, so no window opens. It needs Python 3 with Pillow (`PYTHON` names it). |
 | `make lint` | shellcheck on the scripts and their tests, and actionlint on the workflows when it is installed. |
 | `make clean` | Removes build products. |
@@ -396,6 +397,19 @@ Dotfiles.app/Contents/
 `build-info.json` holds `{"version", "commit", "sourceTree"}`. `sourceTree` is the git object ids of `installer/Sources`, `installer/Package.swift` and `installer/Package.resolved` at `HEAD`, joined by commas, the same value `shawn` computes from its checkout. It is empty when those paths have uncommitted or untracked changes, when they changed during the build, or when the build is not from a git checkout, because then nobody can say which sources the binaries hold. When the installer puts a new `shawn` in place, it copies `sourceTree` and `commit` into `~/.shawn/state/cli.json`.
 
 `scripts/build-app.sh` builds for Apple silicon (`arm64`) only. `CONFIGURATION=debug` makes a debug build, `OUTPUT_DIR` sets where the app goes (default `build/`), `CONFIG_DIR` bundles another config folder and `BUILD_NUMBER` sets `CFBundleVersion`.
+
+### The disk image's window
+
+The disk image opens in a window that looks like the app. It shows the config's banner, a card under each of the two icons, an arrow from the app to the Applications shortcut, and the narrator with the first line the app opens on. Two committed files in `Resources/dmg/` make it:
+
+- `background.tiff` is the picture behind the icons, at 1x and 2x. The app draws it with the views it puts on screen (`--disk-image-art`), so it follows the config's banner, narrator and colors.
+- `DS_Store` is the file Finder reads a window's size, its icon size and its icons' places from. `scripts/make-dsstore.py` writes it from the layout in `Sources/ShawnUI/Views/DiskImageBackground.swift`.
+
+`make dmg-art` redraws both, without opening a window. Run it after you change the banner or the narrator, the app's name in `scripts/common.sh`, or that layout, and commit the result. The Swift tests compare both files with the layout in the code.
+
+`make dmg` needs neither Python nor those packages. It copies the two files into the image and stops when the layout file was drawn for an app with another name. `hdiutil create` leaves a file named `.DS_Store` out of an image, so the script mounts the new image for a moment, hidden from Finder, and gives the layout file its name there. Before it unmounts, it checks that the app's signature still verifies inside the image.
+
+Finder draws the two icons and their names. Over a picture it draws the names in black, in the light and in the dark appearance, and black does not read on the window's dark background. So each card has a band under its icon in a purple that black reads on, and white too, should another version of Finder pick that.
 
 ### Signing
 
@@ -534,6 +548,7 @@ The installer app takes these flags, for example `swift run ShawnsDotfiles --dry
 | `--config-ref REF` | Fetches config from this branch, tag or commit. |
 | `--simulate` | A built-in simulation config that goes through every screen. |
 | `--snapshot PATH` | Renders the window to a PNG and quits, without showing a window. Add `--snapshot-state` (`loading`, `welcome`, `customize`, `running`, `ask`, `ask-again`, `password`, `password-again`, `question`, `attention`, `finished`, `failed`, `stopped`, `dry-run-finished`, `config-error`), `--snapshot-size WxH` (each side 320 to 4000; default 1100x760), `--snapshot-scale 1\|2\|3` (default 2) and `--snapshot-contrast standard\|high`. `--snapshot-progress F` shows a run `F` of the way through (0 to 1), with no failures, and `--snapshot-at-kind K` shows it as the first item of kind `K` starts. Both work with the screens built on the running screen: `running`, `question` and `attention`. Use it to check the design without screen recording. |
+| `--disk-image-art PATH` | Draws the picture behind the disk image's Finder window to a PNG and quits, without showing a window. `--snapshot-scale` sets its pixels per point. `make dmg-art` uses it. |
 | `-h`, `--help` | Lists these flags. |
 
 The CLI has the same safety valves: `shawn install --dry-run`, `shawn doctor`, and `shawn --config DIR` for another config.

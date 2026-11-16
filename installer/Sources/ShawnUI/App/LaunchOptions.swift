@@ -50,6 +50,8 @@ public struct LaunchOptions: Equatable, Sendable {
     public var snapshotHighContrast = false
     /// Where in a run the screens built on the running screen show it (see `SnapshotProgress`).
     public var snapshotPoint: SnapshotPoint?
+    /// Draw the picture behind the disk image's Finder window to this PNG and exit (see `DiskImageBackground`).
+    public var diskImageArtPath: String?
     public var showHelp = false
 
     public init() {}
@@ -79,6 +81,8 @@ public struct LaunchOptions: Equatable, Sendable {
       --snapshot-contrast C   standard or high (the Increase Contrast look)
       --snapshot-progress F   show the run F of the way through, 0 to 1 (screens that show a run)
       --snapshot-at-kind K    show the run as the first item of kind K starts (e.g. github)
+      --disk-image-art PATH   draw the picture behind the disk image's Finder window to a PNG and exit
+                              (--snapshot-scale sets its pixels per point)
       -h, --help              show this help
     """
 
@@ -150,6 +154,7 @@ public struct LaunchOptions: Equatable, Sendable {
                 options.snapshotScale = scale
             case "--snapshot-progress": options.snapshotPoint = try .fraction(parseProgress(value(for: flag, inline: inline)))
             case "--snapshot-at-kind": options.snapshotPoint = try .kind(value(for: flag, inline: inline))
+            case "--disk-image-art": options.diskImageArtPath = try value(for: flag, inline: inline)
             default:
                 throw LaunchOptionsError.unknownArgument(argument)
             }

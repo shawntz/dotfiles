@@ -13,7 +13,7 @@ PACKAGE := --package-path "$(ROOT)"
 NO_SELF_UPDATE := SHAWN_NO_SELF_UPDATE=1 SHAWN_NO_UPDATE=1
 
 .DEFAULT_GOAL := help
-.PHONY: help build test test-scripts validate app dmg notarize release publish install-cli run icon media lint clean
+.PHONY: help build test test-scripts validate app dmg dmg-art notarize release publish install-cli run icon media lint clean
 
 help: ## List the targets
 	@echo "Shawn's Dotfiles. Targets:"
@@ -61,6 +61,9 @@ run: ## Open the installer in demo mode (a dry run: nothing on this Mac changes)
 
 icon: ## Redraw Resources/AppIcon.icns from scripts/make-icon.swift
 	$(SWIFT) "$(ROOT)/scripts/make-icon.swift" "$(ROOT)/Resources/AppIcon.icns"
+
+dmg-art: ## Redraw the disk image window's picture and layout file in Resources/dmg (needs ds_store, mac_alias)
+	"$(ROOT)/scripts/make-dmg-art.sh"
 
 media: ## Draw the README's GIFs and stills of the app into build/media (needs Pillow)
 	"$(ROOT)/scripts/make-media.sh" "$(MEDIA_DIR)"

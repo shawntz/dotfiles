@@ -6,6 +6,9 @@ import SwiftUI
 struct CRTOverlay: View {
     @Environment(\.palette) private var palette
     @Environment(\.motionEnabled) private var motionEnabled
+    /// Where the vignette is lightest, and how far from there it reaches its full darkness.
+    var vignetteCenter = UnitPoint.center
+    var vignetteRadius: CGFloat = 900
 
     var body: some View {
         ZStack {
@@ -22,7 +25,7 @@ struct CRTOverlay: View {
             }
             if palette.vignette > 0 {
                 RadialGradient(colors: [.clear, .clear, .black.opacity(palette.vignette)],
-                               center: .center, startRadius: 0, endRadius: 900)
+                               center: vignetteCenter, startRadius: 0, endRadius: vignetteRadius)
                     .blendMode(.multiply)
             }
             if motionEnabled && palette.scanlines > 0 {

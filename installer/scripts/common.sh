@@ -15,6 +15,11 @@ PROJECT_NAME="Shawn's Dotfiles"
 APP_BUNDLE_NAME="$APP_NAME.app"
 APP_BUNDLE_ID="com.shawnschwartz.dotfiles"
 APP_EXECUTABLE="ShawnsDotfiles"
+# What gives the disk image's Finder window its look, drawn by make-dmg-art.sh and packed by
+# make-dmg.sh: the picture behind the icons and Finder's layout file. The picture's name in the
+# image starts with a period, so Finder hides it.
+DMG_ART_DIR="$INSTALLER_ROOT/Resources/dmg"
+DMG_PICTURE_NAME=".background.tiff"
 RELEASE_REPO="${RELEASE_REPO:-shawntz/dotfiles}"
 
 if [ -t 2 ] && [ -z "${NO_COLOR:-}" ]; then
@@ -179,6 +184,15 @@ write_build_info() { # <destination file> <version>
 }
 EOF
     plutil -convert xml1 -o /dev/null "$1" 2>/dev/null || die "wrote an invalid $1"
+}
+
+# Succeeds when Finder's layout file places an icon for <file name>. The file stores each name as
+# UTF-16 with the code "Iloc" right behind it.
+layout_places() { # <layout file> <file name>
+    local name
+    name="$(printf '%s' "$2" | iconv -f UTF-8 -t UTF-16BE | xxd -p | tr -d '\n')" || return 1
+    [ -n "$name" ] || return 1
+    xxd -p "$1" | tr -d '\n' | grep -q "${name}496c6f63"
 }
 
 # Reads a key from an Info.plist (or a JSON file).

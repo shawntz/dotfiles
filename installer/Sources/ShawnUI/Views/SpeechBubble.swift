@@ -7,6 +7,8 @@ struct SpeechBubble: View {
     let speaker: String?
     let text: String
     var size: CGFloat = Theme.Size.body
+    /// Off, the bubble is as wide as its text needs and no wider.
+    var fillsWidth = true
 
     var body: some View {
         VStack(alignment: .leading, spacing: 6) {
@@ -23,7 +25,7 @@ struct SpeechBubble: View {
         }
         .padding(.horizontal, Theme.Space.m)
         .padding(.vertical, 10)
-        .frame(maxWidth: .infinity, alignment: .leading)
+        .frame(maxWidth: fillsWidth ? .infinity : nil, alignment: .leading)
         .background(BubbleShape().fill(palette.panel.color))
         .overlay(BubbleShape().stroke(palette.pink.color.opacity(0.55), lineWidth: 1))
         .accessibilityElement(children: .combine)

@@ -49,3 +49,70 @@ test_dmg_of_an_ad_hoc_app_is_left_unsigned() {
     assert_not_contains "$(cat "$FAKE_LOG")" "--sign" "codesign calls"
     assert_contains "$ERR" "left unsigned"
 }
+
+test_dmg_packs_the_app_the_shortcut_and_what_gives_the_window_its_look() {
+    use_fakes codesign hdiutil security
+    export FAKE_SIGNATURE=adhoc
+    make_package "$T/pkg"
+    fake_built_app
+    run "$T/pkg/scripts/make-dmg.sh" --output "$T/build"
+    assert_status 0
+    local log
+    log="$(cat "$FAKE_LOG")"
+    # The layout file has its own name by the time the image is unmounted, and nothing else is there.
+    assert_contains "$log" "hdiutil holds: .DS_Store .background.tiff Applications Dotfiles.app " "hdiutil calls"
+    assert_contains "$log" "hdiutil create -quiet -volname Dotfiles -srcfolder " "hdiutil calls"
+    assert_contains "$log" "hdiutil attach -quiet -nobrowse -noautoopen -noverify -mountpoint " "hdiutil calls"
+    assert_contains "$log" "-format UDZO -imagekey zlib-level=9" "hdiutil calls"
+    # The app is checked while the image is mounted.
+    assert_contains "$log" "codesign --verify --deep --strict $T/build/.make-dmg." "codesign calls"
+    local left
+    for left in "$T/build"/* "$T/build"/.[!.]*; do
+        case "$(basename "$left")" in
+            Dotfiles.app|ShawnsDotfiles-9.8.7.dmg|".[!.]*") ;;
+            *) fail "it left $left in the output folder" ;;
+        esac
+    done
+}
+
+test_dmg_without_the_window_art_says_how_to_draw_it() {
+    use_fakes codesign hdiutil security
+    make_package "$T/pkg"
+    fake_built_app
+    rm "$T/pkg/Resources/dmg/DS_Store"
+    run "$T/pkg/scripts/make-dmg.sh" --output "$T/build"
+    assert_status 1
+    assert_contains "$ERR" "there is no $T/pkg/Resources/dmg/DS_Store"
+    assert_contains "$ERR" "Draw the disk image's window first: scripts/make-dmg-art.sh"
+    assert_not_contains "$(cat "$FAKE_LOG")" "hdiutil" "tool calls"
+}
+
+test_dmg_refuses_window_art_drawn_for_another_app_name() {
+    use_fakes codesign hdiutil security
+    make_package "$T/pkg"
+    sed -i '' 's/^APP_NAME="Dotfiles"$/APP_NAME="Lumps"/' "$T/pkg/scripts/common.sh"
+    mkdir -p "$T/build/Lumps.app/Contents/MacOS"
+    plutil -create xml1 "$T/build/Lumps.app/Contents/Info.plist"
+    plutil -insert CFBundleShortVersionString -string 9.8.7 "$T/build/Lumps.app/Contents/Info.plist"
+    run "$T/pkg/scripts/make-dmg.sh" --output "$T/build"
+    assert_status 1
+    assert_contains "$ERR" "$T/pkg/Resources/dmg/DS_Store has no place for Lumps.app"
+    assert_contains "$ERR" "Draw it again: scripts/make-dmg-art.sh"
+    assert_not_contains "$(cat "$FAKE_LOG")" "hdiutil" "tool calls"
+}
+
+test_dmg_that_cannot_be_mounted_leaves_nothing_behind() {
+    use_fakes codesign hdiutil security
+    export FAKE_SIGNATURE=adhoc FAKE_HDIUTIL_ATTACH_FAILS=1
+    make_package "$T/pkg"
+    fake_built_app
+    run "$T/pkg/scripts/make-dmg.sh" --output "$T/build"
+    assert_status 1
+    assert_contains "$ERR" "hdiutil could not mount the new disk image"
+    assert_not_contains "$(cat "$FAKE_LOG")" "hdiutil detach" "hdiutil calls"
+    [ ! -e "$T/build/ShawnsDotfiles-9.8.7.dmg" ] || fail "it made a disk image"
+    local left
+    for left in "$T/build"/.make-dmg.*; do
+        [ ! -e "$left" ] || fail "it left $left"
+    done
+}
