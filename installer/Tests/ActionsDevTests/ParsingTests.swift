@@ -208,6 +208,35 @@ final class ParsingTests: XCTestCase {
         XCTAssertEqual(CloneAction.githubURL(owner: "a", name: "b.git", protocol: "https"), "https://github.com/a/b.git")
     }
 
+    func testCloneRecognizesTheConfigsOwnRepository() {
+        func repository(_ text: String) -> String? { CloneAction.classify(text).flatMap(CloneAction.githubRepository) }
+        XCTAssertEqual(repository("shawntz/dotfiles"), "shawntz/dotfiles")
+        XCTAssertEqual(repository("shawntz/dotfiles.git"), "shawntz/dotfiles")
+        XCTAssertEqual(repository("https://github.com/shawntz/dotfiles"), "shawntz/dotfiles")
+        XCTAssertEqual(repository("https://github.com/shawntz/dotfiles.git"), "shawntz/dotfiles")
+        XCTAssertEqual(repository("https://www.GitHub.com/shawntz/dotfiles.git/"), "shawntz/dotfiles")
+        XCTAssertEqual(repository("git@github.com:shawntz/dotfiles.git"), "shawntz/dotfiles")
+        XCTAssertEqual(repository("ssh://git@github.com/shawntz/dotfiles.git"), "shawntz/dotfiles")
+        XCTAssertEqual(repository("ssh://git@github.com:22/shawntz/dotfiles"), "shawntz/dotfiles")
+        XCTAssertEqual(repository("ssh://git@ssh.github.com:443/shawntz/dotfiles.git"), "shawntz/dotfiles", "GitHub's ssh over port 443")
+        XCTAssertEqual(repository("git@ssh.github.com:shawntz/dotfiles.git"), "shawntz/dotfiles")
+        XCTAssertNil(repository("git@github-personal:shawntz/dotfiles.git"), "an ssh host alias: only ssh knows where it leads")
+        XCTAssertNil(repository("https://gitlab.com/shawntz/dotfiles.git"), "another host")
+        XCTAssertNil(repository("https://github.com.example.org/shawntz/dotfiles.git"), "a host that only starts like GitHub")
+        XCTAssertNil(repository("https://github.com/shawntz/dotfiles/tree/master"), "a page of the repository, not the repository")
+        XCTAssertNil(repository("https://github.com/shawntz"), "an owner without a name")
+        XCTAssertNil(repository("/srv/shawntz/dotfiles.git"), "a folder")
+
+        let remote = RemoteConfigRef(repo: "shawntz/dotfiles", branch: "master", path: "installer/config")
+        XCTAssertTrue(CloneAction.isConfigRepository(.github(owner: "shawntz", name: "dotfiles"), remote: remote))
+        XCTAssertTrue(CloneAction.isConfigRepository(.github(owner: "Shawntz", name: "Dotfiles.git"), remote: remote), "GitHub ignores letter case")
+        XCTAssertTrue(CloneAction.isConfigRepository(.url("git@github.com:shawntz/dotfiles.git"), remote: remote))
+        XCTAssertFalse(CloneAction.isConfigRepository(.github(owner: "shawntz", name: "dotfiles-old"), remote: remote))
+        XCTAssertFalse(CloneAction.isConfigRepository(.github(owner: "someone", name: "dotfiles"), remote: remote), "a fork is another repository")
+        XCTAssertFalse(CloneAction.isConfigRepository(.github(owner: "shawntz", name: "dotfiles"), remote: nil), "a config without remote:")
+        XCTAssertFalse(CloneAction.isConfigRepository(nil, remote: remote))
+    }
+
     func testSkillOptions() throws {
         let sandbox = DevSandbox()
         let files = ["skills/nodoc/README.md": "no skill file here"]

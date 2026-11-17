@@ -229,9 +229,9 @@ final class DevSandbox {
     }
 
     /// The single item of a valid config, as its concrete action type.
-    func single<T: Action>(_ type: T.Type, _ items: String, files: [String: String] = [:],
+    func single<T: Action>(_ type: T.Type, _ items: String, files: [String: String] = [:], installer: String = installerYAML,
                            file: StaticString = #filePath, line: UInt = #line) throws -> (action: T, item: PlannedItem, plan: InstallPlan) {
-        let plan = try plan(items: items, files: files)
+        let plan = try plan(items: items, files: files, installer: installer)
         XCTAssertEqual(plan.errors, [], "config should be valid", file: file, line: line)
         let item = try XCTUnwrap(plan.allItems.first, file: file, line: line)
         let action = try XCTUnwrap(item.action as? T, "expected a \(T.self)", file: file, line: line)

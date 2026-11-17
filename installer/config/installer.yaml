@@ -20,6 +20,8 @@ remote:                      # where newer config comes from (public repo)
 
 vars:                        # available everywhere as {{name}}
   github_user: shawntz
+  # Keep this the same repo as `remote: repo:` above. Installers newer than 1.0.1
+  # clone it with --depth=1 only while the two match (steps/08-developer.yaml).
   dotfiles_repo: shawntz/dotfiles
 
 # Questions for the person at the keyboard, so this config sets up anyone's

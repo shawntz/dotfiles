@@ -67,7 +67,7 @@ A release that carries a Developer ID signature and Apple's notarization ticket 
 On a Mac running macOS 27 or later with Xcode 27 or later, you can also build and run it from a checkout:
 
 ```sh
-git clone https://github.com/shawntz/dotfiles.git ~/Developer/dotfiles
+git clone --depth=1 https://github.com/shawntz/dotfiles.git ~/Developer/dotfiles
 cd ~/Developer/dotfiles/installer
 make app SIGN_IDENTITY=-
 open build/Dotfiles.app
@@ -283,7 +283,7 @@ The installer moves the files it replaces to `~/.shawn/backups/<run>/` first, wh
 | `ssh-key` | private key path, such as `~/.ssh/id_ed25519` | `type: ed25519\|ecdsa\|rsa` (default ed25519), `comment:` (default `{{email}}`), `config: true\|false` (default true), `hosts: [github.com]` | Makes the key if it does not exist; never overwrites one. Keeps a marked block in `~/.ssh/config` that adds the key to the agent and keychain, plus a stanza per host. It adds the block at the end, later updates it wherever it is, and keeps everything outside it byte for byte. ssh uses the first value it finds, so settings you already have in the file win. |
 | `github` | host, such as `github.com` | `protocol: ssh\|https` (default ssh), `scopes: […]`, `key:` (public key), `upload: [authentication, signing]`, `title:` (default `{{hostname}}`), `known_hosts: true\|false`, `setup_git: true\|false` (both default true) | Signs in with `gh auth login --web` and shows you the one-time code, uploads the SSH key for each `upload` type, adds the host to `known_hosts` and runs `gh auth setup-git`. Stops waiting after 15 minutes and adds a checklist entry. |
 | `git-signing` | public key path | `email:` (default `{{email}}`), `commits: true\|false`, `tags: true\|false` (both default true) | Signs commits and tags with that SSH key and keeps `~/.config/git/allowed_signers` current. |
-| `clone` | `owner/repo` or a git URL | `to:` (required), `protocol: ssh\|https` (default ssh when `gh` is signed in over ssh, else https), `branch:` | Clones the repo unless `<to>/.git` exists. Refuses a folder that has files but is not a repo. Gives up after 30 minutes, or after 2 minutes without data, and removes the half-finished clone. |
+| `clone` | `owner/repo` or a git URL | `to:` (required), `protocol: ssh\|https` (default ssh when `gh` is signed in over ssh, else https), `branch:` | Clones the repo unless `<to>/.git` exists. Refuses a folder that has files but is not a repo. Gives up after 30 minutes, or after 2 minutes without data, and removes the half-finished clone. Installers newer than 1.0.1 clone the config's own repo (`remote: repo:` in `installer.yaml`) with `--depth=1` when the item names it as `owner/repo` or a github.com URL, as [The checkout the installer makes](#the-checkout-the-installer-makes) explains. |
 | `skill` | skill name | `from:` (bundled; default `skills/<name>`), `source: owner/repo` (from GitHub), `agents: [claude, codex, grok]` (default all), `replace_existing: true\|false` (bundled only; default false) | Copies a bundled skill to `~/.agents/skills/<name>` and links it into `~/.claude/skills` and `~/.grok/skills`. Codex reads `~/.agents/skills` itself. Your own copy at one of those links stays as it is, and the item adds a checklist entry. Your own copy is a git checkout, a folder holding an edited or extra file, or a link to either. With `replace_existing: true`, the item moves such a folder to the backups instead, or points such a link at the bundled copy. Any other folder there, such as an older copy whose every file matches the bundle, goes to the backups and the link takes its place. `npx skills add` installs a `source:` skill. |
 | `claude-plugin` | `name@marketplace` | `marketplace: owner/repo`, `scope: user\|project\|local` (default user) | `claude plugin install`, adding the marketplace first when it is new. |
 
@@ -357,6 +357,32 @@ The installer fills in `cli.json` from `build-info.json` in the app, which says 
 A command you add to `cli.yaml` and merge therefore works on every other Mac the next time you run any `shawn` command there. A change to the rest of the config folder, apart from `cli.yaml` and `fun/`, arrives the same way. It changes a Mac only when you run `shawn sync` there. `shawn` reminds you after a pull that brings one, except when the command is `shawn sync` itself. `shawn update` does the same check on demand and explains each step. A failed build or download never stops your command. The old binary stays, and `shawn` says what went wrong.
 
 To check less often, set `self_update.mode` in `cli.yaml` to `daily` or `off` (the default is `always`). For one call, use `shawn --no-update <command>`; to turn it off in a shell, set `SHAWN_NO_SELF_UPDATE=1`.
+
+### The checkout the installer makes
+
+Installers newer than 1.0.1 clone their own repo, the one `remote:` in `installer.yaml` names, with `--depth=1`. Installers up to 1.0.1, an older disk image among them, clone it whole. `--depth=1` downloads the newest commit of the default branch and none of the history. In November 2026 that was 8 MB instead of 600 MB. Every other `clone:` item still gets its whole repo, and a checkout that is already on the Mac stays as it is.
+
+`shawn` still fast-forwards that checkout, rebuilds itself from it and opens pull requests with `shawn add --pr`. If GitHub renames the default branch, `shawn` follows the rename there too. What differs is what git shows, and with it `shawn whatsup`, `shawn projects` and `shawn today`:
+
+- `git log` and `git blame` stop at the commit the installer cloned. When that commit is a merge, `shawn today` can list it as a commit of yours on the day you set up the Mac.
+- git knows no branch but the default one, so `git fetch` brings only that branch.
+- A branch that `shawn add --pr` pushed has no `origin/<branch>` to compare with. So `git status`, `shawn whatsup` and `shawn projects` show no unpushed commits on it.
+- The checkout has no release tags, apart from one that sits on the commit the installer cloned.
+
+To get the history of the default branch, run this in the checkout:
+
+```sh
+git fetch --unshallow
+```
+
+To get every branch as well, run this after it:
+
+```sh
+git remote set-branches origin '*'
+git fetch
+```
+
+For one other branch without the history, run `git remote set-branches --add origin <branch>`, then `git fetch --depth=1 origin <branch>` and `git switch <branch>`. A plain `git fetch origin <branch>` makes no `origin/<branch>`. When the branch starts before the commit the installer cloned, it also downloads nearly the whole history.
 
 ## Build, sign, notarize, release
 
