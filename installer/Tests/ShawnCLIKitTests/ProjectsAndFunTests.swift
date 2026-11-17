@@ -212,19 +212,21 @@ final class FunTests: XCTestCase {
           success: ["Nailed it."]
           waiting: ["Waiting is the worst."]
           finished: ["Party time."]
-        """, sprites: ["blob": tinySprite, "dot": "id: dot\nname: Dot\npalette:\n  D: \"#FF0000\"\nframes:\n  - |\n    DD\n"])
+        """, sprites: ["blob": tinySprite, "dot": "id: dot\nname: Dot\npalette:\n  D: \"#FF0000\"\nframes:\n  - |\n    DD\n"],
+           voices: ["dot": "id: dot\nmoments:\n  success: [\"Dot did it.\"]\n  waiting: [\"Dot waits.\"]\n"])
+        // The narrator says every line outside a step, even with other voices around.
         let harness = Harness(sandbox: sandbox, config: config)
         _ = await harness.run(["--no-update", "lsp"])
         let lsp = harness.out.plain
         XCTAssertTrue(lsp.contains("▄██▄"), lsp)
         XCTAssertTrue(["Lumping around.", "Hi, nerds.", "Nailed it.", "Waiting is the worst."].contains { lsp.contains($0) }, lsp)
+        XCTAssertFalse(lsp.contains("Dot"), lsp)
 
         let party = Harness(sandbox: sandbox, config: config)
         _ = await party.run(["--no-update", "party"])
         XCTAssertTrue(party.out.plain.contains("Blob"))
         XCTAssertTrue(party.out.plain.contains("Dot"))
-        XCTAssertTrue(party.out.plain.contains("Party time."))
-        XCTAssertTrue(party.out.plain.contains("Fan-made test fixture."))
+        XCTAssertTrue(party.out.plain.contains("  \"Party time.\"\n  Blob\n  Fan-made test fixture.\n"), party.out.plain)
 
         let quote = Harness(sandbox: sandbox, config: config)
         _ = await quote.run(["--no-update", "quote"])
@@ -301,6 +303,33 @@ final class FunTests: XCTestCase {
         let unknownCode = await unknown.run(["--no-update", "config", "shwo"])
         XCTAssertEqual(unknownCode, 64)
         XCTAssertTrue(unknown.err.plain.contains("Did you mean 'show'?"))
+    }
+
+    func testValidateFailsOnABadVoiceAndWarnsAboutAGap() async {
+        let sandbox = Sandbox()
+        let steps = ["01-a.yaml": "id: a\ntitle: Alpha\nmascot: blob\nitems:\n  - ok: one\n"]
+        let sprites = ["blob": tinySprite, "dot": "id: dot\nname: Dot\npalette:\n  D: \"#FF0000\"\nframes:\n  - |\n    DD\n"]
+        let blob = "id: blob\nmoments:\n  working: [\"Blob works.\"]\n"
+
+        // A voice with lines for only some moments still passes. The narrator speaks at the rest, and validate warns about it.
+        // Question lines are optional, because a real run asks its questions before the first step.
+        let gap = makeConfig(in: sandbox.directory, at: "gap", steps: steps, quotes: "speaker: dot\n", sprites: sprites, voices: ["blob": blob])
+        let warned = Harness(sandbox: sandbox)
+        let warnedCode = await warned.run(["--no-update", "config", "validate", gap.path])
+        XCTAssertEqual(warnedCode, 0, warned.out.plain)
+        XCTAssertTrue(warned.out.plain.contains("! fun/voices/blob.yaml: warning: blob has no lines for success, failure, skipped, waiting, "
+                                                + "password, cancelled, dry_run, so the narrator speaks then during a\n"), warned.out.plain)
+        XCTAssertTrue(warned.out.plain.hasSuffix(" is valid (1 warning)\n"), warned.out.plain)
+
+        // A voice for a character with no sprite could never be drawn, so it is an error.
+        let broken = makeConfig(in: sandbox.directory, at: "broken", steps: steps, quotes: "speaker: dot\n", sprites: sprites,
+                                voices: ["blob": blob, "blb": "id: blb\nmoments:\n  working: [\"Blb works.\"]\n"])
+        let invalid = Harness(sandbox: sandbox)
+        let invalidCode = await invalid.run(["--no-update", "config", "validate", broken.path])
+        XCTAssertEqual(invalidCode, 1, invalid.out.plain)
+        XCTAssertTrue(invalid.out.plain.contains("✗ fun/voices/blb.yaml:1: error: voice 'blb' has no sprite in fun/sprites/. Did you mean 'blob'?\n"),
+                      invalid.out.plain)
+        XCTAssertTrue(invalid.out.plain.contains("1 problem in "), invalid.out.plain)
     }
 
     func testConfigEditOpensTheEditorOnTheConfigDirectory() async throws {

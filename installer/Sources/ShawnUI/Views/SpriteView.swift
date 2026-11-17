@@ -110,7 +110,8 @@ struct SpriteView: View {
         .accessibilityHidden(sprite == nil)
     }
 
-    /// Shown when the config has no sprites at all.
+    /// Shown when there is no art to draw, such as for a narrator with no file in `fun/sprites/`, or for a sprite whose
+    /// image cannot be read and that has no frames.
     private var placeholder: some View {
         Text("(^_^)")
             .font(Theme.mono(Theme.Size.headline, .bold))

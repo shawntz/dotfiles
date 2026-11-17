@@ -1,5 +1,6 @@
 import Foundation
 import ShawnCore
+import ShawnFun
 import XCTest
 @testable import ShawnCLIKit
 
@@ -138,6 +139,9 @@ final class DispatcherTests: XCTestCase {
         let text = harness.out.plain
         XCTAssertTrue(text.contains("SHAWN'S DOTFILES"), "fallback header when the config has no fun/")
         XCTAssertTrue(text.contains("tiny test"), "tagline")
+        // With no sprite to name the narrator, her id stands in for the name.
+        let screen = HelpCommand.screen(context: harness.context, seed: 0)
+        XCTAssertTrue(screen.contains("  \"\(FunConfig.fallback.line(for: .launch, seed: 0))\"  lsp"), "\(screen)")
         let groups = HelpCommand.commandGroups(context: harness.context)
         XCTAssertEqual(groups.first?.section, "Greetings")
         XCTAssertEqual(groups.first?.entries.map(\.name), ["hello", "tool"])

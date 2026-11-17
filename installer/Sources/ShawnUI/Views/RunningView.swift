@@ -45,17 +45,20 @@ struct RunningView: View {
     }
 }
 
-/// The current step's character, what it is saying, and what is happening right now.
+/// Whoever is speaking (the character of the step the line is about, or the narrator when it has no line), what
+/// they say, and what is happening right now.
 struct NowCard: View {
     @Environment(\.palette) private var palette
     let model: InstallerModel
 
     var body: some View {
+        // One value for the sprite, the name and the line, so the bubble names the character drawn beside it.
+        let saying = model.saying
         HStack(alignment: .bottom, spacing: Theme.Space.l + 4) {
-            SpriteView(sprite: model.mascot)
+            SpriteView(sprite: saying.sprite)
                 .frame(width: 84, height: 84)
             VStack(alignment: .leading, spacing: Theme.Space.s) {
-                SpeechBubble(speaker: model.speaker?.name, text: model.quip)
+                SpeechBubble(speaker: saying.name, text: saying.text)
                 nowLine
                     .padding(.leading, 2)
             }

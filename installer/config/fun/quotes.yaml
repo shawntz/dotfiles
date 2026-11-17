@@ -1,9 +1,9 @@
-# Lumpy Space Princess narrates the installer and the shawn CLI.
-#
+# The narrator's lines. Lumpy Space Princess narrates the installer and the shawn CLI, and each step's
+#   character says its own lines from fun/voices/<id>.yaml. She speaks whenever that character has none.
 # show_quotes: a few short lines from Adventure Time, each checked word for word against the fandom
 #   wiki's Lumpy_Space_Princess/Quotes page ("quotes page") or that episode's /Transcript page.
-# moments and steps: ORIGINAL lines written in her voice for this project, not quotes from the show.
-#   Keep each one under 90 characters, sassy but never mean to the person installing.
+# moments and steps: ORIGINAL lines in her voice, under 90 characters, sassy but never mean. She says the
+#   steps lines in her own steps and when she stands in; installers 1.0.1 and older show them in every step.
 speaker: lsp
 about: "Fan-made and not affiliated with Cartoon Network. Adventure Time and its characters are © Cartoon Network."
 
@@ -110,12 +110,12 @@ moments:
     - "Well, that was lame. The log knows what happened."
     - "Not your fault. Probably the internet's. It's always the internet."
   skipped:
-    - "Already done. You were, like, ahead of me. Rude, but cute."
-    - "Skipping this one. Been there, lumped that."
-    - "Already here. Nobody needs two of anything. Except beans."
-    - "Nothing to do. My favorite kind of job."
-    - "Done before I even got here. Show-off."
-    - "This one's handled. Next!"
+    - "Skipping this one. Whatever, it can totally wait."
+    - "We're not doing that one right now. It'll still be there later, babe."
+    - "Skipped! Like me skipping class, except this is, like, allowed."
+    - "That one's sitting this run out. Its loss."
+    - "Not today for that one. Run it again whenever, I'm flexible."
+    - "Skipped it. Nobody panic, nothing broke. Next!"
   dry_run:
     - "Dry run! I'm just pretending. Like drama class, but nothing breaks."
     - "This is only a rehearsal. No changes, all drama."

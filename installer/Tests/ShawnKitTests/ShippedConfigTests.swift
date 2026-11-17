@@ -103,6 +103,65 @@ final class ShippedConfigTests: XCTestCase {
         XCTAssertLessThanOrEqual(headerLines.map(\.count).max() ?? 0, 66, "the header must fit the window")
     }
 
+    /// While a step runs, its own character says the line, next to its own sprite, at every step moment. The narrator
+    /// speaks in the steps she hosts and in a step with no mascot.
+    func testEveryStepCharacterSpeaksForItself() throws {
+        let config = try ConfigLoader.load(from: Self.configDirectory).config
+        let (fun, issues) = FunConfig.load(from: config)
+        XCTAssertTrue(issues.isEmpty, "fun issues:\n" + issues.map(\.description).joined(separator: "\n"))
+        XCTAssertFalse(fun.voices.isEmpty, "no voices in fun/voices")
+        for step in config.steps {
+            if let mascot = step.mascot, mascot != fun.speaker {
+                XCTAssertNotNil(fun.voices[mascot], "step '\(step.id)' uses mascot '\(mascot)', which has no voice in fun/voices")
+            }
+            let character = step.mascot ?? fun.speaker
+            for moment in Moment.stepMoments {
+                let own = character == fun.speaker
+                    ? fun.lines(for: moment, stepID: step.id)
+                    : fun.voices[character]?.lines(for: moment, stepID: step.id) ?? []
+                for seed in 0..<10 {
+                    let said = fun.say(moment, stepID: step.id, mascot: step.mascot, seed: seed)
+                    let context = "step '\(step.id)', \(moment.rawValue), seed \(seed)"
+                    XCTAssertEqual(said.speakerID, character, context)
+                    XCTAssertEqual(said.sprite?.id, character, context)
+                    XCTAssertEqual(said.sprite, fun.sprites[character], context)
+                    XCTAssertTrue(own.contains(said.text), "\(context): '\(said.text)' is not one of \(character)'s lines")
+                }
+            }
+        }
+    }
+
+    /// Installers 1.0.1 and older fetch this config from GitHub and read fun/quotes.yaml and fun/sprites/ with a strict
+    /// reader, so a key they do not know is an error on their welcome screen and fails their `shawn config validate`.
+    /// New kinds of lines go in new files such as fun/voices/, which those installers never read.
+    func testFunFilesStayReadableByReleasedInstallers() throws {
+        let config = try ConfigLoader.load(from: Self.configDirectory).config
+        let quotes = try XCTUnwrap(try config.loadYAML(FunConfig.quotesPath)?.map, "fun/quotes.yaml must be a mapping")
+        XCTAssertTrue(Set(quotes.keys).isSubset(of: ["speaker", "about", "show_quotes", "moments", "steps"]), "quotes.yaml keys: \(quotes.keys)")
+        XCTAssertEqual(quotes["speaker"]?.string, "lsp", "a new speaker would change the narrator of every released installer")
+        let releasedMoments: Set<String> = ["launch", "password", "question", "idle", "working", "waiting", "success", "failure", "skipped",
+                                            "dry_run", "finished", "finished_with_failures", "cancelled"]
+        XCTAssertTrue(Set(quotes["moments"]?.map?.keys ?? []).isSubset(of: releasedMoments), "moments: \(quotes["moments"]?.map?.keys ?? [])")
+        for entry in quotes["show_quotes"]?.list ?? [] {
+            guard let quote = entry.map else { continue }
+            XCTAssertTrue(Set(quote.keys).isSubset(of: ["text", "episode", "source", "note"]), "show_quotes entry keys: \(quote.keys)")
+        }
+        let steps = try XCTUnwrap(quotes["steps"]?.map, "quotes.yaml steps must stay a mapping")
+        for entry in steps.entries {
+            XCTAssertNotNil(entry.value.list, "steps: '\(entry.key)' must stay a list")
+        }
+
+        let spriteFiles = try FileManager.default.contentsOfDirectory(atPath: config.url(FunConfig.spritesDirectory).path)
+            .filter { $0.hasSuffix(".yaml") || $0.hasSuffix(".yml") }
+            .sorted()
+        XCTAssertFalse(spriteFiles.isEmpty)
+        for name in spriteFiles {
+            let sprite = try XCTUnwrap(try config.loadYAML("\(FunConfig.spritesDirectory)/\(name)")?.map, "\(name) must be a mapping")
+            XCTAssertTrue(Set(sprite.keys).isSubset(of: ["id", "name", "frame_ms", "image", "palette", "frames"]), "\(name) keys: \(sprite.keys)")
+            XCTAssertTrue(sprite["frames"] != nil || sprite["image"] != nil, "\(name) needs frames or an image")
+        }
+    }
+
     /// Anyone can use this config: it asks for the Git identity instead of naming a person. The git step's items
     /// that write the identity need those answers, so a run asks before it writes them.
     func testTheGitIdentityIsAskedForNotWrittenIntoTheConfig() throws {

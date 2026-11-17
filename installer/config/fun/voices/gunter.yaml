@@ -1,0 +1,37 @@
+# What Gunter says while a step with `mascot: gunter` runs, and right after it ends.
+#
+# moments: lines for what is happening. A moment this file leaves out is said by the narrator
+#   (fun/quotes.yaml), next to her own sprite.
+#
+# Gunter is a penguin, so every line is wenk. The punctuation carries the mood.
+# Keep this file in fun/voices/. Installers up to 1.0.1 read every file in fun/sprites/ as a sprite.
+id: gunter
+
+moments:
+  working:
+    - "Wenk wenk wenk."
+    - "Wenk. Wenk. Wenk."
+  success:
+    - "Wenk!"
+    - "Wenk wenk!"
+  failure:
+    - "Wenk..."
+    - "Wenk? Wenk."
+  skipped:
+    - "Wenk."
+    - "Wenk, wenk."
+  waiting:
+    - "Wenk?"
+    - "Wenk wenk?"
+  question:
+    - "Wenk? Wenk wenk?"
+    - "Wenk wenk wenk?"
+  password:
+    - "Wenk. Wenk?"
+    - "Wenk wenk. Wenk?"
+  cancelled:
+    - "Wenk. Wenk."
+    - "Wenk... wenk."
+  dry_run:
+    - "Wenk, wenk, wenk."
+    - "Wenk wenk. Wenk wenk."

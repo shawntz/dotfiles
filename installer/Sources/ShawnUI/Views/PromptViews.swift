@@ -61,7 +61,7 @@ struct PasswordPanel: View {
 
     var body: some View {
         PromptCard(title: "ADMINISTRATOR PASSWORD") {
-            MascotCard(sprite: model.speaker, speaker: model.speaker?.name, quip: model.quip, spriteSize: 64)
+            MascotCard(model.saying, spriteSize: 64)
             Text(request.reason)
                 .font(Theme.mono(Theme.Size.body))
                 .foregroundStyle(palette.text.color)
@@ -139,7 +139,7 @@ struct TextPanel: View {
 
     var body: some View {
         PromptCard(title: "QUESTION", tint: .yellow) {
-            MascotCard(sprite: model.speaker, speaker: model.speaker?.name, quip: model.quip, spriteSize: 64)
+            MascotCard(model.saying, spriteSize: 64)
             Text(request.prompt)
                 .font(Theme.mono(Theme.Size.title + 2, .bold))
                 .foregroundStyle(palette.text.color)
@@ -220,7 +220,7 @@ struct QuestionPanel: View {
 
     var body: some View {
         PromptCard(title: "QUESTION", tint: .yellow) {
-            MascotCard(sprite: model.speaker, speaker: model.speaker?.name, quip: model.quip, spriteSize: 64)
+            MascotCard(model.saying, spriteSize: 64)
             Text(question.title)
                 .font(Theme.mono(Theme.Size.title + 2, .bold))
                 .foregroundStyle(palette.text.color)

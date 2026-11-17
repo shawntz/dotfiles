@@ -16,7 +16,7 @@
 
 ![A whole run of the installer, from the welcome screen and its plan of 17 steps, through the question for your Git name, the admin password, the log of every command and the GitHub sign-in code, to the finished screen and its checklist](.github/media/tour.gif)
 
-Lumpy Space Princess (LSP) from Adventure Time narrates, and each step puts one of eight [fan-made](#fan-art) pixel-art characters on screen. The GIF uses sample data.
+Lumpy Space Princess (LSP) from Adventure Time narrates. Each step puts one of eight [fan-made](#fan-art) pixel-art characters on screen, and that character says its own lines while its step runs. The GIF uses sample data.
 
 ## What it does
 
@@ -73,7 +73,7 @@ items:
     url: https://x.com
 ```
 
-A `webapp:` item builds an app in `/Applications` with its own window, Dock icon and sign-in. `mascot: bubblegum` puts Princess Bubblegum on screen for that step.
+A `webapp:` item builds an app in `/Applications` with its own window, Dock icon and sign-in. `mascot: bubblegum` puts Princess Bubblegum on screen for that step, and she says her lines from [`fun/voices/bubblegum.yaml`](installer/config/fun/voices/bubblegum.yaml).
 
 An item starts with its kind and the thing it acts on. These lines come from other steps, and the comments are mine:
 
@@ -101,8 +101,8 @@ Fork the repo. You never edit Swift.
 6. Push to `master` on your fork. The app you build in the next step fetches its config from there when it starts. The one on my releases page fetches mine.
 7. Run `make app SIGN_IDENTITY=-` in `installer/`. It builds `build/Dotfiles.app`, signed ad hoc. Copy it to the new Mac and open it. If macOS refuses, use Open Anyway as in [Try it](#try-it).
 
-> "Copying your old laptop's taste. It had good taste. Like me."\
-> LSP, during the packages step
+> "This list is long. Good thing I can stretch all the way to the bottom."\
+> Jake, during the packages step
 
 Some names live in the Swift code and stay mine after a fork: the `shawn` command, the `~/.shawn` and `~/.config/shawn` folders, the `~/Library/Logs/ShawnsDotfiles` log folder and the `com.shawnschwartz` bundle ids.
 
@@ -130,7 +130,7 @@ That installs Figma, adds its line to `steps/04-apps.yaml`, commits it on a bran
 
 ## Fan art
 
-Lumpy Space Princess, Finn, Jake, BMO, Princess Bubblegum, Marceline, the Ice King and Gunter appear here as fan art. Each one is original pixel art in the style of Adventure Time. Adventure Time and its characters are © Cartoon Network. This project is fan-made and not affiliated with Cartoon Network. LSP's lines on this page are original lines in her voice, not quotes from the show.
+Lumpy Space Princess, Finn, Jake, BMO, Princess Bubblegum, Marceline, the Ice King and Gunter appear here as fan art. Each one is original pixel art in the style of Adventure Time. Adventure Time and its characters are © Cartoon Network. This project is fan-made and not affiliated with Cartoon Network. The characters' lines on this page are original lines in their voices, not quotes from the show.
 
 ## License
 

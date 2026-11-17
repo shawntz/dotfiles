@@ -108,6 +108,44 @@ final class InstallRendererTests: XCTestCase {
         XCTAssertEqual(streamed.text, "\r\u{1B}[2K  → alpha\r\u{1B}[2K  → alpha\n    │ ==> Pouring\n  ✓ alpha\n\r\u{1B}[2K  → beta\r\u{1B}[2K  ✓ beta\n")
     }
 
+    func testATerminalHeadingDrawsWhoeverSpeaks() throws {
+        let directory = TempDirectory()
+        let root = makeConfig(in: directory, steps: [
+            "01-voiced.yaml": "id: voiced\ntitle: Voiced\nsubtitle: own words\nmascot: blob\nitems:\n  - ok: alpha\n",
+            "02-unvoiced.yaml": "id: unvoiced\ntitle: Unvoiced\nmascot: dot\nitems:\n  - ok: beta\n",
+        ], quotes: "speaker: lsp\nmoments:\n  working: [\"The narrator works.\"]\n", sprites: [
+            "lsp": "id: lsp\nname: Narrator\npalette:\n  L: \"#B57EDC\"\nframes:\n  - |\n    L.L\n    LLL\n",
+            "blob": tinySprite,
+            "dot": "id: dot\nname: Dot\npalette:\n  D: \"#FF0000\"\nframes:\n  - |\n    DD\n",
+        ], voices: ["blob": "id: blob\nsteps:\n  voiced: [\"Blob is on it.\"]\n"])
+        let loaded = try ConfigLoader.load(from: root)
+        let plan = InstallPlan.build(config: loaded.config, registry: FakeKinds.registry(), environment: Sandbox().environment)
+        let out = BufferOutput()
+        var terminal = Terminal.plain(width: 60)
+        terminal.stdoutIsTTY = true
+        let renderer = InstallRenderer(plan: plan, selection: .defaults(for: plan), fun: FunConfig.load(from: loaded.config).fun,
+                                       terminal: terminal, out: out, desktop: nil, seed: 0)
+        renderer.handle(.stepStatus(stepID: "voiced", status: .running))
+        renderer.handle(.stepStatus(stepID: "unvoiced", status: .running))
+        // Blob has a line for its step, so the heading draws Blob saying it. Dot has no voice, so the next heading
+        // draws the narrator saying her own line, not Dot.
+        XCTAssertEqual(out.text, """
+
+                ╭───────────────────╮
+          ▄██▄ ─┤ Voiced: own words │
+          ▀██▀  │ Blob is on it.    │
+                ╰───────────────────╯
+          [1/2] Voiced
+
+               ╭─────────────────────╮
+          █▄█ ─┤ Unvoiced            │
+               │ The narrator works. │
+               ╰─────────────────────╯
+          [2/2] Unvoiced
+
+        """)
+    }
+
     func testAStopIsShownAsAStopNotAFailure() throws {
         let plan = try plan()
         let out = BufferOutput()

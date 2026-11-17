@@ -112,7 +112,7 @@ struct WelcomeView: View {
                 .frame(maxWidth: .infinity, maxHeight: .infinity)
 
                 VStack(alignment: .leading, spacing: Theme.Space.l) {
-                    MascotCard(sprite: model.speaker, speaker: model.speaker?.name, quip: model.quip, spriteSize: 112)
+                    MascotCard(model.saying, spriteSize: 112)
                         .padding(.top, Theme.Space.s)
                     if !model.notes.isEmpty {
                         NotesPanel(notes: model.notes)

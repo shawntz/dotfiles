@@ -50,7 +50,7 @@ final class SampleOutputTests: XCTestCase {
             "02-packages.yaml": "id: packages\ntitle: Homebrew Packages\nmascot: blob\nitems:\n  - tap: buildkite/buildkite\n  - brew: eza\n  - brew: ripgrep\n  - cask: ghostty\n  - cask: warp\n    optional: true\n    note: no longer in /Applications\n",
             "03-apps.yaml": "id: apps\ntitle: Apps\nmascot: lsp\nitems:\n  - mas: 937984704\n    name: Amphetamine\n  - ok: Dropbox sign-in\n    follow_up: Sign in to Dropbox\n  - manual: Allow Karabiner in Privacy & Security\n",
         ], quotes: "speaker: lsp\nmoments:\n  working: [\"Working. Don't rush me.\"]\n  dry_run: [\"Pretend mode. Nothing actually happened, nerd.\"]\n",
-           sprites: ["lsp": lsp, "blob": tinySprite])
+           sprites: ["lsp": lsp, "blob": tinySprite], voices: ["blob": "id: blob\nsteps:\n  packages: [\"Blob counts the packages.\"]\n"])
     }
 
     func testWriteInstallTranscripts() async throws {
@@ -67,6 +67,7 @@ final class SampleOutputTests: XCTestCase {
         _ = await live.run(["--no-update", "install", "--dry-run"])
         try live.out.text.write(to: samples.appendingPathComponent("install-dry-run.tty.ansi.txt"), atomically: true, encoding: .utf8)
         XCTAssertTrue(live.out.text.contains("▀"), "mascots are drawn on a terminal")
+        XCTAssertTrue(live.out.text.contains("Blob counts the packages."), "a voiced mascot says its own line in its step")
     }
 
     func testWriteDriftTranscript() async throws {

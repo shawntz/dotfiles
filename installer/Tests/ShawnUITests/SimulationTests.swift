@@ -61,7 +61,31 @@ final class SimulationTests: XCTestCase {
             XCTAssertNotNil(fun.fun.moments[moment], "simulation has a line for \(moment.rawValue)")
         }
         for step in resolved.config.steps {
-            if let mascot = step.mascot { XCTAssertNotNil(fun.fun.sprites[mascot], "\(step.id) mascot \(mascot)") }
+            guard let mascot = step.mascot else { continue }
+            XCTAssertNotNil(fun.fun.sprites[mascot], "\(step.id) mascot \(mascot)")
+            guard mascot != fun.fun.speaker else { continue }
+            XCTAssertNotNil(fun.fun.voices[mascot], "\(step.id) mascot \(mascot) has a voice")
+            for moment in Moment.stepMoments {
+                XCTAssertEqual(fun.fun.speakerID(for: moment, stepID: step.id, mascot: mascot), mascot,
+                               "\(mascot) speaks at \(moment.rawValue) during \(step.id)")
+            }
+            // The step file's quips stay where they are and become the mascot's own lines for its step.
+            XCTAssertEqual(Array(fun.fun.stepLines(step.id, mascot: mascot).prefix(step.quips.count)), step.quips, step.id)
+            XCTAssertTrue(Set(fun.fun.stepQuips[step.id] ?? []).isDisjoint(with: step.quips), "\(step.id): the quips are not the narrator's")
+        }
+    }
+
+    func testPlaceholderVoicesFollowTheTextRules() {
+        var seen = Set<String>()
+        for voice in SimulationConfig.voices {
+            XCTAssertEqual(Set(voice.lines.keys), Set(Moment.stepMoments), "\(voice.id) has a line for every step moment")
+            for line in voice.lines.values {
+                XCTAssertLessThan(line.count, 90, line)
+                XCTAssertEqual(line, line.trimmingCharacters(in: .whitespaces), line)
+                XCTAssertNil(line.rangeOfCharacter(from: CharacterSet(charactersIn: "\"\\{}\u{2014}\u{2013}\u{2018}\u{2019}\u{201C}\u{201D}")),
+                             "\(line): no double quotes, backslashes, braces, dashes or curly quotes")
+                XCTAssertTrue(seen.insert(line).inserted, "\(line) is said only once")
+            }
         }
     }
 

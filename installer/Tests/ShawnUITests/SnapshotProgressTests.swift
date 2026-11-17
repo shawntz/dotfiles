@@ -83,7 +83,7 @@ final class SnapshotProgressTests: XCTestCase {
             XCTAssertEqual(first.log, second.log)
             XCTAssertEqual(first.currentItemID, second.currentItemID)
             XCTAssertEqual(first.quip, second.quip)
-            XCTAssertEqual(first.mascot?.id, second.mascot?.id)
+            XCTAssertEqual(first.saying.speakerID, second.saying.speakerID)
             XCTAssertEqual(first.elapsed(at: first.now()), second.elapsed(at: second.now()))
         }
     }
@@ -126,8 +126,12 @@ final class SnapshotProgressTests: XCTestCase {
             let model = try model(at: Double(index) / Double(frames - 1))
             let step = try XCTUnwrap(model.currentStep)
             shown.insert(step.id)
-            XCTAssertEqual(model.mascot?.id, model.fun.sprite(step.config.mascot)?.id, step.id)
-            if let own = model.fun.stepQuips[step.id], !own.isEmpty {
+            let mascot = step.config.mascot
+            XCTAssertEqual(model.saying.speakerID, model.fun.speakerID(for: .working, stepID: step.id, mascot: mascot), step.id)
+            XCTAssertEqual(model.saying.speakerID, mascot ?? model.fun.speaker, "\(step.id): its own character speaks")
+            XCTAssertEqual(model.saying.sprite?.id, model.saying.speakerID, "\(step.id): and is drawn")
+            let own = model.fun.stepLines(step.id, mascot: mascot)
+            if !own.isEmpty {
                 XCTAssertEqual(model.quip, own[0], "\(step.id): the step's own line")
             }
         }

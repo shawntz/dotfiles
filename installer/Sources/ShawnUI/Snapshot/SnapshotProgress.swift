@@ -156,11 +156,14 @@ enum SnapshotProgress {
     }
 
     /// Puts the running step's first line of its own in the speech bubble (a general working line when it has
-    /// none), so the bubble holds still while the step is on screen. The model picks a line by a seed that
-    /// only moves forward, so this moves the seed on to that line.
+    /// none), so the bubble holds still while the step is on screen. The lines are those of whoever speaks while
+    /// the step works, its mascot or the narrator, as in `InstallerModel.saying`. The model picks a line by a seed
+    /// that only moves forward, so this moves the seed on to that line.
     private static func showStepLine(stepIndex: Int, model: InstallerModel) {
-        let lines = model.fun.lines(for: .working, stepID: model.currentStepID)
-        let hasOwnLines = model.currentStepID.flatMap { model.fun.stepQuips[$0] }.map { !$0.isEmpty } ?? false
+        let stepID = model.currentStepID
+        let mascot = model.currentStep?.config.mascot
+        let lines = model.fun.lines(for: .working, stepID: stepID, mascot: mascot)
+        let hasOwnLines = stepID.map { !model.fun.stepLines($0, mascot: mascot).isEmpty } ?? false
         let target = hasOwnLines ? 0 : stepIndex % lines.count
         repeat { model.advanceQuip() } while abs(model.quipSeed) % lines.count != target
     }

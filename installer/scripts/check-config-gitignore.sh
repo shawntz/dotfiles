@@ -75,7 +75,7 @@ PROBES=(
     files/example/settings.json files/example/.config
     skills/example/SKILL.md skills/example/scripts/run.py
     webapp-icons/example.png webapp-icons/example.icns
-    fun/header.txt fun/quotes.yaml fun/sprites/example.yaml fun/images/example.png
+    fun/header.txt fun/quotes.yaml fun/sprites/example.yaml fun/voices/example.yaml fun/images/example.png
 )
 hidden="$(printf '%s\n' "${PROBES[@]}" | explain_ignored)"
 if [ -n "$hidden" ]; then

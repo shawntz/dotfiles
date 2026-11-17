@@ -33,8 +33,8 @@ struct HelpCommand: BuiltinCommand {
         var lines: [String] = [""]
         lines += Painter.banner(fun.header, style: style, width: context.terminal.width, tagline: context.lightConfig()?.meta.tagline)
         lines.append("")
-        let speaker = fun.sprite(fun.speaker)?.name ?? "LSP"
-        lines.append("  " + style.fg(Palette.star, "\"\(fun.line(for: .launch, seed: seed))\"") + style.muted("  \(speaker)"))
+        let said = fun.say(.launch, mascot: nil, seed: seed)
+        lines.append("  " + style.fg(Palette.star, "\"\(said.text)\"") + style.muted("  \(said.name ?? fun.speaker)"))
         lines.append("")
 
         let groups = commandGroups(context: context)

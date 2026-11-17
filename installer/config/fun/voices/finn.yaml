@@ -1,0 +1,53 @@
+# What Finn the Human says while a step with `mascot: finn` runs, and right after it ends.
+#
+# moments: lines for what is happening. A moment this file leaves out is said by the narrator
+#   (fun/quotes.yaml), next to her own sprite.
+# steps: more working lines for one step. They take turns with the general ones while that step runs.
+#
+# These are ORIGINAL lines written in the character's voice for this project, not quotes from the
+# show. Keep each one under 90 characters, and never mean to the person installing.
+# Keep this file in fun/voices/. Installers up to 1.0.1 read every file in fun/sprites/ as a sprite.
+id: finn
+
+moments:
+  working:
+    - "On it! Every great quest starts with somebody just getting to work."
+    - "Leveling up your Mac piece by piece. Hang in there!"
+    - "Heads down, sleeves up. This Mac is getting the full hero treatment."
+    - "Busy setting things up! A real hero always finishes the job."
+  success:
+    - "Mathematical! Score one for the good guys."
+    - "Done! High five, partner!"
+    - "Yes! Another item checked off the quest list."
+  failure:
+    - "Aw, man, the computer tripped on that one. We can retry it once we're done."
+    - "Uh oh, that one failed its quest. No worries, the rest keeps going."
+    - "Dang, that one didn't make it. Machines have bad days too. Retry it later."
+  skipped:
+    - "Skipping that one for now. Every quest has a side path to come back to."
+    - "We left that one behind on purpose. No worries, it'll be there next run!"
+  waiting:
+    - "I need your help for this part! Follow the steps on screen, then we keep going."
+    - "This door only opens for you. I'll stand guard while you handle the screen."
+  question:
+    - "A question for my fellow adventurer! Type your answer and we're off."
+    - "Answer this one for me, and our quest charges on!"
+  password:
+    - "Only the true keeper of this Mac knows its password. Type it in, please!"
+    - "Every treasure chest has a lock. Type your Mac password to open this one."
+  cancelled:
+    - "Making camp! We're stopping here, and everything finished is safe."
+    - "Stopping the quest for now. Good heroes rest, and our progress stays put."
+  dry_run:
+    - "Practice run! We walk the whole map, but nothing on your Mac changes."
+    - "Algebraic, a training quest! It's all pretend, so your Mac stays the same."
+
+steps:
+  bootstrap:
+    - "First up, Apple's Command Line Tools. A hero's starter kit!"
+    - "Homebrew is going in. It fetches the gear for every step after this."
+    - "Starting Xcode's long download now. It'll catch up with the quest later!"
+  skills:
+    - "Three AI helpers, one set of skills. That's how a real quest party works!"
+    - "Unpacking the skills bundled with this installer. Shiny new gear!"
+    - "Grabbing a few more skills from GitHub too. Extra loot for the team!"

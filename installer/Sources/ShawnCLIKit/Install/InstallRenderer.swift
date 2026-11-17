@@ -4,8 +4,8 @@ import ShawnFun
 
 /// Turns engine events into terminal output.
 ///
-/// On a terminal: step headings with the step's mascot and a quip, a live "working on…" line that is
-/// rewritten in place, progress bars that overwrite themselves. Anywhere else (a pipe, a log file):
+/// On a terminal: step headings drawn as whoever speaks for the step with their own line, a live "working on…"
+/// line that is rewritten in place, progress bars that overwrite themselves. Anywhere else (a pipe, a log file):
 /// one plain line per event, no cursor movement, no color unless forced.
 final class InstallRenderer: @unchecked Sendable {
     private let plan: InstallPlan
@@ -122,15 +122,18 @@ final class InstallRenderer: @unchecked Sendable {
         }
     }
 
+    /// On a terminal, this draws whoever speaks for the step saying its title and a line. That is the step's mascot
+    /// when it has lines of its own, and the narrator otherwise.
     private func stepHeading(_ step: PlannedStep) {
         let position = (enabledSteps.firstIndex(of: step.id) ?? 0) + 1
         let counter = "[\(position)/\(max(1, enabledSteps.count))]"
         permanent("")
-        if live, let sprite = fun.sprite(step.config.mascot), !sprite.frames.isEmpty {
-            var said = step.config.title
-            if let subtitle = step.config.subtitle { said += ": \(subtitle)" }
-            said += "\n" + fun.line(for: .working, stepID: step.id, seed: seed + position)
-            for line in Painter.speaking(sprite, says: said, style: style, width: terminal.width) { permanent(line) }
+        let said = fun.say(.working, stepID: step.id, mascot: step.config.mascot, seed: seed + position)
+        if live, let sprite = said.sprite, !sprite.frames.isEmpty {
+            var text = step.config.title
+            if let subtitle = step.config.subtitle { text += ": \(subtitle)" }
+            text += "\n" + said.text
+            for line in Painter.speaking(sprite, says: text, style: style, width: terminal.width) { permanent(line) }
             permanent(style.muted("  \(counter) \(step.config.title)"))
         } else {
             var heading = "== \(counter) \(step.config.title)"
@@ -265,11 +268,13 @@ final class InstallRenderer: @unchecked Sendable {
             permanent(style.muted("Log: \(log.path)"))
         }
         let moment: Moment = summary.wasCancelled ? .cancelled : summary.wasDryRun ? .dryRun : summary.failures.isEmpty ? .finished : .finishedWithFailures
+        // The run is over, so the narrator has the last word.
+        let said = fun.say(moment, mascot: nil, seed: seed)
         permanent("")
-        if live, summary.succeeded, let sprite = fun.sprite(fun.speaker), !sprite.frames.isEmpty {
-            for line in Painter.speaking(sprite, says: fun.line(for: moment, seed: seed), style: style, width: terminal.width) { permanent(line) }
+        if live, summary.succeeded, let sprite = said.sprite, !sprite.frames.isEmpty {
+            for line in Painter.speaking(sprite, says: said.text, style: style, width: terminal.width) { permanent(line) }
         } else {
-            permanent(style.fg(Palette.star, "\"\(fun.line(for: moment, seed: seed))\""))
+            permanent(style.fg(Palette.star, "\"\(said.text)\""))
         }
     }
 

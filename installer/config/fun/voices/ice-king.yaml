@@ -1,0 +1,49 @@
+# What Ice King says while a step with `mascot: ice-king` runs, and right after it ends.
+#
+# moments: lines for what is happening. A moment this file leaves out is said by the narrator
+#   (fun/quotes.yaml), next to her own sprite.
+# steps: more working lines for one step. They take turns with the general ones while that step runs.
+#
+# These are ORIGINAL lines written in the character's voice for this project, not quotes from the
+# show. Keep each one under 90 characters, and never mean to the person installing.
+# Keep this file in fun/voices/. Installers up to 1.0.1 read every file in fun/sprites/ as a sprite.
+id: ice-king
+
+moments:
+  working:
+    - "Wizard on duty! This is very important, very icy work."
+    - "My penguins and I are on the job. They mostly supervise."
+    - "Lots to do, and I'm doing it! Stay and keep me company? Please?"
+    - "Working my ice magic on this Mac, with a little help from the internet."
+  success:
+    - "Done! Did you see that? Tell everyone I did that."
+    - "It worked! I'm so proud of us. Group hug? No? Okay."
+    - "Finished, and nothing melted. Somebody give this king a drumroll!"
+  failure:
+    - "My ice powers lost to a cranky computer, so that one failed. Try it again later."
+    - "I forgive the computer for failing that one. You can retry it later."
+    - "One piece froze up, and not the fun kind of frozen. Blame the machine. Retry it later."
+  skipped:
+    - "We skipped that one! More time for us to hang out. You can do it later."
+    - "No spell for that one today. It got skipped, and that's okay with me!"
+  waiting:
+    - "Your help is needed on screen! I'm a champion at waiting, so go ahead."
+    - "Please click or sign in on screen. I'll hum to my penguins till you're done."
+  question:
+    - "Ooh, I can't wait to read your answer. Every word, twice!"
+    - "Talk to me! Type your answer in the box. I love a good chat."
+  password:
+    - "Psst! Your Mac password goes in the box. I'll hide behind my beard."
+    - "The administrator password, please. I bet it's a really good one!"
+  cancelled:
+    - "Run's on ice now. All the finished parts are kept, nice and frosty."
+    - "Stop it is! I kept everything that finished. Come back and visit soon?"
+  dry_run:
+    - "Test run only! No real changes, like drumming on a pillow."
+    - "Practice spells today! I wave my hands, and this Mac doesn't change a bit."
+
+steps:
+  keyboard:
+    - "Caps Lock gets two jobs now. Tap for Escape, hold for Option. So clever!"
+    - "Setting up Karabiner-Elements and Hammerspoon. Keys fit for a king!"
+    - "Right Option becomes a Hyper key that opens apps. A wizard key, if you ask me."
