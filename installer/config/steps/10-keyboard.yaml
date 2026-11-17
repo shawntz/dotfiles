@@ -3,7 +3,7 @@
 # before they first start, starts them, and lists the switches only you can
 # turn on in System Settings.
 #
-#   Caps Lock          Escape when tapped, Control when held
+#   Caps Lock          Escape when tapped, Option when held
 #   Right Option       Hyper (⇧⌃⌥⌘); Hyper + key opens an app
 #   S+D held together  h/j/k/l arrows, a = Option, f = Command, space = Shift
 #   Control+S, key     move and resize the front window
