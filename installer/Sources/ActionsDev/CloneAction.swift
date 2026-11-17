@@ -1,7 +1,8 @@
 import Foundation
 import ShawnCore
 
-/// `clone:` clones a repository unless the destination already is one.
+/// `clone:` clones a repository unless the destination already is one. It clones the config's own repository
+/// (`remote: repo:` in installer.yaml) with `--depth=1` and every other repository whole.
 struct CloneAction: Action {
     /// `owner/repo` or a git URL, as written (may contain `{{vars}}`).
     let repository: String
@@ -17,6 +18,10 @@ struct CloneAction: Action {
     /// ssh asks about unknown host keys on /dev/tty, not stdin, so batch mode makes it fail instead of hang;
     /// the keep-alives notice a connection that died mid-transfer within about a minute.
     static let sshCommand = "ssh -o BatchMode=yes -o ConnectTimeout=30 -o ServerAliveInterval=15 -o ServerAliveCountMax=4"
+    /// Downloads the newest commit only, and with it only the branch that commit is on. `shawn` reads the
+    /// checkout and fast-forwards it, and neither needs the history, which is nearly all of the download.
+    /// `git fetch --unshallow` in the checkout gets the history later.
+    static let newestCommitOnly = "--depth=1"
 
     enum Source: Equatable {
         case github(owner: String, name: String)
@@ -28,7 +33,8 @@ struct CloneAction: Action {
 
     static let descriptor = ActionDescriptor(
         kind: "clone",
-        summary: "Clones a git repository (owner/repo on GitHub, or any git URL) unless the destination already is a repository.",
+        summary: "Clones a git repository (owner/repo on GitHub, or any git URL) unless the destination already is a repository. "
+            + "The config's own repository (remote: repo: in installer.yaml), written as owner/repo or a github.com URL, gets its newest commit only.",
         example: """
         - clone: "{{dotfiles_repo}}"
           to: ~/Developer/dotfiles
@@ -64,6 +70,34 @@ struct CloneAction: Action {
     static func githubURL(owner: String, name: String, protocol scheme: String) -> String {
         let repo = name.hasSuffix(".git") ? name : name + ".git"
         return scheme == "ssh" ? "git@github.com:\(owner)/\(repo)" : "https://github.com/\(owner)/\(repo)"
+    }
+
+    /// An https, ssh or git URL of github.com, or its scp-like form. Captures the owner and the name.
+    /// ssh.github.com is GitHub's own name for ssh over port 443. An ssh host alias from ~/.ssh/config is not
+    /// recognized, because only ssh knows where it leads.
+    private static let githubAddress = try! NSRegularExpression(
+        pattern: "^(?:(?:https?|ssh|git)://(?:[^@/\\s]+@)?(?:(?:www|ssh)\\.)?github\\.com(?::\\d+)?/|(?:[^@/\\s]+@)?(?:ssh\\.)?github\\.com:)([^/\\s]+)/([^/\\s]+?)/?$",
+        options: [.caseInsensitive])
+
+    /// `owner/name` on GitHub, without `.git`, whether the item wrote the shorthand or a github.com URL.
+    /// nil for a repository anywhere else.
+    static func githubRepository(_ source: Source) -> String? {
+        func withoutSuffix(_ name: String) -> String { name.lowercased().hasSuffix(".git") ? String(name.dropLast(4)) : name }
+        switch source {
+        case .github(let owner, let name):
+            return "\(owner)/\(withoutSuffix(name))"
+        case .url(let url):
+            guard let match = githubAddress.firstMatch(in: url, range: NSRange(url.startIndex..<url.endIndex, in: url)),
+                  let owner = Range(match.range(at: 1), in: url), let name = Range(match.range(at: 2), in: url) else { return nil }
+            return "\(url[owner])/\(withoutSuffix(String(url[name])))"
+        }
+    }
+
+    /// Whether `source` is the repository the config itself comes from, written as owner/repo or as a
+    /// github.com URL.
+    static func isConfigRepository(_ source: Source?, remote: RemoteConfigRef?) -> Bool {
+        guard let source, let remote, let repository = githubRepository(source) else { return false }
+        return repository.caseInsensitiveCompare(remote.repo) == .orderedSame
     }
 
     func validate(_ context: ValidationContext) -> [String] {
@@ -139,7 +173,9 @@ struct CloneAction: Action {
         let targetExisted = context.files.exists(target)
         try context.files.ensureDirectory(target.deletingLastPathComponent())
 
+        let newestCommitOnly = Self.isConfigRepository(Self.classify(context.expand(repository)), remote: context.config.meta.remote)
         var arguments = Self.stallSettings + ["clone", "--progress"]
+        if newestCommitOnly { arguments.append(Self.newestCommitOnly) }
         if let branch { arguments += ["--branch", context.expand(branch)] }
         arguments += ["--", url, target.path]
         var variables: [String: String] = [:]
@@ -158,12 +194,12 @@ struct CloneAction: Action {
             }
             throw error
         }
-        if result.wasDryRun { return .done("would clone \(url)") }
+        if result.wasDryRun { return .done(newestCommitOnly ? "would clone the newest commit of \(url)" : "would clone \(url)") }
         guard result.succeeded else {
             removePartialClone(target, existedBefore: targetExisted, context: context)
             throw ActionError("Cloning \(url) failed: \(result.tail(3))", hint: Self.hint(for: scheme))
         }
-        return .done("cloned \(url) to \(context.display(target))")
+        return .done("cloned \(url) to \(context.display(target))" + (newestCommitOnly ? ", newest commit only" : ""))
     }
 
     private static func hint(for scheme: String?) -> String {

@@ -2,6 +2,11 @@
 # checked out in it. `shawn` uses that checkout to update itself and to turn
 # config changes into pull requests.
 #
+# Installers newer than 1.0.1 clone this repo, the one `remote:` in
+# installer.yaml names, with --depth=1. That is its newest commit without the
+# history. `git fetch --unshallow` in the checkout gets the history later.
+# They clone every other repo whole.
+#
 # To clone another repo on every new Mac, add:
 #
 #     - clone: owner/repo

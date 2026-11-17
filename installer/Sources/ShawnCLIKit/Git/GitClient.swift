@@ -260,12 +260,26 @@ struct GitRepo: Sendable {
 
     /// `git branch -m old new`, then makes `new` track `remote`'s branch of the same name (what GitHub suggests
     /// after a default branch is renamed). The rename carries the branch's other settings along.
+    ///
+    /// A clone of one branch, which is what `--depth=1` makes, fetches that branch by name. Its fetch list gets
+    /// the new name too, or a plain `git fetch` there would keep asking for a branch that is gone. A clone of
+    /// every branch has no such line and keeps its list.
     func renameBranch(_ old: String, to new: String, tracking remote: String) async -> ProcessResult {
         let renamed = await run(["branch", "-m", old, new])
         guard renamed.succeeded else { return renamed }
         let remoteSet = await run(["config", "branch.\(new).remote", remote])
         guard remoteSet.succeeded else { return remoteSet }
-        return await run(["config", "branch.\(new).merge", "refs/heads/\(new)"])
+        let tracking = await run(["config", "branch.\(new).merge", "refs/heads/\(new)"])
+        guard tracking.succeeded else { return tracking }
+
+        let oldLine = "+refs/heads/\(old):refs/remotes/\(remote)/\(old)"
+        let fetchList = await run(["config", "--get-all", "remote.\(remote).fetch"])
+        if fetchList.succeeded, fetchList.output.split(separator: "\n").contains(where: { $0 == oldLine }) {
+            // The branch already has its new name, so a failure here costs only the convenience.
+            _ = await run(["config", "--fixed-value", "--replace-all", "remote.\(remote).fetch",
+                           "+refs/heads/\(new):refs/remotes/\(remote)/\(new)", oldLine])
+        }
+        return tracking
     }
 
     /// One string identifying the content of `paths` at `revision` (their git object ids, `-` for a missing

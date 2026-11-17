@@ -37,7 +37,7 @@ The app changes nothing until you press START. Turn on DRY RUN first to see what
 With Xcode 27 or later, you can build it from a checkout instead:
 
 ```sh
-git clone https://github.com/shawntz/dotfiles.git
+git clone --depth=1 https://github.com/shawntz/dotfiles.git
 cd dotfiles/installer && make run
 ```
 

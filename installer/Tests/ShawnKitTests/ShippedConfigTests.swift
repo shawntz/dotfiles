@@ -83,6 +83,16 @@ final class ShippedConfigTests: XCTestCase {
         XCTAssertEqual(ids.count, Set(ids).count, "item ids must be unique")
     }
 
+    /// The installer clones the dotfiles checkout with --depth=1 only while its clone item names the repo that
+    /// `remote:` names. If one of the two changes alone, new Macs get the whole history again.
+    func testTheDotfilesCheckoutIsTheConfigsOwnRepository() throws {
+        let plan = try loadPlan(environment: try makeSandbox())
+        let checkout = try XCTUnwrap(plan.allItems.first { $0.config.kind == "clone" && $0.config.options["to"]?.string == "~/Developer/dotfiles" },
+                                     "no clone item makes ~/Developer/dotfiles")
+        XCTAssertEqual(checkout.title.lowercased(), plan.config.meta.remote?.repo.lowercased(),
+                       "the clone item and remote: repo: in installer.yaml must name the same repo")
+    }
+
     func testFunAssetsLoadAndEveryMascotHasASprite() throws {
         let config = try ConfigLoader.load(from: Self.configDirectory).config
         let (fun, issues) = FunConfig.load(from: config)

@@ -99,6 +99,60 @@ final class CloneTests: XCTestCase {
         XCTAssertEqual(sandbox.calls("git").last, stall + ["clone", "--progress", "--", "https://github.com/tester/dotfiles.git", target])
     }
 
+    /// The item passes --depth=1 for the repository that `remote:` in installer.yaml names, written as owner/repo
+    /// or as a github.com URL, and for no other. With no `remote:` in the config, it clones every repository
+    /// whole (the test above).
+    func testTheConfigsOwnRepositoryGetsOnlyItsNewestCommit() async throws {
+        var base = ProcessInfo.processInfo.environment
+        base.removeValue(forKey: "GIT_SSH_COMMAND")
+        let sandbox = DevSandbox(baseEnvironment: base)
+        sandbox.shim("git", #"""
+        for last in "$@"; do :; done
+        mkdir -p "$last/.git"
+        """#)
+        let installer = DevSandbox.installerYAML + "remote:\n  repo: Tester/Dotfiles\n  branch: main\n"
+        let stall = ["-c", "http.lowSpeedLimit=1", "-c", "http.lowSpeedTime=120"]
+        let target = sandbox.homeURL("Developer/dotfiles").path
+
+        /// Runs one clone item on a home without the checkout, and gives back what the item asked git and what it said.
+        func clone(_ items: String, dryRun: Bool = false) async throws -> (asked: [String]?, said: ActionOutcome) {
+            try? FileManager.default.removeItem(at: sandbox.homeURL("Developer/dotfiles"))
+            sandbox.clearShimLog()
+            let (action, item, plan) = try sandbox.single(CloneAction.self, items, installer: installer)
+            let said = try await action.run(sandbox.context(item, plan, dryRun: dryRun))
+            return (sandbox.calls("git").last, said)
+        }
+
+        let own = "  - clone: \"{{dotfiles_repo}}\"\n    to: ~/Developer/dotfiles"
+        var result = try await clone(own)
+        XCTAssertEqual(result.asked, stall + ["clone", "--progress", "--depth=1", "--", "https://github.com/tester/dotfiles.git", target])
+        XCTAssertEqual(result.said, .done("cloned https://github.com/tester/dotfiles.git to ~/Developer/dotfiles, newest commit only"))
+
+        result = try await clone(own + "\n    branch: main")
+        XCTAssertEqual(result.asked, stall + ["clone", "--progress", "--depth=1", "--branch", "main", "--", "https://github.com/tester/dotfiles.git", target])
+
+        // A full URL of the same repository counts too, whatever its letter case.
+        result = try await clone("  - clone: https://github.com/tester/DOTFILES.git\n    to: ~/Developer/dotfiles")
+        XCTAssertEqual(result.asked, stall + ["clone", "--progress", "--depth=1", "--", "https://github.com/tester/DOTFILES.git", target])
+
+        result = try await clone("  - clone: tester/other\n    to: ~/Developer/dotfiles")
+        XCTAssertEqual(result.asked, stall + ["clone", "--progress", "--", "https://github.com/tester/other.git", target])
+        XCTAssertEqual(result.said, .done("cloned https://github.com/tester/other.git to ~/Developer/dotfiles"))
+
+        result = try await clone(own, dryRun: true)
+        XCTAssertNil(result.asked, "a dry run runs no git")
+        XCTAssertEqual(result.said, .done("would clone the newest commit of https://github.com/tester/dotfiles.git"))
+        XCTAssertTrue(sandbox.logText.contains("[dry-run] $ git -c http.lowSpeedLimit=1 -c http.lowSpeedTime=120 clone --progress --depth=1 -- https://github.com/tester/dotfiles.git"),
+                      sandbox.logText)
+
+        // Over ssh the option is the same.
+        sandbox.installFakeGh()
+        sandbox.ghSignedIn(protocol: "ssh")
+        sandbox.newRun()
+        result = try await clone(own)
+        XCTAssertEqual(result.asked, stall + ["clone", "--progress", "--depth=1", "--", "git@github.com:tester/dotfiles.git", target])
+    }
+
     func testDryRunClonesNothing() async throws {
         let sandbox = DevSandbox()
         let remote = makeRemote(sandbox)

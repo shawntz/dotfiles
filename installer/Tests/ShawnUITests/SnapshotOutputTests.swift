@@ -6,16 +6,16 @@ import XCTest
 @MainActor
 final class SnapshotOutputTests: XCTestCase {
     /// Real kind names played by FakeAction, so the output can be checked without the real actions.
-    private func model(_ items: String, dryRun: Bool = false) throws -> InstallerModel {
+    private func model(_ items: String, dryRun: Bool = false, meta: String = defaultMeta) throws -> InstallerModel {
         var registry = ActionRegistry()
-        for kind in ["brew", "cask", "manual", "copy", "github", "skill", "script", "defaults", "mas", "xcode", "open", "mkdir", "ok"] {
+        for kind in ["brew", "cask", "manual", "copy", "github", "skill", "script", "defaults", "mas", "xcode", "open", "mkdir", "clone", "ok"] {
             registry.register(ActionDescriptor(kind: kind, summary: kind, example: "- \(kind): x") { parser in
                 for key in ["to", "run", "set", "source", "protocol", "detail", "url", "check", "creates"] { _ = parser.options.value(key) }
                 return FakeAction(title: parser.primaryString())
             })
         }
         let (model, _) = try makeModel(steps: ["01-a.yaml": "id: a\ntitle: A\nitems:\n" + items], registry: registry,
-                                       mode: .snapshot, dryRun: dryRun)
+                                       meta: meta, mode: .snapshot, dryRun: dryRun)
         model.apply(.runStarted(totalItems: model.enabledItemCount))
         return model
     }
@@ -179,6 +179,22 @@ final class SnapshotOutputTests: XCTestCase {
         XCTAssertTrue(SnapshotOutput.end(model.steps[0].items[0], model: model).isEmpty)
         XCTAssertEqual(lines(of: 1, in: model), ["[dry-run] write ~/.zshrc"])
         XCTAssertEqual(lines(of: 2, in: model), ["added to your checklist: Log out and back in"], "as the engine says it in a dry run")
+    }
+
+    /// Like the clone item, the fake output passes --depth=1 for the repository that `remote:` names and for no other.
+    func testTheFakeOutputClonesOnlyTheNewestCommitOfTheConfigsOwnRepository() throws {
+        let model = try model("""
+              - clone: Tester/dotfiles
+                to: ~/Developer/dotfiles
+              - clone: tester/other
+                to: ~/Developer/other
+            """, meta: defaultMeta + "remote:\n  repo: tester/dotfiles\n  branch: main\n")
+        let items = model.steps[0].items
+        XCTAssertEqual(SnapshotOutput.command(items[0], model: model),
+                       "git -c http.lowSpeedLimit=1 -c http.lowSpeedTime=120 clone --progress --depth=1 -- https://github.com/Tester/dotfiles.git ~/Developer/dotfiles")
+        XCTAssertEqual(SnapshotOutput.command(items[1], model: model),
+                       "git -c http.lowSpeedLimit=1 -c http.lowSpeedTime=120 clone --progress -- https://github.com/tester/other.git ~/Developer/other")
+        XCTAssertEqual(lines(of: 0, in: model).last, "Cloning into '~/Developer/dotfiles'...")
     }
 
     func testAFailureNamesTheCommandThatFailed() throws {

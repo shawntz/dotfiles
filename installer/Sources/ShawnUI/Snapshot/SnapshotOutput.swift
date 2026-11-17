@@ -157,7 +157,9 @@ enum SnapshotOutput {
             run("curl -fL --retry 3 -o ~/Library/Caches/ShawnsDotfiles/downloads/\(fileName) \(value)")
         case "clone":
             let target = options["to"]?.string ?? "~/Developer/\(lastComponent(item.title))"
-            run("git -c http.lowSpeedLimit=1 -c http.lowSpeedTime=120 clone --progress -- https://github.com/\(item.title).git \(target)")
+            // Like the clone item, this passes --depth=1 for the config's own repository and for no other.
+            let ownRepository = model.plan?.config.meta.remote?.repo.caseInsensitiveCompare(item.title) == .orderedSame
+            run("git -c http.lowSpeedLimit=1 -c http.lowSpeedTime=120 clone --progress \(ownRepository ? "--depth=1 " : "")-- https://github.com/\(item.title).git \(target)")
             output("Cloning into '\(target)'...")
         case "manual", "sim-manual":
             note("added to your checklist: \(item.title)")

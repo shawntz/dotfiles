@@ -527,6 +527,8 @@ final class SelfUpdateGuardTests: XCTestCase {
         XCTAssertEqual(git(["symbolic-ref", "--short", "HEAD"], in: fixture.checkout), "main")
         XCTAssertEqual(git(["config", "branch.main.merge"], in: fixture.checkout), "refs/heads/main")
         XCTAssertEqual(git(["config", "branch.main.remote"], in: fixture.checkout), "origin")
+        XCTAssertEqual(git(["config", "--get-all", "remote.origin.fetch"], in: fixture.checkout), "+refs/heads/*:refs/remotes/origin/*",
+                       "a clone of every branch keeps its fetch list")
         XCTAssertEqual(fixture.head(fixture.checkout), git(["rev-parse", "main"], in: fixture.remote))
         XCTAssertEqual(fixture.notes.all, [
             "origin renamed 'master' to 'main'; renamed the branch in \(fixture.checkout.path) to match",
@@ -542,6 +544,25 @@ final class SelfUpdateGuardTests: XCTestCase {
         request.remote = RemoteConfigRef(repo: "tester/dotfiles", branch: "main", path: "installer/config")
         let next = await fixture.updater().run(request)
         XCTAssertEqual(next.outcome, .pulled(commits: 1))
+    }
+
+    /// A clone of one branch, which is what --depth=1 makes, fetches that branch by name. After the rename its
+    /// fetch list asks for the new name, so a plain `git fetch` in the checkout still works. A branch the
+    /// person added to the list stays in it.
+    func testRenameAlsoMovesAOneBranchFetchList() async {
+        let fixture = UpdateFixture()
+        git(["push", "-q", "origin", "master:side"], in: fixture.upstream)
+        git(["remote", "set-branches", "origin", "master"], in: fixture.checkout)
+        git(["remote", "set-branches", "--add", "origin", "side"], in: fixture.checkout)
+        renameRemoteBranch(fixture)
+        let report = await fixture.updater().run(fixture.request())
+        XCTAssertEqual(report.outcome, .pulled(commits: 1))
+        XCTAssertEqual(git(["symbolic-ref", "--short", "HEAD"], in: fixture.checkout), "main")
+        XCTAssertEqual(git(["config", "--get-all", "remote.origin.fetch"], in: fixture.checkout),
+                       "+refs/heads/main:refs/remotes/origin/main\n+refs/heads/side:refs/remotes/origin/side")
+        git(["fetch", "-q"], in: fixture.checkout)
+        XCTAssertEqual(git(["rev-parse", "origin/main"], in: fixture.checkout), fixture.head(fixture.checkout),
+                       "a plain fetch asks for the branch by its new name")
     }
 
     func testRenameIsNotForcedOverLocalCommits() async {
