@@ -26,11 +26,13 @@ final class TempDirectory {
     }
 }
 
-/// An `InstallerConfig` rooted at `root` with empty steps for `stepIDs`; `fun/` is all FunConfig reads.
-func makeInstallerConfig(root: URL, stepIDs: [String] = []) -> InstallerConfig {
+/// An `InstallerConfig` rooted at `root` with empty steps for `stepIDs`, each with its mascot from `mascots` and its
+/// step-file quips from `quips`; `fun/` is all FunConfig reads.
+func makeInstallerConfig(root: URL, stepIDs: [String] = [], mascots: [String: String] = [:],
+                         quips: [String: [String]] = [:]) -> InstallerConfig {
     InstallerConfig(root: root,
                     meta: ConfigMeta(schema: ShawnCore.schemaVersion, name: "Test Dotfiles"),
-                    steps: stepIDs.map { StepConfig(id: $0, title: $0, file: "steps/\($0).yaml") },
+                    steps: stepIDs.map { StepConfig(id: $0, title: $0, mascot: mascots[$0], quips: quips[$0] ?? [], file: "steps/\($0).yaml") },
                     source: .local(root.path))
 }
 

@@ -182,6 +182,11 @@ let standardSteps: [String: String] = [
     """,
 ]
 
+/// A tiny sprite file for `fun/sprites/<id>.yaml`, named after its id ("talker" is "Talker").
+func spriteYAML(_ id: String) -> String {
+    "id: \(id)\nname: \(id.capitalized)\npalette:\n  X: \"#FF00FF\"\nframes:\n  - |\n    XX\n    XX\n"
+}
+
 /// Records desktop side effects instead of performing them.
 @MainActor
 final class DesktopRecorder {

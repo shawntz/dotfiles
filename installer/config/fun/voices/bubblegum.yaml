@@ -1,0 +1,57 @@
+# What Princess Bubblegum says while a step with `mascot: bubblegum` runs, and right after it ends.
+#
+# moments: lines for what is happening. A moment this file leaves out is said by the narrator
+#   (fun/quotes.yaml), next to her own sprite.
+# steps: more working lines for one step. They take turns with the general ones while that step runs.
+#
+# These are ORIGINAL lines written in the character's voice for this project, not quotes from the
+# show. Keep each one under 90 characters, and never mean to the person installing.
+# Keep this file in fun/voices/. Installers up to 1.0.1 read every file in fun/sprites/ as a sprite.
+id: bubblegum
+
+moments:
+  working:
+    - "Running the procedure one careful step at a time, and checking each result."
+    - "Collecting data and adjusting variables. Everything is within tolerance so far."
+    - "Goggles on, notebook open. Your new Mac is coming together nicely."
+    - "Measure twice, install once. I'm being thorough on purpose."
+  success:
+    - "Results confirmed. Clean, repeatable and exactly as predicted."
+    - "Experiment successful. I'm writing that one up in my lab notebook."
+    - "Completed to specification. I do love a tidy result."
+  failure:
+    - "That item failed. Faulty apparatus, I suspect. You can rerun it later."
+    - "A glitch in the equipment made that fail. I logged it so you can retry it."
+    - "One item didn't take. The machine misbehaved. The rest of the run carries on."
+  skipped:
+    - "I've marked that item as skipped. You can run it in a later trial."
+    - "Skipping this one, as conditions require. The rest of the procedure continues."
+  waiting:
+    - "This part of the procedure requires you. Please finish the task on screen."
+    - "Pausing the experiment while you finish the task on screen."
+  question:
+    - "I need one data point from you. Type your answer when you're ready."
+    - "The question on screen needs an answer. Accurate inputs, accurate results."
+  password:
+    - "Clearance check. Enter the administrator password and I'll continue."
+    - "Admin password required. Proper access control is good lab practice."
+  cancelled:
+    - "Run stopped. Every completed result is preserved, exactly as recorded."
+    - "Experiment halted at your request. The finished work stays in place."
+  dry_run:
+    - "Controlled trial only. I'm testing the procedure without changing your Mac."
+    - "Simulation mode. I'll run every step on paper, and this Mac stays unchanged."
+
+steps:
+  apps:
+    - "Installing apps from Homebrew casks, the App Store and one direct download."
+    - "The App Store requires your sign-in. The other apps I can install unassisted."
+    - "Adding new apps one at a time. Each gets a clean, labeled spot in Applications."
+  webapps:
+    - "Each web app keeps its own sign-in, isolated from your browser like a clean sample."
+    - "A website in its own window with its own icon. Elegant engineering."
+    - "A few sites graduate to standalone apps. Fewer browser tabs, better focus."
+  macos:
+    - "Carrying over your old laptop's preferences. Same conditions, new hardware."
+    - "Tap to click, list view in Finder, a 24-hour clock. Small, precise adjustments."
+    - "Calibrating window tiling and the battery readout. Precision matters."

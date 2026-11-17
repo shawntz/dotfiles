@@ -327,7 +327,7 @@ final class InstallerModelStateTests: XCTestCase {
         model.apply(.runStarted(totalItems: 5))
         model.apply(.stepStatus(stepID: "base", status: .running))
         XCTAssertEqual(model.quipMoment, .working)
-        XCTAssertTrue(["Base quip", "working"].contains(model.quip), "step quips come first: \(model.quip)")
+        XCTAssertTrue(["Base quip", "working"].contains(model.quip), "the seed picks from the step's quips and the working lines as one pool: \(model.quip)")
         model.apply(.itemStatus(itemID: "base/2", status: .failed("kaboom")))
         XCTAssertEqual(model.quip, "ugh")
         model.advanceQuip()
@@ -365,25 +365,252 @@ final class InstallerModelStateTests: XCTestCase {
     }
 
     func testMascotFallsBackToTheSpeakerAndCopesWithNoSprites() throws {
-        let sprite = { (id: String) in "id: \(id)\nname: \(id.capitalized)\npalette:\n  X: \"#FF00FF\"\nframes:\n  - |\n    XX\n    XX\n" }
         let (model, _) = try makeModel(extraFiles: [
             "fun/quotes.yaml": "speaker: talker\n",
-            "fun/sprites/talker.yaml": sprite("talker"),
-            "fun/sprites/zed.yaml": sprite("zed"),
+            "fun/sprites/talker.yaml": spriteYAML("talker"),
+            "fun/sprites/zed.yaml": spriteYAML("zed"),
         ])
         XCTAssertEqual(model.speaker?.id, "talker")
-        XCTAssertEqual(model.mascot?.id, "talker")
+        XCTAssertEqual(model.saying.speakerID, "talker")
+        XCTAssertEqual(model.saying.sprite?.id, "talker")
         model.apply(.runStarted(totalItems: 5))
         model.apply(.stepStatus(stepID: "base", status: .running))
-        XCTAssertEqual(model.mascot?.id, "talker", "mascot 'blob' has no sprite, so the speaker stands in")
+        XCTAssertEqual(model.saying.speakerID, "talker", "mascot 'blob' has no sprite, so the narrator speaks")
+        XCTAssertEqual(model.saying.sprite?.id, "talker", "and the narrator is drawn")
+        XCTAssertEqual(model.saying.name, "Talker")
         XCTAssertEqual(model.lineup.map(\.id), ["talker", "zed"])
         XCTAssertTrue(model.notes.contains { $0.contains("mascot 'blob'") }, "the missing sprite is reported as a note: \(model.notes)")
 
         let (bare, _) = try makeModel()
         XCTAssertNil(bare.speaker)
-        XCTAssertNil(bare.mascot)
+        XCTAssertNil(bare.saying.sprite, "no sprites, so the placeholder is drawn")
+        XCTAssertNil(bare.saying.name, "and the bubble names nobody")
         XCTAssertTrue(bare.lineup.isEmpty)
         XCTAssertFalse(bare.quip.isEmpty, "FunConfig's fallback lines are used")
+        bare.apply(.runStarted(totalItems: 5))
+        bare.apply(.stepStatus(stepID: "base", status: .running))
+        XCTAssertNil(bare.saying.sprite, "a step's mascot with no sprite draws the placeholder too")
+        XCTAssertNil(bare.saying.name)
+        XCTAssertFalse(bare.quip.isEmpty)
+    }
+
+    /// Checks that `model.saying` is `text`, said by `speakerID`, with that character's sprite and name in the bubble.
+    private func expect(_ model: InstallerModel, _ speakerID: String, _ text: String, _ message: String,
+                        file: StaticString = #filePath, line: UInt = #line) {
+        let saying = model.saying
+        XCTAssertEqual(saying.speakerID, speakerID, message, file: file, line: line)
+        XCTAssertEqual(saying.sprite?.id, speakerID, "\(message): the sprite drawn", file: file, line: line)
+        XCTAssertEqual(saying.name, speakerID.capitalized, "\(message): the name in the bubble", file: file, line: line)
+        XCTAssertEqual(saying.text, text, message, file: file, line: line)
+        XCTAssertEqual(model.quip, text, message, file: file, line: line)
+    }
+
+    /// The sprite drawn, the name in the bubble and the line always belong to the same character. That is the mascot
+    /// of the step the line is about when it has a line for the moment, and the narrator otherwise.
+    func testTheBubbleBelongsToWhoeverIsDrawn() throws {
+        let steps = [
+            "01-one.yaml": "id: one\ntitle: One\nmascot: ada\nitems:\n  - ok: alpha\n  - ok: beta\n",
+            "02-two.yaml": "id: two\ntitle: Two\nmascot: bo\nitems:\n  - ok: gamma\n",
+        ]
+        let quotes = """
+        speaker: talker
+        moments:
+          launch: ["Hello from the narrator."]
+          working: ["The narrator works."]
+          password: ["The narrator asks for the password."]
+          success: ["The narrator cheers."]
+          finished: ["The narrator says goodbye."]
+        """
+        let (model, _) = try makeModel(steps: steps, extraFiles: [
+            "fun/quotes.yaml": quotes,
+            "fun/sprites/talker.yaml": spriteYAML("talker"),
+            "fun/sprites/ada.yaml": spriteYAML("ada"),
+            "fun/sprites/bo.yaml": spriteYAML("bo"),
+            "fun/voices/ada.yaml": "id: ada\nmoments:\n  working: [\"Ada works.\"]\n  success: [\"Ada cheers.\"]\n",
+            "fun/voices/bo.yaml": """
+            id: bo
+            moments:
+              working: ["Bo works."]
+              success: ["Bo cheers."]
+              password: ["Bo asks for the password."]
+            """,
+        ])
+        func expect(_ speakerID: String, _ text: String, _ message: String, file: StaticString = #filePath, line: UInt = #line) {
+            self.expect(model, speakerID, text, message, file: file, line: line)
+        }
+
+        expect("talker", "Hello from the narrator.", "the narrator opens")
+        model.apply(.runStarted(totalItems: 3))
+        expect("talker", "The narrator works.", "before the first step")
+        model.apply(.stepStatus(stepID: "one", status: .running))
+        expect("ada", "Ada works.", "a voiced step")
+
+        model.enqueue(.password(PasswordRequest(reason: "r", attempt: 1, lastError: nil, maxAttempts: 3), PromptGate<String?>()))
+        expect("talker", "The narrator asks for the password.", "ada has no password line, so the narrator says it and is drawn")
+        model.cancelPassword()
+        expect("ada", "Ada works.", "back to ada")
+
+        model.apply(.stepStatus(stepID: "one", status: .done))
+        expect("ada", "Ada cheers.", "ada's step is done")
+        model.apply(.stepStatus(stepID: "two", status: .running))
+        expect("ada", "Ada cheers.", "the success belongs to ada's step, so she keeps saying it while step two starts")
+        model.advanceQuip()
+        expect("bo", "Bo works.", "the next line is bo's own")
+        model.enqueue(.password(PasswordRequest(reason: "r", attempt: 1, lastError: nil, maxAttempts: 3), PromptGate<String?>()))
+        expect("bo", "Bo asks for the password.", "bo has a password line of its own")
+        model.cancelPassword()
+
+        model.apply(.stepStatus(stepID: "two", status: .done))
+        model.apply(.runFinished(InstallSummary()))
+        expect("talker", "The narrator says goodbye.", "the finished screen")
+    }
+
+    /// A success, failure or skipped line belongs to the step it happened in. That step's character says it until the
+    /// next line comes due, even once the next step has started, and the narrator stands in when it has no such line.
+    /// A prompt or a banner belongs to the running step. A new run starts with no reaction.
+    func testAReactionStaysWithTheStepItHappenedIn() throws {
+        let steps = [
+            "01-one.yaml": "id: one\ntitle: One\nmascot: ada\nitems:\n  - ok: alpha\n  - ok: beta\n",
+            "02-two.yaml": "id: two\ntitle: Two\nmascot: bo\nitems:\n  - ok: gamma\n  - ok: delta\n",
+            "03-three.yaml": "id: three\ntitle: Three\nmascot: cy\nitems:\n  - ok: epsilon\n",
+            "04-four.yaml": "id: four\ntitle: Four\nmascot: dee\nitems:\n  - ok: zeta\n",
+        ]
+        let quotes = """
+        speaker: talker
+        moments:
+          launch: ["Hello from the narrator."]
+          working: ["The narrator works."]
+          success: ["The narrator cheers."]
+          failure: ["The narrator frowns."]
+          skipped: ["The narrator shrugs."]
+          finished_with_failures: ["The narrator says goodbye anyway."]
+        """
+        var files = ["fun/quotes.yaml": quotes]
+        for id in ["talker", "ada", "bo", "cy", "dee"] { files["fun/sprites/\(id).yaml"] = spriteYAML(id) }
+        files["fun/voices/ada.yaml"] = "id: ada\nmoments:\n  working: [\"Ada works.\"]\n  failure: [\"Ada frowns.\"]\n"
+        files["fun/voices/bo.yaml"] = """
+        id: bo
+        moments:
+          working: ["Bo works."]
+          skipped: ["Bo shrugs."]
+          password: ["Bo asks for the password."]
+        """
+        files["fun/voices/cy.yaml"] = """
+        id: cy
+        moments:
+          working: ["Cy works."]
+          failure: ["Cy frowns."]
+          skipped: ["Cy shrugs."]
+          waiting: ["Cy waits."]
+        """
+        files["fun/voices/dee.yaml"] = "id: dee\nmoments:\n  working: [\"Dee works.\"]\n  success: [\"Dee cheers.\"]\n"
+        let (model, _) = try makeModel(steps: steps, extraFiles: files)
+        model.apply(.runStarted(totalItems: 6))
+
+        // A failure on the last item of a step carries into the next step.
+        model.apply(.stepStatus(stepID: "one", status: .running))
+        model.apply(.itemStatus(itemID: "one/0", status: .running))
+        model.apply(.itemStatus(itemID: "one/0", status: .done(nil)))
+        model.apply(.itemStatus(itemID: "one/1", status: .running))
+        model.apply(.itemStatus(itemID: "one/1", status: .failed("kaboom")))
+        expect(model, "ada", "Ada frowns.", "an item in ada's step failed")
+        model.apply(.stepStatus(stepID: "one", status: .finishedWithFailures(1)))
+        model.apply(.stepStatus(stepID: "two", status: .running))
+        expect(model, "ada", "Ada frowns.", "the failure belongs to ada's step, so she says it while step two starts")
+        model.apply(.itemStatus(itemID: "two/0", status: .running))
+        model.apply(.itemStatus(itemID: "two/0", status: .skipped("not needed on this Mac")))
+        expect(model, "ada", "Ada frowns.", "a failure outranks a later skip and keeps its own step")
+
+        // A prompt that comes up while the reaction is pending belongs to the running step.
+        model.enqueue(.password(PasswordRequest(reason: "r", attempt: 1, lastError: nil, maxAttempts: 3), PromptGate<String?>()))
+        expect(model, "bo", "Bo asks for the password.", "the password prompt comes up in bo's step")
+        model.cancelPassword()
+        expect(model, "ada", "Ada frowns.", "the reaction is still pending once the prompt is gone")
+        model.advanceQuip()
+        expect(model, "bo", "Bo works.", "the next line clears the reaction")
+
+        // A skipped item carries into the next step the same way, past the step's own success.
+        model.apply(.itemStatus(itemID: "two/1", status: .running))
+        model.apply(.itemStatus(itemID: "two/1", status: .skipped("you chose Skip")))
+        expect(model, "bo", "Bo shrugs.", "an item in bo's step was skipped")
+        model.apply(.stepStatus(stepID: "two", status: .done))
+        expect(model, "bo", "Bo shrugs.", "a skip outranks the step's success")
+        model.apply(.stepStatus(stepID: "three", status: .running))
+        expect(model, "bo", "Bo shrugs.", "the skip belongs to bo's step, so he says it while step three starts")
+
+        // A banner that comes up while the reaction is pending belongs to the running step.
+        model.apply(.attention(itemID: "three/0", attention: Attention(title: "Sign in", message: "Enter the code")))
+        expect(model, "cy", "Cy waits.", "the banner comes up in cy's step")
+        model.apply(.attention(itemID: "three/0", attention: nil))
+        expect(model, "bo", "Bo shrugs.", "the reaction is still pending once the banner is gone")
+        model.advanceQuip()
+        expect(model, "cy", "Cy works.", "the next line clears the reaction")
+
+        // A success carries into the next step, and the narrator stands in for a character with no success line.
+        model.apply(.itemStatus(itemID: "three/0", status: .running))
+        model.apply(.itemStatus(itemID: "three/0", status: .done(nil)))
+        model.apply(.stepStatus(stepID: "three", status: .done))
+        model.apply(.stepStatus(stepID: "four", status: .running))
+        expect(model, "talker", "The narrator cheers.", "cy has no success line, so the narrator says it, not dee")
+        model.advanceQuip()
+        expect(model, "dee", "Dee works.", "the next line is dee's own")
+
+        // A reaction still pending when the run ends does not reach the next run.
+        model.apply(.itemStatus(itemID: "four/0", status: .running))
+        model.apply(.itemStatus(itemID: "four/0", status: .done(nil)))
+        model.apply(.stepStatus(stepID: "four", status: .done))
+        expect(model, "dee", "Dee cheers.", "dee's step is done")
+        model.apply(.runFinished(InstallSummary()))
+        expect(model, "talker", "The narrator says goodbye anyway.", "the run is over, and an item in it failed, so the narrator speaks")
+        model.apply(.runStarted(totalItems: 6))
+        model.apply(.stepStatus(stepID: "one", status: .running))
+        expect(model, "ada", "Ada works.", "a new run starts with no reaction from the run before")
+    }
+
+    /// The moments a step's character can speak at (`Moment.stepMoments`) are exactly the ones a run can reach.
+    func testEveryRunningMomentIsAStepMoment() throws {
+        let (model, _) = try makeModel(dryRun: true)
+        var reached: [Moment] = []
+        func note() {
+            XCTAssertEqual(model.phase, .running)
+            reached.append(model.quipMoment)
+        }
+
+        model.apply(.runStarted(totalItems: 5))
+        note()
+        model.advanceQuip()
+        note()
+        model.apply(.stepStatus(stepID: "base", status: .running))
+        model.apply(.itemStatus(itemID: "base/1", status: .skipped("already there")))
+        note()
+        model.advanceQuip()
+        model.apply(.itemStatus(itemID: "base/2", status: .failed("kaboom")))
+        note()
+        model.advanceQuip()
+        model.apply(.stepStatus(stepID: "base", status: .done))
+        note()
+        model.advanceQuip()
+        model.apply(.stepStatus(stepID: "extras", status: .running))
+        model.apply(.attention(itemID: "extras/0", attention: Attention(title: "Sign in", message: "Enter the code")))
+        note()
+        model.apply(.attention(itemID: "extras/0", attention: nil))
+        model.enqueue(.password(PasswordRequest(reason: "r", attempt: 1, lastError: nil, maxAttempts: 3), PromptGate<String?>()))
+        note()
+        model.cancelPassword()
+        // An item that asks for text during its step, as the simulation's does. A real run asks before the first step.
+        model.enqueue(.text(TextRequest(id: "email", prompt: "Your email"), PromptGate<String?>()))
+        note()
+        model.skipText()
+        let question = Question(title: "Sign in", message: "Then come back.", options: [Question.Option(id: "yes", label: "Done", isDefault: true)])
+        model.enqueue(.question(question, PromptGate<String>()))
+        note()
+        model.answer(optionID: "yes")
+        model.stop()
+        note()
+
+        XCTAssertEqual(reached, [.dryRun, .working, .skipped, .failure, .success, .waiting, .password, .question, .waiting, .cancelled])
+        XCTAssertEqual(Set(reached), Set(Moment.stepMoments))
+        XCTAssertEqual(Set(Moment.stepMoments).count, Moment.stepMoments.count, "no moment is listed twice")
     }
 
     // MARK: Running the real engine

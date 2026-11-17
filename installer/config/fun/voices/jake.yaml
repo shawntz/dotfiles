@@ -1,0 +1,53 @@
+# What Jake the Dog says while a step with `mascot: jake` runs, and right after it ends.
+#
+# moments: lines for what is happening. A moment this file leaves out is said by the narrator
+#   (fun/quotes.yaml), next to her own sprite.
+# steps: more working lines for one step. They take turns with the general ones while that step runs.
+#
+# These are ORIGINAL lines written in the character's voice for this project, not quotes from the
+# show. Keep each one under 90 characters, and never mean to the person installing.
+# Keep this file in fun/voices/. Installers up to 1.0.1 read every file in fun/sprites/ as a sprite.
+id: jake
+
+moments:
+  working:
+    - "Hard at work. Okay, medium at work. Still getting it done."
+    - "Got it covered. Big brother's handling the boring parts."
+    - "Chugging along over here. Go stretch your legs, I'll keep at it."
+    - "Easy does it. I'm putting everything right where it goes."
+  success:
+    - "Done and done. That calls for a snack."
+    - "Sweet, that one went down easy. Like a good sandwich."
+    - "All set. That deserves a long, lazy stretch."
+  failure:
+    - "Bummer, that one failed. The Mac must be napping on the job. Retry it later."
+    - "Grumpy Mac moment, so that one failed. No big deal, we keep rolling."
+    - "Butterfingers! The Mac fumbled that one, so it failed. Grab a retry later."
+  skipped:
+    - "Skipped that one, no biggie. It'll still be around if you want it later."
+    - "We're passing on that one for now. Less to carry, man."
+  waiting:
+    - "Over to you. Handle what's on screen while I keep the couch warm."
+    - "This bit's on you, pal. Do what the screen asks. I'll sit and stay."
+  question:
+    - "Fill in the box for me, buddy. I'm all ears, and I can make them bigger."
+    - "Got a question for you on screen, man. Answer it and we keep cruising."
+  password:
+    - "My super nose can't sniff out your admin password. Type it in for me?"
+    - "The Mac needs your password. I'm covering my eyes with my ears."
+  cancelled:
+    - "Stopping, no problem. Whatever got done is kept. Nap time for me."
+    - "Calling it a day, that's cool. The finished stuff isn't going anywhere."
+  dry_run:
+    - "Kick back, this one's a test drive. Nothing on this Mac actually changes."
+    - "Rehearsal round. I'll go through the motions and leave your Mac alone."
+
+steps:
+  packages:
+    - "Homebrew's hauling in your command line tools and a few apps. Get comfy."
+    - "This list is long. Good thing I can stretch all the way to the bottom."
+    - "Installing tools one after another. I could do this in my sleep. Maybe I am."
+  developer:
+    - "Every project you start lands in ~/Developer. Neat, like a well-packed lunchbox."
+    - "Fetching the dotfiles repo into ~/Developer. Fetch is kind of my thing."
+    - "Quick one, buddy. One new folder, one clone, then we move along."

@@ -320,9 +320,9 @@ struct LSPCommand: BuiltinCommand {
         let fun = context.fun
         let moments: [Moment] = [.idle, .launch, .success, .waiting]
         let seed = Int.random(in: 0..<10_000)
-        let quip = fun.line(for: moments[seed % moments.count], seed: seed / 7)
+        let said = fun.say(moments[seed % moments.count], mascot: nil, seed: seed / 7)
         context.out.line("")
-        for line in Painter.speaking(fun.sprite(fun.speaker), says: quip, style: context.style, width: context.terminal.width) {
+        for line in Painter.speaking(said.sprite, says: said.text, style: context.style, width: context.terminal.width) {
             context.out.line(line)
         }
         context.out.line("")
@@ -342,7 +342,7 @@ struct QuoteCommand: BuiltinCommand {
         let style = context.style
         if let quote = fun.showQuotes.randomElement() {
             context.out.line(style.fg(Palette.star, "\"\(quote.text)\""))
-            context.out.line(style.muted("  \(fun.sprite(fun.speaker)?.name ?? "LSP")" + (quote.episode.map { ", \"\($0)\"" } ?? "")))
+            context.out.line(style.muted("  \(fun.sprite(fun.speaker)?.name ?? fun.speaker)" + (quote.episode.map { ", \"\($0)\"" } ?? "")))
         } else {
             context.out.line(style.fg(Palette.star, "\"\(fun.line(for: .idle, seed: Int.random(in: 0..<10_000)))\""))
         }
@@ -372,7 +372,10 @@ struct PartyCommand: BuiltinCommand {
         }
         context.out.line("")
         for line in Painter.lineUp(sprites, style: context.style, width: context.terminal.width) { context.out.line(line) }
-        context.out.line("  " + context.style.fg(Palette.star, "\"\(fun.line(for: .finished, seed: Int.random(in: 0..<10_000)))\""))
+        // Everybody is on screen, so name the one who says the line.
+        let said = fun.say(.finished, mascot: nil, seed: Int.random(in: 0..<10_000))
+        context.out.line("  " + context.style.fg(Palette.star, "\"\(said.text)\""))
+        if let name = said.name { context.out.line(context.style.muted("  " + name)) }
         if let about = fun.about { context.out.line(context.style.muted("  " + about)) }
         return ExitCode.ok
     }

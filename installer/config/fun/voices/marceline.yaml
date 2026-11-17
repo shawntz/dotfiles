@@ -1,0 +1,53 @@
+# What Marceline the Vampire Queen says while a step with `mascot: marceline` runs, and right after it ends.
+#
+# moments: lines for what is happening. A moment this file leaves out is said by the narrator
+#   (fun/quotes.yaml), next to her own sprite.
+# steps: more working lines for one step. They take turns with the general ones while that step runs.
+#
+# These are ORIGINAL lines written in the character's voice for this project, not quotes from the
+# show. Keep each one under 90 characters, and never mean to the person installing.
+# Keep this file in fun/voices/. Installers up to 1.0.1 read every file in fun/sprites/ as a sprite.
+id: marceline
+
+moments:
+  working:
+    - "On it. Steady and low, like a good bass line."
+    - "Setting things up. I've got all night, literally."
+    - "Still working. I've played longer gigs than this."
+    - "Floating along while this installs. Night shift suits me."
+  success:
+    - "Done. Smooth as a low note at midnight."
+    - "That worked. Not that I was worried."
+    - "Finished. That was a clean take."
+  failure:
+    - "Sour note. That one failed, and it's on the machine. Run it back later."
+    - "The machine dropped the beat on that one. It failed, so try it again later."
+    - "That one went off-key and failed. Machine's fault. Give it another go later."
+  skipped:
+    - "Skipped that one. No drama, you can catch it on the next run."
+    - "Sitting that one out. Not every track makes the set list."
+  waiting:
+    - "You're up. Finish what's on screen. I'll hang upside down till then."
+    - "Waiting on you for this one. I'll keep the beat going till you're back."
+  question:
+    - "Question for you on screen. Type an answer, I'll wait."
+    - "Your answer first, then we pick the tune back up."
+  password:
+    - "Password prompt's all yours. I'll be over here, tuning my bass."
+    - "Your admin password opens the next set. Type it whenever."
+  cancelled:
+    - "Cutting the set short. We're stopping, and what's done is kept."
+    - "Stopping here for tonight. Anything already finished won't be undone."
+  dry_run:
+    - "Sound check. Testing levels, changing nothing on this Mac."
+    - "Rehearsal only. I'm playing air bass, so your Mac stays untouched."
+
+steps:
+  git:
+    - "Writing your Git name and email. Every track needs a credit."
+    - "A new SSH key, then a GitHub sign-in. Think of it as your backstage pass."
+    - "Every commit gets your signature now. Like an autograph on the liner notes."
+  terminal:
+    - "Installing Herdr, your new everyday terminal. Dark, quiet, my style."
+    - "Herdr core keeps every session running underneath. My kind of rhythm section."
+    - "Claude Code, Codex and Grok each get a Herdr hook. Now it's a full band."

@@ -97,10 +97,12 @@ struct Sandbox {
 
 // MARK: - Config fixtures
 
-/// Writes a config directory (installer.yaml + steps + optional cli.yaml and fun) and returns its URL.
+/// Writes a config directory (installer.yaml + steps + optional cli.yaml and fun) and returns its URL. `sprites`
+/// and `voices` map an id to the body of `fun/sprites/<id>.yaml` or `fun/voices/<id>.yaml`.
 @discardableResult
 func makeConfig(in directory: TempDirectory, at path: String = "config", meta: String = "name: Test Dotfiles\ntagline: tiny test\nvars:\n  github_user: tester\n",
-                steps: [String: String], cli: String? = nil, quotes: String? = nil, sprites: [String: String] = [:]) -> URL {
+                steps: [String: String], cli: String? = nil, quotes: String? = nil, sprites: [String: String] = [:],
+                voices: [String: String] = [:]) -> URL {
     let root = directory.url.appendingPathComponent(path)
     directory.write("\(path)/installer.yaml", meta)
     for (name, body) in steps { directory.write("\(path)/steps/\(name)", body) }
@@ -108,6 +110,7 @@ func makeConfig(in directory: TempDirectory, at path: String = "config", meta: S
     if let cli { directory.write("\(path)/cli.yaml", cli) }
     if let quotes { directory.write("\(path)/fun/quotes.yaml", quotes) }
     for (id, body) in sprites { directory.write("\(path)/fun/sprites/\(id).yaml", body) }
+    for (id, body) in voices { directory.write("\(path)/fun/voices/\(id).yaml", body) }
     return root
 }
 

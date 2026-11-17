@@ -204,7 +204,8 @@ public struct StepConfig: Equatable, Sendable, Identifiable {
     public var mascot: String?
     /// Whether the step is switched on by default.
     public var enabledByDefault: Bool
-    /// Step-specific quips shown in the speech bubble while it runs.
+    /// Extra working lines for this step's speech bubble. The mascot says them when it has a voice in `fun/voices/`;
+    /// otherwise the narrator does.
     public var quips: [String]
     public var rawItems: [RawItem]
     /// Path relative to the config root, e.g. `steps/03-packages.yaml`.

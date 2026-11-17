@@ -5,6 +5,7 @@ A Mac app that sets up a brand-new Mac the way Shawn's laptop is set up. It inst
 - [Set up a new Mac](#set-up-a-new-mac)
 - [Change something](#change-something)
 - [Item kinds](#item-kinds)
+- [Characters and their lines](#characters-and-their-lines)
 - [The shawn command](#the-shawn-command)
 - [How changes reach your other Macs](#how-changes-reach-your-other-macs)
 - [Build, sign, notarize, release](#build-sign-notarize-release)
@@ -87,12 +88,12 @@ config/
   skills/<name>/        agent skills bundled with the installer
   webapp-icons/         icons for web apps (optional)
   cli.yaml              the shawn command's own settings and YAML commands
-  fun/                  the ASCII header, LSP quotes, pixel sprites, your own images
+  fun/                  the ASCII header, the narrator's lines, each character's lines, pixel sprites, your own images
 ```
 
 The steps are `01-bootstrap`, `02-dropbox`, `03-packages`, `04-apps`, `05-ai`, `06-git`, `07-skills`, `08-developer`, `09-shell`, `10-keyboard`, `11-terminal`, `12-claude`, `13-webapps`, `14-cli`, `15-macos`, `16-dock` and `17-finish`.
 
-A step file has an `id:` (lowercase letters, digits and dashes; `shawn install --only` and `--skip` use it), a `title:` and an `items:` list. `subtitle:`, `mascot:` and `quips:` are optional, and `enabled: false` leaves the whole step unchecked. A file whose name starts with `_` or `.` is skipped.
+A step file has an `id:` (lowercase letters, digits and dashes; `shawn install --only` and `--skip` use it), a `title:` and an `items:` list. `subtitle:`, `mascot:` and `quips:` are optional, and `enabled: false` leaves the whole step unchecked. `mascot:` names the step's character by sprite id. `quips:` adds lines for the step. The mascot says them when it has a voice file, and the narrator says them otherwise. [Characters and their lines](#characters-and-their-lines) says who speaks when. A file whose name starts with `_` or `.` is skipped.
 
 Each item in a step file is one line or a short block. Its first key is its kind and that key's value is the main thing it acts on. Every item also accepts `name:` (display name), `note:` (shown next to it) and `optional: true` (unchecked until you switch it on). A misspelled key is an error, and the message suggests the key you probably meant.
 
@@ -293,6 +294,139 @@ The installer moves the files it replaces to `~/.shawn/backups/<run>/` first, wh
 |---|---|---|---|
 | `webapp` | app name, such as `X` | `url:` (required, https), `icon:` (a PNG, JPEG or ICNS file in `config/webapp-icons/`, written `webapp-icons/<file>`, or the https address of such an image), `to:` (default /Applications), `bundle_id:`, `user_agent:`, `width:`, `height:`, `hosts: […]` | Builds `<Name>.app` around the bundled web-app shell, with its own window, sign-in, downloads and camera and microphone prompts. Links to other sites open in your browser; `hosts:` lists extra sites that stay inside. A link to another app, such as a `zoommtg:` link, opens right away only when you click it in the page itself. The web app asks first when you click one inside an embedded frame, such as an ad, whatever the link's target, and when the page opens one from a script. A script in an embedded frame cannot open another app at all. The icon is yours, else the site's own, else a letter tile. If the image at an `icon:` address cannot be downloaded or used, such as an SVG, the app gets a stand-in icon and the item asks for attention on every run until it works. |
 
+## Characters and their lines
+
+The narrator speaks on the welcome and last screens, and in `shawn help`, `shawn lsp` and `shawn party`. During a step, the character named by the step's `mascot:` says its own lines, and the narrator stands in when it has none. In this config the narrator is Lumpy Space Princess. Her lines are in `fun/quotes.yaml`. Each other character's lines are in `fun/voices/<id>.yaml`, where `<id>` is its sprite id.
+
+The speech bubble names whoever speaks, and the sprite beside it is theirs. The bubble moves on to a new line every 8 seconds. When the next step starts, its character takes over. A line about how the step before went stays with that step's character until the next line comes due.
+
+### The narrator's lines
+
+`fun/quotes.yaml` takes five keys:
+
+- `speaker:` names the narrator by sprite id, here `lsp`.
+- `about:` is a credit line that `shawn quote` and `shawn party` print last.
+- `show_quotes:` holds short quotes from the show. Each is a string, or a mapping with `text:` and, optionally, `episode:`, `source:` and `note:`. `shawn quote` prints one with its episode.
+- `moments:` holds a list of lines for each moment. The narrator can speak at all 13 moments: the nine [step moments](#step-moments), plus `launch` and `idle` on the welcome screen and `finished` and `finished_with_failures` on the last screen.
+- `steps:` holds extra `working` lines for each step id. She says them only during that step.
+
+### A character's lines
+
+`fun/voices/<id>.yaml` takes three keys:
+
+- `id:` is required. It names the character by sprite id, so `fun/sprites/` needs a sprite with the same id.
+- `moments:` holds a list of lines for each step moment.
+- `steps:` holds extra `working` lines for each step id. They show only in steps whose `mascot:` is this character.
+
+The installer reads every `.yaml` and `.yml` file in `fun/voices/`. Here is part of `fun/voices/jake.yaml`:
+
+```yaml
+id: jake
+
+moments:
+  working:
+    - "Hard at work. Okay, medium at work. Still getting it done."
+    - "Got it covered. Big brother's handling the boring parts."
+  password:
+    - "My super nose can't sniff out your admin password. Type it in for me?"
+
+steps:
+  packages:
+    - "Homebrew's hauling in your command line tools and a few apps. Get comfy."
+    - "Installing tools one after another. I could do this in my sleep. Maybe I am."
+```
+
+### Step moments
+
+A step's character can speak at nine moments. The app picks the moment from what is on screen:
+
+| moment | when it shows |
+|---|---|
+| `working` | The installer is checking or running an item in the step, and no other moment applies. The character draws from its `steps:` lines for the step and its `working` lines. |
+| `success` | A step just finished with no failed item. |
+| `failure` | An item failed. |
+| `skipped` | The installer skipped an item, such as an App Store app after you chose to skip App Store apps. An item already in place does not count. |
+| `waiting` | A choice or a banner waits for you, such as the App Store sign-in or the GitHub code. |
+| `question` | A question you answer by typing is on screen. In a real run these are the `ask:` questions, which come before the first step, so the narrator says these lines. A character says its `question` lines only when an item asks during its step, which today only the simulation (`--simulate`) does. |
+| `password` | The admin password prompt is on screen. The app usually asks for it before the first step, so the narrator says it. A character says its `password` line when an item asks for the password during its step. |
+| `cancelled` | You pressed STOP, and the run is stopping. |
+| `dry_run` | A dry run just started. |
+
+A `success`, `failure` or `skipped` line is about the step it happened in, so that step's character says it. When that character has no line for the moment, the narrator says it. The line stays up until the next line comes due, even if the next step starts in the meantime. A step that succeeds hands over to the next step at once, so its `success` line shows while the next step runs. A prompt or a banner that comes up while such a line is pending belongs to the running step's character. If the next line has not come due when it closes, the pending line comes back. Write these lines about the speaker's own step, and do not assume which step comes next.
+
+### Who speaks
+
+`FunConfig.speakerID` in `Sources/ShawnFun/Voices.swift` decides. The step's mascot says the line only when all of these hold:
+
+- The moment is one of the nine step moments.
+- The step has a `mascot:`, and it is not the narrator named by `speaker:`.
+- `fun/sprites/` has a sprite with that id.
+- `fun/voices/` has a voice with that id.
+- That voice has a line for the moment. At `working`, its `steps:` lines for the running step count.
+
+Otherwise the narrator says it. So she speaks on every screen outside a run, and in a run until the first step starts. She also speaks in a step with no `mascot:` or with her as its mascot, and at any step moment a character has no line for. The `ask:` questions and, usually, the password prompt come before the first step, so she says those lines.
+
+When she stands in, the app draws her own sprite and puts her name in the bubble. Her lines come from `fun/quotes.yaml`. At `working` she draws from her `steps:` lines for the running step and her `working` lines. A moment with no lines in `quotes.yaml` uses a line built into the app, except `idle`, which uses `show_quotes:` first. If `fun/sprites/` has no sprite for her, the app draws a `(^_^)` placeholder with no name.
+
+On a terminal, `shawn install` draws whoever speaks at `working` above each step, saying the step's title and one line. When that speaker has no pixel art, or the output is not a terminal, it prints a plain heading instead. After the run, the narrator has the last line.
+
+### Quips in a step file
+
+A step file's `quips:` are extra `working` lines for that step. The step's mascot says them when it has a voice file and a sprite and is not the narrator. Otherwise they join the narrator's `steps:` lines for that step.
+
+### What validate reports
+
+`shawn config validate` and `make validate` check the voice files with the rest of the config. An error starts with `✗` and makes validate exit 1. A warning starts with `!`, and validate still passes. The app shows both as notes on the welcome screen. Two sample lines:
+
+```
+✗ fun/voices/fin.yaml:1: error: voice 'fin' has no sprite in fun/sprites/. Did you mean 'finn'?
+! steps/03-packages.yaml: warning: mascot 'jake' has no voice in fun/voices/, so the narrator speaks during this step
+```
+
+These are the errors:
+
+- a YAML syntax error, with its line
+- `a voice file must be a mapping with 'id', 'moments' and 'steps'`
+- `voice: missing required key 'id'`, or `voice: 'id' must not be empty`
+- `voice 'fin' has no sprite in fun/sprites/. Did you mean 'finn'?` When no sprite id is close, it lists the other sprite ids instead, as in `(known: bmo, finn, jake)`.
+- `'lsp' is the narrator; the narrator's lines belong in fun/quotes.yaml`
+- `voice 'finn' is defined twice`. The file whose name sorts last wins.
+- `voice: unknown key 'moment'. Did you mean 'moments'?` A misspelled moment gives `voice → moments: unknown key 'succes'. Did you mean 'success'?`
+- `voice → moments: 'working' must be a list of strings`. A step under `steps:` gives `voice → steps: 'packages' must be a list of strings`.
+- `voice: 'moments' must be a mapping, not a list`
+
+The installer drops a voice with no `id`, with no sprite or with the narrator's id. A voice with any other error keeps the lines it could read.
+
+These are the warnings:
+
+- `finn never speaks at 'launch'; the narrator does`. The same goes for `idle`, `finished` and `finished_with_failures`. The installer drops those lines.
+- `lines for unknown step 'nowhere'`
+- `finn never says these lines, because step 'dock' has mascot 'gunter'`, or the same ending in `step 'extras' has no mascot`
+- `finn is not the mascot of any step, so these lines never show`
+- `finn has no lines for password, cancelled, so the narrator speaks then during bootstrap, skills`. It names each step moment the voice has no line for, then the steps it hosts. It never names `question`, because question lines are not required.
+- `finn has no 'working' lines for step 'skills', so the narrator speaks then`. It shows when the voice has no `working` lines and has `steps:` lines for some of its steps but not this one.
+- `mascot 'jake' has no voice in fun/voices/, so the narrator speaks during this step`, in the step file. It shows only once at least one voice file loads, and only for a mascot that has a sprite and is not the narrator.
+
+So a config with no voice files gets none of these.
+
+### Add a character
+
+1. Draw its sprite in `fun/sprites/<id>.yaml`. Copy a sprite file that is there, then change its `id:`, `name:`, `palette:` and `frames:`. The bubble shows its `name:`.
+2. Write its lines in `fun/voices/<id>.yaml`, with the same `id:`. So that the narrator never speaks for it in a real run, give it lines for `working`, `success`, `failure`, `skipped`, `waiting`, `password`, `cancelled` and `dry_run`. `question` lines are optional, because a real run asks its questions before the first step. Add `steps:` lines only for the steps it hosts.
+3. Set `mascot: <id>` in each step file where it should speak.
+4. Run `shawn config validate`. It warns about each moment other than `question`, and each step, where the narrator would still speak for the new character.
+
+Keep each line under 90 characters, with no en or em dashes and no curly quotes. `Tests/ShawnFunTests/FunConfigTests.swift` checks that for the narrator's lines and for every voice file.
+
+### Installers up to 1.0.1
+
+Installers up to 1.0.1 never read `fun/voices/`. During every step they show the narrator's lines from `fun/quotes.yaml` beside the step's mascot. That is why `quotes.yaml` keeps `steps:` lines for every step. Newer installers use those lines only in her own steps and when she stands in.
+
+Those installers fetch this config from GitHub too, and they read the rest of `fun/` and the step files strictly. Two changes would break them:
+
+- A voice file in `fun/sprites/`. Every installer reads each file there as a sprite, so a voice file there is a broken sprite.
+- A new key in `fun/quotes.yaml`, a sprite file or a step file. Installers up to 1.0.1 report a key they do not know as an error. A step file with one does not load at all, so they skip the config from GitHub and use their own copy.
+
 ## The shawn command
 
 The installer puts `shawn` in `~/.local/bin`. Run `shawn` on its own for the full list, including the YAML commands from `cli.yaml`, and `shawn help <command>` for one command's options.
@@ -310,7 +444,7 @@ The installer puts `shawn` in `~/.local/bin`. Run `shawn` on its own for the ful
 | `shawn upgrade [name …] [--list]` | Runs the upgrades listed under `upgrade:` in `cli.yaml` (Homebrew, App Store apps, Claude Code, Codex, Grok, skills and more) and reports each one. Name entries to run only those; `--list` shows them. |
 | `shawn config [path\|show\|validate [DIR]\|kinds\|answers\|edit\|brewfile]` | Where the config is, the plan, a check that lists every problem, the item kinds, the questions with the answers saved on this Mac, the config in `$EDITOR`, or a Brewfile made from the config. `answers` only reads: it shows each question, its answer or "not answered yet", and where the answers file is. It also says when `shawn install` does not ask a question, because nothing it runs by default uses it. |
 | `shawn statusline` | The Claude Code status line: model, folder, git branch, context meter, cost and a quip. Reads Claude's JSON on stdin and never fails. |
-| `shawn lsp`, `shawn quote`, `shawn party`, `shawn banner` | LSP with a quip, a random quote, every sprite at once, the ASCII header. |
+| `shawn lsp`, `shawn quote`, `shawn party`, `shawn banner` | LSP with a quip, a random quote, every sprite at once with a line from LSP and her name under it, the ASCII header. |
 | `shawn projects [--paths]`, `shawn clone <repo> [directory]`, `shawn new <name> [--github] [--public]` | Repos in `~/Developer` with branch and state; clone into `~/Developer`; start a new project there (git, README, .gitignore; `--github` also creates the repo with `gh`, private unless `--public`). |
 | `shawn shell-init zsh` | Shell setup for `.zshrc`: completions, `sd` to jump to a project with fzf, and `cd` after `shawn clone` and `shawn new`. |
 | `shawn completions zsh` | The zsh completion script. |
@@ -519,7 +653,7 @@ Sources/
   ActionsDev/       git-config, ssh-key, github, git-signing, clone, skill, claude-plugin
   ActionsWebApp/    webapp and its icon pipeline
   WebAppShell/      the browser inside each web app
-  ShawnFun/         quotes, sprites, speech bubbles, the header
+  ShawnFun/         quotes, voices, sprites, speech bubbles, the header
   ShawnSync/        finding the config and fetching it from GitHub
   ShawnKit/         registers every item kind
   ShawnUI/          the installer window; ShawnsDotfiles/ starts it
@@ -561,6 +695,6 @@ CI is `.github/workflows/installer.yml` at the repository root. It runs on pull 
 
 Lumpy Space Princess, Finn, Jake, BMO, Princess Bubblegum, Marceline, the Ice King and Gunter appear here as fan art. Adventure Time and its characters are © Cartoon Network. This project is not affiliated with or endorsed by Cartoon Network.
 
-This project neither downloads nor bundles official artwork. Each sprite is original pixel art written out as text in `config/fun/sprites/<id>.yaml`, and `scripts/make-icon.swift` draws the app icon in code. LSP's lines in `config/fun/quotes.yaml` are original, apart from a few short quotes from the show, each credited to its episode.
+This project neither downloads nor bundles official artwork. Each sprite is original pixel art written out as text in `config/fun/sprites/<id>.yaml`, and `scripts/make-icon.swift` draws the app icon in code. The lines in `config/fun/quotes.yaml` and `config/fun/voices/` are original lines in each character's voice. The only exceptions are a few short quotes from the show under `show_quotes:` in `quotes.yaml`, each credited to its episode.
 
 To use your own pictures, drop PNG or JPEG files into `config/fun/images/` and add `image: images/<file>` to a sprite's YAML. The app shows the image in place of the pixels; the terminal keeps the pixel art. This repository is public, so only add images you have the right to share.

@@ -79,7 +79,7 @@ public struct ShowQuote: Equatable, Sendable {
     }
 }
 
-/// Moments the installer has something to say about. Keys under `moments:` in `fun/quotes.yaml`.
+/// Moments the installer has something to say about. Keys under `moments:` in `fun/quotes.yaml` and in each voice file.
 public enum Moment: String, CaseIterable, Sendable {
     case launch
     case password
@@ -102,18 +102,22 @@ public struct FunConfig: Sendable {
     /// ASCII art banner (`fun/header.txt`).
     public var header: String
     public var sprites: [String: Sprite]
-    /// Sprite id of whoever does the talking.
+    /// Sprite id of the narrator, who speaks whenever a step's character has no line of its own.
     public var speaker: String
     public var showQuotes: [ShowQuote]
-    /// Original quips keyed by moment.
+    /// The narrator's lines keyed by moment.
     public var moments: [Moment: [String]]
-    /// Quips keyed by step id (from `fun/quotes.yaml` `steps:` and each step file's `quips:`).
+    /// The narrator's extra working lines keyed by step id (from `fun/quotes.yaml` `steps:`, plus each step file's
+    /// `quips:` when its mascot has no voice).
     public var stepQuips: [String: [String]]
     /// Attribution line for the About text.
     public var about: String?
+    /// Each character's own lines keyed by sprite id (`fun/voices/`). Never holds the narrator, whose lines are
+    /// `moments` and `stepQuips`.
+    public var voices: [String: Voice]
 
     public init(header: String, sprites: [String: Sprite], speaker: String, showQuotes: [ShowQuote],
-                moments: [Moment: [String]], stepQuips: [String: [String]], about: String? = nil) {
+                moments: [Moment: [String]], stepQuips: [String: [String]], about: String? = nil, voices: [String: Voice] = [:]) {
         self.header = header
         self.sprites = sprites
         self.speaker = speaker
@@ -121,6 +125,7 @@ public struct FunConfig: Sendable {
         self.moments = moments
         self.stepQuips = stepQuips
         self.about = about
+        self.voices = voices
     }
 
     /// Used when the config has no `fun/` directory at all, so nothing ever has to handle "no fun".
@@ -140,14 +145,15 @@ public struct FunConfig: Sendable {
         stepQuips: [:]
     )
 
-    /// The sprite for `id`, falling back to the speaker, then to any sprite at all.
+    /// Exactly the sprite for `id`, or the narrator's when `id` is nil. Never a stand-in, so a name shown with it
+    /// belongs to the art.
     public func sprite(_ id: String?) -> Sprite? {
-        if let id, let sprite = sprites[id] { return sprite }
-        if let sprite = sprites[speaker] { return sprite }
-        return sprites.sorted { $0.key < $1.key }.first?.value
+        sprites[id ?? speaker]
     }
 
-    /// Lines that fit `moment` (step-specific ones first when a step is given). Never empty.
+    /// The narrator's lines for `moment`, plus her lines for the step at `.working` when a step is given. They are one
+    /// pool that the seed picks from. Never empty. During a step, `lines(for:stepID:mascot:)` gives the lines of
+    /// whoever speaks.
     public func lines(for moment: Moment, stepID: String? = nil) -> [String] {
         var candidates: [String] = []
         if let stepID, moment == .working, let quips = stepQuips[stepID] { candidates += quips }
@@ -157,7 +163,7 @@ public struct FunConfig: Sendable {
         return candidates
     }
 
-    /// One line for `moment`. Pass a changing `seed` (a counter, a random number) to rotate through them.
+    /// One of the narrator's lines for `moment`. Pass a changing `seed` (a counter, a random number) to rotate through them.
     public func line(for moment: Moment, stepID: String? = nil, seed: Int) -> String {
         let candidates = lines(for: moment, stepID: stepID)
         return candidates[abs(seed) % candidates.count]
@@ -183,10 +189,16 @@ public struct FunConfig: Sendable {
         }
 
         loadQuotes(config: config, into: &fun, collector: collector)
-        for step in config.steps where !step.quips.isEmpty {
-            fun.stepQuips[step.id, default: []].insert(contentsOf: step.quips, at: 0)
-        }
         loadSprites(config: config, into: &fun, collector: collector)
+        let voiceFiles = loadVoices(config: config, into: &fun, collector: collector)
+        // A step file's quips belong to whoever speaks during that step.
+        for step in config.steps where !step.quips.isEmpty {
+            if let mascot = step.mascot, fun.hasVoice(mascot) {
+                fun.voices[mascot]?.steps[step.id, default: []].insert(contentsOf: step.quips, at: 0)
+            } else {
+                fun.stepQuips[step.id, default: []].insert(contentsOf: step.quips, at: 0)
+            }
+        }
 
         for step in config.steps {
             if let mascot = step.mascot, fun.sprites[mascot] == nil, !fun.sprites.isEmpty {
@@ -198,6 +210,7 @@ public struct FunConfig: Sendable {
             collector.add(.warning("speaker '\(fun.speaker)' has no sprite in \(spritesDirectory)/ (known: \(fun.sprites.keys.sorted().joined(separator: ", ")))",
                                    at: SourceRef(file: quotesPath)))
         }
+        warnAboutVoices(config: config, fun: fun, files: voiceFiles, collector: collector)
         return (fun, collector.issues)
     }
 

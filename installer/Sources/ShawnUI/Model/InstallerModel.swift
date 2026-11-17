@@ -130,6 +130,8 @@ final class InstallerModel {
     private(set) var quipsInPhase = 0
     private enum RecentEvent { case none, success, skipped, failure }
     private var recentEvent = RecentEvent.none
+    /// The step `recentEvent` happened in. That step's character says the reaction, even once the next step has started.
+    private var recentEventStepID: String?
 
     init(registry: ActionRegistry, environment: SystemEnvironment, resolveOptions: ConfigResolveOptions = ConfigResolveOptions(),
          settings: Settings = Settings(), dryRun: Bool = false, desktop: DesktopActions = .none,
@@ -459,7 +461,7 @@ final class InstallerModel {
             case .running:
                 currentStepID = stepID
             case .done:
-                if stepID == currentStepID { noteRecent(.success) }
+                if stepID == currentStepID { noteRecent(.success, in: stepID) }
             default:
                 break
             }
@@ -476,9 +478,9 @@ final class InstallerModel {
                 currentItemID = itemID
                 if let stepID = stepIDByItemID[itemID] { currentStepID = stepID }
             case .failed:
-                noteRecent(.failure)
+                noteRecent(.failure, in: stepIDByItemID[itemID] ?? currentStepID)
             case .skipped:
-                noteRecent(.skipped)
+                noteRecent(.skipped, in: stepIDByItemID[itemID] ?? currentStepID)
             default:
                 break
             }
@@ -550,6 +552,7 @@ final class InstallerModel {
         runEndedAt = nil
         isStopping = false
         recentEvent = .none
+        recentEventStepID = nil
         runIsDryRun = dryRun
         showsLogOnFinishedScreen = false
         if runCount > 1 { log.note("──────── run \(runCount)\(dryRun ? " (dry run)" : "") ────────") }
@@ -686,6 +689,9 @@ final class InstallerModel {
             if dryRun { return .dryRun }
             return quipsInPhase == 0 ? .launch : .idle
         case .running:
+            // A step's character can speak only at `Moment.stepMoments`, so every moment here must be one of them.
+            // A real run asks its `ask:` questions before the first step, so the narrator says `.question` then. A
+            // character says it only when an item asks during its step, which today only the simulation does.
             if let prompt = prompts.first {
                 if prompt.isPassword { return .password }
                 return prompt.textRequest != nil ? .question : .waiting
@@ -710,24 +716,42 @@ final class InstallerModel {
         }
     }
 
-    /// What the speaker says right now. Deterministic for a given state and seed.
-    var quip: String {
+    /// The line in the speech bubble right now, with who says it and the sprite drawn beside it. During a run a step's
+    /// mascot says it when it has a line for the moment; otherwise the narrator does. A reaction (success, failure or
+    /// skipped) belongs to the step it happened in, so that step's character says it until the next line comes due,
+    /// even when the next step has already started. Every other moment belongs to the running step. The sprite, the
+    /// name and the line come from this one value, so they always change together. Deterministic for a given state
+    /// and seed.
+    var saying: SpokenLine {
+        guard phase == .running else { return fun.say(quipMoment, mascot: nil, seed: quipSeed) }
         let moment = quipMoment
-        return fun.line(for: moment, stepID: moment == .working ? currentStepID : nil, seed: quipSeed)
+        // A prompt, a banner or STOP outranks a reaction, so the moment shows whether the reaction is on screen.
+        let isReaction = recentEvent != .none && [Moment.success, .failure, .skipped].contains(moment)
+        let stepID = isReaction ? (recentEventStepID ?? currentStepID) : currentStepID
+        let mascot = stepID.flatMap { plan?.step($0) }?.config.mascot
+        return fun.say(moment, stepID: stepID, mascot: mascot, seed: quipSeed)
     }
 
-    /// Moves the speech bubble on to its next line.
+    /// The text of `saying`.
+    var quip: String { saying.text }
+
+    /// Moves the speech bubble on to its next line. Any reaction is over, so the running step's character speaks next.
     func advanceQuip() {
         quipSeed &+= 1
         quipsInPhase += 1
         recentEvent = .none
+        recentEventStepID = nil
     }
 
-    private func noteRecent(_ event: RecentEvent) {
+    /// Keeps `event`, and the step it happened in, as the reaction to show, unless the one already kept wins. A failure
+    /// wins over everything, and a skip wins over a success. The winner keeps its own step.
+    private func noteRecent(_ event: RecentEvent, in stepID: String?) {
         switch (recentEvent, event) {
         case (.failure, _): return
         case (.skipped, .success): return
-        default: recentEvent = event
+        default:
+            recentEvent = event
+            recentEventStepID = stepID
         }
     }
 
@@ -737,12 +761,8 @@ final class InstallerModel {
         quipsInPhase = 0
     }
 
-    /// The character for the current moment: the running step's mascot, otherwise the speaker.
-    var mascot: Sprite? {
-        if phase == .running, let mascot = currentStep?.config.mascot { return fun.sprite(mascot) }
-        return fun.sprite(nil)
-    }
-
+    /// The narrator's sprite, for the one screen that shows the narrator without a line (the config error screen).
+    /// Every screen with a speech bubble draws `saying.sprite`.
     var speaker: Sprite? { fun.sprite(nil) }
 
     /// Every sprite, speaker first, then in the order the steps use them.

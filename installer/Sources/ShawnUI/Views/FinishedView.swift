@@ -39,7 +39,7 @@ struct FinishedView: View {
 
                 VStack(alignment: .leading, spacing: Theme.Space.l) {
                     if !celebrates {
-                        MascotCard(sprite: model.speaker, speaker: model.speaker?.name, quip: model.quip, spriteSize: 88)
+                        MascotCard(model.saying, spriteSize: 88)
                             .padding(.top, Theme.Space.xs)
                     }
                     TerminalPanel(title: "STEPS", padding: Theme.Space.s + 2) {
@@ -94,18 +94,19 @@ struct FinishedView: View {
     }
 }
 
-/// Everyone on stage at the same pixel scale, with the speaker's last word underneath.
+/// Everyone on stage at the same pixel scale, with the narrator's last word and name underneath.
 private struct Celebration: View {
     @Environment(\.palette) private var palette
     let model: InstallerModel
 
     var body: some View {
+        let saying = model.saying
         VStack(spacing: Theme.Space.s) {
             CharacterLineup(sprites: model.lineup, cellHeight: 64)
             HStack(spacing: Theme.Space.s) {
-                TypewriterText(text: "\"\(model.quip)\"")
+                TypewriterText(text: "\"\(saying.text)\"")
                     .foregroundStyle(palette.text.color)
-                if let name = model.speaker?.name {
+                if let name = saying.name {
                     Text(name)
                         .foregroundStyle(palette.pink.color)
                 }

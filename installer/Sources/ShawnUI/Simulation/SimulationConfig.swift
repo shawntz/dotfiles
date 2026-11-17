@@ -1,8 +1,9 @@
 import Foundation
+import ShawnFun
 
 /// The simulation's config directory, generated at launch. It uses the real config format (and the real
-/// loaders), with its own placeholder sprites, quips and header, so the layout can be judged before
-/// the real art exists and stays exercisable afterward.
+/// loaders), with its own placeholder sprites, characters' lines, quips and header, so the layout can be judged
+/// before the real art exists and stays exercisable afterward.
 enum SimulationConfig {
     /// Writes `config/` into `directory` and returns its URL.
     static func write(into directory: URL) throws -> URL {
@@ -14,6 +15,7 @@ enum SimulationConfig {
         ]
         for (name, body) in steps { files["steps/\(name)"] = body }
         for sprite in sprites { files["fun/sprites/\(sprite.id).yaml"] = sprite.yaml }
+        for voice in voices { files["\(FunConfig.voicesDirectory)/\(voice.id).yaml"] = voice.yaml }
 
         for (path, contents) in files {
             let url = root.appendingPathComponent(path)
@@ -207,7 +209,7 @@ enum SimulationConfig {
         """),
     ]
 
-    // MARK: Quips (simulation lines; the real ones live in the real config)
+    // MARK: Quips (the narrator's simulation lines; the real ones live in the real config)
 
     static let quotes = """
     speaker: lumpy
@@ -244,6 +246,86 @@ enum SimulationConfig {
       macos:
         - "Fixing the settings. You're welcome."
     """
+
+    // MARK: Voices (each placeholder character's own lines, said while the step it hosts runs)
+
+    /// One placeholder character's `fun/voices/<id>.yaml`, with a line for each step moment. The `quips:` in the step
+    /// file of the step it hosts join these as extra working lines when the config loads.
+    struct VoiceFile {
+        let id: String
+        let lines: [Moment: String]
+
+        var yaml: String {
+            var rows = ["id: \(id)", "moments:"]
+            for moment in Moment.stepMoments {
+                guard let line = lines[moment] else { continue }
+                rows.append("  \(moment.rawValue):")
+                rows.append("    - \"\(line)\"")
+            }
+            return rows.joined(separator: "\n") + "\n"
+        }
+    }
+
+    /// The characters who host a step. The narrator (lumpy) has no voice file, because her lines are in `quotes`.
+    static var voices: [VoiceFile] {
+        [
+            VoiceFile(id: "hero", lines: [
+                .working: "Hero on duty. This step is in good hands.",
+                .success: "That one went in clean. On to the next quest.",
+                .failure: "The machine threw that one back. We'll get it next run.",
+                .skipped: "Leaving that one out of this run. The quest goes on.",
+                .waiting: "I'll hold the line until you're back.",
+                .question: "One question first, and then I'm off again.",
+                .password: "This needs your password. I'll look away while you type.",
+                .cancelled: "Standing down. The quest can wait.",
+                .dryRun: "A practice round. Nothing on this Mac changes.",
+            ]),
+            VoiceFile(id: "pup", lines: [
+                .working: "Fetching packages. Fetching is my best trick.",
+                .success: "Done and done! Who wants to go next?",
+                .failure: "The download dropped that one. Not my fault, I promise.",
+                .skipped: "That one stays out of this run. On to the next toy!",
+                .waiting: "Sitting. Staying. Waiting for you.",
+                .question: "Ooh, a question! I'll wait right here with my tail going.",
+                .password: "Your password, please. I won't tell the other dogs.",
+                .cancelled: "Okay, stopping. I'll go lie down.",
+                .dryRun: "Pretend fetch! Nothing actually comes back.",
+            ]),
+            VoiceFile(id: "cube", lines: [
+                .working: "Processing. Please enjoy this blinking cursor.",
+                .success: "Result OK. Logging a small victory.",
+                .failure: "Error from the system, not from me. Flagged for the next run.",
+                .skipped: "Item excluded from this run. Skipping ahead.",
+                .waiting: "Input required. Standing by.",
+                .question: "Query pending. Please type an answer.",
+                .password: "Authentication needed. Type carefully, I can't see it either.",
+                .cancelled: "Halt received. Powering down this task.",
+                .dryRun: "Simulation mode. Every output is imaginary.",
+            ]),
+            VoiceFile(id: "penguin", lines: [
+                .working: "Sliding through this one on my belly. Very efficient.",
+                .success: "Smooth. Cool. Done.",
+                .failure: "The server left that one out in the cold. We'll retry later.",
+                .skipped: "Leaving that one out this run. I'll waddle on.",
+                .waiting: "Chilling until you're ready.",
+                .question: "Quick question before we slide on.",
+                .password: "Password time. I'll keep it on ice.",
+                .cancelled: "Stopping here. Back to the iceberg.",
+                .dryRun: "Just a practice slide. The ice stays smooth.",
+            ]),
+            VoiceFile(id: "moon", lines: [
+                .working: "Slowly, steadily, like a tide coming in.",
+                .success: "That one landed softly.",
+                .failure: "The machine said no to that one. The tide will turn.",
+                .skipped: "That one sits out this run. The tide moves on.",
+                .waiting: "I'll keep the light on until you're back.",
+                .question: "A question for you, whenever you're ready.",
+                .password: "Your password, please. I'll dim the lights.",
+                .cancelled: "Setting early tonight.",
+                .dryRun: "A rehearsal by moonlight. Nothing really moves.",
+            ]),
+        ]
+    }
 
     // MARK: Header (ANSI Shadow lettering, built from glyphs so every row has the same width)
 

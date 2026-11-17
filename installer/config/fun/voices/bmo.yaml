@@ -1,0 +1,53 @@
+# What BMO says while a step with `mascot: bmo` runs, and right after it ends.
+#
+# moments: lines for what is happening. A moment this file leaves out is said by the narrator
+#   (fun/quotes.yaml), next to her own sprite.
+# steps: more working lines for one step. They take turns with the general ones while that step runs.
+#
+# These are ORIGINAL lines written in the character's voice for this project, not quotes from the
+# show. Keep each one under 90 characters, and never mean to the person installing.
+# Keep this file in fun/voices/. Installers up to 1.0.1 read every file in fun/sprites/ as a sprite.
+id: bmo
+
+moments:
+  working:
+    - "Beep boop! BMO is pressing all the right buttons, in the right order."
+    - "Please wait a little. BMO is being a very good helper."
+    - "BMO is pretending to be a giant supercomputer. It is working!"
+    - "BMO turns installing into a game. So far, BMO is winning!"
+  success:
+    - "Level complete! BMO gives this one a gold star."
+    - "Done! That went perfectly. BMO is doing a tiny victory dance."
+    - "All finished. High five! BMO is reaching up really high."
+  failure:
+    - "Oh no! That one failed. Blame the machine. Retry it later, like a do-over!"
+    - "Oops, the computer made a mistake on that one. Not your fault. BMO keeps going."
+    - "That one failed. Silly machine! BMO has extra lives, so try it again later."
+  skipped:
+    - "BMO skipped that one. It is okay! You can play that level another day."
+    - "Skipped! BMO hops to the next one. No points lost, and you can retry later."
+  waiting:
+    - "Player two, your turn! BMO is waiting for you to finish that part."
+    - "Some things need a human. BMO will wait right here while you do it."
+  question:
+    - "Quiz time! Please type your answer so BMO can keep going."
+    - "There is a question on screen! BMO is so curious what you will say."
+  password:
+    - "Beep! The next part needs the administrator password. Please type it in."
+    - "Your Mac wants its admin password now. Then BMO can do the grown-up stuff."
+  cancelled:
+    - "Stopping now, like you asked. BMO made a save point, so nothing finished is lost."
+    - "Stop button pressed! BMO is tidying up and keeping every finished part."
+  dry_run:
+    - "Make-believe install! BMO acts out every step but touches nothing on this Mac."
+    - "Tutorial level! BMO plays along, and this Mac stays exactly the same."
+
+steps:
+  dropbox:
+    - "BMO invites Dropbox over early, so your files get a head start."
+    - "Soon Dropbox will ask you to sign in. BMO will cheer you on!"
+    - "While Dropbox syncs your files, BMO keeps setting up everything else."
+  ai:
+    - "Claude Code and Codex are joining the team. BMO will show them around!"
+    - "New players! BMO is adding ChatGPT and the Grok command line tool."
+    - "Lots of new roommates for this Mac! BMO hopes the AI tools all like games."

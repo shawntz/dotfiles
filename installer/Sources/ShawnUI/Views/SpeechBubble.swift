@@ -18,6 +18,8 @@ struct SpeechBubble: View {
                 Text(speaker.uppercased())
                     .captionStyle(palette.pink.color, size: 9)
                     .lineLimit(1)
+                    // VoiceOver reads the name as the sprite's label has it, not in capitals.
+                    .accessibilityLabel(speaker)
             }
             TypewriterText(text: "\"\(text)\"")
                 .font(Theme.mono(size))
@@ -63,18 +65,22 @@ struct BubbleShape: Shape {
     }
 }
 
-/// A character with something to say.
+/// A character with something to say. The sprite and the name both come from `line`, so the bubble always
+/// names the character drawn beside it.
 struct MascotCard: View {
-    let sprite: Sprite?
-    let speaker: String?
-    let quip: String
-    var spriteSize: CGFloat = 96
+    let line: SpokenLine
+    let spriteSize: CGFloat
+
+    init(_ line: SpokenLine, spriteSize: CGFloat = 96) {
+        self.line = line
+        self.spriteSize = spriteSize
+    }
 
     var body: some View {
         HStack(alignment: .bottom, spacing: Theme.Space.l + 4) {
-            SpriteView(sprite: sprite)
+            SpriteView(sprite: line.sprite)
                 .frame(width: spriteSize, height: spriteSize)
-            SpeechBubble(speaker: speaker, text: quip)
+            SpeechBubble(speaker: line.name, text: line.text)
                 .padding(.bottom, spriteSize * 0.25)
         }
     }
